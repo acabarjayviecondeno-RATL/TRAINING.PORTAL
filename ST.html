@@ -1554,6 +1554,25 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
     #dailyPlanContainer > div > .flex > span:first-child { flex: 0 0 auto; white-space: nowrap; }
     #dailyPlanContainer .text-sm { line-height: 1.35; }
 }
+
+/* ---- Monthly Plan pending tracker (own classes, independent of Tailwind) ---- */
+.plan-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.plan-title { display: block !important; flex: 1 1 220px; min-width: 0; line-height: 1.4 !important; overflow-wrap: anywhere; }
+.plan-badge { flex: 0 0 auto; white-space: nowrap; }
+.plan-card { display: flex !important; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+.plan-card-main { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 auto; }
+.plan-freq { flex: 0 0 auto; white-space: nowrap; }
+.plan-info { min-width: 0; }
+.plan-name { line-height: 1.4; overflow-wrap: anywhere; }
+.plan-meta { display: block; line-height: 1.5; margin-top: 3px; }
+.plan-status { flex: 0 0 auto; white-space: nowrap; }
+@media (max-width: 640px) {
+    .plan-card { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; padding: 12px !important; }
+    .plan-card-main { align-items: flex-start; width: 100%; }
+    .plan-name { font-size: 14px !important; }
+    .plan-meta { font-size: 12px !important; }
+    .plan-status { align-self: flex-start; }
+}
 </style>
 <script id="mobile-responsive-js">
 (function () {
@@ -1723,11 +1742,11 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
                     <!-- MONTHLY PLAN PENDING TASKS & FREQUENCY TRACKER -->
                     <div class="bg-blue-50/50 rounded-xl border border-blue-100 p-5 mb-6">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2" style="margin:0;">
+                        <div class="plan-head mb-3">
+                            <h4 class="text-sm font-bold text-gray-800 plan-title" style="margin:0;">
                                 📅 Monthly Plan Pending Tasks & Frequency Tracker (<span id="currentDateText"></span>)
                             </h4>
-                            <span id="planStatusBadge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-yellow-100 text-yellow-800">0 Tasks</span>
+                            <span id="planStatusBadge" class="plan-badge text-xs px-2.5 py-1 rounded-full font-medium bg-yellow-100 text-yellow-800">0 Tasks</span>
                         </div>
                         <div id="dailyPlanContainer" class="space-y-2">
                             <p class="text-sm text-gray-500 italic">Loading pending tasks...</p>
@@ -2552,15 +2571,15 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 badge.className = "text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-800";
 
                 container.innerHTML = pendingTasks.map(p => `
-                    <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs font-semibold px-2.5 py-1 bg-blue-50 border border-blue-200 rounded text-blue-700">Freq: ${p.done}/${p.frequency}</span>
-                            <div>
-                                <span class="text-sm font-medium text-gray-800 block">${p.title}</span>
-                                <span class="text-xs text-gray-500">${p.category ? 'Category: ' + p.category + ' | ' : ''}Remaining: <strong>${p.remaining}</strong> times this month</span>
+                    <div class="plan-card p-3 bg-white rounded-lg border border-blue-100 shadow-sm">
+                        <div class="plan-card-main">
+                            <span class="plan-freq text-xs font-semibold px-2.5 py-1 bg-blue-50 border border-blue-200 rounded text-blue-700">Freq: ${p.done}/${p.frequency}</span>
+                            <div class="plan-info">
+                                <span class="plan-name text-sm font-medium text-gray-800 block">${p.title}</span>
+                                <span class="plan-meta text-xs text-gray-500">${p.category ? 'Category: ' + p.category + ' | ' : ''}Remaining: <strong>${p.remaining}</strong> times this month</span>
                             </div>
                         </div>
-                        <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-orange-100 text-orange-700">Pending (${p.remaining} left)</span>
+                        <span class="plan-status text-xs px-2.5 py-1 rounded-full font-medium bg-orange-100 text-orange-700">Pending (${p.remaining} left)</span>
                     </div>
                 `).join('');
             } else {
