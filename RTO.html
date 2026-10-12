@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Specialized Field Trainer (SFT) Portal - Tarkie UI Style</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --tarkie-bg: #f4f6f9;
+            --tarkie-sidebar-bg: #ffffff;
+            --tarkie-sidebar-border: #e2e8f0;
+            --tarkie-sidebar-text: #475569;
+            --tarkie-sidebar-hover: #f1f5f9;
+            --tarkie-sidebar-active-bg: #eff6ff;
+            --tarkie-sidebar-active-text: #2563eb;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #059669;
+            --border-color: #e2e8f0;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tarkie-bg);
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h2, h3, h4 { color: var(--text-main); font-weight: 700; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-sizing: border-box;
+            font-size: 13px;
+            outline: none;
+            background: #fff;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+        button {
+            padding: 9px 16px;
+            background-color: var(--primary);
+            border: none;
+            color: white;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: var(--primary-hover); }
+
+        /* Dashboard Layout (Tarkie Style Sidebar) */
+        .dashboard-layout {
+            display: block;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--tarkie-sidebar-bg);
+            border-right: 1px solid var(--tarkie-sidebar-border);
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: width 0.2s ease;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--tarkie-sidebar-border);
+        }
+
+        .sidebar-brand-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .sidebar-brand {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: #ffffff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .sidebar-brand-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .sidebar-menu-scroll {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 12px 10px;
+        }
+
+        .sidebar-category-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 8px 10px 4px 10px;
+            margin-top: 8px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-menu li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--tarkie-sidebar-text);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar-menu li:hover {
+            background: var(--tarkie-sidebar-hover);
+            color: var(--text-main);
+        }
+
+        .sidebar-menu li.active {
+            background: var(--tarkie-sidebar-active-bg);
+            color: var(--tarkie-sidebar-active-text);
+            font-weight: 600;
+        }
+
+        .sidebar-icon { font-size: 15px; display: flex; align-items: center; justify-content: center; width: 20px; }
+
+        /* Sub-dropdown CSS Styling */
+        .has-sub-menu {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 0 !important;
+        }
+        .main-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .sub-menu {
+            list-style: none;
+            padding: 0 0 6px 0;
+            margin: 0;
+            display: none;
+            background: #fafafa;
+            border-bottom-left-radius: var(--radius-sm);
+            border-bottom-right-radius: var(--radius-sm);
+        }
+        .sub-menu li {
+            padding: 7px 12px 7px 38px !important;
+            font-size: 12px !important;
+            color: var(--tarkie-sidebar-text);
+            border-radius: 0 !important;
+        }
+        .sub-menu li:hover {
+            background: var(--tarkie-sidebar-hover) !important;
+            color: var(--primary) !important;
+        }
+        .sub-menu li.active {
+            background: var(--tarkie-sidebar-active-bg) !important;
+            color: var(--tarkie-sidebar-active-text) !important;
+            font-weight: 600;
+        }
+        .arrow-icon {
+            margin-left: auto;
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        .has-sub-menu.open .arrow-icon {
+            transform: rotate(90deg);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 240px;
+            padding: 24px;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        /* Top Bar Header */
+        .header-bar {
+            background: var(--card-bg);
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .content-section {
+            display: none;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+        .content-section.active { display: block; }
+
+        .logout-btn {
+            background-color: #ffeeee;
+            color: #dc2626;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .logout-btn:hover { background-color: #dc2626; color: white; }
+
+        .section-container {
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+
+        .section-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sync-status {
+            font-size: 11px;
+            color: var(--success);
+            font-weight: 600;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .summary-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .summary-card h4 { margin: 0 0 6px 0; font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+        .summary-card .val { font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0; }
+
+        /* Gantt & Tables */
+        .gantt-container {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+        }
+        .gantt-grid {
+            display: grid;
+            min-width: 700px;
+            border-top: 1px solid var(--border-color);
+            border-left: 1px solid var(--border-color);
+        }
+        .gantt-grid-header {
+            background: #0f172a;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .gantt-sub-header {
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 6px;
+            text-align: center;
+            font-size: 10px;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .gantt-category-row {
+            background: #f8fafc;
+            color: var(--text-main);
+            font-weight: bold;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+        .gantt-task-name {
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #334155;
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+        .gantt-cell {
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            height: 40px;
+            background: #fff;
+        }
+        .gantt-bar-item {
+            position: absolute;
+            height: 22px;
+            border-radius: 4px;
+            top: 9px;
+            font-size: 9px;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            font-weight: bold;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .bar-actual-item { background-color: var(--success); }
+
+        .task-table-container { overflow-x: auto; margin-top: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: center;
+            background: #fff;
+        }
+        .task-table th, .task-table td {
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            padding: 10px;
+            vertical-align: middle;
+        }
+        .task-table th:last-child, .task-table td:last-child { border-right: none; }
+        .task-table th { background-color: #f8fafc; color: var(--text-main); font-weight: 600; }
+
+        .time-input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .time-input-group input { width: 55px !important; border: 1px solid var(--border-color) !important; padding: 4px !important; }
+        .ampm-btn {
+            background-color: #e2e8f0;
+            color: #334155;
+            border: none;
+            padding: 4px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .ampm-btn:hover { background-color: #cbd5e1; }
+
+        .delete-row-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .delete-row-btn:hover { background: #dc2626; color: white; }
+
+        /* Status Badges */
+        .badge-pending { background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+        .badge-approved { background: #ecfdf5; color: #059669; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    <!-- Dashboard Layout (Tarkie Style Sidebar & UI) - Direktang naglo-load nang walang login form -->
+    <div class="dashboard-layout" id="dashboardLayout">
+        <div class="sidebar" id="appSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand-container" title="SFT Portal">
+                    <div class="sidebar-brand">SFT</div>
+                    <div class="sidebar-brand-text">SFT Portal</div>
+                </div>
+            </div>
+            <div class="sidebar-menu-scroll">
+                <div class="sidebar-category-title">Reports</div>
+                <ul class="sidebar-menu">
+                    <li class="has-sub-menu active open" id="dailyTaskMenuParent">
+                        <div class="main-menu-item" onclick="toggleSubMenu(event)">
+                            <span class="sidebar-icon">📊</span>
+                            <span>Daily Task Time</span>
+                            <span class="arrow-icon">▶</span>
+                        </div>
+                        <ul class="sub-menu" id="dailyTaskSubMenu" style="display: block;">
+                            <li id="subSummary" class="active" onclick="switchSubTab(event, 'summarySection')">Summary</li>
+                            <li id="subPlan" onclick="switchSubTab(event, 'planSection')">Plan</li>
+                            <li id="subActual" onclick="switchSubTab(event, 'actualSection')">Actual</li>
+                        </ul>
+                    </li>
+                    <li id="socmedMenuLi" onclick="switchTab(event, 'socmedTab')">
+                        <span class="sidebar-icon">📈</span>
+                        <span>SocMed Engagement</span>
+                    </li>
+                    <li id="sepcoMenuLi" onclick="redirectToPage('SEPCO.html')">
+                        <span class="sidebar-icon">⚡</span>
+                        <span>SEPCO Page</span>
+                    </li>
+                </ul>
+
+                <div class="sidebar-category-title" style="margin-top: 15px;">Approval</div>
+                <ul class="sidebar-menu">
+                    <li id="approvalMenuLi" onclick="switchTab(event, 'approvalTab')">
+                        <span class="sidebar-icon">📝</span>
+                        <span>Approval Requests</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header-bar">
+                <div class="header-left">
+                    <div>
+                        <h3 id="dashTitle" style="margin:0; font-size: 16px;">Welcome, SFT User</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Role: <span id="dashRole" style="font-weight:600; color:var(--text-main);">Specialized Field Trainer</span></p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Log out / Bumalik sa ST.html</button>
+            </div>
+
+            <!-- DAILY TASK SECTION -->
+            <div id="dailyTaskTab" class="content-section active">
+                <h3 style="margin-top:0; font-size: 15px;">Daily Task Time Management (SFT)</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px; line-height: 1.4;">Ang Plan para sa buong buwan ay isinusumite bago ito magsimula. Ang Actual naman ay ang mga aktwal na ginawa, at ang Gantt chart ay para lamang sa Actual tasks.</p>
+                
+                <!-- MONTH SELECTOR & DOWNLOAD -->
+                <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #f8fafc; padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <label style="margin:0;">Pumili ng Buwan:</label>
+                        <select id="selectedMonthFilter" onchange="changeActiveMonth()" style="width: 220px; margin-bottom: 0; padding: 8px;">
+                            <option value="2026-09">September 2026 (Current)</option>
+                            <option value="2026-10">October 2026</option>
+                            <option value="2026-11">November 2026</option>
+                            <option value="2026-12">December 2026</option>
+                        </select>
+                    </div>
+                    <button onclick="downloadMonthExcel()" style="background-color: var(--success); display: flex; align-items: center; gap: 6px;">
+                        📥 Download Excel (<span id="downloadMonthLabel">September 2026</span>)
+                    </button>
+                </div>
+
+                <!-- 1. ACTUAL REPORT & GANTT (SUMMARY) -->
+                <div id="summarySection" class="sub-content-section">
+                    <div class="section-container">
+                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 15px;">📊 Actual Report & Gantt Chart Summary</h4>
+                        
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <h4>Total Days Pinasok</h4>
+                                <p class="val" id="sumDaysWorked">0</p>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Actual Days (8 hrs/day)</h4>
+                                <p class="val" id="sumActualDays">0.0</p>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Ach % (Actual / Total)</h4>
+                                <p class="val" id="sumAchPercent">0%</p>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Total Mins (Actual)</h4>
+                                <p class="val" id="sumTotalMins">0</p>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Total Plan / Actual Mins</h4>
+                                <p class="val" id="sumPlanActualMins">0.0%</p>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Average Time / Task</h4>
+                                <p class="val" id="sumAvgTime">0 mins</p>
+                            </div>
+                        </div>
+
+                        <div class="gantt-container">
+                            <div id="ganttGridWrapper"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. MONTHLY PLAN CONTAINER -->
+                <div id="planSection" class="sub-content-section" style="display: none;">
+                    <div class="section-container" style="border-left: 3px solid var(--primary);">
+                        <div class="section-header-flex">
+                            <div>
+                                <h4 style="margin:0; font-size: 13px; color:var(--primary);">📅 Buwanang Plan (Month Plan Submission)</h4>
+                                <span id="planSyncStatus" class="sync-status" style="display:inline-block; margin-top:4px;">Synced</span>
+                            </div>
+                        </div>
+                        
+                        <div id="planContent" style="margin-top: 15px;">
+                            <div class="task-table-container">
+                                <table class="task-table" id="planTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Task Name</th>
+                                            <th>Category</th>
+                                            <th>Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="planTableBody"></tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <button onclick="addPlanRow()" style="background-color: var(--primary);">+ Magdagdag ng Plan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. ACTUAL TASK CONTAINER -->
+                <div id="actualSection" class="sub-content-section" style="display: none;">
+                    <div class="section-container" style="border-left: 3px solid var(--success);">
+                        <div class="section-header-flex">
+                            <div>
+                                <h4 style="margin:0; font-size: 13px; color:var(--success);">✅ Araw-araw na Actual Task</h4>
+                                <span id="actualSyncStatus" class="sync-status" style="display:inline-block; margin-top:4px;">Synced</span>
+                            </div>
+                        </div>
+
+                        <div id="actualContent" style="margin-top: 15px;">
+                            <div class="task-table-container">
+                                <table class="task-table" id="actualTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Task Name</th>
+                                            <th>Category</th>
+                                            <th>Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="actualTableBody"></tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <button onclick="addActualRow()" style="background-color: var(--success);">+ Magdagdag ng Actual</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOCMED SECTION -->
+            <div id="socmedTab" class="content-section">
+                <h3 style="margin-top:0; font-size: 15px;">SocMed Engagement Report</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">I-submit dito ang mga social media links o engagement reports.</p>
+                <div class="form-group" style="max-width: 350px;">
+                    <label>Platform</label>
+                    <select id="socmedPlatform"><option value="Facebook">Facebook</option><option value="YouTube">YouTube</option></select>
+                </div>
+                <div class="form-group" style="max-width: 350px;">
+                    <label>Link / URL</label>
+                    <input type="text" id="socmedLink" placeholder="https://...">
+                </div>
+                <button onclick="submitSocMed()">Isubmit ang Report</button>
+            </div>
+
+            <!-- APPROVAL SECTION -->
+            <div id="approvalTab" class="content-section">
+                <h3 style="margin-top:0; font-size: 15px;">Approval Requests</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Mag-upload ng file para sa approval at tingnan ang status nito.</p>
+                
+                <div style="background: #f8fafc; border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex-grow: 1; min-width: 250px;">
+                        <label>Pumili ng File (All File Types)</label>
+                        <input type="file" id="approvalFileInput" style="background: #fff; padding: 7px;">
+                    </div>
+                    <button onclick="handleFileUpload()" style="height: 38px;">I-upload para sa Approval</button>
+                </div>
+
+                <div class="task-table-container">
+                    <table class="task-table" id="approvalTable">
+                        <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Upload (Petsa / Oras)</th>
+                                <th>Status (Approver Approval)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="approvalTableBody">
+                            <tr>
+                                <td colspan="4" style="color: var(--text-muted); padding: 20px;">Walang nakabinbing approval sa ngayon. Mag-upload ng file sa itaas.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyvlHUCpBtixA0RqOLuQXSHdozx9lV3sbu7T3zwq06RpRy1ZYMkq--BRPZw2USa_uqg/exec";
+        
+        // Kinukuha ang logged-in user mula sa localStorage (na sine-set sa ST.html pagka-login)
+        var loggedInUser = localStorage.getItem('portal_user') || "sft_user@company.com";
+        var saveTimeout = null;
+        var allLoadedTasks = { plan: [], actual: [] };
+        var approvalFilesList = [];
+
+        window.onload = function() {
+            let savedName = localStorage.getItem('portal_name');
+            let savedRole = localStorage.getItem('portal_role');
+
+            if (savedName && savedName.includes('@')) {
+                let parts = savedName.split('@')[0];
+                savedName = parts.charAt(0).toUpperCase() + parts.slice(1);
+            }
+
+            if (savedName) {
+                document.getElementById('dashTitle').innerText = "Welcome, " + savedName;
+            }
+            if (savedRole) {
+                document.getElementById('dashRole').innerText = savedRole;
+            }
+
+            loadUserTasks();
+        };
+
+        function toggleSubMenu(event) {
+            let parentLi = document.getElementById('dailyTaskMenuParent');
+            let subMenu = document.getElementById('dailyTaskSubMenu');
+            if (subMenu.style.display === "block") {
+                subMenu.style.display = "none";
+                parentLi.classList.remove('open');
+            } else {
+                subMenu.style.display = "block";
+                parentLi.classList.add('open');
+            }
+        }
+
+        function switchSubTab(evt, sectionId) {
+            evt.stopPropagation();
+            let subSections = document.getElementsByClassName('sub-content-section');
+            for (let sec of subSections) sec.style.display = 'none';
+            
+            let subItems = document.querySelectorAll('#dailyTaskSubMenu li');
+            for (let item of subItems) item.classList.remove('active');
+
+            document.getElementById(sectionId).style.display = 'block';
+            evt.currentTarget.classList.add('active');
+
+            let sections = document.getElementsByClassName('content-section');
+            for (let sec of sections) sec.classList.remove('active');
+            let menuItems = document.querySelectorAll('.sidebar-menu > li:not(.has-sub-menu)');
+            for (let item of menuItems) item.classList.remove('active');
+            
+            document.getElementById('dailyTaskTab').classList.add('active');
+            document.getElementById('dailyTaskMenuParent').classList.add('active');
+        }
+
+        function redirectToPage(pageName) {
+            window.location.href = pageName;
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = 'ST.html'; // Ibabalik sa ST.html kung saan naroroon ang login form
+        }
+
+        function switchTab(evt, tabId) {
+            let sections = document.getElementsByClassName('content-section');
+            for (let sec of sections) sec.classList.remove('active');
+            let menuItems = document.querySelectorAll('.sidebar-menu li');
+            for (let item of menuItems) item.classList.remove('active');
+            document.getElementById(tabId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            
+            document.getElementById('dailyTaskMenuParent').classList.remove('active');
+        }
+
+        function toggleAmPm(btn) {
+            btn.innerText = btn.innerText === "AM" ? "PM" : "AM";
+        }
+
+        function createRowElement(type, data = null) {
+            let tr = document.createElement('tr');
+            let date = '';
+            if (data && data.date) {
+                date = data.date.includes('T') ? data.date.split('T')[0] : data.date;
+            }
+
+            let startVal = "08:00", startAmPm = "AM";
+            let endVal = "05:00", endAmPm = "PM";
+
+            if (data && data.hour && data.hour.includes('-')) {
+                let parts = data.hour.split('-');
+                let sParts = parts[0].trim().split(' ');
+                startVal = sParts[0] || "08:00";
+                startAmPm = sParts[1] || "AM";
+
+                let eParts = parts[1].trim().split(' ');
+                endVal = eParts[0] || "05:00";
+                endAmPm = eParts[1] || "PM";
+            } else if (data && data.start && data.end) {
+                startVal = data.start;
+                startAmPm = data.startAmPm || "AM";
+                endVal = data.end;
+                endAmPm = data.endAmPm || "PM";
+            }
+
+            let name = data ? data.name : '';
+            let category = data ? data.category : '';
+            let remarks = data ? data.remarks : '';
+
+            let dateInputAttr = 'type="date"';
+            if (type === 'Actual') {
+                let todayStr = new Date().toISOString().split('T')[0];
+                dateInputAttr = `type="date" min="${todayStr}" max="${todayStr}"`;
+                if (!date) date = todayStr;
+            }
+
+            tr.innerHTML = `
+                <td><input ${dateInputAttr} class="task-date" value="${date}" oninput="triggerCompute(); triggerAutoSave()"></td>
+                <td>
+                    <div class="time-input-group">
+                        <input type="text" class="task-start-time" value="${startVal}" placeholder="08:00" oninput="triggerCompute(); triggerAutoSave()">
+                        <button type="button" class="ampm-btn task-start-ampm" onclick="toggleAmPm(this); triggerCompute(); triggerAutoSave();">${startAmPm}</button>
+                    </div>
+                </td>
+                <td>
+                    <div class="time-input-group">
+                        <input type="text" class="task-end-time" value="${endVal}" placeholder="05:00" oninput="triggerCompute(); triggerAutoSave()">
+                        <button type="button" class="ampm-btn task-end-ampm" onclick="toggleAmPm(this); triggerCompute(); triggerAutoSave();">${endAmPm}</button>
+                    </div>
+                </td>
+                <td><input type="text" class="task-name" value="${name}" placeholder="Ilagay ang Task Name" oninput="triggerCompute(); triggerAutoSave()"></td>
+                <td>
+                    <select class="task-category" onchange="triggerCompute(); triggerAutoSave()">
+                        <option value="" ${category === '' ? 'selected' : ''}>Pumili ng Category</option>
+                        <option value="Others" ${category === 'Others' ? 'selected' : ''}>Others</option>
+                        <option value="Content" ${category === 'Content' ? 'selected' : ''}>Content</option>
+                        <option value="Task" ${category === 'Task' ? 'selected' : ''}>Task</option>
+                    </select>
+                </td>
+                <td><input type="text" class="task-remarks" value="${remarks}" placeholder="Remarks (Optional)" oninput="triggerCompute(); triggerAutoSave()"></td>
+                <td><button class="delete-row-btn" onclick="deleteRow(this)">✕</button></td>
+            `;
+            return tr;
+        }
+
+        function addPlanRow(data = null) {
+            document.getElementById('planTableBody').appendChild(createRowElement('Plan', data));
+            triggerCompute();
+            triggerAutoSave();
+        }
+
+        function addActualRow(data = null) {
+            let selectedMonthVal = document.getElementById('selectedMonthFilter').value;
+            let currentMonthPlans = allLoadedTasks.plan.filter(t => t.date && t.date.startsWith(selectedMonthVal));
+            if (currentMonthPlans.length === 0) {
+                alert("Hindi ka maaaring magdagdag ng Actual task dahil walang nakitang Plan para sa buwang ito. Maglagay muna ng Plan bago mag-Actual.");
+                return;
+            }
+
+            document.getElementById('actualTableBody').appendChild(createRowElement('Actual', data));
+            triggerCompute();
+            triggerAutoSave();
+        }
+
+        function deleteRow(btn) {
+            btn.parentNode.parentNode.remove();
+            triggerCompute();
+            triggerAutoSave();
+        }
+
+        function parseTimeMinutes(tStr, ampm) {
+            try {
+                let timeParts = tStr.split(':');
+                let hours = parseInt(timeParts[0]) || 0;
+                let mins = parseInt(timeParts[1]) || 0;
+                if (ampm === 'PM' && hours < 12) hours += 12;
+                if (ampm === 'AM' && hours === 12) hours = 0;
+                return hours * 60 + mins;
+            } catch (e) { return 0; }
+        }
+
+        function parseDurationMinutes(row) {
+            try {
+                let startInput = row.querySelector('.task-start-time').value.trim();
+                let startAmPm = row.querySelector('.task-start-ampm').innerText;
+                let endInput = row.querySelector('.task-end-time').value.trim();
+                let endAmPm = row.querySelector('.task-end-ampm').innerText;
+                let startMins = parseTimeMinutes(startInput, startAmPm);
+                let endMins = parseTimeMinutes(endInput, endAmPm);
+                let diff = endMins - startMins;
+                if (diff <= 0) diff += 24 * 60; 
+                return diff > 0 ? diff : 480;
+            } catch (e) { return 480; }
+        }
+
+        async function loadUserTasks() {
+            try {
+                let url = `${WEB_APP_URL}?action=getTasks&user=${encodeURIComponent(loggedInUser)}`;
+                let response = await fetch(url);
+                let result = await response.json();
+                if (result.success && result.tasks) {
+                    allLoadedTasks.plan = result.tasks.filter(t => t.type === 'Plan');
+                    allLoadedTasks.actual = result.tasks.filter(t => t.type === 'Actual');
+                    renderTablesAndGantt();
+                }
+            } catch (e) { console.error("Hindi ma-load ang tasks.", e); }
+            triggerCompute();
+        }
+
+        function changeActiveMonth() {
+            let selectEl = document.getElementById('selectedMonthFilter');
+            let selectedText = selectEl.options[selectEl.selectedIndex].text.split(' (')[0];
+            document.getElementById('downloadMonthLabel').innerText = selectedText;
+            renderTablesAndGantt();
+        }
+
+        function renderTablesAndGantt() {
+            let selectedMonthVal = document.getElementById('selectedMonthFilter').value;
+            let planTbody = document.getElementById('planTableBody');
+            let actualTbody = document.getElementById('actualTableBody');
+            planTbody.innerHTML = ''; 
+            actualTbody.innerHTML = ''; 
+
+            allLoadedTasks.plan.filter(t => t.date && t.date.startsWith(selectedMonthVal)).forEach(t => {
+                planTbody.appendChild(createRowElement('Plan', t));
+            });
+            allLoadedTasks.actual.filter(t => t.date && t.date.startsWith(selectedMonthVal)).forEach(t => {
+                actualTbody.appendChild(createRowElement('Actual', t));
+            });
+
+            triggerCompute();
+        }
+
+        function triggerCompute() {
+            let actualRows = document.getElementById('actualTableBody').getElementsByTagName('tr');
+            let planRows = document.getElementById('planTableBody').getElementsByTagName('tr');
+
+            let uniqueDates = new Set();
+            let totalActualMins = 0;
+            let actualCount = 0;
+
+            for (let i = 0; i < actualRows.length; i++) {
+                let dateVal = actualRows[i].querySelector('.task-date').value;
+                if(dateVal) uniqueDates.add(dateVal);
+                totalActualMins += parseDurationMinutes(actualRows[i]);
+                actualCount++;
+            }
+
+            let totalPlanMins = 0;
+            for (let i = 0; i < planRows.length; i++) {
+                totalPlanMins += parseDurationMinutes(planRows[i]);
+            }
+
+            let daysWorked = uniqueDates.size;
+            let actualDays = totalActualMins > 0 ? (totalActualMins / 480) : 0;
+            let achPercent = daysWorked > 0 ? (actualDays / daysWorked) * 100 : 0;
+            let planActualPercent = totalPlanMins > 0 ? (totalActualMins / totalPlanMins) * 100 : 0;
+            let avgTime = actualCount > 0 ? Math.round(totalActualMins / actualCount) : 0;
+
+            document.getElementById('sumDaysWorked').innerText = daysWorked;
+            document.getElementById('sumActualDays').innerText = actualDays.toFixed(1);
+            document.getElementById('sumAchPercent').innerText = achPercent.toFixed(1) + "%";
+            document.getElementById('sumTotalMins').innerText = totalActualMins + " mins";
+            document.getElementById('sumPlanActualMins').innerText = planActualPercent.toFixed(1) + "%";
+            document.getElementById('sumAvgTime').innerText = avgTime + " mins";
+
+            updateGanttChart();
+        }
+
+        function triggerAutoSave() {
+            document.getElementById('planSyncStatus').innerText = "Nagse-sync...";
+            document.getElementById('actualSyncStatus').innerText = "Nagse-sync...";
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => { saveTasksToCloud(); }, 800); 
+        }
+
+        async function saveTasksToCloud() {
+            let selectedMonthVal = document.getElementById('selectedMonthFilter').value;
+            let planRows = document.getElementById('planTableBody').getElementsByTagName('tr');
+            let actualRows = document.getElementById('actualTableBody').getElementsByTagName('tr');
+            let currentMonthTasks = [];
+
+            for (let i = 0; i < planRows.length; i++) {
+                let sTime = planRows[i].querySelector('.task-start-time').value;
+                let sAmPm = planRows[i].querySelector('.task-start-ampm').innerText;
+                let eTime = planRows[i].querySelector('.task-end-time').value;
+                let eAmPm = planRows[i].querySelector('.task-end-ampm').innerText;
+                currentMonthTasks.push({
+                    type: 'Plan',
+                    date: planRows[i].querySelector('.task-date').value,
+                    hour: `${sTime} ${sAmPm} - ${eTime} ${eAmPm}`,
+                    name: planRows[i].querySelector('.task-name').value,
+                    category: planRows[i].querySelector('.task-category').value,
+                    remarks: planRows[i].querySelector('.task-remarks').value
+                });
+            }
+
+            for (let i = 0; i < actualRows.length; i++) {
+                let sTime = actualRows[i].querySelector('.task-start-time').value;
+                let sAmPm = actualRows[i].querySelector('.task-start-ampm').innerText;
+                let eTime = actualRows[i].querySelector('.task-end-time').value;
+                let eAmPm = actualRows[i].querySelector('.task-end-ampm').innerText;
+                currentMonthTasks.push({
+                    type: 'Actual',
+                    date: actualRows[i].querySelector('.task-date').value,
+                    hour: `${sTime} ${sAmPm} - ${eTime} ${eAmPm}`,
+                    name: actualRows[i].querySelector('.task-name').value,
+                    category: actualRows[i].querySelector('.task-category').value,
+                    remarks: actualRows[i].querySelector('.task-remarks').value
+                });
+            }
+
+            allLoadedTasks.plan = allLoadedTasks.plan.filter(t => !t.date || !t.date.startsWith(selectedMonthVal));
+            allLoadedTasks.actual = allLoadedTasks.actual.filter(t => !t.date || !t.date.startsWith(selectedMonthVal));
+
+            currentMonthTasks.forEach(t => {
+                if(t.type === 'Plan') allLoadedTasks.plan.push(t);
+                else allLoadedTasks.actual.push(t);
+            });
+
+            try {
+                await fetch(`${WEB_APP_URL}?action=saveTasks`, {
+                    method: 'POST',
+                    body: JSON.stringify({ user: loggedInUser, tasks: [...allLoadedTasks.plan, ...allLoadedTasks.actual] })
+                });
+                document.getElementById('planSyncStatus').innerText = "Synced";
+                document.getElementById('actualSyncStatus').innerText = "Synced";
+            } catch (err) {
+                document.getElementById('planSyncStatus').innerText = "Error";
+                document.getElementById('actualSyncStatus').innerText = "Error";
+            }
+        }
+
+        function downloadMonthExcel() {
+            let selectedMonthVal = document.getElementById('selectedMonthFilter').value;
+            let selectEl = document.getElementById('selectedMonthFilter');
+            let monthLabelText = selectEl.options[selectEl.selectedIndex].text.replace(/[\(\)]/g, '').replace(/\s+/g, '_');
+
+            let exportData = [];
+            allLoadedTasks.plan.filter(t => t.date && t.date.startsWith(selectedMonthVal)).forEach(t => {
+                exportData.push({ "Type": "Plan", "Date": t.date, "Time Slot": t.hour, "Task Name": t.name, "Category": t.category, "Remarks": t.remarks });
+            });
+            allLoadedTasks.actual.filter(t => t.date && t.date.startsWith(selectedMonthVal)).forEach(t => {
+                exportData.push({ "Type": "Actual", "Date": t.date, "Time Slot": t.hour, "Task Name": t.name, "Category": t.category, "Remarks": t.remarks });
+            });
+
+            if (exportData.length === 0) {
+                alert("Walang nakitang data o tasks para sa buwang ito.");
+                return;
+            }
+
+            let worksheet = XLSX.utils.json_to_sheet(exportData);
+            let workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks_" + monthLabelText);
+            XLSX.writeFile(workbook, `SFT_Tasks_${monthLabelText}.xlsx`);
+        }
+
+        function getISOWeek(date) {
+            let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            let dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function updateGanttChart() {
+            let selectedMonthVal = document.getElementById('selectedMonthFilter').value;
+            let [targetYear, targetMonth] = selectedMonthVal.split('-').map(Number);
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            let monthName = monthNames[targetMonth - 1];
+
+            let filteredActuals = allLoadedTasks.actual.filter(t => t.date && t.date.startsWith(selectedMonthVal));
+            let dateColumnsMap = new Map();
+            let categoriesMap = {};
+
+            filteredActuals.forEach(t => {
+                let dateVal = t.date;
+                let taskName = t.name ? t.name.trim() : "";
+                let categoryVal = t.category ? t.category.trim() : "";
+
+                let parts = t.hour.split('-');
+                let sParts = parts[0].trim().split(' ');
+                let eParts = parts[1] ? parts[1].trim().split(' ') : ["05:00", "PM"];
+
+                let sMins = parseTimeMinutes(sParts[0], sParts[1]);
+                let eMins = parseTimeMinutes(eParts[0], eParts[1]);
+                let durationMins = eMins - sMins;
+                if (durationMins <= 0) durationMins += 24 * 60;
+
+                if(!dateVal) return;
+                let d = new Date(dateVal);
+                let wkNum = getISOWeek(d);
+                let formattedDate = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
+                
+                dateColumnsMap.set(dateVal, { dateStr: formattedDate, wkNum: wkNum, rawDate: dateVal });
+                
+                let cleanCategory = categoryVal ? categoryVal : "Uncategorized";
+                let cleanTaskName = taskName ? taskName : "Unnamed Task";
+
+                if (!categoriesMap[cleanCategory]) categoriesMap[cleanCategory] = {};
+                if (!categoriesMap[cleanCategory][cleanTaskName]) categoriesMap[cleanCategory][cleanTaskName] = [];
+                
+                let existingEntry = categoriesMap[cleanCategory][cleanTaskName].find(e => e.rawDate === dateVal);
+                if (existingEntry) {
+                    existingEntry.totalMins += durationMins;
+                    existingEntry.width = Math.min(100 - existingEntry.left, existingEntry.width + ((durationMins / 480) * 100));
+                    existingEntry.label = `${cleanTaskName} (${existingEntry.totalMins}m total)`;
+                } else {
+                    let leftPercent = Math.max(0, (sMins - 480) / 480 * 100);
+                    let widthPercent = Math.min(100 - leftPercent, (durationMins / 480) * 100);
+                    categoriesMap[cleanCategory][cleanTaskName].push({
+                        rawDate: dateVal,
+                        label: `${cleanTaskName} (${durationMins}m)`,
+                        left: leftPercent > 90 ? 5 : leftPercent,
+                        width: widthPercent < 5 ? 5 : widthPercent,
+                        totalMins: durationMins
+                    });
+                }
+            });
+
+            let sortedDateCols = Array.from(dateColumnsMap.values()).sort((a, b) => new Date(a.rawDate) - new Date(b.rawDate));
+            let wrapper = document.getElementById('ganttGridWrapper');
+            
+            if(sortedDateCols.length === 0) {
+                sortedDateCols.push({ dateStr: `01/${String(targetMonth).padStart(2, '0')}/${targetYear}`, wkNum: 1, rawDate: selectedMonthVal + "-01" });
+            }
+
+            let totalCols = sortedDateCols.length;
+            let html = `<div class="gantt-grid" style="grid-template-columns: 200px repeat(${totalCols}, 1fr);">`;
+            html += `<div class="gantt-grid-header" style="grid-row: span 2; display: flex; align-items: center; justify-content: center;">Task Name (${monthName} ${targetYear})</div>`;
+            
+            sortedDateCols.forEach(col => { html += `<div class="gantt-grid-header">WK ${col.wkNum}</div>`; });
+            sortedDateCols.forEach(col => { html += `<div class="gantt-sub-header">${col.dateStr}</div>`; });
+
+            let categoryKeys = Object.keys(categoriesMap);
+            if(categoryKeys.length === 0) {
+                html += `<div style="grid-column: span ${totalCols + 1}; padding: 25px; text-align: center; color: var(--text-muted); font-size: 12px;">Walang actual task para sa buwang ito.</div>`;
+            } else {
+                categoryKeys.forEach(catKey => {
+                    html += `<div class="gantt-category-row">${catKey}</div>`;
+                    sortedDateCols.forEach(() => { html += `<div class="gantt-category-row" style="background: #f8fafc; border-right: 1px solid var(--border-color);"></div>`; });
+
+                    Object.keys(categoriesMap[catKey]).forEach(taskName => {
+                        let entries = categoriesMap[catKey][taskName];
+                        html += `<div class="gantt-task-name">${taskName}</div>`;
+                        sortedDateCols.forEach(col => {
+                            html += `<div class="gantt-cell">`;
+                            let matchedEntry = entries.find(e => e.rawDate === col.rawDate);
+                            if(matchedEntry) {
+                                html += `<div class="gantt-bar-item bar-actual-item" style="left: ${matchedEntry.left}%; width: ${matchedEntry.width}%;" title="${matchedEntry.label}">${matchedEntry.label}</div>`;
+                            }
+                            html += `</div>`;
+                        });
+                    });
+                });
+            }
+            html += `</div>`;
+            wrapper.innerHTML = html;
+        }
+
+        function submitSocMed() { alert("Naisumite na ang SocMed report!"); }
+
+        function handleFileUpload() {
+            let fileInput = document.getElementById('approvalFileInput');
+            if (fileInput.files.length === 0) {
+                alert("Mangyaring pumili muna ng file na ia-upload.");
+                return;
+            }
+
+            let file = fileInput.files[0];
+            let now = new Date();
+            let dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}/${now.getFullYear()} ${now.toLocaleTimeString()}`;
+
+            approvalFilesList.push({
+                fileName: file.name,
+                uploadDate: dateStr,
+                status: "Pending"
+            });
+
+            fileInput.value = ''; 
+            renderApprovalTable();
+            alert("Matagumpay na na-upload ang file para sa approval!");
+        }
+
+        function renderApprovalTable() {
+            let tbody = document.getElementById('approvalTableBody');
+            tbody.innerHTML = '';
+
+            if (approvalFilesList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="color: var(--text-muted); padding: 20px;">Walang nakabinbing approval sa ngayon. Mag-upload ng file sa itaas.</td></tr>`;
+                return;
+            }
+
+            approvalFilesList.forEach((item, index) => {
+                let tr = document.createElement('tr');
+                let statusBadge = item.status === "Approved" 
+                    ? `<span class="badge-approved">Approved na</span>` 
+                    : `<span class="badge-pending">Pending (Naghihintay ng Approver)</span>`;
+
+                tr.innerHTML = `
+                    <td style="font-weight: 600; text-align: left; padding-left: 15px;">📁 ${item.fileName}</td>
+                    <td>${item.uploadDate}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button onclick="toggleApprovalStatus(${index})" style="background-color: ${item.status === 'Approved' ? '#dc2626' : 'var(--success)'}; font-size: 11px; padding: 5px 10px;">
+                            ${item.status === 'Approved' ? 'I-cancel ang Approval' : 'I-approve'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleApprovalStatus(index) {
+            if (approvalFilesList[index].status === "Pending") {
+                approvalFilesList[index].status = "Approved";
+            } else {
+                approvalFilesList[index].status = "Pending";
+            }
+            renderApprovalTable();
+        }
+    </script>
+</body>
+</html>

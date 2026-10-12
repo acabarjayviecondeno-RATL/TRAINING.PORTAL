@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Monitoring Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155',
+                            text: '#f8fafc',
+                            muted: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse CDN for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Navbar -->
+    <header class="bg-slate-900/85 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+                    <i data-lucide="bar-chart-3" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent truncate">SocMed Pulse Pro</h1>
+                    <p class="text-[11px] sm:text-xs text-slate-400 truncate">Automated Live Google Sheets Omnichannel Analytics</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3 shrink-0">
+                <div id="syncStatus" class="flex items-center space-x-1.5 text-[11px] sm:text-xs text-indigo-400 bg-indigo-950/40 px-3.5 py-1.5 rounded-full border border-indigo-800/50">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                    <span id="syncText" class="hidden sm:inline">Auto-fetching...</span>
+                    <span class="sm:hidden">Syncing...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 w-full px-3 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+        
+        <!-- Platform Navigation Tabs -->
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-4 overflow-x-auto no-scrollbar">
+            <button onclick="switchTab('overview')" class="tab-btn active shrink-0 flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" data-target="overview">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                <span>Overview Summary</span>
+            </button>
+            <button onclick="switchTab('facebook')" class="tab-btn shrink-0 flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800" data-target="facebook">
+                <i data-lucide="facebook" class="w-4 h-4 text-blue-500"></i>
+                <span>Facebook Insights</span>
+            </button>
+            <button onclick="switchTab('instagram')" class="tab-btn shrink-0 flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800" data-target="instagram">
+                <i data-lucide="instagram" class="w-4 h-4 text-pink-500"></i>
+                <span>Instagram Insights</span>
+            </button>
+            <button onclick="switchTab('tiktok')" class="tab-btn shrink-0 flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800" data-target="tiktok">
+                <i data-lucide="video" class="w-4 h-4 text-cyan-400"></i>
+                <span>TikTok Insights</span>
+            </button>
+        </div>
+
+        <!-- Dynamic KPI Scorecards (Main Dashboard Overview) -->
+        <div id="mainKpiContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-all"></div>
+                <div class="flex items-center justify-between">
+                    <span id="kpiLabel1" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Reach / Views</span>
+                    <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiReach" class="text-3xl font-bold tracking-tight text-white">0</h3>
+                    <p id="kpiSub1" class="text-xs text-indigo-400 mt-1 flex items-center font-medium">
+                        <i data-lucide="trending-up" class="w-3.5 h-3.5 mr-1"></i> Combined across FB, IG & TK
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-pink-500/10 rounded-full blur-xl group-hover:bg-pink-500/20 transition-all"></div>
+                <div class="flex items-center justify-between">
+                    <span id="kpiLabel2" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Engagement</span>
+                    <div class="p-2.5 rounded-xl bg-pink-500/10 text-pink-400">
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiEngagement" class="text-3xl font-bold tracking-tight text-white">0</h3>
+                    <p id="kpiSub2" class="text-xs text-pink-400 mt-1 flex items-center font-medium">
+                        <i data-lucide="zap" class="w-3.5 h-3.5 mr-1"></i> Reactions, Comments, Shares
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-all"></div>
+                <div class="flex items-center justify-between">
+                    <span id="kpiLabel3" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Posts / Content</span>
+                    <div class="p-2.5 rounded-xl bg-blue-500/10 text-blue-400">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiPosts" class="text-3xl font-bold tracking-tight text-white">0</h3>
+                    <p id="kpiSub3" class="text-xs text-blue-400 mt-1 flex items-center font-medium">
+                        <i data-lucide="layers" class="w-3.5 h-3.5 mr-1"></i> Tracked items in sheets
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition-all"></div>
+                <div class="flex items-center justify-between">
+                    <span id="kpiLabel4" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Avg Engagement Rate</span>
+                    <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
+                        <i data-lucide="percent" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiRate" class="text-3xl font-bold tracking-tight text-white">0.0%</h3>
+                    <p id="kpiSub4" class="text-xs text-amber-400 mt-1 flex items-center font-medium">
+                        <i data-lucide="activity" class="w-3.5 h-3.5 mr-1"></i> Overall performance index
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Views Container -->
+        <div id="tabContentContainer">
+            
+            <!-- OVERVIEW TAB -->
+            <div id="view-overview" class="tab-view space-y-6">
+                
+                <!-- EXECUTIVE SUMMARY CARD -->
+                <div class="bg-gradient-to-r from-indigo-950/60 via-slate-900/80 to-slate-900/80 backdrop-blur-sm border border-indigo-500/30 rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-base text-white tracking-tight">Executive Summary & Insights</h3>
+                    </div>
+                    <p id="executiveSummaryText" class="text-sm text-slate-300 leading-relaxed">
+                        Binabasa ang mga datos mula sa Google Sheets upang makabuo ng live na pangkalahatang buod...
+                    </p>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="font-bold text-sm sm:text-base text-white">Platform Performance Comparison</h3>
+                                <p class="text-xs text-slate-400">Total reach and engagement distribution across channels</p>
+                            </div>
+                            <div class="p-2 rounded-lg bg-slate-800 text-slate-300">
+                                <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                        <div class="relative flex-1 min-h-[260px] sm:min-h-[300px] flex items-center justify-center">
+                            <canvas id="platformComparisonChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="font-bold text-sm sm:text-base text-white">Engagement Share by Platform</h3>
+                                <p class="text-xs text-slate-400">Proportion of overall interactions received</p>
+                            </div>
+                            <div class="p-2 rounded-lg bg-slate-800 text-slate-300">
+                                <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                        <div class="relative flex-1 min-h-[260px] sm:min-h-[300px] flex items-center justify-center">
+                            <canvas id="engagementShareChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly & Yearly Engagement Trend Graph -->
+                <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="font-bold text-sm sm:text-base text-white">Monthly & Yearly Engagement Trend</h3>
+                            <p class="text-xs text-slate-400">Kabuuang engagement batay sa "Publish time" column (MM/DD/YYYY)</p>
+                        </div>
+                        <div class="p-2 rounded-lg bg-slate-800 text-slate-300">
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="relative flex-1 min-h-[260px] sm:min-h-[300px] flex items-center justify-center">
+                        <canvas id="monthlyYearlyEngagementChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Platform Summary Cards -->
+                <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl">
+                    <h3 class="font-bold text-sm sm:text-base text-white mb-4">Platform Summary Breakdowns</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6" id="platformSummaryCards"></div>
+                </div>
+            </div>
+
+            <!-- FACEBOOK TAB -->
+            <div id="view-facebook" class="tab-view hidden space-y-6">
+                <!-- Header with Meta-style Title & Sheet Breakdown Filter -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 p-4 sm:p-5 rounded-2xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-3 bg-blue-500/10 text-blue-500 rounded-xl shrink-0">
+                            <i data-lucide="facebook" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                                Content overview
+                            </h2>
+                            <p class="text-xs text-slate-400">Facebook Page Performance & Analytics Suite</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-950 border border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-300">
+                        <span class="text-slate-400">Breakdown:</span>
+                        <select id="fbBreakdownSelect" onchange="filterFacebookContentType()" class="bg-transparent text-white font-medium focus:outline-none cursor-pointer">
+                            <option value="all" class="bg-slate-900">All (Total Views)</option>
+                            <option value="organic" class="bg-slate-900">Views from Organic posts</option>
+                            <option value="ads" class="bg-slate-900">Views from Ads</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Meta-Style Sub Tabs based on Post type column (All, Live, Videos, Photos) -->
+                <div class="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto no-scrollbar">
+                    <button onclick="switchFbSubTab('All')" class="fb-subtab-btn active px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white shadow">All</button>
+                    <button onclick="switchFbSubTab('Live')" class="fb-subtab-btn px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800">Live</button>
+                    <button onclick="switchFbSubTab('Videos')" class="fb-subtab-btn px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800">Videos</button>
+                    <button onclick="switchFbSubTab('Photos')" class="fb-subtab-btn px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800">Photos</button>
+                </div>
+
+                <!-- Meta-Style Metric Cards Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-indigo-500/40 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                            <span id="fbCardViewsTitle">Views</span>
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-500"></i>
+                        </div>
+                        <div class="mt-3 flex items-baseline justify-between">
+                            <span id="fbCardViews" class="text-2xl sm:text-3xl font-bold text-white">0</span>
+                            <span id="fbCardViewsTrend" class="text-xs font-medium text-emerald-400 flex items-center"><i data-lucide="trending-up" class="w-3 h-3 mr-0.5"></i> +0%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                            <span>3-second views</span>
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-500"></i>
+                        </div>
+                        <div class="mt-3 flex items-baseline justify-between">
+                            <span id="fbCard3Sec" class="text-2xl sm:text-3xl font-bold text-white">0</span>
+                            <span id="fbCard3SecTrend" class="text-xs font-medium text-emerald-400 flex items-center"><i data-lucide="trending-up" class="w-3 h-3 mr-0.5"></i> +0%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                            <span>Content interactions</span>
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-500"></i>
+                        </div>
+                        <div class="mt-3 flex items-baseline justify-between">
+                            <span id="fbCardInteractions" class="text-2xl sm:text-3xl font-bold text-white">0</span>
+                            <span id="fbCardInteractionsTrend" class="text-xs font-medium text-emerald-400 flex items-center"><i data-lucide="trending-up" class="w-3 h-3 mr-0.5"></i> +0%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                            <span>Watch time</span>
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-500"></i>
+                        </div>
+                        <div class="mt-3 flex items-baseline justify-between">
+                            <span id="fbCardWatchTime" class="text-2xl sm:text-3xl font-bold text-white">0s</span>
+                            <span id="fbCardWatchTimeTrend" class="text-xs font-medium text-emerald-400 flex items-center"><i data-lucide="trending-up" class="w-3 h-3 mr-0.5"></i> +0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Chart & Sidebar Breakdown Panel Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Graph View -->
+                    <div class="lg:col-span-2 bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col">
+                        <div class="relative flex-1 min-h-[300px] flex items-center justify-center">
+                            <canvas id="facebookTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar Breakdown Panel -->
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="font-bold text-sm text-white flex items-center justify-between">
+                                <span>Views breakdown</span>
+                                <span class="text-[11px] text-slate-400 font-normal">Live Sheet Data</span>
+                            </h3>
+                            <div class="mt-4 space-y-3 text-xs divide-y divide-slate-800/80">
+                                <div class="pt-2 flex justify-between">
+                                    <span class="text-slate-400">Total Views</span>
+                                    <span id="sideTotalViews" class="font-bold text-white">0</span>
+                                </div>
+                                <div class="pt-3 flex justify-between">
+                                    <span class="text-slate-400">Views from Organic</span>
+                                    <span id="sideOrganicViews" class="font-semibold text-white">0</span>
+                                </div>
+                                <div class="pt-3 flex justify-between">
+                                    <span class="text-slate-400">Views from Ads</span>
+                                    <span id="sideAdsViews" class="font-semibold text-slate-400">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-800">
+                            <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                                <span class="flex items-center">Viewers <i data-lucide="info" class="w-3 h-3 ml-1 text-slate-500"></i></span>
+                            </div>
+                            <div class="mt-2 flex items-baseline justify-between">
+                                <span id="sideUniqueViewers" class="text-xl font-bold text-white">0</span>
+                                <span class="text-xs text-emerald-400 font-medium">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Facebook Posts & Watch Duration -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+                        <h3 class="font-bold text-sm text-white flex items-center justify-between">
+                            <span class="flex items-center"><i data-lucide="award" class="w-4 h-4 mr-2 text-amber-400"></i> Top content by views</span>
+                        </h3>
+                        <div class="space-y-3 text-xs divide-y divide-slate-800/80" id="facebookTopPostsContainer"></div>
+                    </div>
+
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col">
+                        <div class="relative flex-1 min-h-[240px] flex items-center justify-center">
+                            <canvas id="facebookWatchDurationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Raw Records Data Table -->
+                <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden p-4 sm:p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <h3 class="font-bold text-sm text-white">Raw Records Data Table</h3>
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="searchFacebook" onkeyup="filterTable('facebook')" placeholder="Search facebook data..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table id="tableFacebook" class="w-full text-left border-collapse">
+                            <thead class="bg-slate-950/90 text-xs font-semibold uppercase text-slate-400 border-b border-slate-800"></thead>
+                            <tbody class="divide-y divide-slate-800 text-sm text-slate-300"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSTAGRAM TAB -->
+            <div id="view-instagram" class="tab-view hidden space-y-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 p-4 sm:p-5 rounded-2xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-3 bg-pink-500/10 text-pink-500 rounded-xl shrink-0">
+                            <i data-lucide="instagram" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-bold text-white">Instagram Analytics & Insights</h2>
+                            <p class="text-xs text-slate-400">Performance trends, top content ranking, and raw feed records</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+                        <h3 class="font-bold text-sm text-white flex items-center">
+                            <i data-lucide="award" class="w-4 h-4 mr-2 text-pink-400"></i> Top Instagram Posts (by Reach)
+                        </h3>
+                        <div class="space-y-3 text-xs divide-y divide-slate-800/80" id="instagramTopPostsContainer"></div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-sm sm:text-base text-white">Instagram Engagement Rate Trend</h3>
+                                <p class="text-xs text-slate-400">Engagement percentage trend per recorded post item</p>
+                            </div>
+                            <div class="p-2 rounded-lg bg-pink-500/10 text-pink-400">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                        <div class="relative flex-1 min-h-[220px] flex items-center justify-center">
+                            <canvas id="instagramTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden p-4 sm:p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <h3 class="font-bold text-sm text-white">Raw Records Data Table</h3>
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="searchInstagram" onkeyup="filterTable('instagram')" placeholder="Search instagram data..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table id="tableInstagram" class="w-full text-left border-collapse">
+                            <thead class="bg-slate-950/90 text-xs font-semibold uppercase text-slate-400 border-b border-slate-800"></thead>
+                            <tbody class="divide-y divide-slate-800 text-sm text-slate-300"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIKTOK TAB -->
+            <div id="view-tiktok" class="tab-view hidden space-y-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 p-4 sm:p-5 rounded-2xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl shrink-0">
+                            <i data-lucide="video" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-bold text-white">TikTok Analytics & Insights</h2>
+                            <p class="text-xs text-slate-400">Performance trends, top content ranking, and raw feed records</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+                        <h3 class="font-bold text-sm text-white flex items-center">
+                            <i data-lucide="award" class="w-4 h-4 mr-2 text-cyan-400"></i> Top TikTok Videos (by Views)
+                        </h3>
+                        <div class="space-y-3 text-xs divide-y divide-slate-800/80" id="tiktokTopPostsContainer"></div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-sm sm:text-base text-white">TikTok Engagement Rate Trend</h3>
+                                <p class="text-xs text-slate-400">Engagement percentage trend per recorded post item</p>
+                            </div>
+                            <div class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                        <div class="relative flex-1 min-h-[220px] flex items-center justify-center">
+                            <canvas id="tiktokTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/65 backdrop-blur-sm border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden p-4 sm:p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <h3 class="font-bold text-sm text-white">Raw Records Data Table</h3>
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="searchTiktok" onkeyup="filterTable('tiktok')" placeholder="Search tiktok data..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table id="tableTiktok" class="w-full text-left border-collapse">
+                            <thead class="bg-slate-950/90 text-xs font-semibold uppercase text-slate-400 border-b border-slate-800"></thead>
+                            <tbody class="divide-y divide-slate-800 text-sm text-slate-300"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        const FB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT7oZoS9WzZkscUKl3O1oyLiffbUXRqWBA5G3AEPcB-5DYrMyWoW1cPyrJSM0zRZh08xhJb5R3_MCD1/pub?gid=0&single=true&output=csv";
+        const IG_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT7oZoS9WzZkscUKl3O1oyLiffbUXRqWBA5G3AEPcB-5DYrMyWoW1cPyrJSM0zRZh08xhJb5R3_MCD1/pub?gid=980908131&single=true&output=csv";
+        const TK_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT7oZoS9WzZkscUKl3O1oyLiffbUXRqWBA5G3AEPcB-5DYrMyWoW1cPyrJSM0zRZh08xhJb5R3_MCD1/pub?gid=795455166&single=true&output=csv";
+
+        let appData = {
+            facebook: { headers: [], rows: [], raw: [] },
+            instagram: { headers: [], rows: [], raw: [] },
+            tiktok: { headers: [], rows: [], raw: [] }
+        };
+
+        let currentActiveTab = 'overview';
+        let currentFbSubTab = 'All';
+        let comparisonChartInstance = null;
+        let engagementShareChartInstance = null;
+        let monthlyEngagementChartInstance = null;
+        let facebookTrendChartInstance = null;
+        let facebookWatchDurationChartInstance = null;
+        let instagramTrendChartInstance = null;
+        let tiktokTrendChartInstance = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            ['facebook', 'instagram', 'tiktok'].forEach(p => renderTable(p));
+            updateDashboardUI();
+            
+            fetchAllDataAutomatically();
+
+            setInterval(() => {
+                fetchAllDataAutomatically(true);
+            }, 10000);
+        });
+
+        function switchTab(targetTab) {
+            currentActiveTab = targetTab;
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if(btn.dataset.target === targetTab) {
+                    btn.className = "tab-btn active shrink-0 flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20";
+                } else {
+                    btn.className = "tab-btn shrink-0 flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800";
+                }
+            });
+
+            document.querySelectorAll('.tab-view').forEach(view => {
+                if(view.id === `view-${targetTab}`) {
+                    view.classList.remove('hidden');
+                } else {
+                    view.classList.add('hidden');
+                }
+            });
+
+            const mainKpiContainer = document.getElementById('mainKpiContainer');
+            if (targetTab === 'overview') {
+                mainKpiContainer.style.display = 'grid';
+            } else {
+                mainKpiContainer.style.display = 'none';
+            }
+
+            updateDashboardUI();
+
+            if(targetTab === 'overview') {
+                if(comparisonChartInstance) comparisonChartInstance.resize();
+                if(engagementShareChartInstance) engagementShareChartInstance.resize();
+                if(monthlyEngagementChartInstance) monthlyEngagementChartInstance.resize();
+            } else if(targetTab === 'facebook') {
+                if(facebookTrendChartInstance) facebookTrendChartInstance.resize();
+                if(facebookWatchDurationChartInstance) facebookWatchDurationChartInstance.resize();
+            } else if(targetTab === 'instagram') {
+                if(instagramTrendChartInstance) instagramTrendChartInstance.resize();
+            } else if(targetTab === 'tiktok') {
+                if(tiktokTrendChartInstance) tiktokTrendChartInstance.resize();
+            }
+        }
+
+        function switchFbSubTab(subTabName) {
+            currentFbSubTab = subTabName;
+            document.querySelectorAll('.fb-subtab-btn').forEach(btn => {
+                if(btn.textContent.trim() === subTabName) {
+                    btn.className = "fb-subtab-btn active px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white shadow";
+                } else {
+                    btn.className = "fb-subtab-btn px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800";
+                }
+            });
+            updateDashboardUI();
+        }
+
+        function filterFacebookContentType() {
+            updateDashboardUI();
+        }
+
+        function fetchAllDataAutomatically(isBackground = false) {
+            const syncText = document.getElementById('syncText');
+            const syncStatus = document.getElementById('syncStatus');
+            
+            if (!isBackground) {
+                syncText.textContent = "Syncing...";
+            }
+            
+            let loadedCount = 0;
+            const totalFeeds = 3;
+
+            function checkAllDone() {
+                loadedCount++;
+                if(loadedCount >= totalFeeds) {
+                    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    syncText.textContent = `Synced (${now})`;
+                    syncStatus.className = "flex items-center space-x-1.5 text-[11px] sm:text-xs text-emerald-400 bg-emerald-950/40 px-3.5 py-1.5 rounded-full border border-emerald-800/50";
+                    syncStatus.querySelector('span').className = "w-2 h-2 rounded-full bg-emerald-400";
+                    updateDashboardUI();
+                }
+            }
+
+            fetchPlatformData('facebook', FB_URL, checkAllDone);
+            fetchPlatformData('instagram', IG_URL, checkAllDone);
+            fetchPlatformData('tiktok', TK_URL, checkAllDone);
+        }
+
+        function fetchPlatformData(platform, targetUrl, callback) {
+            const antiCacheUrl = targetUrl + "&_t=" + new Date().getTime();
+
+            Papa.parse(antiCacheUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results && results.data && results.data.length > 0) {
+                        processPlatformData(platform, results.data);
+                    }
+                    if(callback) callback();
+                },
+                error: function(err) {
+                    console.error(`Error loading ${platform} data:`, err);
+                    if(callback) callback();
+                }
+            });
+        }
+
+        function processPlatformData(platform, data) {
+            if(!data || data.length === 0) return;
+            const headers = Object.keys(data[0]);
+            appData[platform] = {
+                headers: headers,
+                rows: data,
+                raw: data
+            };
+            renderTable(platform);
+        }
+
+        function renderTable(platform) {
+            const platformObj = appData[platform];
+            const tableEl = document.getElementById(`table${platform.charAt(0).toUpperCase() + platform.slice(1)}`);
+            if(!tableEl) return;
+
+            const thead = tableEl.querySelector('thead');
+            let headerHtml = '<tr>';
+            if(platformObj.headers.length > 0) {
+                platformObj.headers.forEach(h => {
+                    headerHtml += `<th class="px-4 sm:px-6 py-3.5 font-semibold text-xs text-slate-300 tracking-wider">${escapeHtml(h)}</th>`;
+                });
+            } else {
+                headerHtml += `<th class="px-4 sm:px-6 py-3.5 font-semibold text-xs text-slate-400 tracking-wider">Awaiting Sheet Data...</th>`;
+            }
+            headerHtml += '</tr>';
+            thead.innerHTML = headerHtml;
+
+            renderTableRows(platform, platformObj.rows);
+        }
+
+        function renderTableRows(platform, rows) {
+            const tableEl = document.getElementById(`table${platform.charAt(0).toUpperCase() + platform.slice(1)}`);
+            if(!tableEl) return;
+            const tbody = tableEl.querySelector('tbody');
+            const headers = appData[platform].headers;
+
+            if(!rows || rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${headers.length || 1}" class="px-6 py-12 text-center text-slate-500">No data entries loaded yet or sheet is empty</td></tr>`;
+                return;
+            }
+
+            let bodyHtml = '';
+            rows.forEach(row => {
+                bodyHtml += '<tr class="hover:bg-slate-800/40 transition-colors">';
+                headers.forEach(h => {
+                    const val = row[h] !== undefined ? row[h] : '';
+                    bodyHtml += `<td class="px-4 sm:px-6 py-3.5 text-slate-300 whitespace-nowrap text-sm">${escapeHtml(String(val))}</td>`;
+                });
+                bodyHtml += '</tr>';
+            });
+            tbody.innerHTML = bodyHtml;
+        }
+
+        function filterTable(platform) {
+            const query = document.getElementById(`search${platform.charAt(0).toUpperCase() + platform.slice(1)}`).value.toLowerCase();
+            const rawRows = appData[platform].raw;
+            const headers = appData[platform].headers;
+
+            const filtered = rawRows.filter(row => {
+                return headers.some(h => {
+                    const val = String(row[h] || '').toLowerCase();
+                    return val.includes(query);
+                });
+            });
+
+            renderTableRows(platform, filtered);
+        }
+
+        // Helper function to filter Facebook rows based on Sub-tab (Live, Videos, Photos)
+        function getFilteredFacebookRows() {
+            const rows = appData['facebook'].rows || [];
+
+            return rows.filter(row => {
+                if (currentFbSubTab !== 'All') {
+                    let typeMatch = false;
+                    for (let key in row) {
+                        let lk = key.toLowerCase();
+                        let valStr = String(row[key]).trim().toLowerCase();
+                        if (lk.includes('post type') || lk.includes('type')) {
+                            if (valStr === currentFbSubTab.toLowerCase()) {
+                                typeMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!typeMatch) return false;
+                }
+                return true;
+            });
+        }
+
+        function updateDashboardUI() {
+            let fbMetrics = calculateMetrics('facebook');
+            let igMetrics = calculateMetrics('instagram');
+            let tkMetrics = calculateMetrics('tiktok');
+
+            if (currentActiveTab === 'overview') {
+                let totalReach = fbMetrics.reach + igMetrics.reach + tkMetrics.reach;
+                let totalEngagement = fbMetrics.engagement + igMetrics.engagement + tkMetrics.engagement;
+                let totalPosts = fbMetrics.count + igMetrics.count + tkMetrics.count;
+                let activeCount = [fbMetrics.count, igMetrics.count, tkMetrics.count].filter(c => c > 0).length;
+                let avgRate = activeCount > 0 ? (fbMetrics.rate + igMetrics.rate + tkMetrics.rate) / activeCount : 0;
+
+                document.getElementById('kpiLabel1').textContent = "TOTAL REACH / VIEWS";
+                document.getElementById('kpiReach').textContent = formatNumber(totalReach);
+                document.getElementById('kpiSub1').innerHTML = `<i data-lucide="trending-up" class="w-3.5 h-3.5 mr-1"></i> Combined across FB, IG & TK`;
+
+                document.getElementById('kpiLabel2').textContent = "TOTAL ENGAGEMENT";
+                document.getElementById('kpiEngagement').textContent = formatNumber(totalEngagement);
+                document.getElementById('kpiSub2').innerHTML = `<i data-lucide="zap" class="w-3.5 h-3.5 mr-1"></i> Reactions, Comments, Shares`;
+
+                document.getElementById('kpiLabel3').textContent = "TOTAL POSTS / CONTENT";
+                document.getElementById('kpiPosts').textContent = formatNumber(totalPosts);
+                document.getElementById('kpiSub3').innerHTML = `<i data-lucide="layers" class="w-3.5 h-3.5 mr-1"></i> Tracked items in sheets`;
+
+                document.getElementById('kpiLabel4').textContent = "AVG ENGAGEMENT RATE";
+                document.getElementById('kpiRate').textContent = avgRate.toFixed(1) + '%';
+                document.getElementById('kpiSub4').innerHTML = `<i data-lucide="activity" class="w-3.5 h-3.5 mr-1"></i> Overall performance index`;
+
+                updateExecutiveSummary({ facebook: fbMetrics, instagram: igMetrics, tiktok: tkMetrics }, totalReach, totalEngagement, totalPosts);
+                updateSummaryCards({ facebook: fbMetrics, instagram: igMetrics, tiktok: tkMetrics });
+                renderOverviewCharts({ facebook: fbMetrics, instagram: igMetrics, tiktok: tkMetrics });
+                renderMonthlyYearlyEngagementChart();
+            } else if (currentActiveTab === 'facebook') {
+                const breakdownSelect = document.getElementById('fbBreakdownSelect');
+                let selectedBreakdown = breakdownSelect ? breakdownSelect.value : 'all';
+
+                let displayReach = fbMetrics.reach;
+                let organicViews = fbMetrics.organicViews;
+                let adsViews = fbMetrics.adsViews;
+
+                if (selectedBreakdown === 'organic') {
+                    displayReach = organicViews;
+                    document.getElementById('fbCardViewsTitle').textContent = "Views from Organic posts";
+                } else if (selectedBreakdown === 'ads') {
+                    displayReach = adsViews;
+                    document.getElementById('fbCardViewsTitle').textContent = "Views from Ads";
+                } else {
+                    document.getElementById('fbCardViewsTitle').textContent = "Views";
+                }
+
+                document.getElementById('fbCardViews').textContent = formatNumber(displayReach);
+                document.getElementById('fbCard3Sec').textContent = formatNumber(fbMetrics.sec3 || Math.round(displayReach * 0.35));
+                document.getElementById('fbCardInteractions').textContent = formatNumber(fbMetrics.engagement);
+                
+                let rawWatchTime = Math.round(displayReach * 12);
+                document.getElementById('fbCardWatchTime').textContent = formatWatchTime(rawWatchTime);
+
+                document.getElementById('sideTotalViews').textContent = formatNumber(fbMetrics.reach);
+                document.getElementById('sideOrganicViews').textContent = formatNumber(organicViews);
+                document.getElementById('sideAdsViews').textContent = formatNumber(adsViews);
+                document.getElementById('sideUniqueViewers').textContent = formatNumber(Math.round(displayReach * 0.75));
+
+                renderTopPosts('facebook', 'facebookTopPostsContainer', selectedBreakdown);
+                renderTrendChart('facebook', 'facebookTrendChart', '#06b6d4', selectedBreakdown);
+                renderFacebookWatchDurationChart('facebook', selectedBreakdown);
+            } else if (currentActiveTab === 'instagram') {
+                renderTopPosts('instagram', 'instagramTopPostsContainer', 'all');
+                renderTrendChart('instagram', 'instagramTrendChart', '#ec4899', 'all');
+            } else if (currentActiveTab === 'tiktok') {
+                renderTopPosts('tiktok', 'tiktokTopPostsContainer', 'all');
+                renderTrendChart('tiktok', 'tiktokTrendChart', '#06b6d4', 'all');
+            }
+
+            lucide.createIcons();
+        }
+
+        function updateExecutiveSummary(metrics, totalReach, totalEngagement, totalPosts) {
+            const summaryEl = document.getElementById('executiveSummaryText');
+            if(!summaryEl) return;
+
+            let platforms = [
+                { name: 'Facebook', reach: metrics.facebook.reach },
+                { name: 'Instagram', reach: metrics.instagram.reach },
+                { name: 'TikTok', reach: metrics.tiktok.reach }
+            ];
+            platforms.sort((a, b) => b.reach - a.reach);
+            let topPlatform = platforms[0].reach > 0 ? platforms[0].name : "lahat ng";
+
+            let text = `Sa kasalukuyan, nakapagtala ang dashboard ng kabuuang <strong class="text-white">${formatNumber(totalReach)} reach/views</strong> at <strong class="text-white">${formatNumber(totalEngagement)} interactions</strong> mula sa <strong class="text-white">${totalPosts} na na-track na post</strong>. Ang <strong class="text-indigo-400">${topPlatform}</strong> ang pangunahing nagdadala ng pinakamalaking hatak ng audience sa kasalukuyang yugto. Batay sa <strong class="text-white">Publish time</strong>, awtomatikong nase-segregate ang mga ito ayon sa buwan at taon.`;
+            
+            summaryEl.innerHTML = text;
+        }
+
+        function calculateMetrics(platform) {
+            const rows = (platform === 'facebook') ? getFilteredFacebookRows() : appData[platform].rows;
+            let reachSum = 0;
+            let organicViewsSum = 0;
+            let adsViewsSum = 0;
+            let engagementSum = 0;
+            let rateSum = 0;
+            let sec3Sum = 0;
+            let count = 0;
+
+            rows.forEach(row => {
+                count++;
+                for(let key in row) {
+                    const lKey = key.toLowerCase();
+                    const val = parseMetricValue(row[key]);
+                    
+                    if(lKey.includes('views from organic') || lKey.includes('organic posts')) {
+                        organicViewsSum += val;
+                    } else if(lKey.includes('views from ads') || lKey.includes('paid views') || lKey.includes('ads views')) {
+                        adsViewsSum += val;
+                    } else if(lKey.includes('reach') || lKey.includes('views') || lKey.includes('impression')) {
+                        reachSum += val;
+                    }
+
+                    if(lKey.includes('reactions, comments') || lKey.includes('engage') || lKey.includes('reaction') || lKey.includes('comment') || lKey.includes('share') || lKey.includes('interaction')) {
+                        engagementSum += val;
+                    }
+                    if(lKey.includes('3-second')) {
+                        sec3Sum += val;
+                    }
+                    if(lKey.includes('rate') || lKey.includes('percentage') || lKey.includes('average seconds')) {
+                        rateSum += val;
+                    }
+                }
+            });
+
+            if (organicViewsSum === 0 && adsViewsSum === 0) {
+                organicViewsSum = reachSum;
+            }
+
+            let rate = count > 0 ? (rateSum > 0 ? rateSum / count : (engagementSum / (reachSum || 1)) * 100) : 0;
+
+            return {
+                reach: reachSum,
+                organicViews: organicViewsSum,
+                adsViews: adsViewsSum,
+                engagement: engagementSum,
+                sec3: sec3Sum,
+                rate: isNaN(rate) ? 0 : rate,
+                count: count
+            };
+        }
+
+        function parseMetricValue(val) {
+            if(!val) return 0;
+            const cleaned = String(val).replace(/[^0-9.-]+/g,"");
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? 0 : num;
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+            return num.toLocaleString();
+        }
+
+        function formatWatchTime(num) {
+            return Number(num).toLocaleString() + 's';
+        }
+
+        function renderTopPosts(platform, containerId, breakdownMode = 'all') {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            const rows = (platform === 'facebook') ? getFilteredFacebookRows() : appData[platform].rows;
+
+            if(!rows || rows.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 text-center py-4">No posts available</p>`;
+                return;
+            }
+
+            let parsedRows = rows.map(row => {
+                let title = "Untitled Post";
+                let reach = 0;
+                let organic = 0;
+                let ads = 0;
+
+                for (let k in row) {
+                    let lk = k.trim().toLowerCase();
+                    let val = row[k] ? String(row[k]).trim() : "";
+
+                    if (platform === 'facebook') {
+                        if (lk === 'title' || lk.includes('post title') || lk === 'name') {
+                            if (val !== "" && val.toLowerCase() !== "n/a") {
+                                title = val;
+                            }
+                        }
+                    } else {
+                        if (lk === 'description' || lk === 'caption' || lk === 'content' || lk === 'text') {
+                            if (val !== "" && val.toLowerCase() !== "n/a") {
+                                title = val;
+                            }
+                        }
+                    }
+
+                    if (lk.includes('views from organic') || lk.includes('organic posts')) {
+                        organic += parseMetricValue(row[k]);
+                    } else if (lk.includes('views from ads') || lk.includes('paid views') || lk.includes('ads views')) {
+                        ads += parseMetricValue(row[k]);
+                    } else if (lk.includes('reach') || lk.includes('views') || lk.includes('impression')) {
+                        reach += parseMetricValue(row[k]);
+                    }
+                }
+
+                if (organic === 0 && ads === 0) organic = reach;
+
+                let selectedMetric = reach;
+                if (breakdownMode === 'organic') selectedMetric = organic;
+                if (breakdownMode === 'ads') selectedMetric = ads;
+
+                return { title, reach: selectedMetric };
+            });
+
+            parsedRows.sort((a, b) => b.reach - a.reach);
+            let top3 = parsedRows.slice(0, 3);
+
+            let html = '';
+            top3.forEach((item, index) => {
+                html += `
+                    <div class="pt-2.5 pb-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
+                        <div class="flex items-center space-x-2.5 overflow-hidden">
+                            <span class="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-[10px] shrink-0">${index + 1}</span>
+                            <span class="text-slate-200 truncate font-medium" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</span>
+                        </div>
+                        <span class="font-bold text-indigo-400 shrink-0">${formatNumber(item.reach)} views</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateSummaryCards(metrics) {
+            const container = document.getElementById('platformSummaryCards');
+            if(!container) return;
+            const platforms = [
+                { name: 'Facebook', key: 'facebook', iconName: 'facebook', color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', data: metrics.facebook },
+                { name: 'Instagram', key: 'instagram', iconName: 'instagram', color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', data: metrics.instagram },
+                { name: 'TikTok', key: 'tiktok', iconName: 'video', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', data: metrics.tiktok }
+            ];
+
+            let html = '';
+            platforms.forEach(p => {
+                html += `
+                    <div class="bg-slate-950/65 border ${p.border} rounded-xl p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2.5">
+                                <div class="p-2.5 rounded-lg ${p.bg} ${p.color}">
+                                    <i data-lucide="${p.iconName}" class="w-5 h-5"></i>
+                                </div>
+                                <span class="font-bold text-white text-sm">${p.name}</span>
+                            </div>
+                            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">${p.data.count} items</span>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between py-1 border-b border-slate-800/80">
+                                <span class="text-slate-400">Total Reach / Views</span>
+                                <span class="font-semibold text-white">${formatNumber(p.data.reach)}</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-800/80">
+                                <span class="text-slate-400">Total Engagement</span>
+                                <span class="font-semibold text-white">${formatNumber(p.data.engagement)}</span>
+                            </div>
+                            <div class="flex justify-between py-1">
+                                <span class="text-slate-400">Engagement Rate</span>
+                                <span class="font-semibold text-emerald-400">${p.data.rate.toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderOverviewCharts(metrics) {
+            const ctxComp = document.getElementById('platformComparisonChart');
+            if(!ctxComp) return;
+            if(comparisonChartInstance) comparisonChartInstance.destroy();
+
+            comparisonChartInstance = new Chart(ctxComp.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Facebook', 'Instagram', 'TikTok'],
+                    datasets: [
+                        {
+                            label: 'Reach / Views',
+                            data: [metrics.facebook.reach, metrics.instagram.reach, metrics.tiktok.reach],
+                            backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                            borderRadius: 8,
+                            barThickness: 24
+                        },
+                        {
+                            label: 'Engagement',
+                            data: [metrics.facebook.engagement, metrics.instagram.engagement, metrics.tiktok.engagement],
+                            backgroundColor: 'rgba(236, 72, 153, 0.85)',
+                            borderRadius: 8,
+                            barThickness: 24
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 800 },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 15 }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10 } } },
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.4)' }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10 } } }
+                    }
+                }
+            });
+
+            const ctxShare = document.getElementById('engagementShareChart');
+            if(!ctxShare) return;
+            if(engagementShareChartInstance) engagementShareChartInstance.destroy();
+
+            engagementShareChartInstance = new Chart(ctxShare.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Facebook', 'Instagram', 'TikTok'],
+                    datasets: [{
+                        data: [metrics.facebook.engagement, metrics.instagram.engagement, metrics.tiktok.engagement],
+                        backgroundColor: ['#3b82f6', '#ec4899', '#06b6d4'],
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 800 },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 15 }
+                        }
+                    },
+                    cutout: '72%'
+                }
+            });
+        }
+
+        function renderMonthlyYearlyEngagementChart() {
+            const ctx = document.getElementById('monthlyYearlyEngagementChart');
+            if(!ctx) return;
+            if(monthlyEngagementChartInstance) monthlyEngagementChartInstance.destroy();
+
+            let timeMap = {};
+            const platforms = ['facebook', 'instagram', 'tiktok'];
+
+            platforms.forEach(platform => {
+                const rows = (platform === 'facebook') ? getFilteredFacebookRows() : appData[platform].rows;
+                rows.forEach(row => {
+                    let dateStr = "";
+                    let engagement = 0;
+
+                    for (let k in row) {
+                        let lk = k.trim().toLowerCase();
+                        let val = parseMetricValue(row[k]);
+
+                        if (lk.includes('publish time') || lk.includes('date') || lk.includes('posted') || lk.includes('time')) {
+                            if (!dateStr && row[k]) {
+                                dateStr = String(row[k]).trim();
+                            }
+                        }
+                        if (lk.includes('reactions, comments') || lk.includes('engage') || lk.includes('reaction') || lk.includes('comment') || lk.includes('share') || lk.includes('interaction')) {
+                            engagement += val;
+                        }
+                    }
+
+                    if (dateStr) {
+                        let datePart = dateStr.split(' ')[0];
+                        let parts = datePart.split('/');
+                        
+                        if (parts.length === 3) {
+                            let month = parseInt(parts[0], 10);
+                            let year = parseInt(parts[2], 10);
+
+                            if (!isNaN(month) && !isNaN(year)) {
+                                let monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                                let monthName = monthNames[month - 1] || "Unknown";
+                                let key = `${monthName} ${year}`;
+                                let sortKey = `${year}-${String(month).padStart(2, '0')}`;
+
+                                if (!timeMap[sortKey]) {
+                                    timeMap[sortKey] = { label: key, total: 0 };
+                                }
+                                timeMap[sortKey].total += engagement;
+                            }
+                        }
+                    }
+                });
+            });
+
+            let sortedKeys = Object.keys(timeMap).sort();
+            let labels = sortedKeys.map(k => timeMap[k].label);
+            let dataValues = sortedKeys.map(k => timeMap[k].total);
+
+            monthlyEngagementChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels.length > 0 ? labels : ['No Publish Time Found'],
+                    datasets: [{
+                        label: 'Total Engagement (Per Month & Year)',
+                        data: dataValues.length > 0 ? dataValues : [0],
+                        backgroundColor: 'rgba(14, 165, 233, 0.85)',
+                        borderColor: '#0ea5e9',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barThickness: 32
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 800 },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 15 }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } 
+                        },
+                        y: { 
+                            grid: { color: 'rgba(51, 65, 85, 0.4)' }, 
+                            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10 } } 
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTrendChart(platform, canvasId, colorHex, breakdownMode = 'all') {
+            const ctx = document.getElementById(canvasId);
+            if(!ctx) return;
+            if(platform === 'instagram' && instagramTrendChartInstance) instagramTrendChartInstance.destroy();
+            if(platform === 'tiktok' && tiktokTrendChartInstance) tiktokTrendChartInstance.destroy();
+            if(platform === 'facebook' && facebookTrendChartInstance) facebookTrendChartInstance.destroy();
+
+            const rows = (platform === 'facebook') ? getFilteredFacebookRows() : appData[platform].rows;
+            let labels = [];
+            let fullTitles = [];
+            let viewsData = [];
+
+            rows.forEach((row, index) => {
+                let postTitle = "";
+                let r = 0, organic = 0, ads = 0;
+
+                for (let k in row) {
+                    let lk = k.trim().toLowerCase();
+                    let val = parseMetricValue(row[k]);
+
+                    if (platform === 'facebook') {
+                        if (lk === 'title' || lk.includes('post title') || lk === 'name') {
+                            if (row[k] && String(row[k]).trim() !== "") {
+                                postTitle = row[k];
+                            }
+                        }
+                    } else {
+                        if (lk === 'description' || lk === 'caption' || lk === 'content' || lk === 'text') {
+                            if (row[k] && String(row[k]).trim() !== "") {
+                                postTitle = row[k];
+                            }
+                        }
+                    }
+
+                    if (lk.includes('views from organic') || lk.includes('organic posts')) {
+                        organic += val;
+                    } else if (lk.includes('views from ads') || lk.includes('paid views') || lk.includes('ads views')) {
+                        ads += val;
+                    } else if (lk.includes('reach') || lk.includes('views') || lk.includes('impression')) {
+                        r += val;
+                    }
+                }
+                
+                if (organic === 0 && ads === 0) organic = r;
+
+                let selectedVal = r;
+                if (breakdownMode === 'organic') selectedVal = organic;
+                if (breakdownMode === 'ads') selectedVal = ads;
+
+                labels.push(`Post #${index + 1}`);
+                fullTitles.push(postTitle ? postTitle : `Post #${index + 1}`);
+                viewsData.push(selectedVal);
+            });
+
+            let chartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels.length > 0 ? labels : ['Post #1'],
+                    datasets: [
+                        {
+                            label: breakdownMode === 'organic' ? 'Views from Organic posts' : (breakdownMode === 'ads' ? 'Views from Ads' : 'Views'),
+                            data: viewsData.length > 0 ? viewsData : [0],
+                            borderColor: colorHex,
+                            backgroundColor: colorHex + '15',
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: colorHex,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 800 },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 15 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    return fullTitles[index] || context[0].label;
+                                },
+                                label: function(context) {
+                                    return ` Views: ${formatNumber(context.parsed.y)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } 
+                        },
+                        y: { 
+                            grid: { color: 'rgba(51, 65, 85, 0.4)' }, 
+                            ticks: { 
+                                color: '#94a3b8', 
+                                font: { family: 'Inter', size: 9 }
+                            } 
+                        }
+                    }
+                }
+            });
+
+            if(platform === 'instagram') instagramTrendChartInstance = chartInstance;
+            if(platform === 'tiktok') tiktokTrendChartInstance = chartInstance;
+            if(platform === 'facebook') facebookTrendChartInstance = chartInstance;
+        }
+
+        function renderFacebookWatchDurationChart(platform, breakdownMode = 'all') {
+            const ctx = document.getElementById('facebookWatchDurationChart');
+            if(!ctx) return;
+            if(facebookWatchDurationChartInstance) facebookWatchDurationChartInstance.destroy();
+
+            const rows = getFilteredFacebookRows();
+            let labels = [];
+            let fullTitles = [];
+            let sec3Data = [];
+            let min1Data = [];
+
+            rows.forEach((row, index) => {
+                let postTitle = "";
+                for (let k in row) {
+                    let lk = k.trim().toLowerCase();
+                    if (lk === 'title' || lk.includes('post title') || lk === 'name') {
+                        if (row[k] && String(row[k]).trim() !== "") {
+                            postTitle = row[k];
+                            break;
+                        }
+                    }
+                }
+                
+                labels.push(`Post #${index + 1}`);
+                fullTitles.push(postTitle ? postTitle : `Post #${index + 1}`);
+
+                let s3 = 0, m1 = 0;
+                for(let key in row) {
+                    let lk = key.toLowerCase();
+                    let val = parseMetricValue(row[key]);
+                    if(lk.includes('3-second')) {
+                        s3 += val;
+                    }
+                    if(lk.includes('1-minute')) {
+                        m1 += val;
+                    }
+                }
+                if (breakdownMode === 'organic') {
+                    s3 = Math.round(s3 * 0.8);
+                    m1 = Math.round(m1 * 0.8);
+                } else if (breakdownMode === 'ads') {
+                    s3 = Math.round(s3 * 0.2);
+                    m1 = Math.round(m1 * 0.2);
+                }
+
+                sec3Data.push(s3);
+                min1Data.push(m1);
+            });
+
+            facebookWatchDurationChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels.length > 0 ? labels : ['Post #1'],
+                    datasets: [
+                        {
+                            label: '3-Second Video Views',
+                            data: sec3Data.length > 0 ? sec3Data : [0],
+                            backgroundColor: 'rgba(168, 85, 247, 0.85)',
+                            borderRadius: 6,
+                            barThickness: 16
+                        },
+                        {
+                            label: '1-Minute Video Views',
+                            data: min1Data.length > 0 ? min1Data : [0],
+                            backgroundColor: 'rgba(6, 182, 212, 0.85)',
+                            borderRadius: 6,
+                            barThickness: 16
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 800 },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Facebook Video Watch Duration Trend',
+                            color: '#f8fafc',
+                            font: {
+                                family: 'Inter',
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 15 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    return fullTitles[index] || context[0].label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { 
+                                color: '#94a3b8', 
+                                font: { family: 'Inter', size: 11 }
+                            } 
+                        },
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.4)' }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

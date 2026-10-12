@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Portal - Login</title>
+    <style>
+        :root {
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --border-color: #e2e8f0;
+            --radius-sm: 6px;
+            --radius-lg: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        h2 { color: var(--text-main); font-weight: 700; margin-top: 0; margin-bottom: 6px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+        
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-sizing: border-box;
+            font-size: 13px;
+            outline: none;
+            background: #fff;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+        button {
+            padding: 10px;
+            background-color: var(--primary);
+            border: none;
+            color: white;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            margin-top: 6px;
+        }
+        button:hover { background-color: var(--primary-hover); }
+        .error-msg { color: #dc2626; font-size: 12px; text-align: center; margin-top: 8px; font-weight: 500; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            display: none;
+        }
+    </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="aura-theme">
+/* ==========================================================
+   AURA DARK THEME — presentation layer only (no logic changes)
+   Inspired by the "Aura Store" dashboard reference.
+   ========================================================== */
+:root {
+    color-scheme: dark;
+
+    --aura-bg: #090e1c;
+    --aura-sidebar: #0b1121;
+    --aura-card: #101828;
+    --aura-card-2: #0c1322;
+    --aura-line: rgba(148, 163, 184, 0.13);
+    --aura-line-strong: rgba(148, 163, 184, 0.24);
+    --aura-text: #e6ebf5;
+    --aura-soft: #c4cee0;
+    --aura-muted: #8795b1;
+    --aura-blue: #3b82f6;
+    --aura-blue-soft: #8ab8ff;
+    --aura-violet: #8b5cf6;
+    --aura-orange: #f97316;
+    --aura-green: #10b981;
+    --aura-red: #ef4444;
+
+    /* Re-map the variables already used by the existing pages */
+    --tarkie-bg: var(--aura-bg);
+    --tarkie-sidebar-bg: var(--aura-sidebar);
+    --tarkie-sidebar-border: var(--aura-line);
+    --tarkie-sidebar-text: #9aa8c4;
+    --tarkie-sidebar-hover: rgba(148, 163, 184, 0.08);
+    --tarkie-sidebar-active-bg: rgba(59, 130, 246, 0.16);
+    --tarkie-sidebar-active-text: #8ab8ff;
+    --card-bg: var(--aura-card);
+    --text-main: var(--aura-text);
+    --text-muted: var(--aura-muted);
+    --primary: #3b82f6;
+    --primary-hover: #2f6fe0;
+    --success: #10b981;
+    --danger: #ef4444;
+    --border-color: var(--aura-line);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+}
+
+html { scroll-behavior: smooth; }
+
+body,
+body.bg-gray-50 {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    background:
+        radial-gradient(1100px 560px at 85% -10%, rgba(59, 130, 246, 0.14), transparent 60%),
+        radial-gradient(900px 520px at -10% 105%, rgba(139, 92, 246, 0.12), transparent 60%),
+        var(--aura-bg) !important;
+    background-attachment: fixed !important;
+    color: var(--aura-text) !important;
+}
+
+::selection { background: rgba(59, 130, 246, 0.45); color: #fff; }
+
+/* Thin dark scrollbars */
+* { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.28) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 8px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.4); }
+*::-webkit-scrollbar-track { background: transparent; }
+
+h2, h3, h4 { color: var(--aura-text); letter-spacing: -0.01em; }
+
+/* ---------- SIDEBAR ---------- */
+.sidebar {
+    background: linear-gradient(180deg, #0d1426 0%, var(--aura-sidebar) 100%) !important;
+    border-right: 1px solid var(--aura-line) !important;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.25);
+}
+.sidebar-header { border-bottom: 1px solid var(--aura-line) !important; padding: 18px 20px !important; }
+.sidebar-brand {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45);
+    letter-spacing: 0.02em;
+}
+.sidebar-brand-text { color: #fff !important; font-size: 16px !important; letter-spacing: -0.01em; }
+.sidebar-category-title { color: #5d6b88 !important; letter-spacing: 0.1em !important; }
+
+.sidebar-menu li,
+.main-menu-item { transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease; }
+.sidebar-menu li:hover,
+.main-menu-item:hover { background: rgba(148, 163, 184, 0.08) !important; color: #fff !important; }
+.sidebar-menu li.active,
+.main-menu-item.active,
+.has-sub-menu.active > .main-menu-item {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.22), rgba(59, 130, 246, 0.06)) !important;
+    color: #9cc3ff !important;
+    box-shadow: inset 3px 0 0 var(--aura-blue);
+}
+.has-sub-menu.active, .sidebar-menu li.has-sub-menu.active { background: transparent !important; box-shadow: none !important; }
+
+.sub-menu { background: rgba(255, 255, 255, 0.02) !important; border-radius: 10px !important; margin: 2px 0 4px !important; }
+.sub-menu li { color: #8e9cb8 !important; }
+.sub-menu li:hover { background: rgba(148, 163, 184, 0.08) !important; color: #9cc3ff !important; }
+.sub-menu li.active { background: rgba(59, 130, 246, 0.18) !important; color: #9cc3ff !important; box-shadow: none !important; }
+
+/* ---------- HEADER BAR ---------- */
+.header-bar {
+    background: rgba(16, 24, 40, 0.72) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-color: var(--aura-line) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22) !important;
+}
+.header-bar h3 { font-size: 17px !important; color: #fff; }
+
+/* ---------- CARDS / SECTIONS ---------- */
+.content-section.active,
+.section-container,
+.login-card {
+    animation: auraFade 0.28s ease both;
+}
+@keyframes auraFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.content-section,
+.section-container {
+    background: linear-gradient(180deg, rgba(20, 30, 50, 0.85), rgba(14, 22, 38, 0.9)) !important;
+    border: 1px solid var(--aura-line) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.28) !important;
+}
+#dailyTaskTab.content-section,
+#socmedTab.content-section,
+#approvalTab.content-section,
+#overviewTab.content-section { background: transparent !important; border: none !important; box-shadow: none !important; }
+
+.announcement-box,
+.filter-container,
+.computation-notes-box {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--aura-line) !important;
+    border-radius: 12px !important;
+}
+.computation-notes-box { border-left: 4px solid var(--aura-blue) !important; color: var(--aura-soft) !important; }
+.computation-notes-box summary { color: #8ab8ff !important; }
+
+/* ---------- KPI / SUMMARY CARDS (gradient + sparkline) ---------- */
+.summary-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 14px !important;
+    padding: 18px !important;
+    border: 1px solid rgba(59, 130, 246, 0.32) !important;
+    background:
+        radial-gradient(260px 120px at 100% 0%, rgba(59, 130, 246, 0.30), transparent 70%),
+        linear-gradient(145deg, rgba(37, 99, 235, 0.22), rgba(12, 19, 34, 0.95)) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.summary-card:hover { transform: translateY(-3px); box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4); }
+.summary-grid > .summary-card:nth-child(4n+2) {
+    border-color: rgba(249, 115, 22, 0.34) !important;
+    background:
+        radial-gradient(260px 120px at 100% 0%, rgba(249, 115, 22, 0.28), transparent 70%),
+        linear-gradient(145deg, rgba(194, 65, 12, 0.24), rgba(12, 19, 34, 0.95)) !important;
+}
+.summary-grid > .summary-card:nth-child(4n+3) {
+    border-color: rgba(139, 92, 246, 0.36) !important;
+    background:
+        radial-gradient(260px 120px at 100% 0%, rgba(139, 92, 246, 0.30), transparent 70%),
+        linear-gradient(145deg, rgba(109, 40, 217, 0.24), rgba(12, 19, 34, 0.95)) !important;
+}
+.summary-grid > .summary-card:nth-child(4n+4) {
+    border-color: rgba(16, 185, 129, 0.34) !important;
+    background:
+        radial-gradient(260px 120px at 100% 0%, rgba(16, 185, 129, 0.26), transparent 70%),
+        linear-gradient(145deg, rgba(4, 120, 87, 0.26), rgba(12, 19, 34, 0.95)) !important;
+}
+.summary-card h4 { color: var(--aura-soft) !important; opacity: 0.85; }
+.summary-card .val { color: #fff !important; font-size: 26px !important; letter-spacing: -0.02em; }
+.summary-card p { color: var(--aura-muted) !important; }
+.summary-card p.val { color: #fff !important; }
+
+/* ---------- TABLES ---------- */
+.task-table-container {
+    background: rgba(8, 13, 25, 0.55) !important;
+    border: 1px solid var(--aura-line) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+}
+.task-table { background: transparent !important; }
+.task-table th,
+.task-table td {
+    border-bottom: 1px solid var(--aura-line) !important;
+    border-right: none !important;
+    color: var(--aura-text) !important;
+}
+.task-table th {
+    background: rgba(255, 255, 255, 0.035) !important;
+    color: var(--aura-muted) !important;
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700 !important;
+}
+.task-table tbody tr { transition: background 0.15s ease; }
+.task-table tbody tr:hover { background: rgba(59, 130, 246, 0.07) !important; }
+.task-table tbody tr:last-child td { border-bottom: none !important; }
+.task-table td[colspan] { color: var(--aura-muted) !important; }
+
+/* ---------- FORM CONTROLS ---------- */
+input, select, textarea,
+input[type="text"], input[type="date"], input[type="month"], input[type="password"],
+.announcement-input, .announcement-textarea, .filter-input, .remarks-input {
+    background: rgba(8, 13, 25, 0.75) !important;
+    color: var(--aura-text) !important;
+    border: 1px solid var(--aura-line-strong) !important;
+    border-radius: 10px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+input::placeholder, textarea::placeholder { color: #5d6b88 !important; }
+input:focus, select:focus, textarea:focus {
+    border-color: var(--aura-blue) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
+    background: rgba(8, 13, 25, 0.95) !important;
+}
+select option { background: #0f1729; color: var(--aura-text); }
+input[type="file"]::file-selector-button {
+    background: rgba(59, 130, 246, 0.18);
+    color: #9cc3ff;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 8px;
+    padding: 5px 12px;
+    margin-right: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 40px #0b1222 inset !important;
+    -webkit-text-fill-color: var(--aura-text) !important;
+}
+label { color: var(--aura-muted) !important; }
+
+/* ---------- BUTTONS ---------- */
+button { transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, filter 0.2s ease; }
+button:not(.logout-btn):not(#notifBtn):hover { transform: translateY(-1px); filter: brightness(1.08); }
+button:active { transform: translateY(0); }
+button[style*="background: var(--primary)"],
+button[style*="background-color: var(--primary)"],
+#loginBtn, #changeBtn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.38);
+}
+button[style*="background-color: var(--success)"] {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+}
+.btn-approve { background: linear-gradient(135deg, #10b981, #059669) !important; }
+.btn-reject { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+.logout-btn {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #fca5a5 !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+.logout-btn:hover { background: #ef4444 !important; color: #fff !important; }
+button[style*="background: #f1f5f9"] {
+    background: rgba(148, 163, 184, 0.1) !important;
+    color: var(--aura-soft) !important;
+    border: 1px solid var(--aura-line-strong) !important;
+}
+
+/* ---------- BADGES / CHIPS ---------- */
+.badge-pending { background: rgba(245, 158, 11, 0.16) !important; color: #fbbf24 !important; border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-approved { background: rgba(16, 185, 129, 0.16) !important; color: #34d399 !important; border: 1px solid rgba(16, 185, 129, 0.3); }
+.badge-rejected { background: rgba(239, 68, 68, 0.16) !important; color: #f87171 !important; border: 1px solid rgba(239, 68, 68, 0.3); }
+.badge-pending, .badge-approved, .badge-rejected { border-radius: 999px !important; padding: 3px 10px !important; }
+.sync-status {
+    background: rgba(16, 185, 129, 0.12) !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    color: #34d399 !important;
+    border-radius: 999px !important;
+    padding: 3px 12px !important;
+}
+.file-link { color: #8ab8ff !important; }
+
+/* ---------- INLINE-STYLE OVERRIDES (light colours baked into markup/JS) ---------- */
+[style*="background: #f8fafc"], [style*="background:#f8fafc"] {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: var(--aura-line) !important;
+}
+[style*="background: #eff6ff"] {
+    background: rgba(59, 130, 246, 0.14) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+[style*="background: #e0f2fe"] { background: rgba(14, 165, 233, 0.16) !important; }
+[style*="color: #0284c7"] { color: #7dd3fc !important; }
+[style*="color: #2563eb"] { color: #8ab8ff !important; }
+[style*="color: #1e40af"] { color: #9cc3ff !important; }
+[style*="color: #1e3a8a"] { color: #b6d2ff !important; }
+[style*="color: #dc2626"], .error-msg { color: #f87171 !important; }
+[style*="border: 1px solid #bfdbfe"] { border-color: rgba(59, 130, 246, 0.3) !important; }
+[style*="background: #fff"], [style*="background:#fff"] { background: rgba(8, 13, 25, 0.75) !important; }
+
+/* ---------- TAILWIND CLASS OVERRIDES (ST.html notification bell, trackers, badges) ---------- */
+body .bg-white { background: rgba(20, 30, 50, 0.9) !important; }
+body .bg-gray-50 { background: rgba(255, 255, 255, 0.04) !important; }
+body.bg-gray-50 { background: var(--aura-bg) !important; }
+body .hover\:bg-gray-50:hover { background: rgba(255, 255, 255, 0.05) !important; }
+body .hover\:bg-gray-100:hover { background: rgba(255, 255, 255, 0.08) !important; }
+body .border-gray-100, body .border-gray-200 { border-color: var(--aura-line) !important; }
+body .divide-gray-100 > * + * { border-color: var(--aura-line) !important; }
+body .text-gray-900, body .text-gray-800 { color: var(--aura-text) !important; }
+body .text-gray-700, body .text-gray-600 { color: var(--aura-soft) !important; }
+body .text-gray-500, body .text-gray-400 { color: var(--aura-muted) !important; }
+body .text-blue-600 { color: #8ab8ff !important; }
+body .text-blue-700 { color: #9cc3ff !important; }
+body .text-green-600 { color: #34d399 !important; }
+body .bg-blue-50\/50 { background: rgba(59, 130, 246, 0.07) !important; }
+body .bg-blue-50\/40 { background: rgba(59, 130, 246, 0.12) !important; }
+body .bg-blue-50 { background: rgba(59, 130, 246, 0.16) !important; }
+body .border-blue-100 { border-color: rgba(59, 130, 246, 0.24) !important; }
+body .border-blue-200 { border-color: rgba(59, 130, 246, 0.36) !important; }
+body .bg-blue-100 { background: rgba(59, 130, 246, 0.2) !important; }
+body .text-blue-800 { color: #9cc3ff !important; }
+body .bg-red-100 { background: rgba(239, 68, 68, 0.2) !important; }
+body .text-red-800 { color: #fca5a5 !important; }
+body .bg-yellow-100, body .bg-amber-100 { background: rgba(245, 158, 11, 0.18) !important; }
+body .text-yellow-800, body .text-amber-800 { color: #fbbf24 !important; }
+body .bg-emerald-100 { background: rgba(16, 185, 129, 0.18) !important; }
+body .text-emerald-800 { color: #34d399 !important; }
+body .bg-orange-100 { background: rgba(249, 115, 22, 0.18) !important; }
+body .text-orange-700 { color: #fdba74 !important; }
+body #notifBtn { border-color: var(--aura-line-strong) !important; }
+body #notifDropdown {
+    background: rgba(14, 22, 38, 0.97) !important;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
+    border: 1px solid var(--aura-line-strong) !important;
+    border-radius: 14px !important;
+}
+
+/* ---------- GANTT (ST.html) ---------- */
+.gantt-calendar-container { background: rgba(8, 13, 25, 0.55) !important; border-color: var(--aura-line) !important; border-radius: 12px !important; box-shadow: none !important; }
+.gantt-cal-table th { background: rgba(255, 255, 255, 0.035) !important; color: var(--aura-muted) !important; border-bottom-color: var(--aura-line) !important; }
+.gantt-cal-table td { color: var(--aura-text); }
+.gantt-task-name-cell { background: #0d1527 !important; color: var(--aura-text) !important; border-right: 2px solid var(--aura-line-strong) !important; }
+.gantt-bar-cell { background: transparent !important; }
+.gantt-bar { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important; }
+
+/* ---------- LOGIN PAGE (index.html) ---------- */
+.login-card {
+    background: linear-gradient(180deg, rgba(22, 33, 56, 0.88), rgba(13, 21, 38, 0.92)) !important;
+    border: 1px solid var(--aura-line-strong) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.02) inset !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    padding: 38px !important;
+}
+.login-card h2 { color: #fff !important; font-size: 24px; letter-spacing: -0.02em; }
+.login-card h2::before {
+    content: "TP";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 18px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    box-shadow: 0 10px 28px rgba(59, 130, 246, 0.5);
+}
+.login-card input { padding: 12px 14px !important; font-size: 14px !important; }
+.login-card button { padding: 12px !important; font-size: 14px !important; border-radius: 10px !important; margin-top: 10px !important; }
+.modal-overlay { background: rgba(5, 8, 18, 0.72) !important; backdrop-filter: blur(8px) !important; }
+
+/* Gantt: continuous bars, full-width table */
+.gantt-cal-table { width: 100% !important; }
+.gantt-cal-table td, .gantt-cal-table th { padding-left: 0 !important; padding-right: 0 !important; }
+.gantt-task-name-cell { padding-left: 14px !important; padding-right: 10px !important; }
+.gantt-bar-cell { padding: 5px 0 !important; border-left: 1px solid rgba(148,163,184,0.06) !important; }
+.gantt-bar { border-radius: 4px !important; }
+
+</style>
+</head>
+<body>
+
+    <!-- Login Container -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-card">
+            <h2>Training Portal</h2>
+            <p style="color:var(--text-muted); font-size:12px; margin-bottom:20px;">Please log in using your account.</p>
+            <div class="form-group">
+                <label>User (NS + User ID)</label>
+                <input type="text" id="userInput" placeholder="E.g., email@company.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="passwordInput" placeholder="••••••••">
+            </div>
+            <button onclick="handleLogin()" id="loginBtn">Login</button>
+            <div class="error-msg" id="errorMsg"></div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div class="modal-overlay" id="changePassModal">
+        <div class="login-card" style="display: block;">
+            <h2>Change Password</h2>
+            <p style="color:var(--text-muted); font-size:12px; margin-bottom:16px;">You are required to change your temporary password.</p>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newPasswordInput" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirmPasswordInput" placeholder="••••••••">
+            </div>
+            <button onclick="submitNewPassword()" id="changeBtn">Save Password</button>
+            <div class="error-msg" id="modalErrorMsg"></div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyRvkqZdaAAwWtl59hu4qOvQ-6u-QIgVRMM47h_HJ5wLVPIezlFfoI7Kcoung-tWxg5/exec";
+        var loggedInUser = "";
+
+        window.onload = function() {
+            let savedUser = localStorage.getItem('portal_user');
+            if (savedUser) {
+                let savedRole = (localStorage.getItem('portal_role') || "").toLowerCase();
+                redirectUserByRole(savedRole);
+            }
+
+            document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+            document.getElementById('userInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+        };
+
+        async function handleLogin() {
+            var userInput = document.getElementById('userInput').value.trim();
+            var passwordInput = document.getElementById('passwordInput').value.trim();
+            var btn = document.getElementById('loginBtn');
+            var errorMsg = document.getElementById('errorMsg');
+
+            if(!userInput || !passwordInput) { 
+                errorMsg.innerText = "Please fill in all fields."; 
+                return; 
+            }
+            
+            errorMsg.innerText = "";
+            btn.innerText = "Verifying...";     
+            btn.disabled = true;
+
+            try {
+                let url = `${WEB_APP_URL}?action=login&user=${encodeURIComponent(userInput)}&pass=${encodeURIComponent(passwordInput)}`;
+                let response = await fetch(url);
+                let result = await response.json();
+                
+                btn.innerText = "Login"; 
+                btn.disabled = false;
+
+                if (result.success) {
+                    loggedInUser = userInput;
+
+                    if (result.mustChangePassword) {
+                        document.getElementById('loginContainer').style.display = 'none';
+                        document.getElementById('changePassModal').style.display = 'flex';
+                        return;
+                    }
+                    
+                    let finalName = result.user;
+                    if (finalName && finalName.includes('@')) {
+                        let parts = finalName.split('@')[0];
+                        finalName = parts.charAt(0).toUpperCase() + parts.slice(1);
+                    }
+                    
+                    let roleStr = result.role ? result.role.toLowerCase().trim() : "";
+
+                    // Security: Only those with a true admin role are allowed into the Admin page
+                    if (roleStr === 'admin' || roleStr.includes('admin')) {
+                        roleStr = 'admin';
+                    } else if (userInput.toLowerCase() === 'admin' && roleStr === '') {
+                        roleStr = 'admin';
+                    }
+
+                    localStorage.setItem('portal_user', userInput);
+                    localStorage.setItem('portal_name', finalName); 
+                    localStorage.setItem('portal_role', roleStr);
+
+                    redirectUserByRole(roleStr);
+                } else { 
+                    errorMsg.innerText = result.message || "Login error encountered."; 
+                }
+            } catch (err) {
+                btn.innerText = "Login"; 
+                btn.disabled = false;
+                errorMsg.innerText = "A connection error occurred.";
+            }
+        }
+
+        function redirectUserByRole(position) {
+            console.log("Redirecting for position:", position);
+            
+            if (position.includes('sepco')) {
+                window.location.href = "SEPCO.html";
+            } else if (position === 'admin') {
+                window.location.href = "Admin.html";
+            } else if (position.includes('rto') || position.includes('regional training officer')) {
+                window.location.href = "RTO.html";
+            } else if (position.includes('sft') || position.includes('specialized field trainer')) {
+                window.location.href = "SFT.html";
+            } else if (position === 'st' || position.includes('specialized trainer')) {
+                window.location.href = "ST.html";
+            } else {
+                // Safe default fallback for regular accounts without an exact match
+                window.location.href = "ST.html"; 
+            }
+        }
+
+        async function submitNewPassword() {
+            var newPass = document.getElementById('newPasswordInput').value.trim();
+            var confirmPass = document.getElementById('confirmPasswordInput').value.trim();
+            var modalError = document.getElementById('modalErrorMsg');
+            
+            if (!newPass || !confirmPass) { modalError.innerText = "Please fill in all fields."; return; }
+            if (newPass.length < 6) { modalError.innerText = "Password must be at least 6 characters long."; return; }
+            if (newPass !== confirmPass) { modalError.innerText = "Passwords do not match."; return; }
+
+            let changeBtn = document.getElementById('changeBtn');
+            changeBtn.innerText = "Saving..."; changeBtn.disabled = true;
+
+            try {
+                let url = `${WEB_APP_URL}?action=changePassword&user=${encodeURIComponent(loggedInUser)}&newPass=${encodeURIComponent(newPass)}`;
+                let response = await fetch(url);
+                let result = await response.json();
+                
+                if (result.success) {
+                    alert("Password updated successfully! Please log in again.");
+                    localStorage.clear();
+                    location.reload();
+                } else {
+                    modalError.innerText = result.message || "Failed to update password.";
+                    changeBtn.innerText = "Save Password"; changeBtn.disabled = false;
+                }
+            } catch (err) {
+                modalError.innerText = "Server connection error.";
+                changeBtn.innerText = "Save Password"; changeBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

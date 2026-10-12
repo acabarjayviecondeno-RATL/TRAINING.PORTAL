@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Portal - SFT Dashboard</title>
+    <!-- SheetJS for Excel download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Chart.js for SocMed Analytics Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse for CSV parsing from Google Sheets -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --tarkie-bg: #f4f6f9;
+            --tarkie-sidebar-bg: #ffffff;
+            --tarkie-sidebar-border: #e2e8f0;
+            --tarkie-sidebar-text: #475569;
+            --tarkie-sidebar-hover: #f1f5f9;
+            --tarkie-sidebar-active-bg: #eff6ff;
+            --tarkie-sidebar-active-text: #2563eb;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #059669;
+            --border-color: #e2e8f0;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tarkie-bg);
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h2, h3, h4 { color: var(--text-main); font-weight: 700; }
+        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-sizing: border-box;
+            font-size: 13px;
+            outline: none;
+            background: #fff;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+        button {
+            padding: 9px 16px;
+            background-color: var(--primary);
+            border: none;
+            color: white;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+            z-index: 10;
+        }
+        button:hover { background-color: var(--primary-hover); }
+
+        .dashboard-layout {
+            display: block;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--tarkie-sidebar-bg);
+            border-right: 1px solid var(--tarkie-sidebar-border);
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--tarkie-sidebar-border);
+        }
+
+        .sidebar-brand-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .sidebar-brand {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: #ffffff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .sidebar-brand-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .sidebar-menu-scroll {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 12px 10px;
+        }
+
+        .sidebar-category-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 8px 10px 4px 10px;
+            margin-top: 8px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-menu li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--tarkie-sidebar-text);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar-menu li:hover {
+            background: var(--tarkie-sidebar-hover);
+            color: var(--text-main);
+        }
+
+        .sidebar-menu li.active {
+            background: var(--tarkie-sidebar-active-bg);
+            color: var(--tarkie-sidebar-active-text);
+            font-weight: 600;
+        }
+
+        .sidebar-icon { font-size: 15px; display: flex; align-items: center; justify-content: center; width: 20px; }
+
+        .has-sub-menu {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 0 !important;
+        }
+        .main-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .sub-menu {
+            list-style: none;
+            padding: 0 0 6px 0;
+            margin: 0;
+            display: none;
+            background: #fafafa;
+            border-bottom-left-radius: var(--radius-sm);
+            border-bottom-right-radius: var(--radius-sm);
+        }
+        .sub-menu li {
+            padding: 7px 12px 7px 38px !important;
+            font-size: 12px !important;
+            color: var(--tarkie-sidebar-text);
+            border-radius: 0 !important;
+        }
+        .sub-menu li:hover {
+            background: var(--tarkie-sidebar-hover) !important;
+            color: var(--primary) !important;
+        }
+        .sub-menu li.active {
+            background: var(--tarkie-sidebar-active-bg) !important;
+            color: var(--tarkie-sidebar-active-text) !important;
+            font-weight: 600;
+        }
+        .arrow-icon {
+            margin-left: auto;
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        .has-sub-menu.open .arrow-icon {
+            transform: rotate(90deg);
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 24px;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .header-bar {
+            background: var(--card-bg);
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .content-section {
+            display: none;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+        .content-section.active { display: block; }
+
+        .logout-btn {
+            background-color: #ffeeee;
+            color: #dc2626;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .logout-btn:hover { background-color: #dc2626; color: white; }
+
+        .section-container {
+            margin-bottom: 25px;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+
+        /* Maximized Form Grid Layout */
+        .form-grid-layout {
+            display: grid;
+            grid-template-columns: 140px 140px 140px 1fr 160px 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+            align-items: flex-end;
+        }
+        @media(max-width: 1200px) {
+            .form-grid-layout {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .sync-status {
+            font-size: 11px;
+            color: var(--success);
+            font-weight: 600;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .summary-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            text-align: left;
+        }
+        .summary-card h4 { margin: 0 0 8px 0; font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; justify-content: space-between; }
+        .summary-card .val { font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; }
+        .summary-card p { margin: 0; font-size: 11px; color: var(--text-muted); }
+
+        .task-table-container { 
+            overflow-x: auto; 
+            margin-top: 12px; 
+            border-radius: var(--radius-md); 
+            border: 1px solid var(--border-color); 
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+            background: #fff;
+        }
+        .task-table th, .task-table td {
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid #f1f5f9;
+            padding: 12px 14px;
+            vertical-align: middle;
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+        .task-table th:last-child, .task-table td:last-child { border-right: none; }
+        .task-table th { 
+            background-color: #f8fafc; 
+            color: var(--text-muted); 
+            font-weight: 700; 
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.03em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .task-table tbody tr:hover { background-color: #f8fafc; }
+
+        .time-input-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .time-input-group input { width: 65px !important; text-align: center; }
+        .ampm-btn {
+            background-color: #e2e8f0;
+            color: #334155;
+            border: none;
+            padding: 10px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+        .ampm-btn:hover { background-color: #cbd5e1; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-layout" id="dashboardLayout">
+        <div class="sidebar" id="appSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand-container" title="Training Portal">
+                    <div class="sidebar-brand">TP</div>
+                    <div class="sidebar-brand-text">Training Portal</div>
+                </div>
+            </div>
+            <div class="sidebar-menu-scroll">
+                <div class="sidebar-category-title">Reports</div>
+                <ul class="sidebar-menu">
+                    <li class="has-sub-menu active open" id="dailyTaskMenuParent">
+                        <div class="main-menu-item" onclick="toggleSubMenu(event, 'dailyTaskMenuParent', 'dailyTaskSubMenu')">
+                            <span class="sidebar-icon">📊</span>
+                            <span>Daily Task Time</span>
+                            <span class="arrow-icon">▶</span>
+                        </div>
+                        <ul class="sub-menu" id="dailyTaskSubMenu" style="display: block;">
+                            <li id="subSummary" onclick="switchSubTab(event, 'summarySection')">Summary</li>
+                            <li id="subPlan" class="active" onclick="switchSubTab(event, 'planSection')">Monthly Plan</li>
+                            <li id="subActual" onclick="switchSubTab(event, 'actualSection')">Monthly Actual</li>
+                        </ul>
+                    </li>
+                    <li class="has-sub-menu" id="socmedMenuParent">
+                        <div class="main-menu-item" onclick="toggleSubMenu(event, 'socmedMenuParent', 'socmedSubMenu')">
+                            <span class="sidebar-icon">📱</span>
+                            <span>Social Media Monitoring</span>
+                            <span class="arrow-icon">▶</span>
+                        </div>
+                        <ul class="sub-menu" id="socmedSubMenu" style="display: none;">
+                            <li id="subSocmedOverview" class="active" onclick="switchSocmedSubTabClick(event, 'overview')">Overview Summary</li>
+                            <li id="subSocmedFb" onclick="switchSocmedSubTabClick(event, 'facebook')">Facebook Insights</li>
+                            <li id="subSocmedIg" onclick="switchSocmedSubTabClick(event, 'instagram')">Instagram Insights</li>
+                            <li id="subSocmedTk" onclick="switchSocmedSubTabClick(event, 'tiktok')">TikTok Insights</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="sidebar-category-title" style="margin-top: 15px;">Approval</div>
+                <ul class="sidebar-menu">
+                    <li id="approvalMenuLi" onclick="switchTab(event, 'approvalTab')">
+                        <span class="sidebar-icon">📝</span>
+                        <span>Approval Requests</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header-bar">
+                <div class="header-left">
+                    <div>
+                        <h3 id="dashTitle" style="margin:0; font-size: 16px;">Welcome, User</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Role: <span id="dashRole" style="font-weight:600; color:var(--text-main);">Trainer</span></p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Log out</button>
+            </div>
+
+            <!-- DAILY TASK SECTION -->
+            <div id="dailyTaskTab" class="content-section active">
+                <h3 style="margin-top:0; font-size: 15px;">Daily Task Time Management</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px; line-height: 1.4;">Manage your Planned and Actual tasks separately and efficiently.</p>
+                
+                <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #f8fafc; padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <label style="margin:0;">Select Month:</label>
+                        <select id="selectedMonthFilter" onchange="onMonthFilterChange()" style="width: 220px; margin-bottom: 0; padding: 8px;"></select>
+                    </div>
+                    <button onclick="downloadMonthExcel()" style="background-color: var(--success); display: flex; align-items: center; gap: 6px;">
+                        📥 Download Excel (<span id="downloadMonthLabel">Current Month</span>)
+                    </button>
+                </div>
+
+                <!-- SUMMARY SECTION -->
+                <div id="summarySection" class="sub-content-section" style="display: none;">
+                    <div class="section-container">
+                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 15px;">📊 Actual Report & Gantt Chart Summary</h4>
+                        <div class="summary-grid">
+                            <div class="summary-card"><h4>Total Days Attended</h4><p class="val" id="sumDaysWorked">0</p></div>
+                            <div class="summary-card"><h4>Actual Days (8 hrs/day)</h4><p class="val" id="sumActualDays">0.0</p></div>
+                            <div class="summary-card"><h4>Ach % (Actual / Total)</h4><p class="val" id="sumAchPercent">0%</p></div>
+                            <div class="summary-card"><h4>Total Mins (Actual)</h4><p class="val" id="sumTotalMins">0</p></div>
+                            <div class="summary-card"><h4>Plan / Actual Mins Ratio</h4><p class="val" id="sumPlanActualMins">0.0%</p></div>
+                            <div class="summary-card"><h4>Average Time / Task</h4><p class="val" id="sumAvgTime">0 mins</p></div>
+                        </div>
+
+                        <div style="margin-top: 25px;">
+                            <h4 style="font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📈 Actual Task Timeline / Gantt Chart</h4>
+                            <div style="position: relative; height: 350px; background: #fff; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                                <canvas id="ganttChartCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PLAN SECTION -->
+                <div id="planSection" class="sub-content-section active">
+                    <div class="section-container" style="border-left: 3px solid var(--primary);">
+                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 15px; color: var(--primary);">📅 Monthly Plan - Add New Plan</h4>
+                        <div class="form-grid-layout">
+                            <div>
+                                <label>Date</label>
+                                <input type="date" id="planInputDate">
+                            </div>
+                            <div>
+                                <label>Start Time</label>
+                                <div class="time-input-group">
+                                    <input type="text" id="planStart" placeholder="08:00">
+                                    <button type="button" class="ampm-btn" id="planStartAmPm" onclick="toggleAmPm('planStartAmPm')">AM</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label>End Time</label>
+                                <div class="time-input-group">
+                                    <input type="text" id="planEnd" placeholder="05:00">
+                                    <button type="button" class="ampm-btn" id="planEndAmPm" onclick="toggleAmPm('planEndAmPm')">PM</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Task Name</label>
+                                <input type="text" id="planTaskName" placeholder="Enter Task Name">
+                            </div>
+                            <div>
+                                <label>Category</label>
+                                <select id="planTaskCategory">
+                                    <option value="">Select Category</option>
+                                    <option value="Task">Task</option>
+                                    <option value="Others">Others</option>
+                                    <option value="Content">Content</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Remarks</label>
+                                <input type="text" id="planTaskRemarks" placeholder="Optional remarks">
+                            </div>
+                        </div>
+                        <button onclick="submitTask('Plan')" style="background-color: var(--primary); display: flex; align-items: center; gap: 6px;">
+                            💾 Save Plan
+                        </button>
+                    </div>
+
+                    <div class="section-container">
+                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📋 Submitted Plans</h4>
+                        <div class="task-table-container">
+                            <table class="task-table" id="viewPlanTable">
+                                <thead>
+                                    <tr><th>NS+ UserID (Email)</th><th>Date</th><th>Hour</th><th>Task Name</th><th>Category</th><th>Remarks</th></tr>
+                                </thead>
+                                <tbody id="viewPlanTableBody">
+                                    <tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">No plans found for this month.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTUAL SECTION -->
+                <div id="actualSection" class="sub-content-section" style="display: none;">
+                    <div class="section-container" style="border-left: 3px solid var(--success);">
+                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 15px; color: var(--success);">✅ Monthly Actual - Add New Actual</h4>
+                        <div class="form-grid-layout">
+                            <div>
+                                <label>Date</label>
+                                <input type="date" id="actualInputDate">
+                            </div>
+                            <div>
+                                <label>Start Time</label>
+                                <div class="time-input-group">
+                                    <input type="text" id="actualStart" placeholder="08:00">
+                                    <button type="button" class="ampm-btn" id="actualStartAmPm" onclick="toggleAmPm('actualStartAmPm')">AM</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label>End Time</label>
+                                <div class="time-input-group">
+                                    <input type="text" id="actualEnd" placeholder="05:00">
+                                    <button type="button" class="ampm-btn" id="actualEndAmPm" onclick="toggleAmPm('actualEndAmPm')">PM</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Task Name</label>
+                                <input type="text" id="actualTaskName" placeholder="Enter Task Name">
+                            </div>
+                            <div>
+                                <label>Category</label>
+                                <select id="actualTaskCategory">
+                                    <option value="">Select Category</option>
+                                    <option value="Task">Task</option>
+                                    <option value="Others">Others</option>
+                                    <option value="Content">Content</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Remarks</label>
+                                <input type="text" id="actualTaskRemarks" placeholder="Optional remarks">
+                            </div>
+                        </div>
+                        <button onclick="submitTask('Actual')" style="background-color: var(--success); display: flex; align-items: center; gap: 6px;">
+                            💾 Save Actual
+                        </button>
+                    </div>
+
+                    <div class="section-container">
+                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📋 Submitted Actuals</h4>
+                        <div class="task-table-container">
+                            <table class="task-table" id="viewActualTable">
+                                <thead>
+                                    <tr><th>NS+ UserID (Email)</th><th>Date</th><th>Hour</th><th>Task Name</th><th>Category</th><th>Remarks</th></tr>
+                                </thead>
+                                <tbody id="viewActualTableBody">
+                                    <tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">No actuals found for this month.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOCIAL MEDIA MONITORING SECTION -->
+            <div id="socmedTab" class="content-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="margin:0; font-size: 16px;">Galaxy U PH</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Automated Live Google Sheets Omnichannel Analytics</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                            <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Filter:</span>
+                            <select id="socmedMonthFilter" onchange="updateSocMedUI()" style="width: 150px; padding: 4px 6px; font-size: 12px; margin-bottom: 0;">
+                                <option value="all" selected>All Months / All</option>
+                                <option value="2026-01">January 2026</option>
+                                <option value="2026-02">February 2026</option>
+                                <option value="2026-03">March 2026</option>
+                                <option value="2026-04">April 2026</option>
+                                <option value="2026-05">May 2026</option>
+                                <option value="2026-06">June 2026</option>
+                                <option value="2026-07">July 2026</option>
+                                <option value="2026-08">August 2026</option>
+                                <option value="2026-09">September 2026</option>
+                                <option value="2026-10">October 2026</option>
+                                <option value="2026-11">November 2026</option>
+                                <option value="2026-12">December 2026</option>
+                            </select>
+                        </div>
+                        <div id="socmedSyncStatus" class="sync-status">Auto-fetching...</div>
+                    </div>
+                </div>
+
+                <div id="socmedMainKpiContainer" class="summary-grid" style="margin-bottom: 20px; display: none;">
+                    <div class="summary-card">
+                        <h4>Total Reach / Views <span>👥</span></h4>
+                        <p class="val" id="socmedKpiReach">0</p>
+                        <p>Combined across FB, IG & TK</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total Engagement <span>❤️</span></h4>
+                        <p class="val" id="socmedKpiEngagement">0</p>
+                        <p>Reactions, Comments, Shares</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total Posts / Content <span>📄</span></h4>
+                        <p class="val" id="socmedKpiPosts">0</p>
+                        <p>Tracked items in sheets</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Avg Engagement Rate <span>📈</span></h4>
+                        <p class="val" id="socmedKpiRate">0.0%</p>
+                        <p style="margin-bottom: 6px;">Overall performance index</p>
+                    </div>
+                </div>
+
+                <div id="socmedSubViewContainer">
+                    <div id="socmed-view-overview" class="socmed-sub-view">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                            <div class="section-container" style="margin-bottom:0;">
+                                <h4 style="margin-top:0; font-size: 13px; margin-bottom: 12px;">👁️ Views / Reach per Platform</h4>
+                                <div style="position: relative; height: 250px;"><canvas id="socmedViewsChart"></canvas></div>
+                            </div>
+                            <div class="section-container" style="margin-bottom:0;">
+                                <h4 style="margin-top:0; font-size: 13px; margin-bottom: 12px;">👍 Reactions per Platform</h4>
+                                <div style="position: relative; height: 250px;"><canvas id="socmedReactionsChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="socmed-view-facebook" class="socmed-sub-view" style="display: none;">
+                        <div class="section-container">
+                            <h4>Facebook Insights & Raw Records</h4>
+                            <div class="task-table-container"><table class="task-table" id="socmedTableFacebook"><thead></thead><tbody></tbody></table></div>
+                        </div>
+                    </div>
+                    <div id="socmed-view-instagram" class="socmed-sub-view" style="display: none;">
+                        <div class="section-container">
+                            <h4>Instagram Insights & Raw Records</h4>
+                            <div class="task-table-container"><table class="task-table" id="socmedTableInstagram"><thead></thead><tbody></tbody></table></div>
+                        </div>
+                    </div>
+                    <div id="socmed-view-tiktok" class="socmed-sub-view" style="display: none;">
+                        <div class="section-container">
+                            <h4>TikTok Insights & Raw Records</h4>
+                            <div class="task-table-container"><table class="task-table" id="socmedTableTiktok"><thead></thead><tbody></tbody></table></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- APPROVAL SECTION -->
+            <div id="approvalTab" class="content-section">
+                <h3 style="margin-top:0; font-size: 15px;">Approval Requests</h3>
+                <div style="background: #f8fafc; border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="min-width: 220px;">
+                        <label>Select Approver (SEPCO)</label>
+                        <select id="approverSelect" style="background: #fff; padding: 8px;"><option value="">Loading...</option></select>
+                    </div>
+                    <div style="flex-grow: 1; min-width: 250px;">
+                        <label>Select File</label>
+                        <input type="file" id="approvalFileInput" style="background: #fff; padding: 7px;">
+                    </div>
+                    <button onclick="handleFileUpload()" id="uploadFileBtn" style="height: 38px;">Upload</button>
+                </div>
+                <div class="task-table-container">
+                    <table class="task-table" id="approvalTable">
+                        <thead><tr><th>File Name</th><th>Approver</th><th>Upload Date</th><th>Status</th></tr></thead>
+                        <tbody id="approvalTableBody"><tr><td colspan="4" style="padding: 20px;">No pending approvals found.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyRvkqZdaAAwWtl59hu4qOvQ-6u-QIgVRMM47h_HJ5wLVPIezlFfoI7Kcoung-tWxg5/exec";
+        const DAILY_TASK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXrBO91DNaE1TxoOBLoYeFEkpLxtUunO3c4bgLvScAYieZRHgNyGedMbrn7INUYTnzpA4zkY98gfqL/pub?gid=9013893&single=true&output=csv";
+        
+        var loggedInUser = "";
+        var allLoadedTasks = { plan: [], actual: [] };
+        var hasFetchedInitialTasks = false;
+
+        const FB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT7oZoS9WzZkscUKl3O1oyLiffbUXRqWBA5G3AEPcB-5DYrMyWoW1cPyrJSM0zRZh08xhJb5R3_MCD1/pub?gid=0&single=true&output=csv";
+        const IG_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT7oZoS9WzZkscUKl3O1oyLiffbUXRqWBA5G3AEPcB-5DYrMyWoW1cPyrJSM0zRZh08xhJb5R3_MCD1/pub?gid=980908131&single=true&output=csv";
+        const TK_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT7oZoS9WzZkscUKl3O1oyLiffbUXRqWBA5G3AEPcB-5DYrMyWoW1cPyrJSM0zRZh08xhJb5R3_MCD1/pub?gid=795455166&single=true&output=csv";
+
+        let socMedAppData = { facebook: { headers: [], rows: [] }, instagram: { headers: [], rows: [] }, tiktok: { headers: [], rows: [] } };
+        let viewsChartInstance = null;
+        let reactionsChartInstance = null;
+        let ganttChartInstance = null;
+
+        window.onload = function() {
+            lucide.createIcons();
+            let savedUser = localStorage.getItem('portal_user');
+            let savedName = localStorage.getItem('portal_name');
+            let savedRole = localStorage.getItem('portal_role');
+
+            if (!savedUser) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            loggedInUser = savedUser;
+            document.getElementById('dashTitle').innerText = "Welcome, " + (savedName || savedUser);
+            document.getElementById('dashRole').innerText = savedRole || "Trainer";
+
+            let todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('planInputDate').value = todayStr;
+            document.getElementById('actualInputDate').value = todayStr;
+
+            initDynamicMonthDropdown();
+            loadUserTasks();
+            loadApprovals();
+            loadSepcoApprovers();
+            initSocMedData();
+        };
+
+        function toggleAmPm(btnId) {
+            let btn = document.getElementById(btnId);
+            if (btn.innerText === "AM") {
+                btn.innerText = "PM";
+            } else {
+                btn.innerText = "AM";
+            }
+        }
+
+        function initDynamicMonthDropdown() {
+            let select = document.getElementById('selectedMonthFilter');
+            select.innerHTML = "";
+            let currentDate = new Date();
+            for (let i = 0; i < 12; i++) {
+                let d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                let yyyy = d.getFullYear();
+                let mm = String(d.getMonth() + 1).padStart(2, '0');
+                let val = `${yyyy}-${mm}`;
+                let monthName = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                let option = document.createElement('option');
+                option.value = val;
+                option.textContent = monthName + (i === 0 ? " (Current)" : "");
+                if (i === 0) option.selected = true;
+                select.appendChild(option);
+            }
+            updateMonthDownloadLabel();
+        }
+
+        function updateMonthDownloadLabel() {
+            let select = document.getElementById('selectedMonthFilter');
+            let label = document.getElementById('downloadMonthLabel');
+            if (select && label && select.options[select.selectedIndex]) {
+                label.textContent = select.options[select.selectedIndex].text;
+            }
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        function toggleSubMenu(event, parentId, subMenuId) {
+            let parentLi = document.getElementById(parentId);
+            let subMenu = document.getElementById(subMenuId);
+            if (subMenu.style.display === "block") {
+                subMenu.style.display = "none";
+                parentLi.classList.remove('open');
+            } else {
+                subMenu.style.display = "block";
+                parentLi.classList.add('open');
+            }
+        }
+
+        function switchSubTab(evt, sectionId) {
+            evt.stopPropagation();
+            let subSections = document.querySelectorAll('#dailyTaskTab .sub-content-section');
+            subSections.forEach(sec => sec.style.display = 'none');
+            let targetSec = document.getElementById(sectionId);
+            if (targetSec) targetSec.style.display = 'block';
+            document.querySelectorAll('#dailyTaskSubMenu li').forEach(li => li.classList.remove('active'));
+            evt.currentTarget.classList.add('active');
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById('dailyTaskTab').classList.add('active');
+            if(sectionId === 'summarySection' && ganttChartInstance) ganttChartInstance.resize();
+        }
+
+        function switchTab(evt, tabId) {
+            let sections = document.getElementsByClassName('content-section');
+            for (let sec of sections) sec.classList.remove('active');
+            let menuItems = document.querySelectorAll('.sidebar-menu > li');
+            for (let item of menuItems) item.classList.remove('active');
+            document.getElementById(tabId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        function switchSocmedSubTabClick(evt, targetSub) {
+            evt.stopPropagation();
+            document.querySelectorAll('.socmed-sub-view').forEach(v => v.style.display = 'none');
+            let targetView = document.getElementById(`socmed-view-${targetSub}`);
+            if (targetView) targetView.style.display = 'block';
+            document.querySelectorAll('#socmedSubMenu li').forEach(li => li.classList.remove('active'));
+            evt.currentTarget.classList.add('active');
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById('socmedTab').classList.add('active');
+            if(targetSub === 'overview') document.getElementById('socmedMainKpiContainer').style.display = 'grid';
+            else document.getElementById('socmedMainKpiContainer').style.display = 'none';
+        }
+
+        function initSocMedData() {
+            fetchSocMedPlatform('facebook', FB_URL, 'socmedTableFacebook');
+            fetchSocMedPlatform('instagram', IG_URL, 'socmedTableInstagram');
+            fetchSocMedPlatform('tiktok', TK_URL, 'socmedTableTiktok');
+        }
+
+        function fetchSocMedPlatform(platform, url, tableId) {
+            Papa.parse(url, {
+                download: true, header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    if (results && results.data) {
+                        socMedAppData[platform].rows = results.data;
+                        if(results.data.length > 0) socMedAppData[platform].headers = Object.keys(results.data[0]);
+                        document.getElementById('socmedSyncStatus').innerText = "Live Synced";
+                        updateSocMedUI();
+                        populateSocMedTable(tableId, socMedAppData[platform].headers, results.data);
+                    }
+                }
+            });
+        }
+
+        function populateSocMedTable(tableId, headers, rows) {
+            let table = document.getElementById(tableId);
+            if (!table) return;
+            let thead = table.querySelector('thead');
+            let tbody = table.querySelector('tbody');
+            let headHtml = '<tr>';
+            headers.forEach(h => { headHtml += `<th>${h}</th>`; });
+            headHtml += '</tr>';
+            thead.innerHTML = headHtml;
+            tbody.innerHTML = "";
+            rows.forEach(r => {
+                let tr = document.createElement('tr');
+                let rowHtml = '';
+                headers.forEach(h => { rowHtml += `<td>${r[h] !== undefined ? r[h] : ''}</td>`; });
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateSocMedUI() {
+            let filterVal = document.getElementById('socmedMonthFilter').value;
+            let fbMonthly = aggregateMonthlyReach('facebook');
+            let igMonthly = aggregateMonthlyReach('instagram');
+            let tkMonthly = aggregateMonthlyReach('tiktok');
+            let fbMetrics = calculatePlatformMetrics('facebook', filterVal);
+            let igMetrics = calculatePlatformMetrics('instagram', filterVal);
+            let tkMetrics = calculatePlatformMetrics('tiktok', filterVal);
+            let totalReach = fbMetrics.reach + igMetrics.reach + tkMetrics.reach;
+            let totalEngagement = fbMetrics.engagement + igMetrics.engagement + tkMetrics.engagement;
+            let totalPosts = fbMetrics.count + igMetrics.count + tkMetrics.count;
+            let avgRate = (totalReach > 0 && totalEngagement > 0) ? (totalEngagement / totalReach) * 100 : 0;
+
+            document.getElementById('socmedKpiReach').innerText = totalReach.toLocaleString();
+            document.getElementById('socmedKpiEngagement').innerText = totalEngagement.toLocaleString();
+            document.getElementById('socmedKpiPosts').innerText = totalPosts.toLocaleString();
+            document.getElementById('socmedKpiRate').innerText = avgRate.toFixed(1) + '%';
+            renderOverviewCharts(fbMetrics, igMetrics, tkMetrics, fbMonthly, igMonthly, tkMonthly);
+        }
+
+        function aggregateMonthlyReach(platform) {
+            let rows = socMedAppData[platform].rows || [];
+            let monthlyReach = new Array(12).fill(0);
+            rows.forEach(r => {
+                let dateStr = "";
+                let reachVal = 0;
+                for (let k in r) {
+                    if (k.toLowerCase().includes('date') || k.toLowerCase().includes('petsa')) { dateStr = String(r[k]).trim(); break; }
+                }
+                for (let k in r) {
+                    if (k.toLowerCase().includes('reach') || k.toLowerCase().includes('views')) {
+                        reachVal = parseFloat(String(r[k]).replace(/,/g, '').replace(/[^0-9.-]+/g, "")) || 0;
+                        break;
+                    }
+                }
+                if (dateStr) {
+                    let d = new Date(dateStr);
+                    if (!isNaN(d.getTime())) monthlyReach[d.getMonth()] += reachVal;
+                }
+            });
+            return monthlyReach;
+        }
+
+        function calculatePlatformMetrics(platform, filterVal) {
+            let rows = socMedAppData[platform].rows || [];
+            let reach = 0, engagement = 0, filteredCount = 0;
+            rows.forEach(r => {
+                let dateStr = "";
+                for(let k in r) {
+                    if(k.toLowerCase().includes('date') || k.toLowerCase().includes('petsa')) { dateStr = String(r[k]).trim(); break; }
+                }
+                if (filterVal !== 'all' && dateStr && !dateStr.includes(filterVal)) return;
+                filteredCount++;
+                for (let k in r) {
+                    let lk = k.toLowerCase();
+                    if (lk.includes('date') || lk.includes('link') || lk.includes('title')) continue;
+                    let val = parseFloat(String(r[k]).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                    if (lk.includes('reach') || lk.includes('views') || lk.includes('impression')) reach += val;
+                    else if (lk.includes('engagement') || lk.includes('likes') || lk.includes('comments')) engagement += val;
+                }
+            });
+            return { reach: reach, engagement: engagement, count: filteredCount };
+        }
+
+        function renderOverviewCharts(fb, ig, tk, fbMonthly, igMonthly, tkMonthly) {
+            let ctxViews = document.getElementById('socmedViewsChart');
+            if (ctxViews) {
+                if (viewsChartInstance) viewsChartInstance.destroy();
+                viewsChartInstance = new Chart(ctxViews.getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: ['Facebook', 'Instagram', 'TikTok'], datasets: [{ label: 'Reach / Views', data: [fb.reach, ig.reach, tk.reach], backgroundColor: ['#2563eb', '#db2777', '#06b6d4'], borderRadius: 6 }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+            let ctxReactions = document.getElementById('socmedReactionsChart');
+            if (ctxReactions) {
+                if (reactionsChartInstance) reactionsChartInstance.destroy();
+                reactionsChartInstance = new Chart(ctxReactions.getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: ['Facebook', 'Instagram', 'TikTok'], datasets: [{ data: [fb.engagement || 1, ig.engagement || 1, tk.engagement || 1], backgroundColor: ['#2563eb', '#db2777', '#06b6d4'] }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        }
+
+        function cleanDateDisplay(rawDate) {
+            if (!rawDate) return '';
+            let dateStr = String(rawDate).trim();
+            if (dateStr.includes('T')) {
+                return dateStr.split('T')[0];
+            }
+            let d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                let yyyy = d.getFullYear();
+                let mm = String(d.getMonth() + 1).padStart(2, '0');
+                let dd = String(d.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+            return dateStr;
+        }
+
+        function onMonthFilterChange() {
+            updateMonthDownloadLabel();
+            let allCombined = [...(allLoadedTasks.plan || []), ...(allLoadedTasks.actual || [])];
+            renderViewTables(allCombined);
+            updateDailyTaskSummaryAndChart();
+        }
+
+        function renderViewTables(tasks) {
+            let selectedMonth = document.getElementById('selectedMonthFilter').value;
+            let filteredTasks = tasks.filter(t => t.date && cleanDateDisplay(t.date).startsWith(selectedMonth));
+
+            let planRows = filteredTasks.filter(t => t.type === "Plan");
+            let actualRows = filteredTasks.filter(t => t.type === "Actual");
+
+            let planTbody = document.getElementById('viewPlanTableBody');
+            planTbody.innerHTML = "";
+            if (planRows.length > 0) {
+                planRows.forEach(t => {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${t.user || loggedInUser}</td>
+                        <td>${cleanDateDisplay(t.date)}</td>
+                        <td>${t.hour || ''}</td>
+                        <td>${t.name || ''}</td>
+                        <td>${t.category || ''}</td>
+                        <td>${t.remarks || ''}</td>
+                    `;
+                    planTbody.appendChild(tr);
+                });
+            } else {
+                planTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">No plans found for this month.</td></tr>`;
+            }
+
+            let actualTbody = document.getElementById('viewActualTableBody');
+            actualTbody.innerHTML = "";
+            if (actualRows.length > 0) {
+                actualRows.forEach(t => {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${t.user || loggedInUser}</td>
+                        <td>${cleanDateDisplay(t.date)}</td>
+                        <td>${t.hour || ''}</td>
+                        <td>${t.name || ''}</td>
+                        <td>${t.category || ''}</td>
+                        <td>${t.remarks || ''}</td>
+                    `;
+                    actualTbody.appendChild(tr);
+                });
+            } else {
+                actualTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">No actuals found for this month.</td></tr>`;
+            }
+        }
+
+        async function loadUserTasks() {
+            updateMonthDownloadLabel();
+            
+            if (hasFetchedInitialTasks && (allLoadedTasks.plan.length > 0 || allLoadedTasks.actual.length > 0)) {
+                let allCombined = [...allLoadedTasks.plan, ...allLoadedTasks.actual];
+                renderViewTables(allCombined);
+                updateDailyTaskSummaryAndChart();
+                return;
+            }
+
+            Papa.parse(DAILY_TASK_CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    let userTasks = [];
+                    if (results && results.data) {
+                        results.data.forEach(row => {
+                            let keys = Object.keys(row);
+                            
+                            let planUser = String(row["NS+ UserID (Email)"] || "").toLowerCase().trim();
+                            let planDate = row["Date"];
+                            let planHour = row["Hour (ex. 1:00 - 2:00)"];
+                            let planName = row["Task Name"];
+                            let planCat = row["Category"];
+                            let planRemarks = row["Remarks"];
+
+                            if (planUser && planDate && planName) {
+                                userTasks.push({
+                                    user: planUser,
+                                    type: "Plan",
+                                    date: planDate,
+                                    hour: planHour,
+                                    name: planName,
+                                    category: planCat,
+                                    remarks: planRemarks
+                                });
+                            }
+
+                            let actualUserCol = keys.find(k => k.toLowerCase().includes('ns+') && k !== "NS+ UserID (Email)");
+                            let actualDateCol = keys.find(k => k.toLowerCase().includes('date') && k !== "Date");
+                            let actualHourCol = keys.find(k => k.toLowerCase().includes('hour') && k !== "Hour (ex. 1:00 - 2:00)");
+                            let actualNameCol = keys.find(k => k.toLowerCase().includes('task name') && k !== "Task Name");
+                            let actualCatCol = keys.find(k => k.toLowerCase().includes('category') && k !== "Category");
+                            let actualRemCol = keys.find(k => k.toLowerCase().includes('remarks') && k !== "Remarks");
+
+                            let actUser = actualUserCol ? String(row[actualUserCol] || "").toLowerCase().trim() : "";
+                            let actDate = actualDateCol ? row[actualDateCol] : "";
+                            let actHour = actualHourCol ? row[actualHourCol] : "";
+                            let actName = actualNameCol ? row[actualNameCol] : "";
+                            let actCat = actualCatCol ? row[actualCatCol] : "";
+                            let actRem = actualRemCol ? row[actualRemCol] : "";
+
+                            if (actDate && actName) {
+                                userTasks.push({
+                                    user: actUser || planUser,
+                                    type: "Actual",
+                                    date: actDate,
+                                    hour: actHour,
+                                    name: actName,
+                                    category: actCat,
+                                    remarks: actRem
+                                });
+                            }
+                        });
+                    }
+
+                    fetchTasksFromAppsScript(userTasks);
+                },
+                error: function(err) {
+                    console.error("Error parsing Daily Task CSV:", err);
+                    fetchTasksFromAppsScript([]);
+                }
+            });
+        }
+
+        async function fetchTasksFromAppsScript(csvTasks) {
+            try {
+                let response = await fetch(WEB_APP_URL + "?action=getTasks&user=" + encodeURIComponent(loggedInUser));
+                let result = await response.json();
+                
+                let mergedTasks = [...csvTasks];
+                if (result.success && result.tasks) {
+                    result.tasks.forEach(st => {
+                        let exists = mergedTasks.some(mt => mt.type === st.type && mt.date === st.date && mt.name === st.name);
+                        if (!exists) mergedTasks.push(st);
+                    });
+                }
+
+                allLoadedTasks.plan = mergedTasks.filter(t => t.type === "Plan");
+                allLoadedTasks.actual = mergedTasks.filter(t => t.type === "Actual");
+                hasFetchedInitialTasks = true;
+
+                renderViewTables(mergedTasks);
+                updateDailyTaskSummaryAndChart();
+            } catch (e) {
+                console.error("Error loading tasks:", e);
+                allLoadedTasks.plan = csvTasks.filter(t => t.type === "Plan");
+                allLoadedTasks.actual = csvTasks.filter(t => t.type === "Actual");
+                hasFetchedInitialTasks = true;
+
+                renderViewTables(csvTasks);
+                updateDailyTaskSummaryAndChart();
+            }
+        }
+
+        async function submitTask(taskType) {
+            let prefix = taskType === 'Plan' ? 'plan' : 'actual';
+            
+            let date = document.getElementById(prefix + 'InputDate').value;
+            let startVal = document.getElementById(prefix + 'Start').value;
+            let startAmPm = document.getElementById(prefix + 'StartAmPm').innerText;
+            let endVal = document.getElementById(prefix + 'End').value;
+            let endAmPm = document.getElementById(prefix + 'EndAmPm').innerText;
+            
+            let hour = `${startVal} ${startAmPm} - ${endVal} ${endAmPm}`;
+            let name = document.getElementById(prefix + 'TaskName').value;
+            let category = document.getElementById(prefix + 'TaskCategory').value;
+            let remarks = document.getElementById(prefix + 'TaskRemarks').value;
+
+            if (!date || !startVal || !endVal || !name || !category) {
+                alert("Please fill in Date, Start Time, End Time, Task Name, and Category.");
+                return;
+            }
+
+            let newTask = {
+                user: loggedInUser,
+                type: taskType,
+                date: date,
+                hour: hour,
+                name: name,
+                category: category,
+                remarks: remarks
+            };
+
+            try {
+                let response = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "saveTasks", user: loggedInUser, tasks: [newTask] })
+                });
+                let result = await response.json();
+                alert(`${taskType} successfully saved!`);
+                
+                document.getElementById(prefix + 'Start').value = "";
+                document.getElementById(prefix + 'End').value = "";
+                document.getElementById(prefix + 'TaskName').value = "";
+                document.getElementById(prefix + 'TaskRemarks').value = "";
+                
+                hasFetchedInitialTasks = false;
+                setTimeout(loadUserTasks, 1500);
+            } catch (e) {
+                console.error("Error saving task:", e);
+                alert("An error occurred while saving the task.");
+            }
+        }
+
+        function updateDailyTaskSummaryAndChart() {
+            let selectedMonth = document.getElementById('selectedMonthFilter').value;
+            let planTasks = (allLoadedTasks.plan || []).filter(t => t.date && cleanDateDisplay(t.date).startsWith(selectedMonth));
+            let actualTasks = (allLoadedTasks.actual || []).filter(t => t.date && cleanDateDisplay(t.date).startsWith(selectedMonth));
+
+            let uniqueDays = new Set();
+            let totalActualMins = 0;
+
+            actualTasks.forEach(t => {
+                if (t.name && t.name.trim() !== "") {
+                    let cleanedDate = cleanDateDisplay(t.date);
+                    if (cleanedDate) uniqueDays.add(cleanedDate);
+                    totalActualMins += 480; 
+                }
+            });
+
+            let totalDaysWorked = uniqueDays.size;
+            let actualDays = (totalActualMins / 480).toFixed(1);
+            let filledActualCount = actualTasks.length;
+            let filledPlanCount = planTasks.length;
+
+            let achPercent = filledPlanCount > 0 ? Math.round((filledActualCount / filledPlanCount) * 100) : 0;
+            let totalPlanMins = filledPlanCount * 480;
+            let planActualRatio = totalPlanMins > 0 ? ((totalActualMins / totalPlanMins) * 100).toFixed(1) : '0.0';
+            let avgTime = filledActualCount > 0 ? Math.round(totalActualMins / filledActualCount) : 0;
+
+            document.getElementById('sumDaysWorked').innerText = totalDaysWorked;
+            document.getElementById('sumActualDays').innerText = actualDays;
+            document.getElementById('sumAchPercent').innerText = achPercent + '%';
+            document.getElementById('sumTotalMins').innerText = totalActualMins.toLocaleString();
+            document.getElementById('sumPlanActualMins').innerText = planActualRatio + '%';
+            document.getElementById('sumAvgTime').innerText = avgTime + ' mins';
+
+            renderGanttChart(actualTasks, planTasks);
+        }
+
+        function renderGanttChart(actualTasks, planTasks) {
+            let canvas = document.getElementById('ganttChartCanvas');
+            if (!canvas) return;
+
+            let allTaskLabels = new Set();
+            actualTasks.forEach(t => { if(t.name) allTaskLabels.add(`${t.category || 'General'}: ${t.name}`); });
+            let labelsArray = Array.from(allTaskLabels);
+
+            if (ganttChartInstance) ganttChartInstance.destroy();
+            ganttChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labelsArray.length > 0 ? labelsArray : ['No Recorded Actual Tasks'],
+                    datasets: [{ label: 'Actual Tasks Progress', data: labelsArray.map(() => 1), backgroundColor: '#059669', borderRadius: 4 }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        async function loadApprovals() {
+            try {
+                let response = await fetch(WEB_APP_URL + "?action=getApprovals&user=" + encodeURIComponent(loggedInUser));
+                let result = await response.json();
+                let tbody = document.getElementById('approvalTableBody');
+                tbody.innerHTML = "";
+                if (result.success && result.approvals && result.approvals.length > 0) {
+                    result.approvals.forEach(app => {
+                        let tr = document.createElement('tr');
+                        let badgeClass = app.status === 'Approved' ? 'badge-approved' : (app.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+                        tr.innerHTML = `
+                            <td><a href="${app.fileUrl}" target="_blank" style="color:var(--primary); text-decoration:none; font-weight:600;">${app.fileName}</a></td>
+                            <td>${app.approverEmail || 'N/A'}</td>
+                            <td>${cleanDateDisplay(app.uploadDate)}</td>
+                            <td><span class="${badgeClass}">${app.status}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" style="padding: 20px; text-align:center; color:var(--text-muted);">No pending approvals found.</td></tr>`;
+                }
+            } catch (e) {
+                console.error("Error loading approvals:", e);
+            }
+        }
+
+        async function loadSepcoApprovers() {
+            try {
+                let response = await fetch(WEB_APP_URL + "?action=getSepcoApprovers");
+                let result = await response.json();
+                let select = document.getElementById('approverSelect');
+                select.innerHTML = '<option value="">Select Approver</option>';
+                if (result.success && result.approvers) {
+                    result.approvers.forEach(app => {
+                        let opt = document.createElement('option');
+                        opt.value = app.email;
+                        opt.textContent = app.name;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                console.error("Error loading approvers:", e);
+            }
+        }
+
+        async function handleFileUpload() {
+            let fileInput = document.getElementById('approvalFileInput');
+            let approverSelect = document.getElementById('approverSelect');
+            if (fileInput.files.length === 0 || !approverSelect.value) {
+                alert("Please select a file and an Approver first.");
+                return;
+            }
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            document.getElementById('uploadFileBtn').innerText = "Uploading...";
+            reader.onload = async function(e) {
+                let base64Data = e.target.result.split(',')[1];
+                let payload = {
+                    action: "uploadFile",
+                    user: loggedInUser,
+                    fileName: file.name,
+                    mimeType: file.type,
+                    fileBytes: base64Data,
+                    approverEmail: approverSelect.value,
+                    uploadDate: new Date().toISOString().split('T')[0]
+                };
+                try {
+                    let response = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+                    let result = await response.json();
+                    if (result.success) {
+                        alert("File uploaded successfully!");
+                        fileInput.value = "";
+                        loadApprovals();
+                    } else {
+                        alert("Upload error: " + result.message);
+                    }
+                } catch (err) {
+                    alert("Upload failed.");
+                } finally {
+                    document.getElementById('uploadFileBtn').innerText = "Upload";
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function downloadMonthExcel() {
+            let selectedMonth = document.getElementById('selectedMonthFilter').value;
+            let planRows = (allLoadedTasks.plan || []).filter(t => t.date && cleanDateDisplay(t.date).startsWith(selectedMonth));
+            let actualRows = (allLoadedTasks.actual || []).filter(t => t.date && cleanDateDisplay(t.date).startsWith(selectedMonth));
+
+            let wb = XLSX.utils.book_new();
+
+            let planData = planRows.map(t => ({ "NS+ UserID (Email)": t.user || loggedInUser, Date: cleanDateDisplay(t.date), "Hour": t.hour, "Task Name": t.name, Category: t.category, Remarks: t.remarks }));
+            let wsPlan = XLSX.utils.json_to_sheet(planData.length ? planData : [{"NS+ UserID (Email)": "", Date: "No Data", "Hour": "", "Task Name": "", Category: "", Remarks: ""}]);
+            XLSX.utils.book_append_sheet(wb, wsPlan, "Monthly Plan");
+
+            let actualData = actualRows.map(t => ({ "NS+ UserID (Email)": t.user || loggedInUser, Date: cleanDateDisplay(t.date), "Hour": t.hour, "Task Name": t.name, Category: t.category, Remarks: t.remarks }));
+            let wsActual = XLSX.utils.json_to_sheet(actualData.length ? actualData : [{"NS+ UserID (Email)": "", Date: "No Data", "Hour": "", "Task Name": "", Category: "", Remarks: ""}]);
+            XLSX.utils.book_append_sheet(wb, wsActual, "Monthly Actual");
+
+            XLSX.writeFile(wb, `Daily_Task_Time_${loggedInUser}_${selectedMonth}.xlsx`);
+        }
+    </script>
+</body>
+</html>
