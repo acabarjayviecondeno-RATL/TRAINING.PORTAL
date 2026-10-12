@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    /* Early auth guard: runs before the page renders, so a visitor who is not logged in never sees the dashboard. */
+    (function(){try{
+        var u=localStorage.getItem('portal_user'),r=String(localStorage.getItem('portal_role')||'').toLowerCase().trim();
+        var demo=String(u||'').toLowerCase()==='jayvie'&&localStorage.getItem('portal_role')==='Report Analyst Team Lead';
+        if(!u||demo||!(r==='st'||r.indexOf('specialized trainer')>-1)){
+            if(demo){localStorage.removeItem('portal_user');localStorage.removeItem('portal_name');localStorage.removeItem('portal_role');}
+            document.documentElement.style.display='none';
+            location.replace('index.html');
+        }
+    }catch(e){}})();
+    </script>
     <title>Training Portal - ST Dashboard</title>
-    <LINk rel="icon" type="img/png" href="/dashboard.png"> </LINk>
+    <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS for Excel download -->
@@ -2135,13 +2147,20 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             let savedName = localStorage.getItem('portal_name');
             let savedRole = localStorage.getItem('portal_role');
 
-            if (!savedUser) {
-                savedUser = "jayvie";
-                savedName = "Jayvie A. Condeno";
-                savedRole = "Report Analyst Team Lead";
-                localStorage.setItem('portal_user', savedUser);
-                localStorage.setItem('portal_name', savedName);
-                localStorage.setItem('portal_role', savedRole);
+            // Auth guard: no real login -> back to the login page (no demo/default account).
+            // Also clears the leftover demo session that older versions of this page saved in the browser.
+            let isLeftoverDemo = (String(savedUser || '').toLowerCase() === 'jayvie' && savedRole === 'Report Analyst Team Lead');
+            // Same role rule index.html uses to route people here: 'st' or 'specialized trainer'
+            let roleLc = String(savedRole || '').toLowerCase().trim();
+            let roleIsST = (roleLc === 'st' || roleLc.includes('specialized trainer'));
+            if (!savedUser || isLeftoverDemo || !roleIsST) {
+                if (isLeftoverDemo) {
+                    localStorage.removeItem('portal_user');
+                    localStorage.removeItem('portal_name');
+                    localStorage.removeItem('portal_role');
+                }
+                window.location.replace('index.html');
+                return;
             }
 
             loggedInUser = String(savedUser).toLowerCase().trim();
