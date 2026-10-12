@@ -393,7 +393,23 @@
             width: 100%;
         }
         .gantt-bar:hover { opacity: 0.85; }
-    </style>
+    
+/* ---------- BIG PERCENT HIGHLIGHT ---------- */
+.summary-grid .summary-card p.pct-big {
+    display: flex !important; align-items: baseline; gap: 6px; flex-wrap: wrap;
+    margin: 6px 0 0 0 !important; line-height: 1 !important;
+}
+.summary-grid .summary-card p.pct-big span {
+    font-size: 17px !important; font-weight: 700 !important; letter-spacing: -0.01em;
+    color: #38bdf8 !important; text-shadow: none;
+}
+.summary-grid .summary-card p.pct-big small {
+    font-size: 10px !important; font-weight: 600; color: var(--aura-muted, #94a3b8) !important; text-transform: uppercase; letter-spacing: .04em;
+}
+html[data-theme="light"] .summary-grid .summary-card p.pct-big span { color: #2563eb !important; text-shadow: none; }
+html[data-theme="light"] .summary-grid .summary-card p.pct-big small { color: #64748b !important; }
+@media (max-width: 768px) { .summary-grid .summary-card p.pct-big span { font-size: 16px !important; } }
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1795,24 +1811,22 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                                 <p>Total days less Sunday, Holidays & Leave/Absent</p>
                             </div>
                             <div class="summary-card">
-                                <h4>Rendered Days</h4>
-                                <p class="val" id="sumDaysWorked">0</p>
-                                <p>Count of unique dates with actual records</p>
+                                <h4>Rendered Days <span>📅</span></h4>
+                                <p class="val"><span id="sumDaysWorked">0</span> days</p>
+                                <p id="sumRenderedTargetText">Target: 0 days</p>
+                                <div style="margin-top:8px; height:6px; border-radius:6px; background:rgba(148,163,184,0.25); overflow:hidden;">
+                                    <div id="sumRenderedDaysBar" style="height:100%; width:0%; background:linear-gradient(90deg,#3b82f6,#22c55e); border-radius:6px; transition:width .4s;"></div>
+                                </div>
+                                <p class="pct-big"><span id="sumRenderedDaysPercent">0%</span><small>of Target Days</small></p>
                             </div>
                             <div class="summary-card">
-                                <h4>Rendered Days %</h4>
-                                <p class="val" id="sumRenderedDaysPercent">0%</p>
-                                <p>(Rendered Days ÷ Target Days) × 100</p>
-                            </div>
-                            <div class="summary-card">
-                                <h4>Actual Days (8 hrs/day)</h4>
-                                <p class="val" id="sumActualDays">0.0</p>
-                                <p>Total Actual Mins divided by 480 mins</p>
-                            </div>
-                            <div class="summary-card">
-                                <h4>Actual Days %</h4>
-                                <p class="val" id="sumActualDaysPercent">0%</p>
-                                <p>(Actual Days ÷ Target Days) × 100</p>
+                                <h4>Actual Days (8 hrs/day) <span>🗓️</span></h4>
+                                <p class="val"><span id="sumActualDays">0.0</span> days</p>
+                                <p id="sumActualTargetText">Target: 0 days (Total Actual Mins ÷ 480)</p>
+                                <div style="margin-top:8px; height:6px; border-radius:6px; background:rgba(148,163,184,0.25); overflow:hidden;">
+                                    <div id="sumActualDaysBar" style="height:100%; width:0%; background:linear-gradient(90deg,#3b82f6,#22c55e); border-radius:6px; transition:width .4s;"></div>
+                                </div>
+                                <p class="pct-big"><span id="sumActualDaysPercent">0%</span><small>of Target Days</small></p>
                             </div>
                             <div class="summary-card">
                                 <h4>Leaves & Absences</h4>
@@ -1820,9 +1834,13 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                                 <p>Total deducted leave/absent days</p>
                             </div>
                             <div class="summary-card">
-                                <h4>Average Time / Task</h4>
+                                <h4>Total Mins vs Target <span>⏱️</span></h4>
                                 <p class="val" id="sumAvgTime">0 mins</p>
-                                <p>Based on DURATION PER MIN</p>
+                                <p id="sumTotalMinsTarget">Target: 0 mins (0 days × 480)</p>
+                                <div style="margin-top:8px; height:6px; border-radius:6px; background:rgba(148,163,184,0.25); overflow:hidden;">
+                                    <div id="sumTotalMinsBar" style="height:100%; width:0%; background:linear-gradient(90deg,#3b82f6,#22c55e); border-radius:6px; transition:width .4s;"></div>
+                                </div>
+                                <p class="pct-big"><span id="sumTotalMinsPercent">0%</span><small>of Target Mins</small></p>
                             </div>
                             <div class="summary-card">
                                 <h4>PRODUCTIVITY RATE <span style="font-size: 14px;">⚡</span></h4>
@@ -2360,6 +2378,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             initSocMedData();
             loadNotifications();
             renderLeaveAbsentTable();
+            loadLeavesFromSheet();
 
             setInterval(() => {
                 loadUserTasks(true);
@@ -2380,7 +2399,25 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             }
         }
 
-        function handleAddLeaveAbsent() {
+        // ---- Leave / Absent: saved in the "Leave / absent etc log" Google Sheet (not just this browser) ----
+        async function loadLeavesFromSheet() {
+            try {
+                let resp = await fetch(WEB_APP_URL + "?action=getLeaves&user=" + encodeURIComponent(loggedInUser));
+                let data = await resp.json();
+                if (data && data.success && Array.isArray(data.leaves)) {
+                    localLeaveRecords = data.leaves.map(l => ({ date: l.date, type: l.type, reason: l.reason }));
+                    localStorage.setItem('portal_leaves_' + loggedInUser, JSON.stringify(localLeaveRecords)); // offline cache only
+                    renderLeaveAbsentTable();
+                    updateDailyTaskSummaryAndChart();
+                }
+            } catch (e) {
+                console.error("Error loading leave records:", e);
+            }
+        }
+
+        var leaveSaving = false;
+        async function handleAddLeaveAbsent() {
+            if (leaveSaving) return;
             let dateVal = document.getElementById('leaveDateInput').value;
             let typeVal = document.getElementById('leaveTypeInput').value;
             let reasonVal = document.getElementById('leaveReasonInput').value;
@@ -2389,6 +2426,26 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 alert('Please select a date.');
                 return;
             }
+            if (localLeaveRecords.some(r => r.date === dateVal && r.type === typeVal)) {
+                alert('This date is already recorded as ' + typeVal + '.');
+                return;
+            }
+
+            leaveSaving = true;
+            try {
+                let resp = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: "saveLeave", user: loggedInUser, date: dateVal, type: typeVal, remarks: reasonVal })
+                });
+                let result = await resp.json();
+                if (!result || !result.success) throw new Error((result && result.message) || 'Save failed');
+            } catch (err) {
+                leaveSaving = false;
+                alert('Could not save to the sheet. Please try again.');
+                return;
+            }
+            leaveSaving = false;
 
             localLeaveRecords.push({ date: dateVal, type: typeVal, reason: reasonVal });
             localStorage.setItem('portal_leaves_' + loggedInUser, JSON.stringify(localLeaveRecords));
@@ -2401,7 +2458,22 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             alert('Successfully added Leave/Absent record!');
         }
 
-        function deleteLeaveAbsent(index) {
+        async function deleteLeaveAbsent(index) {
+            let rec = localLeaveRecords[index];
+            if (!rec) return;
+            if (!confirm('Delete this ' + rec.type + ' record (' + rec.date + ')?')) return;
+            try {
+                let resp = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: "deleteLeave", user: loggedInUser, date: rec.date, type: rec.type })
+                });
+                let result = await resp.json();
+                if (!result || !result.success) throw new Error('Delete failed');
+            } catch (err) {
+                alert('Could not delete from the sheet. Please try again.');
+                return;
+            }
             localLeaveRecords.splice(index, 1);
             localStorage.setItem('portal_leaves_' + loggedInUser, JSON.stringify(localLeaveRecords));
             renderLeaveAbsentTable();
@@ -3353,8 +3425,19 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             document.getElementById('sumRenderedDaysPercent').innerText = (targetDays > 0 ? Math.round((totalDaysWorked / targetDays) * 100) : 0) + '%';
             document.getElementById('sumActualDays').innerText = actualDays;
             document.getElementById('sumActualDaysPercent').innerText = (targetDays > 0 ? Math.round((parseFloat(actualDays) / targetDays) * 100) : 0) + '%';
+            let renderedPct = targetDays > 0 ? Math.round((totalDaysWorked / targetDays) * 100) : 0;
+            let actualPct = targetDays > 0 ? Math.round((parseFloat(actualDays) / targetDays) * 100) : 0;
+            document.getElementById('sumRenderedTargetText').innerText = 'Target: ' + targetDays + ' days';
+            document.getElementById('sumActualTargetText').innerText = 'Target: ' + targetDays + ' days (Total Actual Mins ÷ 480)';
+            document.getElementById('sumRenderedDaysBar').style.width = Math.min(100, renderedPct) + '%';
+            document.getElementById('sumActualDaysBar').style.width = Math.min(100, actualPct) + '%';
             document.getElementById('sumLeaveAbsentCount').innerText = leaveAbsentCount + ' days';
-            document.getElementById('sumAvgTime').innerText = avgActualMins + ' mins';
+            let targetMins = targetDays * 480;
+            let totalMinsPercent = targetMins > 0 ? Math.round((sumDurationPerMin / targetMins) * 1000) / 10 : 0;
+            document.getElementById('sumAvgTime').innerText = Math.round(sumDurationPerMin).toLocaleString() + ' mins';
+            document.getElementById('sumTotalMinsTarget').innerText = 'Target: ' + targetMins.toLocaleString() + ' mins (' + targetDays + ' days × 480)';
+            document.getElementById('sumTotalMinsPercent').innerText = totalMinsPercent + '%';
+            document.getElementById('sumTotalMinsBar').style.width = Math.min(100, totalMinsPercent) + '%';
             document.getElementById('sumProductivityRate').innerText = productivityRate + '%';
 
             document.getElementById('overviewDaysWorked').innerText = totalDaysWorked;
