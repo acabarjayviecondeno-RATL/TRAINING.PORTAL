@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    /* Early auth guard: runs before the page renders, so a visitor who is not logged in never sees the dashboard. */
+    (function(){try{
+        var u=localStorage.getItem('portal_user'),r=String(localStorage.getItem('portal_role')||'').toLowerCase().trim();
+        var demo=false;
+        if(!u||demo||!(r.indexOf('sepco')>-1)){
+            if(demo){localStorage.removeItem('portal_user');localStorage.removeItem('portal_name');localStorage.removeItem('portal_role');}
+            document.documentElement.style.display='none';
+            location.replace('index.html');
+        }
+    }catch(e){}})();
+    </script>
     <title>SEPCO Portal - Dashboard & Overview</title>
     <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -1563,6 +1575,12 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
         window.onload = function() {
             let savedName = localStorage.getItem('portal_name');
             let savedRole = localStorage.getItem('portal_role');
+
+            // Auth guard: only a logged-in SEPCO account may stay on this page.
+            if (!localStorage.getItem('portal_user') || !String(savedRole || '').toLowerCase().includes('sepco')) {
+                window.location.replace('index.html');
+                return;
+            }
 
             if (savedName) {
                 document.getElementById('dashTitle').innerText = "Welcome, " + savedName;
