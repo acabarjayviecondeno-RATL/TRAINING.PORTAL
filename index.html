@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Training Portal - Login</title>
-    <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
+    <LINk rel="icon" type="img/png" href="/dashboard.png"> </LINk>
     <style>
         :root {
             --card-bg: #ffffff;
@@ -479,6 +479,24 @@ body #notifDropdown {
 .gantt-bar-cell { padding: 5px 0 !important; border-left: 1px solid rgba(148,163,184,0.06) !important; }
 .gantt-bar { border-radius: 4px !important; }
 
+</style>
+
+<style id="mobile-responsive">
+@media (max-width: 600px) {
+    body {
+        height: auto !important;
+        min-height: 100vh; min-height: 100dvh;
+        padding: 16px !important;
+        box-sizing: border-box;
+        align-items: flex-start !important;
+    }
+    .login-container { min-height: calc(100dvh - 32px); align-items: center !important; }
+    .login-card { padding: 28px 20px !important; border-radius: 16px !important; }
+    .login-card h2 { font-size: 21px !important; }
+    input { font-size: 16px !important; }
+    .modal-overlay { padding: 16px; box-sizing: border-box; overflow-y: auto; align-items: flex-start !important; }
+    .modal-overlay .login-card { margin: auto; }
+}
 </style>
 </head>
 <body>
