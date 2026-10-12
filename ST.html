@@ -2407,6 +2407,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 if (data && data.success && Array.isArray(data.leaves)) {
                     localLeaveRecords = data.leaves.map(l => ({ date: l.date, type: l.type, reason: l.reason }));
                     localStorage.setItem('portal_leaves_' + loggedInUser, JSON.stringify(localLeaveRecords)); // offline cache only
+                    refreshMonthOptions();
                     renderLeaveAbsentTable();
                     updateDailyTaskSummaryAndChart();
                 }
@@ -2483,18 +2484,26 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
         function renderLeaveAbsentTable() {
             let tbody = document.getElementById('leaveAbsentTableBody');
             if (!tbody) return;
+            let monthSel = document.getElementById('selectedMonthFilter');
+            let selectedMonth = monthSel ? monthSel.value : '';
 
-            if (localLeaveRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:var(--text-muted);">No recorded leaves or absences.</td></tr>`;
+            // keep the original index so Delete removes the right record
+            let visible = [];
+            localLeaveRecords.forEach((rec, idx) => {
+                if (!selectedMonth || getRowMonthKey(rec.date) === selectedMonth) visible.push({ rec: rec, idx: idx });
+            });
+
+            if (visible.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:var(--text-muted);">No recorded leaves or absences for this month.</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = localLeaveRecords.map((rec, idx) => `
+            tbody.innerHTML = visible.map(v => `
                 <tr>
-                    <td>${rec.date}</td>
-                    <td><span class="px-2 py-0.5 rounded text-xs font-semibold ${rec.type === 'Leave' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}">${rec.type}</span></td>
-                    <td>${rec.reason || '-'}</td>
-                    <td><button onclick="deleteLeaveAbsent(${idx})" class="text-red-600 hover:text-red-800 font-semibold text-xs">Delete</button></td>
+                    <td>${escHtml(v.rec.date)}</td>
+                    <td><span class="px-2 py-0.5 rounded text-xs font-semibold ${v.rec.type === 'Leave' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}">${escHtml(v.rec.type)}</span></td>
+                    <td>${escHtml(v.rec.reason) || '-'}</td>
+                    <td><button onclick="deleteLeaveAbsent(${v.idx})" class="text-red-600 hover:text-red-800 font-semibold text-xs">Delete</button></td>
                 </tr>
             `).join('');
         }
@@ -2504,7 +2513,21 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
         function notifDismissKey() { return 'portal_dismissed_notifs_' + loggedInUser; }
         function notifKey(n) {
-            return (n.sheetName || 'notifications') + '|' + (n.rowIndex || 0) + '|' + (n.title || '') + '|' + (n.date || '');
+            // server-made key is stable even if sheet rows move; fall back to the old key shape
+            return n.key || ((n.sheetName || 'notifications') + '|' + (n.rowIndex || 0) + '|' + (n.title || '') + '|' + (n.date || ''));
+        }
+        async function dismissOnServer(keys) {
+            keys = (keys || []).filter(Boolean);
+            if (!keys.length) return;
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: "dismissNotifications", user: loggedInUser, keys: keys })
+                });
+            } catch (e) {
+                console.error("Error saving dismissed notifications:", e);
+            }
         }
         function getDismissedNotifs() {
             try { return JSON.parse(localStorage.getItem(notifDismissKey()) || '[]'); } catch (e) { return []; }
@@ -2532,9 +2555,11 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
         async function markAllAsRead() {
             // Remove everything from the list right away and remember it so it never comes back
-            addDismissedNotifs(currentNotifs.map(notifKey));
+            let clearedKeys = currentNotifs.map(notifKey);
+            addDismissedNotifs(clearedKeys);
             currentNotifs = [];
             updateNotificationUI([]);
+            await dismissOnServer(clearedKeys);
 
             try {
                 await fetch(WEB_APP_URL, {
@@ -2555,7 +2580,11 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             addDismissedNotifs([notifKey(n)]);
             currentNotifs.splice(idx, 1);
             updateNotificationUI(currentNotifs);
+            await dismissOnServer([notifKey(n)]);
 
+            // Only mark the sheet row itself as Read when it is this user's own notification.
+            // Shared notifications ("all") and announcements stay for other users.
+            if (n.type === 'Announcement' || n.sheetName === 'announcements' || !n.user || n.user === 'all') return;
             if (!(n.rowIndex > 0)) return; // never send row 0 (the server treats it as "all rows")
             try {
                 await fetch(WEB_APP_URL, {
@@ -2606,7 +2635,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             let monthActuals = actualTasks.filter(a => {
                 let dateVal = a["Date Submitted"] || "";
                 let cleanedDate = cleanDateDisplay(dateVal);
-                return !selectedMonth || (cleanedDate && cleanedDate.startsWith(selectedMonth));
+                return !selectedMonth || getRowMonthKey(dateVal) === selectedMonth;
             });
 
             let actualCounts = {};
@@ -2794,8 +2823,8 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         socMedAppData[platform].rows = results.data;
                         if(results.data.length > 0) socMedAppData[platform].headers = Object.keys(results.data[0]);
                         document.getElementById('socmedSyncStatus').innerText = "Live Synced";
+                        refreshSocMedMonthOptions();
                         updateSocMedUI();
-                        populateSocMedTable(tableId, socMedAppData[platform].headers, results.data);
                     }
                 }
             });
@@ -2820,8 +2849,36 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             });
         }
 
+        function refreshSocMedMonthOptions() {
+            let select = document.getElementById('socmedMonthFilter');
+            if (!select) return;
+            let months = new Set(Array.from(select.options).map(o => o.value).filter(v => v !== 'all'));
+            ['facebook', 'instagram', 'tiktok'].forEach(p => {
+                (socMedAppData[p].rows || []).forEach(r => { let k = socMedRowMonthKey(r); if (k) months.add(k); });
+            });
+            let existing = Array.from(select.options).map(o => o.value).filter(v => v !== 'all');
+            if (existing.length === months.size) return;
+            let previous = select.value;
+            select.innerHTML = '<option value="all">All Months / All</option>';
+            Array.from(months).sort().forEach(k => {
+                let parts = k.split('-');
+                let d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, 1);
+                let opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                select.appendChild(opt);
+            });
+            select.value = (previous === 'all' || months.has(previous)) ? previous : 'all';
+        }
+
         function updateSocMedUI() {
             let filterVal = document.getElementById('socmedMonthFilter').value;
+            [['facebook', 'socmedTableFacebook'], ['instagram', 'socmedTableInstagram'], ['tiktok', 'socmedTableTiktok']].forEach(pair => {
+                let pd = socMedAppData[pair[0]];
+                if (pd && pd.headers && pd.headers.length) {
+                    populateSocMedTable(pair[1], pd.headers, (pd.rows || []).filter(r => socMedRowMatches(r, filterVal)));
+                }
+            });
             let fbMonthly = aggregateMonthlyEngagement('facebook');
             let igMonthly = aggregateMonthlyEngagement('instagram');
             let tkMonthly = aggregateMonthlyEngagement('tiktok');
@@ -2955,19 +3012,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     }
                 }
 
-                if (filterVal !== 'all' && timeField) {
-                    let dObj = new Date(timeField);
-                    if (!isNaN(dObj.getTime())) {
-                        let yyyy = dObj.getFullYear();
-                        let mm = String(dObj.getMonth() + 1).padStart(2, '0');
-                        let rowMonthStr = `${yyyy}-${mm}`;
-                        if (rowMonthStr !== filterVal) return;
-                    } else if (!timeField.includes(filterVal)) {
-                        return;
-                    }
-                } else if (filterVal !== 'all' && !timeField) {
-                    return;
-                }
+                if (!socMedRowMatches(r, filterVal)) return;
 
                 let wkNum = extractRowWeek(r);
                 if (wkNum === null) return;
@@ -3038,6 +3083,26 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             }
         }
 
+        // Month of a social media row as "YYYY-MM" (works for 2026-10-02, 10/2/2026, "Oct 2, 2026", ISO...)
+        function socMedRowMonthKey(r) {
+            let timeField = "";
+            for (let k in r) {
+                let lk = k.toLowerCase();
+                if (lk.includes('publish') || lk.includes('date') || lk.includes('time')) {
+                    if (r[k] && String(r[k]).trim() !== "") { timeField = String(r[k]).trim(); break; }
+                }
+            }
+            if (!timeField) return '';
+            let m = timeField.match(/^(\d{4})-(\d{2})/);
+            if (m) return m[1] + '-' + m[2];
+            let d = new Date(timeField);
+            if (!isNaN(d.getTime())) return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            return '';
+        }
+        function socMedRowMatches(r, filterVal) {
+            return !filterVal || filterVal === 'all' || socMedRowMonthKey(r) === filterVal;
+        }
+
         function parseNum(val) {
             if (val === undefined || val === null) return 0;
             let clean = String(val).replace(/,/g, '').trim();
@@ -3085,7 +3150,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         if (r[k] && String(r[k]).trim() !== "") { timeField = String(r[k]).trim(); break; }
                     }
                 }
-                if (filterVal !== 'all' && timeField && !timeField.includes(filterVal)) return;
+                if (!socMedRowMatches(r, filterVal)) return;
                 filteredCount++;
                 let rowReach = 0, rowEng = 0;
                 for (let k in r) {
@@ -3110,7 +3175,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         if (r[k] && String(r[k]).trim() !== "") { timeField = String(r[k]).trim(); break; }
                     }
                 }
-                if (filterVal !== 'all' && timeField && !timeField.includes(filterVal)) return;
+                if (!socMedRowMatches(r, filterVal)) return;
                 for (let k in r) {
                     let lk = k.toLowerCase().trim();
                     if (lk.includes('reaction') || lk.includes('like')) total += parseNum(r[k]);
@@ -3190,6 +3255,12 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             }
         }
 
+        // "YYYY-MM" of any date value (handles 2026-10-02, 10/2/2026, ISO, "Oct 2, 2026"); '' if not a date
+        function getRowMonthKey(raw) {
+            let c = cleanDateDisplay(raw);
+            return /^\d{4}-\d{2}/.test(c) ? c.slice(0, 7) : '';
+        }
+
         function cleanDateDisplay(rawDate) {
             if (!rawDate) return '';
             let dateStr = String(rawDate).trim();
@@ -3263,7 +3334,44 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             updateMonthDownloadLabel();
             let allCombined = [...(allLoadedTasks.plan || []), ...(allLoadedTasks.actual || [])];
             renderViewTables(allCombined);
+            renderLeaveAbsentTable();
             updateDailyTaskSummaryAndChart();
+        }
+
+        // Keep the month dropdown in sync with the data: last 12 months + any month that has plan/actual/leave records
+        function refreshMonthOptions() {
+            let select = document.getElementById('selectedMonthFilter');
+            if (!select) return;
+            let previous = select.value;
+            let now = new Date();
+            let curKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            let months = new Set();
+            for (let i = 0; i < 12; i++) {
+                let d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+            }
+            (allLoadedTasks.plan || []).concat(allLoadedTasks.actual || []).forEach(t => {
+                if (!matchesUser(t)) return;
+                let k = getRowMonthKey(t["Date Submitted"]);
+                if (k) months.add(k);
+            });
+            localLeaveRecords.forEach(l => { let k = getRowMonthKey(l.date); if (k) months.add(k); });
+
+            let sorted = Array.from(months).sort().reverse();
+            let current = Array.from(select.options).map(o => o.value);
+            if (current.length === sorted.length && current.every((v, i) => v === sorted[i])) return; // nothing new
+
+            select.innerHTML = '';
+            sorted.forEach(k => {
+                let parts = k.split('-');
+                let d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, 1);
+                let opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = d.toLocaleString('en-US', { month: 'long', year: 'numeric' }) + (k === curKey ? ' (Current)' : '');
+                select.appendChild(opt);
+            });
+            select.value = months.has(previous) && previous ? previous : curKey;
+            updateMonthDownloadLabel();
         }
 
         function getRowVal(row, keys) {
@@ -3280,8 +3388,8 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
         function renderViewTables(tasks) {
             let selectedMonth = document.getElementById('selectedMonthFilter').value;
-            let planRows = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && cleanDateDisplay(t["Date Submitted"]).startsWith(selectedMonth));
-            let actualRows = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && cleanDateDisplay(t["Date Submitted"]).startsWith(selectedMonth));
+            let planRows = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === selectedMonth);
+            let actualRows = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === selectedMonth);
 
             let planTbody = document.getElementById('viewPlanTableBody');
             planTbody.innerHTML = planRows.length > 0 ? planRows.map(row => `
@@ -3335,6 +3443,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                             let actualTasks = parseSheetToObjects(actualCsvText);
                             allLoadedTasks.plan = planTasks;
                             allLoadedTasks.actual = actualTasks;
+                            refreshMonthOptions();
                             renderViewTables([...planTasks, ...actualTasks]);
                             updateDailyTaskSummaryAndChart();
                             if(statusEl) statusEl.innerText = "🔄 Last Synced: " + new Date().toLocaleTimeString();
@@ -3383,10 +3492,10 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 monthIndex = parseInt(parts[1], 10) - 1;
             }
 
-            let planTasks = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && cleanDateDisplay(t["Date Submitted"]).startsWith(selectedMonth));
-            let actualTasks = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && cleanDateDisplay(t["Date Submitted"]).startsWith(selectedMonth));
+            let planTasks = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === selectedMonth);
+            let actualTasks = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === selectedMonth);
 
-            let filteredLeaves = localLeaveRecords.filter(l => !selectedMonth || l.date.startsWith(selectedMonth));
+            let filteredLeaves = localLeaveRecords.filter(l => !selectedMonth || getRowMonthKey(l.date) === selectedMonth);
             let leaveAbsentCount = filteredLeaves.length;
             let targetDays = calculateTargetDays(year, monthIndex, leaveAbsentCount);
 
@@ -3827,7 +3936,45 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
         // Keep the request list fresh while the tab is open
         setInterval(loadApprovals, 30000);
-        function downloadMonthExcel() { /* ... */ }
+        function downloadMonthExcel() {
+            let sel = document.getElementById('selectedMonthFilter');
+            let month = sel ? sel.value : '';
+            let label = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text.replace(' (Current)', '') : month;
+            let inMonth = t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === month;
+            let planRows = (allLoadedTasks.plan || []).filter(inMonth);
+            let actualRows = (allLoadedTasks.actual || []).filter(inMonth);
+            let leaves = localLeaveRecords.filter(l => getRowMonthKey(l.date) === month);
+            let v = id => { let el = document.getElementById(id); return el ? el.innerText : ''; };
+
+            let wb = XLSX.utils.book_new();
+            let summary = [
+                ['Daily Task Time Summary', label],
+                ['User', loggedInUser],
+                [],
+                ['Target Days', v('sumTargetDays')],
+                ['Rendered Days', v('sumDaysWorked') + ' (' + v('sumRenderedDaysPercent') + ' of target)'],
+                ['Actual Days (8 hrs/day)', v('sumActualDays') + ' (' + v('sumActualDaysPercent') + ' of target)'],
+                ['Leaves & Absences', v('sumLeaveAbsentCount')],
+                ['Total Actual Mins', v('sumAvgTime')],
+                ['Target Mins', v('sumTotalMinsTarget')],
+                ['Total Mins % of Target', v('sumTotalMinsPercent')],
+                ['Productivity Rate', v('sumProductivityRate')]
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Summary');
+
+            let planCols = ["Date Submitted", "Time Submitted", "START TIME", "TIME ENDED", "DURATION PER MIN", "LOCATION", "PLAN [Title]", "CATEGORY", "CATEGORY 2", "REMARKS"];
+            let actualCols = ["Date Submitted", "Time Submitted", "START TIME", "TIME ENDED", "DURATION PER MIN", "LOCATION", "CATEGORY", "CATEGORY 2", "ACTUAL [Title]", "FORMAT", "Is this the start date?", "TARGET DATE", "APPROVAL DATE", "REMARKS FOR ACTUAL"];
+            let toAoa = (rows, cols) => [cols].concat(rows.map(r => cols.map(c => {
+                if (c === 'DURATION PER MIN') return getRowVal(r, ["DURATION PER MIN", "DURATION"]);
+                if (c === 'CATEGORY 2') return getRowVal(r, ["CATEGORY 2"]);
+                return r[c] !== undefined ? r[c] : '';
+            })));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(toAoa(planRows, planCols)), 'Daily Plan');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(toAoa(actualRows, actualCols)), 'Daily Actual');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Date', 'Type', 'Remarks / Reason']].concat(leaves.map(l => [l.date, l.type, l.reason || '']))), 'Leave-Absent');
+
+            XLSX.writeFile(wb, 'Daily_Task_' + month + '_' + (loggedInUser || 'user').replace(/[^a-z0-9@._-]/gi, '_') + '.xlsx');
+        }
     </script>
 </body>
 </html>
