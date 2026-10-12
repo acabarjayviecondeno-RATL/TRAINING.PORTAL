@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Training Portal - ST Dashboard</title>
-    <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
+    <LINk rel="icon" type="img/png" href="/dashboard.png"> </LINk>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS for Excel download -->
@@ -1274,6 +1274,166 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 }
 </style>
 
+
+<style id="mobile-responsive">
+/* ==========================================================
+   MOBILE / TABLET RESPONSIVE LAYER
+   ========================================================== */
+.mobile-menu-btn { display: none; }
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 900px) {
+    html, body { overflow-x: hidden; max-width: 100%; }
+
+    /* ---- Off-canvas sidebar (hamburger drawer) ---- */
+    .mobile-menu-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 40px;
+        height: 40px;
+        padding: 0 !important;
+        font-size: 20px;
+        line-height: 1;
+        border-radius: 10px !important;
+        border: 1px solid var(--aura-line-strong) !important;
+        background: rgba(148, 163, 184, 0.10) !important;
+        color: var(--aura-text) !important;
+        cursor: pointer;
+    }
+    .sidebar {
+        position: fixed !important;
+        top: 0; left: 0;
+        height: 100% !important;
+        width: 280px;
+        max-width: 84vw;
+        transform: translateX(-105%);
+        visibility: hidden;
+        transition: transform 0.25s ease, visibility 0.25s;
+        z-index: 1000 !important;
+    }
+    body.sidebar-open .sidebar { transform: none; visibility: visible; }
+    .sidebar-menu-scroll { padding-bottom: 24px; -webkit-overflow-scrolling: touch; }
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(5, 8, 18, 0.62);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 999;
+    }
+    body.sidebar-open .sidebar-backdrop { opacity: 1; pointer-events: auto; }
+    body.sidebar-open { overflow: hidden; }
+
+    /* ---- Layout ---- */
+    .dashboard-layout { height: 100vh; height: 100dvh; }
+    .main-content {
+        margin-left: 0 !important;
+        width: 100%;
+        height: 100vh; height: 100dvh;
+        padding: 0 !important;
+    }
+    .content-section { padding: 14px !important; }
+    .section-container { padding: 14px !important; min-width: 0; }
+
+    /* ---- Header ---- */
+    .header-bar {
+        padding: 10px 12px !important;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    .header-left { gap: 10px !important; min-width: 0; flex: 1 1 auto; }
+    .header-left > div { min-width: 0; }
+    .header-bar h3 {
+        font-size: 15px !important;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .header-bar p { font-size: 11px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .header-right, .header-bar > .flex { flex: 0 0 auto; gap: 8px !important; }
+    .theme-toggle { padding: 7px 10px !important; }
+    .theme-toggle .theme-label { display: none; }
+    .logout-btn { padding: 7px 10px !important; }
+
+    /* Notification dropdown: span the screen instead of overflowing it */
+    .header-bar .flex > .relative { position: static !important; }
+    body #notifDropdown {
+        position: absolute !important;
+        left: 8px !important; right: 8px !important;
+        top: 100% !important;
+        width: auto !important;
+        margin-top: 6px !important;
+    }
+
+    /* ---- Cards / grids ---- */
+    .summary-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important; gap: 10px !important; }
+    .summary-card { padding: 14px !important; }
+    .summary-card .val { font-size: 22px !important; }
+    [style*="minmax(300px"] { grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; }
+
+    /* ---- Tables (scroll sideways inside their card) ---- */
+    .task-table-container { -webkit-overflow-scrolling: touch; max-width: 100%; }
+    .task-table th, .task-table td { padding: 8px 10px !important; font-size: 11.5px; }
+    .gantt-calendar-container { -webkit-overflow-scrolling: touch; max-width: 100%; }
+    .gantt-task-name-cell { min-width: 130px !important; max-width: 150px !important; font-size: 11px; }
+    .gantt-cal-table th { min-width: 60px !important; }
+
+    /* ---- Filters & toolbars ---- */
+    .filter-container { flex-wrap: wrap; }
+    .filter-container .filter-input { flex: 1 1 140px; min-width: 0; }
+    #selectedMonthFilter, #socmedMonthFilter { width: 100% !important; }
+    div:has(> #selectedMonthFilter), div:has(> #socmedMonthFilter) { width: 100%; }
+    button[onclick="downloadMonthExcel()"] { width: 100%; justify-content: center; }
+    #socmedTab > div:first-child > div { width: 100%; }
+    #dailyPlanContainer > div { flex-wrap: wrap; gap: 8px; }
+
+    /* Dashboard / announcement */
+    .announcement-box { padding: 12px !important; }
+}
+
+@media (max-width: 600px) {
+    /* 16px inputs stop iOS Safari from zooming in on focus */
+    input, select, textarea { font-size: 16px !important; }
+    .remarks-input { width: 100% !important; min-width: 160px; }
+    h3 { font-size: 15px; }
+    .content-section { padding: 12px !important; }
+}
+</style>
+<script id="mobile-responsive-js">
+(function () {
+    function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+    window.toggleSidebarMobile = function () { document.body.classList.toggle('sidebar-open'); };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!document.getElementById('sidebarBackdrop')) {
+            var bd = document.createElement('div');
+            bd.id = 'sidebarBackdrop';
+            bd.className = 'sidebar-backdrop';
+            bd.addEventListener('click', closeSidebar);
+            document.body.appendChild(bd);
+        }
+    });
+
+    // Capture phase: the page's own handlers call stopPropagation(), so listen before them.
+    document.addEventListener('click', function (e) {
+        if (!document.body.classList.contains('sidebar-open')) return;
+        var sb = document.querySelector('.sidebar');
+        if (!sb || !sb.contains(e.target)) return;
+        var parent = e.target.closest('.has-sub-menu');
+        var isSubToggle = !!(parent && parent.querySelector('.sub-menu') &&
+                             e.target.closest('.main-menu-item') && !e.target.closest('.sub-menu'));
+        if (isSubToggle) return; // just expanding a group - keep the drawer open
+        if (e.target.closest('.sub-menu li') || e.target.closest('.main-menu-item') || e.target.closest('.sidebar-menu > li')) {
+            closeSidebar();
+        }
+    }, true);
+
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSidebar(); });
+    window.addEventListener('resize', function () { if (window.innerWidth > 900) closeSidebar(); });
+})();
+</script>
 </head>
 <body class="bg-gray-50 font-sans antialiased">
 
@@ -1343,6 +1503,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             <!-- HEADER BAR WITH NOTIFICATION BELL -->
             <header class="header-bar">
                 <div class="header-left">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open menu" onclick="toggleSidebarMobile()">&#9776;</button>
                     <div>
                         <h3 id="dashTitle" style="margin:0; font-size: 16px;">Welcome, User</h3>
                         <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Role: <span id="dashRole" style="font-weight:600; color:var(--text-main);">Trainer</span></p>
