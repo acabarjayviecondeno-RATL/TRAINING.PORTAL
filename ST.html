@@ -1527,6 +1527,33 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
     .logout-btn { height: 38px !important; min-height: 38px !important; padding: 0 10px !important; }
     .header-bar h3 { font-size: 14px !important; }
 }
+
+/* ---- v2.1: headings built as flex rows (text + <span> + text) were splitting into columns ---- */
+@media (max-width: 900px) {
+    .content-section h3.flex, .content-section h4.flex,
+    .section-container h3.flex, .section-container h4.flex {
+        display: block !important;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        line-height: 1.35;
+    }
+    /* title + badge row: title takes the space, badge sits to the right / wraps below */
+    .content-section .flex.items-center.justify-between:has(> h3, > h4) {
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+    }
+    .content-section .flex.items-center.justify-between > h3,
+    .content-section .flex.items-center.justify-between > h4 { flex: 1 1 200px; min-width: 0; }
+    .content-section .flex.items-center.justify-between > span[id$="Badge"] { flex: 0 0 auto; white-space: nowrap; }
+
+    /* pending-task cards */
+    #dailyPlanContainer > div { align-items: flex-start !important; padding: 12px !important; }
+    #dailyPlanContainer > div > .flex { min-width: 0; flex: 1 1 220px; align-items: flex-start !important; }
+    #dailyPlanContainer > div > .flex > div { min-width: 0; overflow-wrap: anywhere; }
+    #dailyPlanContainer > div > .flex > span:first-child { flex: 0 0 auto; white-space: nowrap; }
+    #dailyPlanContainer .text-sm { line-height: 1.35; }
+}
 </style>
 <script id="mobile-responsive-js">
 (function () {
