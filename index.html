@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Training Portal - Login</title>
-    <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
+    <LINk rel="icon" type="img/png" href="/dashboard.png"> </LINk>
     <style>
         :root {
             --card-bg: #ffffff;
@@ -632,8 +632,13 @@ body #notifDropdown {
             } else if (position === 'st' || position.includes('specialized trainer')) {
                 window.location.href = "ST.html";
             } else {
-                // Safe default fallback for regular accounts without an exact match
-                window.location.href = "index.html"; 
+                // No portal for this role: clear the session and stay on the login page
+                // (redirecting to index.html here would just reload this page forever).
+                localStorage.removeItem('portal_user');
+                localStorage.removeItem('portal_name');
+                localStorage.removeItem('portal_role');
+                var em = document.getElementById('errorMsg');
+                if (em) em.innerText = "Your account has no portal assigned. Please contact your administrator.";
             }
         }
 
