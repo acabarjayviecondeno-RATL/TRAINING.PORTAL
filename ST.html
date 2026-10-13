@@ -1087,6 +1087,225 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 @media (max-width: 520px) {
     .leave-form { grid-template-columns: 1fr; }
 }
+
+/* =====================  KPI LANDING PAGE (per Job Group)  ===================== */
+.kpi-top { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:16px; }
+.kpi-sub { margin:4px 0 0 0; font-size:12px; color:var(--text-muted); line-height:1.5; max-width:560px; }
+.kpi-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.kpi-controls select { width:190px; margin:0; padding:8px 10px; }
+.kpi-lbl { margin:0; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
+.kpi-chip { display:inline-block; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700; color:#8ab8ff; background:rgba(59,130,246,.14); border:1px solid rgba(59,130,246,.35); }
+html[data-theme="light"] .kpi-chip { color:#1d4ed8; background:rgba(37,99,235,.08); border-color:rgba(37,99,235,.3); }
+.kpi-btn { padding:8px 14px; border-radius:8px; border:1px solid var(--border-color); background:transparent; color:var(--text-main); font-weight:600; font-size:12px; cursor:pointer; }
+.kpi-btn:hover { background:rgba(148,163,184,.12); }
+.kpi-banner { margin:0 0 16px 0; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.55; color:#fbbf24; background:rgba(245,158,11,.10); border:1px solid rgba(245,158,11,.35); }
+html[data-theme="light"] .kpi-banner { color:#92400e; }
+
+.kpi-hero { display:grid; grid-template-columns:minmax(220px,300px) 1fr; gap:16px; margin-bottom:22px; }
+@media (max-width:820px){ .kpi-hero { grid-template-columns:1fr; } }
+.kpi-score-card { border-radius:14px; padding:20px; border:1px solid rgba(59,130,246,.32); background:radial-gradient(260px 140px at 100% 0%, rgba(59,130,246,.28), transparent 70%), linear-gradient(145deg, rgba(37,99,235,.22), rgba(12,19,34,.95)); color:#fff; }
+html[data-theme="light"] .kpi-score-card { background:linear-gradient(145deg,#eff6ff,#dbeafe); border-color:#bfdbfe; color:#0f172a; }
+.kpi-score-card small { display:block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; opacity:.8; }
+.kpi-score-big { font-size:46px; font-weight:800; letter-spacing:-.03em; line-height:1.1; margin:6px 0 2px 0; }
+.kpi-score-meta { font-size:12px; opacity:.85; line-height:1.6; }
+.kpi-band { display:inline-block; margin-top:10px; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(16,185,129,.18); border:1px solid rgba(16,185,129,.4); color:#34d399; }
+html[data-theme="light"] .kpi-band { color:#047857; }
+.kpi-band.low { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.4); color:#f87171; }
+html[data-theme="light"] .kpi-band.low { color:#b91c1c; }
+
+.kpi-break { border-radius:14px; border:1px solid var(--border-color); padding:14px 16px; overflow-x:auto; }
+.kpi-break h5 { margin:0 0 8px 0; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
+.kpi-brk-table { width:100%; border-collapse:collapse; font-size:12px; }
+.kpi-brk-table th { text-align:left; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:6px 8px; border-bottom:1px solid var(--border-color); white-space:nowrap; }
+.kpi-brk-table td { padding:7px 8px; border-bottom:1px solid rgba(148,163,184,.12); color:var(--text-main); white-space:nowrap; }
+.kpi-brk-table td.num { text-align:right; font-variant-numeric:tabular-nums; }
+.kpi-bar { display:inline-block; vertical-align:middle; width:90px; height:6px; border-radius:6px; background:rgba(148,163,184,.25); overflow:hidden; margin-left:8px; }
+.kpi-bar > i { display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,#3b82f6,#22c55e); }
+.kpi-nodata { color:var(--text-muted); font-style:italic; }
+
+/* Excel-style tables (matches the report images) */
+.xl-wrap { margin:0 0 20px 0; overflow-x:auto; border-radius:10px; }
+.xl-title { margin:0 0 6px 0; font-size:12px; font-weight:800; color:var(--text-main); }
+.xl-table { border-collapse:collapse; width:100%; min-width:720px; font-size:12px; }
+.xl-table th, .xl-table td { border:1px solid rgba(148,163,184,.45); padding:6px 8px; text-align:center; }
+.xl-band { background:#92d050; color:#0f172a; font-weight:800; font-size:12px; }
+.xl-head th { background:#0070c0; color:#fff; font-weight:700; font-size:11px; }
+.xl-table td { background:rgba(148,163,184,.07); color:var(--text-main); font-variant-numeric:tabular-nums; }
+html[data-theme="light"] .xl-table td { background:#fff; }
+.xl-table td.l { text-align:left; font-weight:600; }
+.xl-good { color:#22c55e !important; font-weight:700; }
+.xl-warn { color:#f59e0b !important; font-weight:700; }
+.xl-bad { color:#ef4444 !important; font-weight:700; }
+.xl-na { color:var(--text-muted) !important; }
+.kpi-notes { margin-top:6px; font-size:12px; color:var(--text-muted); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px; }
+.kpi-notes summary { cursor:pointer; font-weight:700; color:var(--text-main); }
+.kpi-notes ul { margin:10px 0 0 0; padding-left:18px; line-height:1.65; }
+
+
+
+/* ---------- KPI landing: polished look, centered data ---------- */
+
+.kpi-top h4 { font-size:18px !important; letter-spacing:-.01em; }
+
+.kpi-top .kpi-sub { max-width:620px; }
+
+.kpi-controls { padding:6px 8px; border-radius:12px; border:1px solid var(--border-color); background:rgba(148,163,184,.06); }
+
+.kpi-hero { align-items:stretch; }
+
+.kpi-score-card { display:flex; flex-direction:column; justify-content:center; text-align:center; box-shadow:0 14px 34px rgba(0,0,0,.28); }
+
+.kpi-score-big { font-size:56px; background:linear-gradient(135deg,#fff,#9cc3ff); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+
+html[data-theme="light"] .kpi-score-big { background:none; -webkit-text-fill-color:#1d4ed8; color:#1d4ed8; }
+
+.kpi-band { align-self:center; }
+
+.kpi-break { background:rgba(148,163,184,.05); padding:16px 18px; }
+
+.kpi-break h5 { text-align:center; margin-bottom:12px; }
+
+.kpi-brk-table { border-collapse:separate; border-spacing:0; }
+
+.kpi-brk-table th, .kpi-brk-table td { text-align:center !important; vertical-align:middle; padding:10px 10px; }
+
+.kpi-brk-table th:first-child, .kpi-brk-table td:first-child { text-align:left !important; font-weight:600; }
+
+.kpi-brk-table tbody tr:nth-child(even) td { background:rgba(148,163,184,.05); }
+
+.kpi-brk-table tbody tr:hover td { background:rgba(59,130,246,.10); }
+
+.kpi-brk-table tbody tr:last-child td { border-bottom:none; }
+
+.kpi-brk-table td.num .kpi-bar { display:block; margin:6px auto 0 auto; width:100px; }
+
+
+
+.kpi-legend { display:flex; justify-content:center; flex-wrap:wrap; gap:14px; margin:0 0 14px 0; font-size:11px; color:var(--text-muted); }
+
+.kpi-legend span { display:inline-flex; align-items:center; gap:6px; }
+
+.kpi-legend i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+
+
+
+.xl-wrap { padding:14px 14px 6px 14px; border:1px solid var(--border-color); border-radius:14px; background:rgba(148,163,184,.04); box-shadow:0 8px 24px rgba(0,0,0,.14); }
+
+.xl-title { display:flex; align-items:center; gap:8px; font-size:13px; letter-spacing:.01em; }
+
+.xl-title::before { content:''; width:4px; height:16px; border-radius:4px; background:linear-gradient(180deg,#3b82f6,#8b5cf6); }
+
+.xl-table { border-collapse:separate; border-spacing:0; border-radius:10px; overflow:hidden; border:1px solid rgba(148,163,184,.28); margin-bottom:10px; }
+
+.xl-table th, .xl-table td { border:none; border-right:1px solid rgba(148,163,184,.18); border-bottom:1px solid rgba(148,163,184,.18); padding:11px 10px; text-align:center; vertical-align:middle; }
+
+.xl-table tr > *:last-child { border-right:none; }
+
+.xl-table tr:last-child > * { border-bottom:none; }
+
+.xl-band { background:linear-gradient(90deg,#10b981,#34d399) !important; color:#052e1f !important; letter-spacing:.04em; text-transform:uppercase; font-size:11px !important; padding:8px 10px !important; }
+
+.xl-head th { background:linear-gradient(180deg,#1e3a8a,#1d4ed8) !important; color:#e8f0ff !important; font-size:10.5px !important; font-weight:700; letter-spacing:.03em; line-height:1.35; white-space:normal; }
+
+.xl-table td { font-size:14px; font-weight:600; background:rgba(148,163,184,.06); }
+
+.xl-table td.l { text-align:center; }
+
+.xl-table td.xl-good { background:rgba(34,197,94,.12); }
+
+.xl-table td.xl-warn { background:rgba(245,158,11,.12); }
+
+.xl-table td.xl-bad  { background:rgba(239,68,68,.12); }
+
+html[data-theme="light"] .xl-head th { background:linear-gradient(180deg,#1d4ed8,#2563eb) !important; }
+
+html[data-theme="light"] .xl-table td { background:#fff; }
+
+html[data-theme="light"] .xl-table td.xl-good { background:#ecfdf5; }
+
+html[data-theme="light"] .xl-table td.xl-warn { background:#fffbeb; }
+
+html[data-theme="light"] .xl-table td.xl-bad  { background:#fef2f2; }
+
+
+
+.kpi-notes { margin-top:18px; padding:0; border-radius:14px; background:rgba(148,163,184,.05); overflow:hidden; }
+
+.kpi-notes > summary { list-style:none; display:flex; align-items:center; gap:10px; padding:14px 18px; font-size:14px; }
+
+.kpi-notes > summary::-webkit-details-marker { display:none; }
+
+.kpi-notes > summary::after { content:'▾'; margin-left:auto; transition:transform .2s ease; color:var(--text-muted); }
+
+.kpi-notes[open] > summary::after { transform:rotate(180deg); }
+
+.kpi-notes[open] > summary { border-bottom:1px solid var(--border-color); }
+
+.kpi-notes-body { padding:16px 18px 18px 18px; display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+
+.kpi-notes-card { border:1px solid var(--border-color); border-radius:12px; padding:12px 14px; background:rgba(148,163,184,.05); }
+
+.kpi-notes-card h6 { margin:0 0 8px 0; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-main); }
+
+.kpi-notes-card ul { margin:0; padding-left:18px; line-height:1.65; }
+
+.kpi-notes-card code { font-size:11px; padding:1px 6px; border-radius:6px; background:rgba(59,130,246,.14); color:#8ab8ff; }
+
+html[data-theme="light"] .kpi-notes-card code { color:#1d4ed8; }
+
+.kpi-live { grid-column:1 / -1; text-align:center; border-color:rgba(59,130,246,.35); background:rgba(59,130,246,.07); }
+
+.kpi-live-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:10px 0; }
+
+.kpi-live-item { padding:10px; border-radius:10px; border:1px solid var(--border-color); background:rgba(148,163,184,.06); display:flex; flex-direction:column; gap:4px; align-items:center; }
+
+.kpi-live-item span { font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); }
+
+.kpi-live-item strong { font-size:17px; color:var(--text-main); font-variant-numeric:tabular-nums; }
+
+.kpi-live-status { margin:6px 0 0 0; font-size:12px; line-height:1.55; color:var(--text-muted); }
+
+.kpi-live-status.warn { color:#fbbf24; }
+
+html[data-theme="light"] .kpi-live-status.warn { color:#92400e; }
+
+
+
+/* ---------- Monthly Plan: filter bar + centered table ---------- */
+
+.mp-filter { display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px; margin-top:20px; padding:14px 16px; border:1px solid var(--border-color); border-radius:14px; background:rgba(148,163,184,.05); }
+
+.mp-field { display:flex; flex-direction:column; gap:5px; min-width:150px; }
+
+.mp-field.grow { flex:1 1 220px; }
+
+.mp-field label { margin:0; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+
+.mp-field select, .mp-field input { margin:0 !important; width:100%; padding:9px 11px; }
+
+.mp-count { margin-left:auto; align-self:center; font-size:12px; color:var(--text-muted); white-space:nowrap; }
+
+.mp-count strong { color:var(--text-main); }
+
+.mp-reset { padding:9px 14px; border-radius:10px; border:1px solid var(--border-color); background:transparent; color:var(--text-main); font-weight:600; font-size:12px; cursor:pointer; }
+
+.mp-reset:hover { background:rgba(148,163,184,.14); }
+
+#monthlyPlanTable th, #monthlyPlanTable td { text-align:center; vertical-align:middle; }
+
+#monthlyPlanTable td:nth-child(4), #monthlyPlanTable th:nth-child(4) { text-align:left; }
+
+.mp-pill { display:inline-block; padding:3px 11px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.03em; color:#8ab8ff; background:rgba(59,130,246,.14); border:1px solid rgba(59,130,246,.35); white-space:nowrap; }
+
+.mp-pill.none { color:var(--text-muted); background:rgba(148,163,184,.1); border-color:rgba(148,163,184,.3); }
+
+html[data-theme="light"] .mp-pill { color:#1d4ed8; }
+
+
+
+@media (max-width:640px){ .kpi-score-big { font-size:44px; } .xl-wrap { padding:10px 8px 2px 8px; } }
+
+
 </style>
 <script>
 /* Aura theme switcher (light / dark) — presentation only */
@@ -1242,62 +1461,223 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 </script>
 
 <style id="approval-form-alignment">
-/* Approval Requests: align all controls to a consistent height and baseline */
-#approvalTab > div[style*="display: flex"] {
-    display: grid !important;
-    grid-template-columns: minmax(220px, 0.9fr) minmax(280px, 1.4fr) auto;
-    gap: 12px !important;
-    align-items: end !important;
-    padding: 16px !important;
+/* ==========================================================
+   APPROVAL REQUESTS — form layout (desktop + mobile)
+   ========================================================== */
+#approvalTab .approval-upload-card {
+    background: linear-gradient(180deg, rgba(20, 30, 50, 0.85), rgba(14, 22, 38, 0.9));
+    border: 1px solid var(--aura-line, rgba(148,163,184,0.13));
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
 }
-#approvalTab > div[style*="display: flex"] > div {
-    min-width: 0 !important;
+#approvalTab .approval-upload-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 14px;
+    align-items: end;
+}
+#approvalTab .approval-field-file {
+    grid-column: 1 / 3;
+}
+#approvalTab .approval-actions {
+    grid-column: 3 / 4;
+    justify-content: stretch;
+}
+#approvalTab .approval-actions #uploadFileBtn {
     width: 100%;
+}
+#approvalTab .approval-field {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    min-width: 0;
 }
-#approvalTab > div[style*="display: flex"] label {
+#approvalTab .approval-field label {
     display: block;
-    height: 14px;
-    line-height: 14px;
-    margin: 0 0 8px !important;
+    margin: 0 0 6px !important;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--aura-muted, #8795b1);
+    height: auto;
+    line-height: 1.3;
 }
-#approvalTab #approverSelect,
-#approvalTab #approvalFileInput {
+#approvalTab .approval-field select,
+#approvalTab .approval-field input[type="file"] {
     width: 100% !important;
-    height: 44px !important;
-    min-height: 44px !important;
+    height: 42px !important;
+    min-height: 42px !important;
     box-sizing: border-box !important;
     margin: 0 !important;
-    font: inherit;
-}
-#approvalTab #approverSelect {
     padding: 0 12px !important;
+    font: inherit;
+    font-size: 13px;
+    color: var(--aura-text, #e6ebf5);
+    background: rgba(8, 13, 25, 0.75) !important;
+    border: 1px solid rgba(148, 163, 184, 0.24) !important;
+    border-radius: 10px !important;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
-#approvalTab #approvalFileInput {
-    padding: 7px 9px !important;
-    line-height: 26px;
+#approvalTab .approval-field select:focus,
+#approvalTab .approval-field input[type="file"]:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
 }
-#approvalTab #approvalFileInput::file-selector-button {
-    height: 30px;
+#approvalTab .approval-field input[type="file"] {
+    padding: 6px 10px !important;
+    line-height: 28px;
+    color: var(--aura-soft, #c4cee0);
+}
+#approvalTab .approval-field input[type="file"]::file-selector-button {
+    height: 28px;
     margin: 0 10px 0 0;
     padding: 0 12px;
+    border: none;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+#approvalTab .approval-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
 }
 #approvalTab #uploadFileBtn {
-    height: 44px !important;
-    min-height: 44px !important;
-    align-self: end;
-    white-space: nowrap;
-    padding: 0 20px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    min-width: 120px;
+    padding: 0 22px !important;
     margin: 0 !important;
+    border: none;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: #fff !important;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+    transition: filter 0.15s, transform 0.15s;
+    white-space: nowrap;
 }
-@media (max-width: 760px) {
-    #approvalTab > div[style*="display: flex"] {
-        grid-template-columns: minmax(0, 1fr) !important;
+#approvalTab #uploadFileBtn:hover { filter: brightness(1.08); }
+#approvalTab #uploadFileBtn:active { transform: translateY(1px); }
+#approvalTab #uploadFileBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: none;
+}
+
+/* Filter bar */
+#approvalTab .approval-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+#approvalTab .approval-filter-bar label {
+    margin: 0 !important;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--aura-muted, #8795b1);
+}
+#approvalTab .approval-filter-bar select {
+    min-width: 200px;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+    color: var(--aura-text, #e6ebf5);
+    background: rgba(8, 13, 25, 0.75);
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 9px;
+}
+
+/* Hint text */
+#approvalTab .approval-hint {
+    margin: 0 0 14px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--aura-muted, #8795b1);
+}
+#approvalTab .approval-hint strong { color: var(--aura-blue-soft, #8ab8ff); font-weight: 600; }
+
+/* Table polish for approval */
+#approvalTab .task-table-container {
+    border-radius: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+#approvalTab .task-table th {
+    white-space: nowrap;
+    font-size: 10px;
+}
+#approvalTab .task-table td {
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 900px) {
+    #approvalTab .approval-upload-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    #approvalTab .approval-field-file {
+        grid-column: 1 / -1;
+    }
+    #approvalTab .approval-actions {
+        grid-column: 1 / -1;
     }
     #approvalTab #uploadFileBtn {
         width: 100%;
+        min-width: 0;
+    }
+}
+@media (max-width: 560px) {
+    #approvalTab .approval-upload-card {
+        padding: 14px 12px 12px;
+        border-radius: 14px;
+    }
+    #approvalTab .approval-upload-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    #approvalTab .approval-field-file,
+    #approvalTab .approval-actions {
+        grid-column: auto;
+    }
+    #approvalTab .approval-field select,
+    #approvalTab .approval-field input[type="file"],
+    #approvalTab #uploadFileBtn {
+        height: 44px !important;
+        min-height: 44px !important;
+        font-size: 14px;
+    }
+    #approvalTab .approval-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+    #approvalTab .approval-filter-bar select {
+        min-width: 0;
+        width: 100%;
+        height: 40px;
+    }
+    #approvalTab .task-table th,
+    #approvalTab .task-table td {
+        padding: 10px 10px;
+        font-size: 11px;
+    }
+    #approvalTab h3 {
+        font-size: 16px !important;
     }
 }
 </style>
@@ -1730,15 +2110,81 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 </div>
             </header>
 
-            <!-- OVERVIEW SECTION -->
+            <!-- OVERVIEW SECTION (KPI LANDING PAGE PER JOB GROUP) -->
             <div id="overviewTab" class="content-section active">
                 <div class="section-container">
-                    <h4 style="margin-top:0; font-size: 14px; margin-bottom: 15px;">🏠 Dashboard & Portal Overview</h4>
-                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px;">
-                        Welcome to your Training Portal Dashboard. Here you can find a quick summary of your tasks, total task hours, and overall productivity rate for this month.
-                    </p>
-                    
-                    <div class="summary-grid">
+
+                    <!-- Landing header -->
+                    <div class="kpi-top">
+                        <div>
+                            <h4 style="margin:0; font-size:15px;">🏠 KPI Landing Page</h4>
+                            <p class="kpi-sub">Your monthly KPI scorecard, computed from your Monthly Plan, Daily Actual and Approval records.</p>
+                        </div>
+                        <div class="kpi-controls">
+                            <span id="kpiJobChip" class="kpi-chip">Job Group: loading…</span>
+                            <label for="kpiMonthSelect" class="kpi-lbl">Month</label>
+                            <select id="kpiMonthSelect" onchange="onKpiMonthChange()"></select>
+                            <button type="button" class="kpi-btn" onclick="refreshKpiLanding()">↻ Refresh</button>
+                        </div>
+                    </div>
+
+                    <div id="kpiMissingBanner" class="kpi-banner" style="display:none;"></div>
+
+                    <!-- Hero: total KPI + weighted breakdown -->
+                    <div id="kpiHero" class="kpi-hero"></div>
+
+                    <!-- Per job group tables (same layout as the Excel report) -->
+                    <div id="kpiTables"></div>
+
+                    <!-- Raw counts -->
+                    <div id="kpiRaw"></div>
+
+                    <details class="kpi-notes">
+                        <summary>ℹ️ How is this computed?</summary>
+                        <div class="kpi-notes-body">
+                            <div class="kpi-notes-card">
+                                <h6>📌 Content count</h6>
+                                <ul>
+                                    <li><strong>Target no. of content</strong> = Monthly Plan rows (category CONTENT) for the selected MONTH × FREQUENCY PER MONTH.</li>
+                                    <li><strong>Actual no. of content</strong> = your Daily Actual rows with category CONTENT (one per “Is this the start date? = Yes”; if not used, one per title). Titles/category containing “proofread” count as Proofread, not Own Content.</li>
+                                    <li><strong>A content is counted only once it is approved</strong>: APPROVAL DATE is filled in, or an <em>Approved</em> file in Approval Requests has the content title in its name. Otherwise it stays in <em>Awaiting approval</em>.</li>
+                                    <li><strong>Ach %</strong> = Own Content ÷ Target.</li>
+                                </ul>
+                            </div>
+                            <div class="kpi-notes-card">
+                                <h6>⏱️ Accuracy · Efficiency · Timeliness (by duration)</h6>
+                                <ul>
+                                    <li>Based on <code>DURATION PER MIN</code> of <strong>approved</strong> content only (sum of the minutes of all its Daily Actual rows).</li>
+                                    <li><strong>Revision mins</strong> = minutes of the content for every <em>Rejected</em> file in Approval Requests uploaded that month (matched by title; if no match, the average minutes per content).</li>
+                                    <li><strong>Accuracy (Quality) %</strong> = (Approved mins − Revision mins) ÷ Approved mins, less the Content Errors deduction (1–2 errors = 1%, 3–4 = 2% …).</li>
+                                    <li><strong>Efficiency %</strong> = (Mins w/o revisions − Revision mins) ÷ Mins w/o revisions (not lower than 0%).</li>
+                                    <li><strong>Timeliness (On-time) %</strong> = On-time mins ÷ Own Content mins. On-time = APPROVAL DATE is on or before TARGET DATE.</li>
+                                    <li>If no Duration per Minute is recorded for the approved content yet, these three temporarily use content count instead.</li>
+                                </ul>
+                            </div>
+                            <div class="kpi-notes-card">
+                                <h6>⚡ Productivity Rate (monitoring only)</h6>
+                                <ul>
+                                    <li><strong>Productivity</strong> = Actual Duration ÷ Adjusted Planned Duration.</li>
+                                    <li><strong>Actual Duration</strong> = sum of <code>DURATION PER MIN</code> of your Daily Actual rows. Content rows count only after the content is approved; other tasks count right away.</li>
+                                    <li><strong>Adjusted Planned Duration</strong> = planned minutes less leave / absent days (480 mins each).</li>
+                                    <li>Not included in the Total KPI.</li>
+                                </ul>
+                            </div>
+                            <div class="kpi-notes-card">
+                                <h6>🧮 Other KPIs &amp; Total</h6>
+                                <ul>
+                                    <li><strong>SO Ach, SocMed, Training, S+ and Inventory/Disbursement</strong> are read from the “KPI Inputs” sheet (they have no source in the daily logs).</li>
+                                    <li><strong>Total KPI</strong> = Σ (achievement, capped per KPI) × weight — same weights and caps as the ST incentive sheet.</li>
+                                </ul>
+                            </div>
+                            <div class="kpi-notes-card kpi-live" id="kpiNotesLive"></div>
+                        </div>
+                    </details>
+
+                    <!-- Time & productivity (previous overview, kept) -->
+                    <h4 style="display:none;">⏱️ Time &amp; Productivity</h4>
+                    <div class="summary-grid" style="display:none;">
                         <div class="summary-card">
                             <h4>Total Rendered Days</h4>
                             <p class="val" id="overviewDaysWorked">0</p>
@@ -1757,7 +2203,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     </div>
 
                     <!-- MONTHLY PLAN PENDING TASKS & FREQUENCY TRACKER -->
-                    <div class="bg-blue-50/50 rounded-xl border border-blue-100 p-5 mb-6">
+                    <div class="bg-blue-50/50 rounded-xl border border-blue-100 p-5 mb-6" style="margin-top:20px;">
                         <div class="plan-head mb-3">
                             <h4 class="text-sm font-bold text-gray-800 plan-title" style="margin:0;">
                                 📅 Monthly Plan Pending Tasks & Frequency Tracker (<span id="currentDateText"></span>)
@@ -1767,15 +2213,6 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         <div id="dailyPlanContainer" class="space-y-2">
                             <p class="text-sm text-gray-500 italic">Loading pending tasks...</p>
                         </div>
-                    </div>
-
-                    <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: var(--radius-md); margin-top: 20px;">
-                        <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 13px;">💡 Quick Guide:</h4>
-                        <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #1e3a8a; line-height: 1.5;">
-                            <li>Go to <strong>Daily Task Time > Summary</strong> to view the detailed Hourly Gantt Chart.</li>
-                            <li>Check the <strong>Daily Plan</strong>, <strong>Monthly Plan</strong>, and <strong>Leave / Absent Log</strong> for your monthly tracking.</li>
-                            <li>Use the <strong>Download Excel</strong> button inside Daily Task Time to get a copy of your report for the selected month.</li>
-                        </ul>
                     </div>
                 </div>
             </div>
@@ -1926,10 +2363,28 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                             <!-- Dynamic populated summary cards -->
                         </div>
 
-                        <div class="task-table-container" style="margin-top: 20px;">
+                        <div class="mp-filter" id="mpFilterBar">
+                            <div class="mp-field">
+                                <label for="mpMonthFilter">Month</label>
+                                <select id="mpMonthFilter" onchange="onMonthlyPlanFilter()"></select>
+                            </div>
+                            <div class="mp-field">
+                                <label for="mpCategoryFilter">Category</label>
+                                <select id="mpCategoryFilter" onchange="onMonthlyPlanFilter()"></select>
+                            </div>
+                            <div class="mp-field grow">
+                                <label for="mpSearchInput">Search</label>
+                                <input type="text" id="mpSearchInput" placeholder="Title, format or remarks…" oninput="onMonthlyPlanFilter()">
+                            </div>
+                            <button type="button" class="mp-reset" onclick="resetMonthlyPlanFilter()">↺ Reset</button>
+                            <div class="mp-count" id="mpCount"></div>
+                        </div>
+
+                        <div class="task-table-container" style="margin-top: 14px;">
                             <table class="task-table" id="monthlyPlanTable">
                                 <thead>
                                     <tr>
+                                        <th>MONTH</th>
                                         <th>DURATION PER MIN</th>
                                         <th>CATEGORY 2</th>
                                         <th>TITLE</th>
@@ -1940,7 +2395,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                                     </tr>
                                 </thead>
                                 <tbody id="monthlyPlanTableBody">
-                                    <tr><td colspan="7" style="text-align:center; padding: 20px; color:var(--text-muted);">No monthly plan data available.</td></tr>
+                                    <tr><td colspan="8" style="text-align:center; padding: 20px; color:var(--text-muted);">No monthly plan data available.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -2258,21 +2713,43 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             <!-- APPROVAL SECTION -->
             <div id="approvalTab" class="content-section">
                 <h3 style="margin-top:0; font-size: 15px;">Approval Requests</h3>
-                <div style="background: #f8fafc; border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
-                    <div style="min-width: 220px;">
-                        <label>Select Approver (SEPCO)</label>
-                        <select id="approverSelect" style="background: #fff; padding: 8px;"><option value="">Loading...</option></select>
+                <p class="approval-hint">Two-stage approval: <strong>RTO</strong> reviews first → after RTO approves, <strong>SEPCO</strong> receives it for final approval.</p>
+
+                <div class="approval-upload-card">
+                    <div class="approval-upload-grid">
+                        <div class="approval-field">
+                            <label for="categorySelect">Category (RCODE · FOR TARKIE)</label>
+                            <select id="categorySelect"><option value="">Select category...</option></select>
+                        </div>
+                        <div class="approval-field">
+                            <label for="rtoSelect">First Approver (RTO)</label>
+                            <select id="rtoSelect"><option value="">Select RTO...</option></select>
+                        </div>
+                        <div class="approval-field">
+                            <label for="approverSelect">Final Approver (SEPCO)</label>
+                            <select id="approverSelect"><option value="">Select SEPCO...</option></select>
+                        </div>
+                        <div class="approval-field approval-field-file">
+                            <label for="approvalFileInput">Select File</label>
+                            <input type="file" id="approvalFileInput">
+                        </div>
+                        <div class="approval-actions">
+                            <button type="button" onclick="handleFileUpload()" id="uploadFileBtn">Upload</button>
+                        </div>
                     </div>
-                    <div style="flex-grow: 1; min-width: 250px;">
-                        <label>Select File</label>
-                        <input type="file" id="approvalFileInput" style="background: #fff; padding: 7px; width: 100%; box-sizing: border-box;">
-                    </div>
-                    <button onclick="handleFileUpload()" id="uploadFileBtn" style="height: 38px; background-color: var(--primary); color: white; padding: 0 16px; border-radius: var(--radius-sm); border: none; font-weight: 600; cursor: pointer;">Upload</button>
                 </div>
+
+                <div class="approval-filter-bar">
+                    <label for="approvalCategoryFilter">Filter by Category</label>
+                    <select id="approvalCategoryFilter" onchange="applyApprovalCategoryFilter()">
+                        <option value="">All categories</option>
+                    </select>
+                </div>
+
                 <div class="task-table-container">
                     <table class="task-table" id="approvalTable">
-                        <thead><tr><th>File Name</th><th>Approver</th><th>Upload Date</th><th>Status</th><th>Remarks</th></tr></thead>
-                        <tbody id="approvalTableBody"><tr><td colspan="5" style="padding: 20px; text-align:center;">No pending approvals found.</td></tr></tbody>
+                        <thead><tr><th>File Name</th><th>Category</th><th>RTO</th><th>SEPCO</th><th>Upload Date</th><th>Status</th><th>Remarks</th></tr></thead>
+                        <tbody id="approvalTableBody"><tr><td colspan="7" style="padding: 20px; text-align:center;">No pending approvals found.</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -2375,6 +2852,8 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             });
             loadApprovals();
             loadSepcoApprovers();
+            loadRtoApprovers();
+            loadRcodeCategories();
             initSocMedData();
             loadNotifications();
             renderLeaveAbsentTable();
@@ -3502,12 +3981,14 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             let uniqueDays = new Set();
             let sumDurationPerMin = 0;
             let durationCount = 0;
+            let apprContentRows = kpiApprovedContentRows(selectedMonth);   // content duration counts only once approved
 
             actualTasks.forEach(t => {
                 let titleVal = t["ACTUAL [Title]"];
                 if (titleVal && String(titleVal).trim() !== "") {
                     uniqueDays.add(cleanDateDisplay(t["Date Submitted"]));
                     let durationVal = parseFloat(getRowVal(t, ["DURATION PER MIN", "DURATION"]));
+                    if (!kpiDurationCounts(t, apprContentRows)) durationVal = NaN;
                     if (!isNaN(durationVal) && durationVal > 0) {
                         sumDurationPerMin += durationVal;
                         durationCount++;
@@ -3558,38 +4039,128 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             updateMonthlyPendingPlanUI(actualTasks);
         }
 
+        // ---- Monthly Plan: month + category + search filter ----
+        var mpFilter = { month: null, cat: '', q: '' };   // month === null -> not initialised yet (defaults to the month selected in the page)
+        var MP_MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        function mpMonthInfo(raw) {
+            let c = String(raw === undefined || raw === null ? '' : raw).trim();
+            if (!c) return { label: 'No month', sort: 999999, mi: -1, yr: '' };
+            let m = /^(\d{4})-(\d{2})/.exec(c);
+            if (m) { let i = parseInt(m[2], 10) - 1; return { label: (MP_MONTH_NAMES[i] || c) + ' ' + m[1], sort: parseInt(m[1], 10) * 100 + i, mi: i, yr: m[1] }; }
+            let i = MP_MONTH_NAMES.findIndex(n => n.toLowerCase().substring(0, 3) === c.toLowerCase().substring(0, 3));
+            if (i === -1) return { label: c, sort: 999998, mi: -1, yr: '' };
+            let y = /(\d{4})/.exec(c);
+            return { label: MP_MONTH_NAMES[i] + (y ? ' ' + y[1] : ''), sort: (y ? parseInt(y[1], 10) : 0) * 100 + i, mi: i, yr: y ? y[1] : '' };
+        }
+        function onMonthlyPlanFilter() {
+            mpFilter.month = document.getElementById('mpMonthFilter').value;
+            mpFilter.cat = document.getElementById('mpCategoryFilter').value;
+            mpFilter.q = document.getElementById('mpSearchInput').value;
+            renderMonthlyPlanView();
+        }
+        function resetMonthlyPlanFilter() {
+            mpFilter = { month: '', cat: '', q: '' };
+            let s = document.getElementById('mpSearchInput'); if (s) s.value = '';
+            renderMonthlyPlanView();
+        }
+
         function renderMonthlyPlanView() {
             let tableBody = document.getElementById('monthlyPlanTableBody');
             let summaryGrid = document.getElementById('monthlyPlanSummaryGrid');
             if (!tableBody) return;
 
             let monthlyTasks = (allLoadedTasks.monthlyPlan || []).filter(t => matchesUser(t));
+            let bar = document.getElementById('mpFilterBar');
             if (monthlyTasks.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:var(--text-muted);">No monthly plan data available.</td></tr>`;
+                if (bar) bar.style.display = 'none';
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px; color:var(--text-muted);">No monthly plan data available.</td></tr>`;
                 if (summaryGrid) summaryGrid.innerHTML = `<div class="summary-card"><h4>No Data</h4><p class="val">-</p><p>No recorded monthly plan data.</p></div>`;
                 return;
             }
+            if (bar) bar.style.display = '';
 
-            tableBody.innerHTML = monthlyTasks.map(row => `
+            let catOf = (row) => String(getRowVal(row, ["CATEGORY 2", "CATEGORY"]) || '').trim().toUpperCase();
+            let infos = monthlyTasks.map(r => mpMonthInfo(getRowVal(r, ["MONTH"])));
+
+            // month options (sorted by calendar) + default = the month selected in the page
+            let monthMap = {};
+            infos.forEach(i => { monthMap[i.label] = i.sort; });
+            let monthLabels = Object.keys(monthMap).sort((a, b) => monthMap[a] - monthMap[b]);
+            if (mpFilter.month === null) {
+                let sel = document.getElementById('selectedMonthFilter');
+                let key = sel ? sel.value : '';
+                let def = '';
+                if (key && key.includes('-')) {
+                    let yy = key.split('-')[0], mm = parseInt(key.split('-')[1], 10) - 1;
+                    let hit = infos.find(i => i.mi === mm && (!i.yr || i.yr === yy));
+                    if (hit) def = hit.label;
+                }
+                mpFilter.month = def;
+            }
+            if (mpFilter.month && monthLabels.indexOf(mpFilter.month) === -1) mpFilter.month = '';
+
+            let cats = Array.from(new Set(monthlyTasks.map(catOf).filter(c => c !== ''))).sort();
+            if (mpFilter.cat && cats.indexOf(mpFilter.cat) === -1) mpFilter.cat = '';
+
+            let monthSel = document.getElementById('mpMonthFilter');
+            let catSel = document.getElementById('mpCategoryFilter');
+            if (monthSel) {
+                monthSel.innerHTML = '<option value="">All months</option>' + monthLabels.map(l => `<option value="${escHtml(l)}">${escHtml(l)}</option>`).join('');
+                monthSel.value = mpFilter.month;
+            }
+            if (catSel) {
+                catSel.innerHTML = '<option value="">All categories</option>' + cats.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+                catSel.value = mpFilter.cat;
+            }
+
+            let q = String(mpFilter.q || '').toLowerCase().trim();
+            let visible = [];
+            monthlyTasks.forEach((row, idx) => {
+                if (mpFilter.month && infos[idx].label !== mpFilter.month) return;
+                if (mpFilter.cat && catOf(row) !== mpFilter.cat) return;
+                if (q) {
+                    let hay = [getRowVal(row, ["TITLE", "PLAN [Title]"]), getRowVal(row, ["FORMAT"]), getRowVal(row, ["REMARKS"]), catOf(row)].join(' ').toLowerCase();
+                    if (hay.indexOf(q) === -1) return;
+                }
+                visible.push({ row: row, info: infos[idx] });
+            });
+
+            let countEl = document.getElementById('mpCount');
+            if (countEl) countEl.innerHTML = 'Showing <strong>' + visible.length + '</strong> of ' + monthlyTasks.length;
+
+            if (visible.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px; color:var(--text-muted);">No plan matches the selected filters.</td></tr>`;
+            } else {
+                tableBody.innerHTML = visible.map(v => `
                 <tr>
-                    <td>${getRowVal(row, ["DURATION PER MIN", "DURATION"])}</td>
-                    <td>${getRowVal(row, ["CATEGORY 2", "CATEGORY"])}</td>
-                    <td>${getRowVal(row, ["TITLE", "PLAN [Title]"])}</td>
-                    <td>${getRowVal(row, ["FORMAT"])}</td>
-                    <td>${getRowVal(row, ["AVERAGE TIME (in minutes)", "AVERAGE TIME"])}</td>
-                    <td>${getRowVal(row, ["FREQUENCY PER MONTH", "FREQUENCY"])}</td>
-                    <td>${getRowVal(row, ["REMARKS"])}</td>
+                    <td><span class="mp-pill ${v.info.mi === -1 && v.info.label === 'No month' ? 'none' : ''}">${escHtml(v.info.label)}</span></td>
+                    <td>${getRowVal(v.row, ["DURATION PER MIN", "DURATION"])}</td>
+                    <td>${getRowVal(v.row, ["CATEGORY 2", "CATEGORY"])}</td>
+                    <td>${getRowVal(v.row, ["TITLE", "PLAN [Title]"])}</td>
+                    <td>${getRowVal(v.row, ["FORMAT"])}</td>
+                    <td>${getRowVal(v.row, ["AVERAGE TIME (in minutes)", "AVERAGE TIME"])}</td>
+                    <td>${getRowVal(v.row, ["FREQUENCY PER MONTH", "FREQUENCY"])}</td>
+                    <td>${getRowVal(v.row, ["REMARKS"])}</td>
                 </tr>
             `).join('');
+            }
 
             if (summaryGrid) {
+                let counts = {};
+                visible.forEach(v => { let c = catOf(v.row) || 'UNCATEGORIZED'; counts[c] = (counts[c] || 0) + 1; });
+                let scope = (mpFilter.month ? mpFilter.month : 'all months') + (mpFilter.cat ? ' · ' + mpFilter.cat : '');
                 summaryGrid.innerHTML = `
                     <div class="summary-card">
                         <h4>Total Planned</h4>
-                        <p class="val">${monthlyTasks.length}</p>
-                        <p>Total listed tasks in the Monthly Plan sheet.</p>
-                    </div>
-                `;
+                        <p class="val">${visible.length}</p>
+                        <p>Listed tasks · ${escHtml(scope)}</p>
+                    </div>` +
+                    Object.keys(counts).sort().slice(0, 3).map(c => `
+                    <div class="summary-card">
+                        <h4>${escHtml(c)}</h4>
+                        <p class="val">${counts[c]}</p>
+                        <p>${escHtml(c.toLowerCase())} items in this view</p>
+                    </div>`).join('');
             }
         }
 
@@ -3699,8 +4270,8 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
         // ===================== APPROVAL REQUESTS (ST -> SEPCO) =====================
         // Apps Script actions used by this tab. "getApprovals" is the same action SEPCO.html reads;
         // the other two names can be changed here if your Apps Script uses different ones.
-        const APPROVAL_ACTIONS = { list: 'getApprovals', approvers: 'getSepcoApprovers', upload: 'uploadFile' };
-        const MAX_UPLOAD_MB = 10;
+        const APPROVAL_ACTIONS = { list: 'getApprovals', approvers: 'getSepcoApprovers', rto: 'getRtoApprovers', categories: 'getRcodeCategories', upload: 'uploadFile' };
+        // No file-size limit on uploads (removed on request).
         var allApprovals = [];
 
         // GET helper: plain fetch first, JSONP fallback (same technique SEPCO.html uses)
@@ -3737,7 +4308,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 let res = await callApi({ action: APPROVAL_ACTIONS.list, t: Date.now() });
                 if (res && res.success && Array.isArray(res.approvals)) {
                     allApprovals = res.approvals.filter(isMyApproval);
-                    renderApprovalTable(allApprovals);
+                    applyApprovalCategoryFilter();
                 } else {
                     allApprovals = [];
                     renderApprovalTable([]);
@@ -3745,8 +4316,33 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             } catch (e) {
                 console.error('Error loading approvals:', e);
                 if (tbody && !allApprovals.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align:center; color:#dc2626;">Failed to load approval requests. Please try again later.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--text-muted);">Could not load approvals.</td></tr>';
                 }
+            }
+        }
+
+        function applyApprovalCategoryFilter() {
+            var filterEl = document.getElementById('approvalCategoryFilter');
+            var cat = filterEl ? String(filterEl.value || '').trim().toLowerCase() : '';
+            var list = allApprovals || [];
+            if (cat) {
+                list = list.filter(function (a) {
+                    return String(a.category || '').trim().toLowerCase() === cat;
+                });
+            }
+            renderApprovalTable(list);
+            // Refresh filter options from current data
+            if (filterEl) {
+                var prev = filterEl.value;
+                var cats = {};
+                (allApprovals || []).forEach(function (a) {
+                    var c = String(a.category || '').trim();
+                    if (c) cats[c] = true;
+                });
+                var opts = Object.keys(cats).sort();
+                filterEl.innerHTML = '<option value="">All categories</option>' +
+                    opts.map(function (c) { return '<option value="' + escHtml(c) + '">' + escHtml(c) + '</option>'; }).join('');
+                filterEl.value = prev;
             }
         }
 
@@ -3755,7 +4351,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             if (!tbody) return;
 
             if (!approvals || approvals.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align:center; color:var(--text-muted);">No approval requests found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align:center; color:var(--text-muted);">No approval requests found.</td></tr>';
                 return;
             }
 
@@ -3768,8 +4364,17 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             tbody.innerHTML = sorted.map(item => {
                 let st = String(item.status || '').toLowerCase();
                 let badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Pending</span>';
-                if (st.includes('approve')) badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Approved</span>';
-                else if (st.includes('reject')) badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">Rejected</span>';
+                if (st.includes('pending rto') || st === 'pending rto') {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background:#fef3c7;color:#b45309;">Pending RTO</span>';
+                } else if (st.includes('pending sepco') || st === 'pending sepco') {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background:#dbeafe;color:#1d4ed8;">Pending SEPCO</span>';
+                } else if (st.includes('approve')) {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Approved</span>';
+                } else if (st.includes('reject')) {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">Rejected</span>';
+                } else if (st.includes('pending')) {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Pending</span>';
+                }
 
                 let remarks = String(item.remarks || '').trim();
                 let remarksColor = st.includes('reject') ? '#f87171' : 'var(--text-muted)';
@@ -3788,80 +4393,116 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     when = d.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
                 }
 
+                let catHtml = item.category ? escHtml(item.category) : '<span style="color:var(--text-muted);">&mdash;</span>';
+                let rtoHtml = item.rtoEmail ? ('👤 ' + escHtml(item.rtoEmail)) : '<span style="color:var(--text-muted);">&mdash;</span>';
+                let sepcoHtml = item.sepcoEmail ? ('👤 ' + escHtml(item.sepcoEmail)) : (item.approverEmail && !item.rtoEmail ? ('👤 ' + escHtml(item.approverEmail)) : '<span style="color:var(--text-muted);">&mdash;</span>');
+
                 return '<tr>' +
-                    '<td>' + fileHtml + '</td>' +
-                    '<td>👤 ' + escHtml(item.approver || item.approverName || '-') + '</td>' +
-                    '<td>' + escHtml(when || 'N/A') + '</td>' +
+                    '<td style="white-space:normal; min-width:180px;">' + fileHtml + '</td>' +
+                    '<td style="font-size:12px;">' + catHtml + '</td>' +
+                    '<td style="font-size:12px;">' + rtoHtml + '</td>' +
+                    '<td style="font-size:12px;">' + sepcoHtml + '</td>' +
+                    '<td style="font-size:12px; white-space:nowrap;">' + escHtml(when) + '</td>' +
                     '<td>' + badge + '</td>' +
                     '<td>' + remarksHtml + '</td>' +
                     '</tr>';
             }).join('');
         }
 
-        async function loadSepcoApprovers() {
-            let sel = document.getElementById('approverSelect');
+        async function fillApproverSelect(selId, actionName, placeholder) {
+            let sel = document.getElementById(selId);
             if (!sel) return;
-
             let list = [];
             try {
-                let res = await callApi({ action: APPROVAL_ACTIONS.approvers });
+                let res = await callApi({ action: actionName, t: Date.now() });
                 if (res && res.success) {
                     let raw = res.approvers || res.sepco || res.users || [];
                     raw.forEach(a => {
                         if (typeof a === 'string') {
                             if (a.trim()) list.push({ value: a.trim(), label: a.trim() });
                         } else if (a) {
-                            let value = a.user || a.userId || a.id || a.email || a.name || '';
-                            let label = a.name || a.user || a.userId || a.email || value;
+                            let value = a.email || a.user || a.userId || a.id || a.name || '';
+                            let label = a.name || a.email || a.user || value;
                             if (String(value).trim()) list.push({ value: String(value).trim(), label: String(label).trim() });
                         }
                     });
                 }
             } catch (e) {
-                console.error('Error loading SEPCO approvers:', e);
+                console.error('Error loading approvers (' + actionName + '):', e);
             }
-
             let seen = {};
             list = list.filter(a => { let k = a.value.toLowerCase(); if (seen[k]) return false; seen[k] = true; return true; });
-
             sel.innerHTML = '';
-            if (list.length === 0) {
-                let opt = document.createElement('option');
-                opt.value = 'SEPCO';
-                opt.textContent = 'SEPCO (any approver)';
-                sel.appendChild(opt);
-                return;
-            }
-
-            let placeholder = document.createElement('option');
-            placeholder.value = '';
-            placeholder.textContent = 'Select approver...';
-            sel.appendChild(placeholder);
+            let ph = document.createElement('option');
+            ph.value = '';
+            ph.textContent = placeholder || 'Select...';
+            sel.appendChild(ph);
             list.forEach(a => {
                 let opt = document.createElement('option');
                 opt.value = a.value;
                 opt.textContent = a.label;
                 sel.appendChild(opt);
             });
+            if (list.length === 0) {
+                let opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'No approvers found';
+                opt.disabled = true;
+                sel.appendChild(opt);
+            }
+        }
+
+        async function loadSepcoApprovers() {
+            await fillApproverSelect('approverSelect', APPROVAL_ACTIONS.approvers, 'Select SEPCO...');
+        }
+        async function loadRtoApprovers() {
+            await fillApproverSelect('rtoSelect', APPROVAL_ACTIONS.rto, 'Select RTO...');
+        }
+
+        async function loadRcodeCategories() {
+            let sel = document.getElementById('categorySelect');
+            if (!sel) return;
+            let list = [];
+            try {
+                let res = await callApi({ action: APPROVAL_ACTIONS.categories, t: Date.now() });
+                if (res && res.success && Array.isArray(res.categories)) {
+                    list = res.categories.filter(function (c) { return String(c || '').trim(); });
+                }
+            } catch (e) {
+                console.error('Error loading RCODE categories:', e);
+            }
+            sel.innerHTML = '';
+            let ph = document.createElement('option');
+            ph.value = '';
+            ph.textContent = list.length ? 'Select category...' : 'No categories found';
+            sel.appendChild(ph);
+            list.forEach(function (c) {
+                let opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                sel.appendChild(opt);
+            });
         }
 
         async function handleFileUpload() {
             let fileInput = document.getElementById('approvalFileInput');
-            let sel = document.getElementById('approverSelect');
+            let rtoSel = document.getElementById('rtoSelect');
+            let sepcoSel = document.getElementById('approverSelect');
+            let catSel = document.getElementById('categorySelect');
             let btn = document.getElementById('uploadFileBtn');
-            if (!fileInput || !sel || !btn) return;
+            if (!fileInput || !btn) return;
 
             let file = fileInput.files && fileInput.files[0];
-            if (!sel.value) { alert('Please select an approver.'); return; }
             if (!file) { alert('Please choose a file to upload.'); return; }
-            if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
-                alert('File is too large. Maximum size is ' + MAX_UPLOAD_MB + ' MB.');
-                return;
-            }
-            if (sel.value.indexOf('@') === -1 &&
-                !confirm('This approver has no email address, so they will not receive an email notification. Continue with the upload anyway?')) {
-                return;
-            }
+            let category = catSel ? String(catSel.value || '').trim() : '';
+            if (!category) { alert('Please select a Category (from RCODE · FOR TARKIE).'); return; }
+            let rtoEmail = rtoSel ? String(rtoSel.value || '').trim() : '';
+            if (!rtoEmail) { alert('Please select the First Approver (RTO).'); return; }
+            let sepcoEmail = sepcoSel ? String(sepcoSel.value || '').trim() : '';
+            if (!sepcoEmail) { alert('Please select the Final Approver (SEPCO).'); return; }
+
+            let rtoLabel = rtoSel.options[rtoSel.selectedIndex] ? rtoSel.options[rtoSel.selectedIndex].text : rtoEmail;
+            let sepcoLabel = sepcoSel.options[sepcoSel.selectedIndex] ? sepcoSel.options[sepcoSel.selectedIndex].text : sepcoEmail;
 
             let originalText = btn.innerText;
             btn.innerText = 'Uploading...';
@@ -3870,29 +4511,32 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             try {
                 let base64 = await new Promise((resolve, reject) => {
                     let reader = new FileReader();
-                    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
-                    reader.onerror = () => reject(new Error('Unable to read the selected file.'));
+                    reader.onload = () => {
+                        let result = String(reader.result || '');
+                        let idx = result.indexOf('base64,');
+                        resolve(idx >= 0 ? result.substring(idx + 7) : result);
+                    };
+                    reader.onerror = () => reject(new Error('Could not read the file.'));
                     reader.readAsDataURL(file);
                 });
 
-                let approverLabel = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : sel.value;
-
-                // Field names exactly as the Apps Script "uploadFile" action reads them
                 let payload = {
                     action: APPROVAL_ACTIONS.upload,
                     fileName: file.name,
                     mimeType: file.type || 'application/octet-stream',
                     fileBytes: base64,
-                    user: localStorage.getItem('portal_user') || loggedInUser,
+                    user: loggedInUser,
                     uploadDate: new Date().toISOString(),
-                    approverEmail: sel.value
+                    category: category,
+                    rtoEmail: rtoEmail,
+                    sepcoEmail: sepcoEmail,
+                    // keep legacy field for older script versions
+                    approverEmail: rtoEmail
                 };
 
-                // Remember which rows already exist so we can confirm the new one landed in the sheet
                 let knownRows = {};
                 allApprovals.forEach(a => { knownRows[a.sheetRow] = true; });
 
-                // text/plain keeps this a "simple" request (no CORS preflight); Apps Script still parses the JSON body
                 let result = null;
                 try {
                     let resp = await fetch(WEB_APP_URL, {
@@ -3902,7 +4546,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     });
                     result = await resp.json();
                 } catch (netErr) {
-                    result = null; // response unreadable - verify through the list below (never re-send)
+                    result = null;
                 }
 
                 if (result && result.success === false) {
@@ -3911,7 +4555,6 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
                 let confirmed = !!(result && result.success);
                 if (!confirmed) {
-                    // Could not read the reply: look for the new row in the sheet before telling the user
                     for (let i = 0; i < 4 && !confirmed; i++) {
                         await new Promise(r => setTimeout(r, 2500));
                         await loadApprovals();
@@ -3920,8 +4563,11 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 }
 
                 if (confirmed) {
-                    alert('File uploaded! It has been sent to ' + approverLabel + ' for approval.');
+                    alert('File uploaded! Sent to RTO (' + rtoLabel + ') first. SEPCO (' + sepcoLabel + ') will receive it only after RTO approves.');
                     fileInput.value = '';
+                    if (catSel) catSel.value = '';
+                    if (rtoSel) rtoSel.value = '';
+                    if (sepcoSel) sepcoSel.value = '';
                     loadApprovals();
                 } else {
                     alert('Could not confirm that the file reached the Google Sheet. Please check the list or the sheet before uploading again to avoid duplicates.');
@@ -3936,6 +4582,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
         // Keep the request list fresh while the tab is open
         setInterval(loadApprovals, 30000);
+
         function downloadMonthExcel() {
             let sel = document.getElementById('selectedMonthFilter');
             let month = sel ? sel.value : '';
@@ -3976,5 +4623,450 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             XLSX.writeFile(wb, 'Daily_Task_' + month + '_' + (loggedInUser || 'user').replace(/[^a-z0-9@._-]/gi, '_') + '.xlsx');
         }
     </script>
+
+<script>
+/* =====================  KPI LANDING PAGE (per Job Group)  =====================
+   Job Group comes from the "user account" sheet (JOB GROUP column) via getUserProfile.
+   Data sources:  Monthly Plan (target) · Task Actual (actual / on-time) · Approvals (revisions) · "KPI Inputs" sheet (everything else)
+*/
+var kpiProfile = { jobGroup: '', position: '', name: '' };
+var kpiInputs = [];            // rows from the "KPI Inputs" sheet for this user
+var kpiInputsLoaded = false;
+var KPI_PAGE_GROUP = '';
+var KPI_PAGE_FILES = { CD: 'ST_Content_Developer.html', SES: 'ST_SES_NSO_CX.html', SPLUS: 'ST_SPlus_Expert_Admin.html' };
+// Each Job Group has its own page; if someone lands on the wrong one (or on ST.html) send them to theirs.
+function kpiRouteToOwnPage() {
+    var g = kpiGroupKey(kpiProfile.jobGroup);
+    if (g && g !== KPI_PAGE_GROUP && KPI_PAGE_FILES[g]) window.location.replace(KPI_PAGE_FILES[g]);
+}
+
+
+// ---------- Job group -> KPI profile (weights & caps copied from the ST incentive sheet) ----------
+function kpiGroupKey(jobGroup) {
+    var g = String(jobGroup || '').toLowerCase();
+    if (g.indexOf('content developer') !== -1) return 'CD';
+    if (g.indexOf('s+') !== -1 || g.indexOf('expert') !== -1) return 'SPLUS';
+    if (/\bses\b|nso|customer/.test(g)) return 'SES';
+    return '';
+}
+var KPI_GROUP_LABEL = { CD: 'Content Developer', SES: 'SES / NSO / Customer Experience', SPLUS: 'S+ Expert and Admin' };
+
+// k = component key, w = weight, c = cap
+var KPI_PROFILES = {
+    CD:        [ {k:'SO',w:.20,c:2}, {k:'TC',w:.20,c:1}, {k:'ACC',w:.20,c:1}, {k:'EFF',w:.10,c:1}, {k:'TIM',w:.20,c:1}, {k:'SOC',w:.10,c:2} ],
+    SES_CC:    [ {k:'SO',w:.20,c:2}, {k:'TC',w:.10,c:1}, {k:'ACC',w:.10,c:1}, {k:'EFF',w:.10,c:1}, {k:'TIM',w:.15,c:1}, {k:'SOC',w:.15,c:2}, {k:'POSTS',w:.05,c:1}, {k:'ENG',w:.15,c:1} ],
+    SES_TRAIN: [ {k:'SO',w:.20,c:2}, {k:'TC',w:.10,c:1}, {k:'ACC',w:.10,c:1}, {k:'EFF',w:.10,c:1}, {k:'TIM',w:.10,c:1}, {k:'TRAIN',w:.15,c:1}, {k:'SOC',w:.15,c:2}, {k:'POSTS',w:.05,c:1}, {k:'ENG',w:.05,c:1} ],
+    SPLUS_ADM: [ {k:'SO',w:.20,c:2}, {k:'TC',w:.05,c:1}, {k:'ACC',w:.05,c:1}, {k:'EFF',w:.05,c:1}, {k:'TIM',w:.05,c:1}, {k:'ACTIVE',w:.10,c:1}, {k:'SOC',w:.15,c:2}, {k:'INVDIS',w:.35,c:1} ],
+    SPLUS_MGT: [ {k:'SO',w:.20,c:2}, {k:'TC',w:.15,c:1}, {k:'ACC',w:.10,c:1}, {k:'EFF',w:.10,c:1}, {k:'TIM',w:.10,c:1}, {k:'UPL',w:.05,c:1}, {k:'ACTIVE',w:.10,c:1}, {k:'SOC',w:.15,c:2}, {k:'INVDIS',w:.05,c:1} ]
+};
+var KPI_LABELS = {
+    SO: 'SO Achievement', TC: 'Target Count (Content)', ACC: 'Accuracy (Quality)', EFF: 'Efficiency', TIM: 'Timeliness (On-time)',
+    SOC: 'SocMed Activities', POSTS: 'No. of Content / Contest', ENG: 'Engagement Rate', TRAIN: 'Customer Training',
+    ACTIVE: 'S+ Users & Active Rate', UPL: 'S+ Content Uploads', INVDIS: 'Inventory & Disbursement'
+};
+// which "KPI Inputs" metric feeds which component (so we can tell the user what is still missing)
+var KPI_INPUT_NEEDS = {
+    SO: ['SO ACH'], SOC: ['SOCMED ACTIVITY', 'SOCMED BOOSTING'], POSTS: ['SOCMED POSTS'], ENG: ['SOCMED ENGAGEMENT'],
+    TRAIN: ['TRAINING SESSION', 'TRAINING PEAK'], ACTIVE: ['S+ ACTIVE USERS'], UPL: ['S+ CONTENT UPLOADS'], INVDIS: ['INVENTORY', 'DISBURSEMENT']
+};
+
+// ---------- helpers ----------
+function kpiMonthMatches(cell, key) {
+    if (!key) return true;
+    var c = String(cell == null ? '' : cell).trim();
+    if (c === '') return true;                                   // rows without a month are treated as "every month"
+    var m = /^(\d{4})-(\d{2})/.exec(c);
+    if (m) return (m[1] + '-' + m[2]) === key;
+    var names = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    var idx = names.indexOf(c.toLowerCase().substring(0, 3));
+    if (idx === -1) return true;
+    var y = /(\d{4})/.exec(c), kp = key.split('-');
+    if (y && y[1] !== kp[0]) return false;
+    return (idx + 1) === parseInt(kp[1], 10);
+}
+function kpiNum(v) { var n = parseFloat(String(v == null ? '' : v).replace(/[%,]/g, '')); return isNaN(n) ? 0 : n; }
+function kpiIsYes(v) { return /^(y|yes|true|1)/i.test(String(v == null ? '' : v).trim()); }
+function kpiCat(r) { return (getRowVal(r, ['CATEGORY']) + ' ' + getRowVal(r, ['CATEGORY 2'])).toLowerCase(); }
+function kpiTitle(r) { return String(getRowVal(r, ['ACTUAL [Title]', 'TITLE', 'PLAN [Title]']) || '').trim(); }
+function kpiDate(v) { var d = cleanDateDisplay(v); return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : ''; }
+function pct(v, d) { return (v == null || isNaN(v)) ? null : Math.round(v * 1000) / 10 + '%'; }
+
+// ---------- computation ----------
+function kpiInputRatio(metricNames, rowsForMonth) {
+    var sumT = 0, sumA = 0, n = 0, found = false;
+    rowsForMonth.forEach(function (r) {
+        var m = String(r.metric || '').trim().toUpperCase();
+        if (metricNames.indexOf(m) === -1) return;
+        found = true;
+        var t = (r.target === '' || r.target == null) ? 0 : Number(r.target) || 0;
+        var a = (r.actual === '' || r.actual == null) ? 0 : Number(r.actual) || 0;
+        sumT += t; sumA += a; n++;
+    });
+    if (!found) return { has: false, t: 0, a: 0, ratio: null };
+    return { has: true, t: sumT, a: sumA, ratio: sumT > 0 ? sumA / sumT : (n ? sumA / n : 0) };
+}
+
+// ---------- Duration rule: a CONTENT task's duration counts only AFTER the content is approved ----------
+// Approved = APPROVAL DATE filled in on the content's rows, or an "Approved" file in Approval Requests whose name contains the title.
+// Non-content tasks (meetings, socmed, etc.) are always counted. Returns a Set of the approved content rows.
+function kpiApprovedContentRows(monthKey) {
+    var approvedSet = new Set();
+    var rows = (allLoadedTasks.actual || []).filter(function (r) {
+        return matchesUser(r) && getRowMonthKey(r['Date Submitted']) === monthKey && kpiCat(r).indexOf('content') !== -1 && kpiTitle(r) !== '';
+    }).sort(function (a, b) { return kpiDate(a['Date Submitted']) < kpiDate(b['Date Submitted']) ? -1 : 1; });
+    var flagged = rows.some(function (r) { return kpiIsYes(getRowVal(r, ['Is this the start date?'])); });
+    var units = [];
+    if (flagged) {
+        rows.forEach(function (r) {
+            if (kpiIsYes(getRowVal(r, ['Is this the start date?']))) units.push({ title: kpiTitle(r), rows: [r] });
+            else for (var i = units.length - 1; i >= 0; i--) { if (units[i].title.toLowerCase() === kpiTitle(r).toLowerCase()) { units[i].rows.push(r); break; } }
+        });
+    } else {
+        var map = {};
+        rows.forEach(function (r) { var k = kpiTitle(r).toLowerCase(); if (!map[k]) { map[k] = { title: kpiTitle(r), rows: [] }; units.push(map[k]); } map[k].rows.push(r); });
+    }
+    function nt(s) { return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+    var approvedFiles = (allApprovals || []).filter(function (a) { return /approve/i.test(String(a.status || '')); }).map(function (a) { return nt(a.fileName); });
+    units.forEach(function (u) {
+        var apr = '';
+        u.rows.forEach(function (r) { var a = kpiDate(getRowVal(r, ['APPROVAL DATE'])); if (a) apr = a; });
+        var tn = nt(u.title);
+        if (!!apr || (tn !== '' && approvedFiles.some(function (f) { return f.indexOf(tn) !== -1; }))) u.rows.forEach(function (r) { approvedSet.add(r); });
+    });
+    return approvedSet;
+}
+// true if this Daily Actual row's duration may be counted
+function kpiDurationCounts(row, approvedSet) {
+    if (kpiCat(row).indexOf('content') === -1) return true;
+    return approvedSet.has(row);
+}
+
+function computeKpi(monthKey) {
+    var gk = kpiGroupKey(kpiProfile.jobGroup);
+
+    // 1) TARGET from Monthly Plan (MONTH column)
+    var plan = (allLoadedTasks.monthlyPlan || []).filter(function (r) { return matchesUser(r) && kpiMonthMatches(r['MONTH'], monthKey); });
+    var target = 0;
+    plan.forEach(function (r) {
+        if (kpiCat(r).indexOf('content') === -1) return;
+        target += parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
+    });
+
+    // 2) ACTUAL content from Daily Actual
+    var rows = (allLoadedTasks.actual || []).filter(function (r) {
+        return matchesUser(r) && getRowMonthKey(r['Date Submitted']) === monthKey && kpiCat(r).indexOf('content') !== -1 && kpiTitle(r) !== '';
+    }).sort(function (a, b) { return kpiDate(a['Date Submitted']) < kpiDate(b['Date Submitted']) ? -1 : 1; });
+
+    var flagged = rows.some(function (r) { return kpiIsYes(getRowVal(r, ['Is this the start date?'])); });
+    var units = [];
+    if (flagged) {
+        rows.forEach(function (r) {
+            if (kpiIsYes(getRowVal(r, ['Is this the start date?']))) units.push({ title: kpiTitle(r), rows: [r] });
+            else for (var i = units.length - 1; i >= 0; i--) { if (units[i].title.toLowerCase() === kpiTitle(r).toLowerCase()) { units[i].rows.push(r); break; } }
+        });
+    } else {
+        var map = {};
+        rows.forEach(function (r) { var k = kpiTitle(r).toLowerCase(); if (!map[k]) { map[k] = { title: kpiTitle(r), rows: [] }; units.push(map[k]); } map[k].rows.push(r); });
+    }
+    var own = 0, proof = 0, onTime = 0, pendingApproval = 0;
+    var totalMins = 0, ownMins = 0, onTimeMins = 0, approvedUnits = [];   // DURATION PER MIN of APPROVED content only
+    function normTitle(s) { return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+    var approvedFiles = (allApprovals || []).filter(function (a) { return /approve/i.test(String(a.status || '')); }).map(function (a) { return normTitle(a.fileName); });
+    units.forEach(function (u) {
+        var tgt = '', apr = '';
+        u.rows.forEach(function (r) {
+            var t = kpiDate(getRowVal(r, ['TARGET DATE'])), a = kpiDate(getRowVal(r, ['APPROVAL DATE']));
+            if (t) tgt = t; if (a) apr = a;
+        });
+        u.proof = u.rows.some(function (r) { return /proof/i.test(kpiCat(r) + ' ' + kpiTitle(r) + ' ' + getRowVal(r, ['REMARKS FOR ACTUAL'])); });
+        u.onTime = !!(tgt && apr && apr <= tgt);
+        // A content counts as 1 only after it is approved: APPROVAL DATE filled in, or an "Approved" file in Approval Requests whose name contains the title
+        var tn = normTitle(u.title);
+        u.approved = !!apr || (tn !== '' && approvedFiles.some(function (f) { return f.indexOf(tn) !== -1; }));
+        if (!u.approved) { pendingApproval++; return; }
+        // minutes of this content = sum of DURATION PER MIN of its rows (counted only because it is approved)
+        u.mins = 0;
+        u.rows.forEach(function (r) { var d = parseFloat(getRowVal(r, ['DURATION PER MIN', 'DURATION'])); if (!isNaN(d) && d > 0) u.mins += d; });
+        approvedUnits.push(u);
+        totalMins += u.mins;
+        if (u.proof) proof++; else { own++; ownMins += u.mins; }
+        if (u.onTime) { onTime++; onTimeMins += u.mins; }
+    });
+    var total = own + proof;
+
+    // 3) REVISIONS from Approval Requests (Rejected = revision)
+    var appr = (allApprovals || []).filter(function (a) { return getRowMonthKey(a.uploadDate) === monthKey; });
+    var revisions = appr.filter(function (a) { return /reject/i.test(String(a.status || '')); }).length;
+    var pendingFiles = appr.filter(function (a) { return /pending/i.test(String(a.status || 'pending')); }).length;
+
+    var woRev = Math.max(0, total - revisions);
+    var ach = target > 0 ? own / target : null;
+
+    // Accuracy / Efficiency / Timeliness are based on DURATION PER MIN (approved content only).
+    // A rejected file = revision; its minutes are taken from the content with the same title (else the average minutes per content).
+    var revMins = 0, avgMins = approvedUnits.length ? totalMins / approvedUnits.length : 0;
+    appr.filter(function (a) { return /reject/i.test(String(a.status || '')); }).forEach(function (a) {
+        var fn = normTitle(a.fileName);
+        var m = approvedUnits.filter(function (u) { var tn = normTitle(u.title); return tn !== '' && fn.indexOf(tn) !== -1; })[0];
+        revMins += m ? m.mins : avgMins;
+    });
+    var useMins = totalMins > 0;     // if no duration was recorded at all, fall back to the old count-based formula
+    var woRevMins = Math.max(0, totalMins - revMins);
+    var quality, eff, timeliness;
+    if (useMins) {
+        quality = woRevMins / totalMins;
+        eff = woRevMins > 0 ? Math.max(0, (woRevMins - revMins) / woRevMins) : 0;
+        timeliness = ownMins > 0 ? onTimeMins / ownMins : 0;
+    } else {
+        quality = total > 0 ? woRev / total : null;
+        eff = total > 0 ? (woRev > 0 ? (woRev - revisions) / woRev : 0) : null;
+        timeliness = own > 0 ? onTime / own : (total > 0 ? 0 : null);
+    }
+
+    // 4) manual inputs for this month ("KPI Inputs" sheet)
+    var inp = (kpiInputs || []).filter(function (r) { return kpiMonthMatches(r.month, monthKey); });
+    var errRow = kpiInputRatio(['CONTENT ERRORS'], inp);
+    var errCount = errRow.has ? errRow.a : 0;
+    var deduction = errCount > 0 ? Math.ceil(errCount / 2) * 0.01 : 0;       // 1-2 = 1%, 3-4 = 2% ... (ACCURACY DEDUCTION table)
+    if (quality != null) quality = Math.max(0, quality - deduction);
+
+    var so = kpiInputRatio(['SO ACH'], inp);
+    var socA = kpiInputRatio(['SOCMED ACTIVITY'], inp), socB = kpiInputRatio(['SOCMED BOOSTING'], inp);
+    var socParts = [socA, socB].filter(function (x) { return x.has; });
+    var soc = socParts.length ? socParts.reduce(function (s, x) { return s + x.ratio; }, 0) / socParts.length : null;
+    var posts = kpiInputRatio(['SOCMED POSTS'], inp), eng = kpiInputRatio(['SOCMED ENGAGEMENT'], inp);
+    var tSes = kpiInputRatio(['TRAINING SESSION'], inp), tPeak = kpiInputRatio(['TRAINING PEAK'], inp);
+    var train = (tSes.has || tPeak.has) ? ((tSes.t + tPeak.t) > 0 ? (tSes.a + tPeak.a) / (tSes.t + tPeak.t) : 0) : null;
+    var active = kpiInputRatio(['S+ ACTIVE USERS'], inp), upl = kpiInputRatio(['S+ CONTENT UPLOADS'], inp);
+    var inv = kpiInputRatio(['INVENTORY'], inp), dis = kpiInputRatio(['DISBURSEMENT'], inp);
+    var invParts = [inv, dis].filter(function (x) { return x.has; });
+    var invdis = invParts.length ? invParts.reduce(function (s, x) { return s + x.ratio; }, 0) / invParts.length : null;
+
+    var values = { SO: so.ratio, TC: ach, ACC: quality, EFF: eff, TIM: timeliness, SOC: soc, POSTS: posts.ratio, ENG: eng.ratio,
+                   TRAIN: train, ACTIVE: active.ratio, UPL: upl.ratio, INVDIS: invdis };
+
+    // 5) pick weights profile
+    var profileKey = gk;
+    if (gk === 'SES') profileKey = (tSes.has || tPeak.has) ? 'SES_TRAIN' : 'SES_CC';
+    if (gk === 'SPLUS') profileKey = (inv.has || dis.has) ? 'SPLUS_ADM' : 'SPLUS_MGT';
+    var prof = KPI_PROFILES[profileKey] || [];
+    var capped = 0, uncapped = 0, missing = [];
+    var lines = prof.map(function (p) {
+        var v = values[p.k];
+        var has = v != null && !isNaN(v);
+        if (!has && KPI_INPUT_NEEDS[p.k]) missing.push({ label: KPI_LABELS[p.k], need: KPI_INPUT_NEEDS[p.k] });
+        var val = has ? v : 0;
+        var cv = Math.min(val, p.c);
+        capped += cv * p.w; uncapped += val * p.w;
+        return { k: p.k, label: KPI_LABELS[p.k], w: p.w, c: p.c, v: has ? v : null, cv: cv, contrib: cv * p.w };
+    });
+    // Productivity (monitoring only - not part of Total KPI): actual duration / planned duration less leave & absence
+    var leaveDays = (localLeaveRecords || []).filter(function (l) { return getRowMonthKey(l.date) === monthKey; }).length;
+    var planMins = 0;
+    (allLoadedTasks.plan || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey; }).forEach(function (t) {
+        if (t['PLAN [Title]']) planMins += parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION'])) || 480;
+    });
+    var adjPlan = Math.max(0, planMins - leaveDays * 480), actMins = 0;
+    var apprRows = kpiApprovedContentRows(monthKey);
+    (allLoadedTasks.actual || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey; }).forEach(function (t) {
+        if (String(t['ACTUAL [Title]'] || '').trim() === '') return;
+        if (!kpiDurationCounts(t, apprRows)) return;      // content not yet approved -> duration not counted
+        var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
+        if (!isNaN(d) && d > 0) actMins += d;
+    });
+    var productivity = adjPlan > 0 ? actMins / adjPlan : (actMins > 0 ? 1 : null);
+    return {
+        productivity: productivity, actMins: actMins, adjPlan: adjPlan,
+        gk: gk, profileKey: profileKey, monthKey: monthKey,
+        target: target, own: own, proof: proof, total: total, woRev: woRev, revisions: revisions, onTime: onTime,
+        totalMins: totalMins, ownMins: ownMins, woRevMins: woRevMins, revMins: revMins, onTimeMins: onTimeMins, useMins: useMins,
+        ach: ach, quality: quality, eff: eff, timeliness: timeliness, deduction: deduction, errCount: errCount,
+        pendingApproval: pendingApproval, pendingFiles: pendingFiles,
+        soc: soc, socA: socA, socB: socB, posts: posts, eng: eng, tSes: tSes, tPeak: tPeak, train: train, active: active, upl: upl, inv: inv, dis: dis, invdis: invdis, so: so,
+        lines: lines, capped: capped, uncapped: uncapped, missing: missing, hasInputs: inp.length > 0
+    };
+}
+
+// ---------- rendering ----------
+function xlCls(v) { if (v == null || isNaN(v)) return 'xl-na'; return v >= 1 ? 'xl-good' : (v >= 0.8 ? 'xl-warn' : 'xl-bad'); }
+function xlPct(v) { return (v == null || isNaN(v)) ? '<td class="xl-na">—</td>' : '<td class="' + xlCls(v) + '">' + pct(v) + '</td>'; }
+function xlNum(v, show) { return show ? '<td>' + v + '</td>' : '<td class="xl-na">—</td>'; }
+function xlTable(title, band, heads, cells) {
+    return '<div class="xl-wrap"><p class="xl-title">' + title + '</p><table class="xl-table">' +
+        '<tr><th class="xl-band" colspan="' + heads.length + '">' + band + '</th></tr>' +
+        '<tr class="xl-head">' + heads.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' +
+        '<tr>' + cells + '</tr></table></div>';
+}
+
+function renderKpiLanding() {
+    var hero = document.getElementById('kpiHero');
+    if (!hero) return;
+    var sel = document.getElementById('selectedMonthFilter');
+    var monthKey = sel ? sel.value : '';
+    syncKpiMonthSelect();
+
+    var chip = document.getElementById('kpiJobChip');
+    var gk = kpiGroupKey(kpiProfile.jobGroup);
+    chip.textContent = kpiProfile.jobGroup ? ('Job Group: ' + kpiProfile.jobGroup) : 'Job Group: not set';
+    var roleEl = document.getElementById('dashRole');
+    if (roleEl && kpiProfile.jobGroup && roleEl.getAttribute('data-jg') !== kpiProfile.jobGroup) {
+        roleEl.setAttribute('data-jg', kpiProfile.jobGroup);
+        roleEl.textContent = (localStorage.getItem('portal_role') || 'Trainer') + ' · ' + kpiProfile.jobGroup;
+    }
+
+    var banner = document.getElementById('kpiMissingBanner');
+    if (!gk) {
+        hero.innerHTML = '';
+        document.getElementById('kpiTables').innerHTML = '';
+        document.getElementById('kpiRaw').innerHTML = '';
+        var _lv = document.getElementById('kpiNotesLive'); if (_lv) _lv.innerHTML = '';
+        banner.style.display = 'block';
+        banner.innerHTML = kpiProfile.jobGroup
+            ? '⚠️ Job Group “' + escHtml(kpiProfile.jobGroup) + '” has no KPI layout yet (supported: Content Developer, SES / NSO / Customer Experience, S+ Expert and Admin).'
+            : '⚠️ Your account has no JOB GROUP in the “user account” sheet yet, so the KPI scorecard cannot be shown.';
+        return;
+    }
+
+    var k = computeKpi(monthKey);
+    var monthLabel = monthKey ? new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' }) : '';
+
+    // missing inputs banner
+    var msgs = [];
+    if (k.target === 0) msgs.push('walang <strong>CONTENT</strong> na naka-plan sa Monthly Plan para sa ' + escHtml(monthLabel) + ' (check ang MONTH column)');
+    if (k.missing.length) msgs.push('walang laman sa <strong>“KPI Inputs”</strong> sheet para sa: ' + k.missing.map(function (m) { return escHtml(m.label) + ' <em>(' + escHtml(m.need.join(' / ')) + ')</em>'; }).join(', '));
+    banner.style.display = 'none';   // missing-data notice removed on request
+
+    // hero
+    var capPct = Math.round(k.capped * 1000) / 10, uncPct = Math.round(k.uncapped * 1000) / 10;
+    var band = k.capped >= 1.41 ? '141% & up' : k.capped >= 1.21 ? '121–140%' : k.capped >= 1.01 ? '101–120%' : k.capped >= 0.8 ? '80–100%' : 'Below 80%';
+    hero.innerHTML =
+        '<div class="kpi-score-card"><small>Total KPI Score · ' + escHtml(monthLabel) + '</small>' +
+        '<div class="kpi-score-big">' + capPct + '%</div>' +
+        '<div class="kpi-score-meta">Capped · Uncapped: <strong>' + uncPct + '%</strong><br>' + escHtml(KPI_GROUP_LABEL[gk]) + '</div>' +
+        '<span class="kpi-band ' + (k.capped < 0.8 ? 'low' : '') + '">KPI band: ' + band + '</span></div>' +
+        '<div class="kpi-break"><h5>KPI breakdown (achievement × weight)</h5><table class="kpi-brk-table"><thead><tr><th>KPI</th><th class="num">Achievement</th><th class="num">Cap</th><th class="num">Weight</th><th class="num">Score</th></tr></thead><tbody>' +
+        k.lines.filter(function (l) { return l.v != null; }).map(function (l) {
+            var ach = l.v == null ? '<span class="kpi-nodata">no data</span>' : '<span class="' + xlCls(l.v) + '">' + pct(l.v) + '</span><span class="kpi-bar"><i style="width:' + Math.min(100, (l.cv / l.c) * 100) + '%"></i></span>';
+            return '<tr><td>' + escHtml(l.label) + '</td><td class="num">' + ach + '</td><td class="num">' + Math.round(l.c * 100) + '%</td><td class="num">' + Math.round(l.w * 100) + '%</td><td class="num"><strong>' + pct(l.contrib) + '</strong></td></tr>';
+        }).join('') +
+        (k.productivity != null ? '<tr><td>Productivity Rate <span class="kpi-nodata">(monitoring only)</span></td><td class="num"><span class="' + xlCls(k.productivity) + '">' + pct(k.productivity) + '</span><span class="kpi-bar"><i style="width:' + Math.min(100, k.productivity * 100) + '%"></i></span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>' : '') +
+        '</tbody></table>' +
+        '</div>';
+
+    // tables per job group (same columns as the Excel report)
+    var contentHeads = ['Target no of content', 'Actual no of content', 'Ach %', 'No of content w/o revisions', 'Ach Quality %', 'TTL No. of revisions', 'Ach % (Efficiency)', 'On-time', '% On-time'];
+    var contentCells = xlNum(k.target, true) + xlNum(k.own, true) + xlPct(k.ach) + xlNum(k.woRev, k.total > 0) + xlPct(k.quality) + xlNum(k.revisions, true) + xlPct(k.eff) + xlNum(k.onTime, true) + xlPct(k.timeliness);
+    var html = '';
+
+    if (gk === 'CD') {
+        var socTarget = k.socA.has || k.socB.has ? '<td>100%</td>' : '<td class="xl-na">—</td>';
+        html += xlTable('Content Developer', 'Content Creation', contentHeads.concat(['Socmed Activity', '%']), contentCells + socTarget + xlPct(k.soc));
+    }
+    if (gk === 'SES') {
+        html += xlTable('SES / NSO / Customer Experience', 'Content Creation', contentHeads, contentCells);
+        if (k.tSes.has || k.tPeak.has) {
+            html += xlTable('Training', 'Training (OBT / NSO / GU)', ['Plan (session)', 'Actual (session)', 'Ach %', 'Plan (peak)', 'Actual (peak)', 'Ach %'],
+                xlNum(k.tSes.t, k.tSes.has) + xlNum(k.tSes.a, k.tSes.has) + xlPct(k.tSes.has ? k.tSes.ratio : null) + xlNum(k.tPeak.t, k.tPeak.has) + xlNum(k.tPeak.a, k.tPeak.has) + xlPct(k.tPeak.has ? k.tPeak.ratio : null));
+        }
+        if (k.posts.has || k.eng.has || k.soc != null) html += xlTable('Socmed', 'Socmed Mgt / Engagements', ['Target Post / Contest', 'Actual Post / Contest', 'Ach %', 'Target Participants / Engagements', 'Actual Participants / Engagements', 'Participation rate', 'SocMed Activities'],
+            xlNum(k.posts.t, k.posts.has) + xlNum(k.posts.a, k.posts.has) + xlPct(k.posts.ratio) + xlNum(k.eng.t, k.eng.has) + xlNum(k.eng.a, k.eng.has) + xlPct(k.eng.ratio) + xlPct(k.soc));
+    }
+    if (gk === 'SPLUS') {
+        html += xlTable('S+ Expert and Admin', 'S+ Content Availability (30%)', contentHeads, contentCells);
+        if (k.active.has || k.upl.has || k.soc != null) html += xlTable('Samsung+', 'Samsung+', ['Target Active', 'Actual Active Users', 'Ach %', 'Target Content Uploads', 'Actual Content Uploads', 'Ach %', 'SocMed Activities'],
+            xlNum(k.active.t, k.active.has) + xlNum(k.active.a, k.active.has) + xlPct(k.active.ratio) + xlNum(k.upl.t, k.upl.has) + xlNum(k.upl.a, k.upl.has) + xlPct(k.upl.ratio) + xlPct(k.soc));
+        if (k.inv.has || k.dis.has) html += xlTable('Inventory and Disbursement', 'Invty and Disbursement (10%)', ['Inventory', 'Disbursement', 'Ach %'],
+            xlPct(k.inv.has ? k.inv.ratio : null) + xlPct(k.dis.has ? k.dis.ratio : null) + xlPct(k.invdis));
+    }
+    html = '<div class="kpi-legend"><span><i style="background:#22c55e"></i>100% and above</span><span><i style="background:#f59e0b"></i>80% – 99%</span><span><i style="background:#ef4444"></i>Below 80%</span></div>' + html;
+    document.getElementById('kpiTables').innerHTML = html;
+
+    // live values for the "How is this computed?" box
+
+    var live = document.getElementById('kpiNotesLive');
+
+    if (live) {
+
+        var li = function (l, v) { return '<div class="kpi-live-item"><span>' + l + '</span><strong>' + v + '</strong></div>'; };
+
+        var mn = function (v) { return Math.round(v || 0).toLocaleString() + ' mins'; };
+
+        live.innerHTML = '<h6>Live values · ' + escHtml(monthLabel) + '</h6><div class="kpi-live-grid">' +
+
+            li('Approved content', mn(k.totalMins)) + li('w/o revisions', mn(k.woRevMins)) + li('Revision', mn(k.revMins)) + li('On-time', mn(k.onTimeMins)) +
+
+            li('Actual duration (approved only)', mn(k.actMins)) + li('Adjusted planned', mn(k.adjPlan)) +
+
+            li('Productivity', k.productivity != null ? pct(k.productivity) : '—') + li('Awaiting approval', k.pendingApproval + ' content') + '</div>' +
+
+            (k.useMins
+
+                ? '<p class="kpi-live-status">Accuracy, Efficiency and Timeliness are using <strong>Duration per Minute</strong> of approved content.</p>'
+
+                : '<p class="kpi-live-status warn">No Duration per Minute found for the approved content yet, so Accuracy, Efficiency and Timeliness are temporarily computed by content count.</p>');
+
+    }
+
+    // raw counts (same as the yellow table)
+    var rawName = escHtml(String(kpiProfile.name || localStorage.getItem('portal_name') || loggedInUser || '').toUpperCase());
+    document.getElementById('kpiRaw').innerHTML =
+        '<div class="xl-wrap"><p class="xl-title">Raw counts (' + escHtml(monthLabel) + ')</p><table class="xl-table"><tr class="xl-head">' +
+        ['GM NAME', 'Target / S+ Target', 'Own Content', 'Proofread', 'Total Content', 'No of content w/o revisions', 'Total Revisions', 'No of content - On Time', 'Awaiting approval', 'Approved mins', 'Mins w/o revisions', 'Revision mins', 'On-time mins'].map(function (h) { return '<th>' + h + '</th>'; }).join('') +
+        '</tr><tr><td class="l">' + rawName + '</td><td>' + k.target + '</td><td>' + k.own + '</td><td>' + k.proof + '</td><td>' + k.total + '</td><td>' + k.woRev + '</td><td>' + k.revisions + '</td><td>' + k.onTime + '</td><td>' + k.pendingApproval + '</td><td>' + Math.round(k.totalMins) + '</td><td>' + Math.round(k.woRevMins) + '</td><td>' + Math.round(k.revMins) + '</td><td>' + Math.round(k.onTimeMins) + '</td></tr></table></div>';
+}
+
+// ---------- month dropdown (mirrors the Daily Task month filter) ----------
+function syncKpiMonthSelect() {
+    var src = document.getElementById('selectedMonthFilter'), dst = document.getElementById('kpiMonthSelect');
+    if (!src || !dst) return;
+    var a = Array.from(src.options).map(function (o) { return o.value + '|' + o.textContent; }).join(',');
+    var b = Array.from(dst.options).map(function (o) { return o.value + '|' + o.textContent; }).join(',');
+    if (a !== b) dst.innerHTML = src.innerHTML;
+    dst.value = src.value;
+}
+function onKpiMonthChange() {
+    var src = document.getElementById('selectedMonthFilter'), dst = document.getElementById('kpiMonthSelect');
+    if (!src || !dst) return;
+    src.value = dst.value;
+    onMonthFilterChange();      // existing handler: refreshes Daily Task views and then re-renders this page
+}
+
+// ---------- data loading ----------
+async function loadKpiProfile() {
+    try {
+        var cached = localStorage.getItem('portal_jobgroup');
+        if (cached) { kpiProfile.jobGroup = cached; kpiRouteToOwnPage(); }
+        var res = await callApi({ action: 'getUserProfile', user: loggedInUser, t: Date.now() });
+        if (res && res.success) {
+            kpiProfile = { jobGroup: res.jobGroup || '', position: res.position || '', name: res.name || '' };
+            try { localStorage.setItem('portal_jobgroup', kpiProfile.jobGroup); } catch (e) {}
+            kpiRouteToOwnPage();
+        }
+    } catch (e) { console.error('Error loading user profile:', e); }
+    renderKpiLanding();
+}
+async function loadKpiInputs() {
+    try {
+        var res = await callApi({ action: 'getKpiInputs', user: loggedInUser, t: Date.now() });
+        if (res && res.success && Array.isArray(res.inputs)) { kpiInputs = res.inputs; kpiInputsLoaded = true; }
+    } catch (e) { console.error('Error loading KPI inputs:', e); }
+    renderKpiLanding();
+}
+function refreshKpiLanding() {
+    loadKpiProfile(); loadKpiInputs(); loadMonthlyPlanData(); loadApprovals(); loadUserTasks();
+}
+
+// ---------- hook into the existing loaders so the page re-renders when data arrives ----------
+(function () {
+    var _upd = updateDailyTaskSummaryAndChart;
+    updateDailyTaskSummaryAndChart = function () { _upd.apply(this, arguments); try { renderKpiLanding(); } catch (e) { console.error(e); } };
+    var _mp = renderMonthlyPlanView;
+    renderMonthlyPlanView = function () { _mp.apply(this, arguments); try { renderKpiLanding(); } catch (e) { console.error(e); } };
+    var _la = loadApprovals;
+    loadApprovals = async function () { await _la.apply(this, arguments); try { updateDailyTaskSummaryAndChart(); } catch (e) { console.error(e); } };
+    window.addEventListener('load', function () { setTimeout(function () { loadKpiProfile(); loadKpiInputs(); }, 0); });
+})();
+</script>
+
 </body>
 </html>
