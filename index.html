@@ -545,7 +545,8 @@ body #notifDropdown {
             let savedUser = localStorage.getItem('portal_user');
             if (savedUser) {
                 let savedRole = (localStorage.getItem('portal_role') || "").toLowerCase();
-                redirectUserByRole(savedRole);
+                let savedJobGroup = localStorage.getItem('portal_jobgroup') || "";
+                redirectUserByRole(savedRole, savedJobGroup);
             }
 
             document.getElementById('passwordInput').addEventListener('keypress', function(e) {
@@ -653,8 +654,10 @@ body #notifDropdown {
                     localStorage.setItem('portal_user', userInput);
                     localStorage.setItem('portal_name', finalName); 
                     localStorage.setItem('portal_role', roleStr);
-
-                    redirectUserByRole(roleStr);
+                    // JOB GROUP (from the "user account" sheet) decides which ST page the trainer lands on
+                    let jobGroupStr = (result.jobGroup || "").toString().trim();
+                    localStorage.setItem('portal_jobgroup', jobGroupStr);
+                    redirectUserByRole(roleStr, jobGroupStr);
                 } else { 
                     errorMsg.innerText = result.message || "Login error encountered."; 
                 }
@@ -665,8 +668,21 @@ body #notifDropdown {
             }
         }
 
-        function redirectUserByRole(position) {
-            console.log("Redirecting for position:", position);
+        // Job Group -> its own ST page (same matching rules as ST.html's kpiGroupKey)
+        var ST_PAGE_BY_GROUP = {
+            CD:    "ST_Content_Developer.html",
+            SES:   "ST_SES_NSO_CX.html",
+            SPLUS: "ST_SPlus_Expert_Admin.html"
+        };
+        function jobGroupKey(jobGroup) {
+            var g = String(jobGroup || "").toLowerCase();
+            if (g.indexOf("content developer") !== -1) return "CD";
+            if (g.indexOf("s+") !== -1 || g.indexOf("expert") !== -1) return "SPLUS";
+            if (/\bses\b|nso|customer/.test(g)) return "SES";
+            return "";
+        }
+        function redirectUserByRole(position, jobGroup) {
+            console.log("Redirecting for position:", position, "| job group:", jobGroup);
             
             if (position.includes('sepco')) {
                 window.location.href = "SEPCO.html";
@@ -677,13 +693,16 @@ body #notifDropdown {
             } else if (position.includes('sft') || position.includes('specialized field trainer')) {
                 window.location.href = "SFT.html";
             } else if (position === 'st' || position.includes('specialized trainer')) {
-                window.location.href = "ST.html";
+                // ST: go straight to the page of his/her Job Group (fallback: ST.html, which also re-routes by Job Group)
+                var gk = jobGroupKey(jobGroup);
+                window.location.href = ST_PAGE_BY_GROUP[gk] || "ST.html";
             } else {
                 // No portal for this role: clear the session and stay on the login page
                 // (redirecting to index.html here would just reload this page forever).
                 localStorage.removeItem('portal_user');
                 localStorage.removeItem('portal_name');
                 localStorage.removeItem('portal_role');
+                localStorage.removeItem('portal_jobgroup');
                 var em = document.getElementById('errorMsg');
                 if (em) em.innerText = "Your account has no portal assigned. Please contact your administrator.";
             }
