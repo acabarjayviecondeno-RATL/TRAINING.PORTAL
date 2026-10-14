@@ -1601,6 +1601,96 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
     border-radius: 9px;
 }
 
+/* Upload / Link switch */
+#approvalTab .approval-mode {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    width: max-content;
+    max-width: 100%;
+    border-radius: 12px;
+    background: rgba(8, 13, 25, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.24);
+}
+#approvalTab .approval-mode button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--aura-muted, #8795b1);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+#approvalTab .approval-mode button.active {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+html[data-theme="light"] #approvalTab .approval-mode { background: #f1f5f9; border-color: #cbd5e1; }
+html[data-theme="light"] #approvalTab .approval-mode button { color: #475569; }
+html[data-theme="light"] #approvalTab .approval-mode button.active { color: #fff; }
+#approvalTab .approval-field-title { grid-column: 1 / -1; }
+#approvalTab .approval-field input[type="text"] {
+    width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    font-size: 13px;
+    border-radius: 10px !important;
+}
+
+/* Searchable category dropdown */
+#approvalTab .cat-combo { position: relative; width: 100%; }
+#approvalTab .cat-combo::after {
+    content: '\25BE';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--aura-muted, #8795b1);
+    font-size: 13px;
+}
+#approvalTab .cat-combo input[type="text"] { padding-right: 34px !important; }
+#approvalTab .cat-list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 60;
+    max-height: 260px;
+    overflow-y: auto;
+    border-radius: 12px;
+    background: rgba(14, 22, 38, 0.98);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    padding: 4px;
+}
+#approvalTab .cat-list.open { display: block; }
+#approvalTab .cat-item {
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--aura-text, #e6ebf5);
+    cursor: pointer;
+}
+#approvalTab .cat-item:hover, #approvalTab .cat-item.hl { background: rgba(59, 130, 246, 0.2); }
+#approvalTab .cat-item.sel { color: #8ab8ff; font-weight: 700; }
+#approvalTab .cat-empty { padding: 12px; font-size: 12px; color: var(--aura-muted, #8795b1); text-align: center; }
+html[data-theme="light"] #approvalTab .cat-list { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16); }
+html[data-theme="light"] #approvalTab .cat-item { color: #0f172a; }
+html[data-theme="light"] #approvalTab .cat-item:hover, html[data-theme="light"] #approvalTab .cat-item.hl { background: rgba(37, 99, 235, 0.1); }
+@media (max-width: 560px) {
+    #approvalTab .approval-mode { width: 100%; }
+    #approvalTab .approval-mode button { flex: 1; }
+}
+
 /* Hint text */
 #approvalTab .approval-hint {
     margin: 0 0 14px;
@@ -2717,9 +2807,17 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
 
                 <div class="approval-upload-card">
                     <div class="approval-upload-grid">
+                        <div class="approval-mode" id="approvalModeSwitch">
+                            <button type="button" id="modeFileBtn" class="active" onclick="setApprovalMode('file')">&#128206; Upload File</button>
+                            <button type="button" id="modeLinkBtn" onclick="setApprovalMode('link')">&#128279; Submit Link</button>
+                        </div>
                         <div class="approval-field">
-                            <label for="categorySelect">Category (RCODE · FOR TARKIE)</label>
-                            <select id="categorySelect"><option value="">Select category...</option></select>
+                            <label for="categorySearch">Category (RCODE · FOR TARKIE)</label>
+                            <div class="cat-combo" id="catCombo">
+                                <input type="text" id="categorySearch" placeholder="Search or select category..." autocomplete="off">
+                                <input type="hidden" id="categorySelect" value="">
+                                <div class="cat-list" id="catList"></div>
+                            </div>
                         </div>
                         <div class="approval-field">
                             <label for="rtoSelect">First Approver (RTO)</label>
@@ -2729,9 +2827,17 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
                             <label for="approverSelect">Final Approver (SEPCO)</label>
                             <select id="approverSelect"><option value="">Select SEPCO...</option></select>
                         </div>
-                        <div class="approval-field approval-field-file">
+                        <div class="approval-field approval-field-file" id="fileField">
                             <label for="approvalFileInput">Select File</label>
                             <input type="file" id="approvalFileInput">
+                        </div>
+                        <div class="approval-field approval-field-title" id="linkTitleField" style="display:none;">
+                            <label for="approvalLinkTitle">Title (optional)</label>
+                            <input type="text" id="approvalLinkTitle" placeholder="Name of the content (shown in the list, used for KPI matching)">
+                        </div>
+                        <div class="approval-field approval-field-file" id="linkField" style="display:none;">
+                            <label for="approvalLinkInput">Link (URL)</label>
+                            <input type="text" id="approvalLinkInput" placeholder="https://...">
                         </div>
                         <div class="approval-actions">
                             <button type="button" onclick="handleFileUpload()" id="uploadFileBtn">Upload</button>
@@ -2748,8 +2854,8 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
 
                 <div class="task-table-container">
                     <table class="task-table" id="approvalTable">
-                        <thead><tr><th>File Name</th><th>Category</th><th>RTO</th><th>SEPCO</th><th>Upload Date</th><th>Status</th><th>Remarks</th></tr></thead>
-                        <tbody id="approvalTableBody"><tr><td colspan="7" style="padding: 20px; text-align:center;">No pending approvals found.</td></tr></tbody>
+                        <thead><tr><th>File Name</th><th>Category</th><th>RTO</th><th>SEPCO</th><th>Upload Date</th><th>Status</th><th>RTO Remarks</th><th>SEPCO Remarks</th></tr></thead>
+                        <tbody id="approvalTableBody"><tr><td colspan="8" style="padding: 20px; text-align:center;">No pending approvals found.</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -4316,7 +4422,7 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
             } catch (e) {
                 console.error('Error loading approvals:', e);
                 if (tbody && !allApprovals.length) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--text-muted);">Could not load approvals.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--text-muted);">Could not load approvals.</td></tr>';
                 }
             }
         }
@@ -4351,7 +4457,7 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
             if (!tbody) return;
 
             if (!approvals || approvals.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align:center; color:var(--text-muted);">No approval requests found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align:center; color:var(--text-muted);">No approval requests found.</td></tr>';
                 return;
             }
 
@@ -4376,11 +4482,21 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
                     badge = '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Pending</span>';
                 }
 
-                let remarks = String(item.remarks || '').trim();
-                let remarksColor = st.includes('reject') ? '#f87171' : 'var(--text-muted)';
-                let remarksHtml = remarks
-                    ? '<div style="font-size:12px; line-height:1.5; color:' + remarksColor + '; white-space:normal; min-width:200px; max-width:320px;">' + escHtml(remarks) + '</div>'
-                    : '<span style="color:var(--text-muted);">&mdash;</span>';
+                // Separate remarks per approver. Legacy rows (no per-stage remarks) fall back to the old single REMARKS value.
+                let rtoRem = String(item.rtoRemarks || '').trim();
+                let sepcoRem = String(item.sepcoRemarks || '').trim();
+                let legacyRem = String(item.remarks || '').trim();
+                if (!rtoRem && !sepcoRem && legacyRem) {
+                    if (st.includes('pending sepco')) rtoRem = legacyRem; else sepcoRem = legacyRem;
+                }
+                let remCell = function (txt, isRejectedHere) {
+                    return txt
+                        ? '<div style="font-size:12px; line-height:1.5; color:' + (isRejectedHere ? '#f87171' : 'var(--text-muted)') + '; white-space:normal; min-width:160px; max-width:260px;">' + escHtml(txt) + '</div>'
+                        : '<span style="color:var(--text-muted);">&mdash;</span>';
+                };
+                let rejected = st.includes('reject');
+                let rtoRemarksHtml = remCell(rtoRem, rejected && !sepcoRem);
+                let sepcoRemarksHtml = remCell(sepcoRem, rejected);
 
                 let fileHtml = '📄 ' + escHtml(item.fileName || 'N/A');
                 if (item.fileUrl && String(item.fileUrl).startsWith('http')) {
@@ -4404,7 +4520,8 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
                     '<td style="font-size:12px;">' + sepcoHtml + '</td>' +
                     '<td style="font-size:12px; white-space:nowrap;">' + escHtml(when) + '</td>' +
                     '<td>' + badge + '</td>' +
-                    '<td>' + remarksHtml + '</td>' +
+                    '<td>' + rtoRemarksHtml + '</td>' +
+                    '<td>' + sepcoRemarksHtml + '</td>' +
                     '</tr>';
             }).join('');
         }
@@ -4459,9 +4576,8 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
             await fillApproverSelect('rtoSelect', APPROVAL_ACTIONS.rto, 'Select RTO...');
         }
 
+        var rcodeCategories = [];
         async function loadRcodeCategories() {
-            let sel = document.getElementById('categorySelect');
-            if (!sel) return;
             let list = [];
             try {
                 let res = await callApi({ action: APPROVAL_ACTIONS.categories, t: Date.now() });
@@ -4471,17 +4587,80 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
             } catch (e) {
                 console.error('Error loading RCODE categories:', e);
             }
-            sel.innerHTML = '';
-            let ph = document.createElement('option');
-            ph.value = '';
-            ph.textContent = list.length ? 'Select category...' : 'No categories found';
-            sel.appendChild(ph);
-            list.forEach(function (c) {
-                let opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                sel.appendChild(opt);
+            rcodeCategories = list.map(function (c) { return String(c).trim(); });
+            let inp = document.getElementById('categorySearch');
+            if (inp) inp.placeholder = rcodeCategories.length ? 'Search or select category...' : 'No categories found';
+            renderCategoryList('');
+        }
+
+        function renderCategoryList(q) {
+            let box = document.getElementById('catList');
+            if (!box) return;
+            q = String(q || '').toLowerCase().trim();
+            let cur = (document.getElementById('categorySelect') || {}).value || '';
+            let html = '';
+            rcodeCategories.forEach(function (c, i) {
+                if (q && c.toLowerCase().indexOf(q) === -1) return;
+                html += '<div class="cat-item' + (c === cur ? ' sel' : '') + '" data-i="' + i + '">' + escHtml(c) + '</div>';
             });
+            box.innerHTML = html || '<div class="cat-empty">No matching category</div>';
+        }
+        function openCatList() { let b = document.getElementById('catList'); if (b) b.classList.add('open'); }
+        function closeCatList() { let b = document.getElementById('catList'); if (b) b.classList.remove('open'); }
+        function pickCategory(c) {
+            let hid = document.getElementById('categorySelect'), inp = document.getElementById('categorySearch');
+            if (hid) hid.value = c;
+            if (inp) inp.value = c;
+            closeCatList();
+        }
+        function resetCategoryCombo() {
+            let hid = document.getElementById('categorySelect'), inp = document.getElementById('categorySearch');
+            if (hid) hid.value = '';
+            if (inp) inp.value = '';
+            renderCategoryList('');
+        }
+        (function initCategoryCombo() {
+            let inp = document.getElementById('categorySearch'), box = document.getElementById('catList'), hid = document.getElementById('categorySelect');
+            if (!inp || !box || !hid) return;
+            inp.addEventListener('focus', function () { inp.select(); renderCategoryList(''); openCatList(); });
+            inp.addEventListener('click', function () { renderCategoryList(inp.value === hid.value ? '' : inp.value); openCatList(); });
+            inp.addEventListener('input', function () { hid.value = ''; renderCategoryList(inp.value); openCatList(); });
+            inp.addEventListener('keydown', function (ev) {
+                if (ev.key === 'Enter') {
+                    ev.preventDefault();
+                    let first = box.querySelector('.cat-item');
+                    if (first) pickCategory(rcodeCategories[parseInt(first.getAttribute('data-i'), 10)]);
+                } else if (ev.key === 'Escape') { closeCatList(); }
+            });
+            box.addEventListener('mousedown', function (ev) {
+                let it = ev.target.closest ? ev.target.closest('.cat-item') : null;
+                if (!it) return;
+                ev.preventDefault();
+                pickCategory(rcodeCategories[parseInt(it.getAttribute('data-i'), 10)]);
+            });
+            inp.addEventListener('blur', function () {
+                closeCatList();
+                if (!hid.value) {
+                    let t = inp.value.trim().toLowerCase();
+                    let hit = rcodeCategories.filter(function (c) { return c.toLowerCase() === t; })[0];
+                    if (hit) pickCategory(hit);
+                } else { inp.value = hid.value; }
+            });
+        })();
+
+        var approvalMode = 'file';
+        function setApprovalMode(mode) {
+            approvalMode = (mode === 'link') ? 'link' : 'file';
+            let isLink = approvalMode === 'link';
+            let show = function (id, on) { let el = document.getElementById(id); if (el) el.style.display = on ? 'flex' : 'none'; };
+            show('fileField', !isLink);
+            show('linkTitleField', isLink);
+            show('linkField', isLink);
+            let fb = document.getElementById('modeFileBtn'), lb = document.getElementById('modeLinkBtn');
+            if (fb) fb.classList.toggle('active', !isLink);
+            if (lb) lb.classList.toggle('active', isLink);
+            let ub = document.getElementById('uploadFileBtn');
+            if (ub) ub.innerText = isLink ? 'Submit Link' : 'Upload';
         }
 
         async function handleFileUpload() {
@@ -4492,8 +4671,19 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
             let btn = document.getElementById('uploadFileBtn');
             if (!fileInput || !btn) return;
 
+            let isLink = (approvalMode === 'link');
             let file = fileInput.files && fileInput.files[0];
-            if (!file) { alert('Please choose a file to upload.'); return; }
+            let linkUrl = '', linkTitle = '';
+            if (isLink) {
+                let linkEl = document.getElementById('approvalLinkInput');
+                let titleEl = document.getElementById('approvalLinkTitle');
+                linkUrl = linkEl ? String(linkEl.value || '').trim() : '';
+                linkTitle = titleEl ? String(titleEl.value || '').trim() : '';
+                if (!linkUrl) { alert('Please paste the link to submit.'); return; }
+                if (!/^https?:\/\//i.test(linkUrl)) linkUrl = 'https://' + linkUrl;
+                try { new URL(linkUrl); } catch (urlErr) { alert('Please enter a valid link.'); return; }
+            } else if (!file) { alert('Please choose a file to upload.'); return; }
+            let submitName = isLink ? (linkTitle || linkUrl) : file.name;
             let category = catSel ? String(catSel.value || '').trim() : '';
             if (!category) { alert('Please select a Category (from RCODE · FOR TARKIE).'); return; }
             let rtoEmail = rtoSel ? String(rtoSel.value || '').trim() : '';
@@ -4505,11 +4695,11 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
             let sepcoLabel = sepcoSel.options[sepcoSel.selectedIndex] ? sepcoSel.options[sepcoSel.selectedIndex].text : sepcoEmail;
 
             let originalText = btn.innerText;
-            btn.innerText = 'Uploading...';
+            btn.innerText = isLink ? 'Submitting...' : 'Uploading...';
             btn.disabled = true;
 
             try {
-                let base64 = await new Promise((resolve, reject) => {
+                let base64 = isLink ? '' : await new Promise((resolve, reject) => {
                     let reader = new FileReader();
                     reader.onload = () => {
                         let result = String(reader.result || '');
@@ -4522,9 +4712,11 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
 
                 let payload = {
                     action: APPROVAL_ACTIONS.upload,
-                    fileName: file.name,
-                    mimeType: file.type || 'application/octet-stream',
+                    fileName: submitName,
+                    mimeType: isLink ? 'text/uri-list' : (file.type || 'application/octet-stream'),
                     fileBytes: base64,
+                    isLink: isLink,
+                    linkUrl: linkUrl,
                     user: loggedInUser,
                     uploadDate: new Date().toISOString(),
                     category: category,
@@ -4558,14 +4750,14 @@ html[data-theme="light"] .mp-pill { color:#1d4ed8; }
                     for (let i = 0; i < 4 && !confirmed; i++) {
                         await new Promise(r => setTimeout(r, 2500));
                         await loadApprovals();
-                        confirmed = allApprovals.some(a => !knownRows[a.sheetRow] && String(a.fileName || '').trim() === file.name);
+                        confirmed = allApprovals.some(a => !knownRows[a.sheetRow] && String(a.fileName || '').trim() === submitName);
                     }
                 }
 
                 if (confirmed) {
-                    alert('File uploaded! Sent to RTO (' + rtoLabel + ') first. SEPCO (' + sepcoLabel + ') will receive it only after RTO approves.');
+                    alert((isLink ? 'Link submitted!' : 'File uploaded!') + ' Sent to RTO (' + rtoLabel + ') first. SEPCO (' + sepcoLabel + ') will receive it only after RTO approves.');
                     fileInput.value = '';
-                    if (catSel) catSel.value = '';
+                    resetCategoryCombo(); let _li = document.getElementById('approvalLinkInput'); if (_li) _li.value = ''; let _lt = document.getElementById('approvalLinkTitle'); if (_lt) _lt.value = '';
                     if (rtoSel) rtoSel.value = '';
                     if (sepcoSel) sepcoSel.value = '';
                     loadApprovals();
