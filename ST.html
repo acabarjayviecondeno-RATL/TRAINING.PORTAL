@@ -15,7 +15,7 @@
         }
     }catch(e){}})();
     </script>
-    <title>Training Portal - ST Dashboard · S+ Expert and Admin</title>
+    <title>Training Portal - ST Dashboard</title>
     <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -2630,7 +2630,7 @@ html[data-theme="light"] .btn-download-min:hover {
                     <!-- Landing header -->
                     <div class="kpi-top">
                         <div>
-                            <h4 style="margin:0; font-size:15px;">🏠 S+ Expert and Admin · KPI Landing Page</h4>
+                            <h4 style="margin:0; font-size:15px;">🏠 KPI Landing Page</h4>
                             <p class="kpi-sub">Your monthly KPI scorecard, computed from your Monthly Plan, Daily Actual and Approval records.</p>
                         </div>
                         <div class="kpi-controls">
@@ -5338,7 +5338,7 @@ html[data-theme="light"] .btn-download-min:hover {
 var kpiProfile = { jobGroup: '', position: '', name: '' };
 var kpiInputs = [];            // rows from the "KPI Inputs" sheet for this user
 var kpiInputsLoaded = false;
-var KPI_PAGE_GROUP = 'SPLUS';
+var KPI_PAGE_GROUP = '';
 var KPI_PAGE_FILES = { CD: 'ST_Content_Developer.html', SES: 'ST_SES_NSO_CX.html', SPLUS: 'ST_SPlus_Expert_Admin.html' };
 // Each Job Group has its own page; if someone lands on the wrong one (or on ST.html) send them to theirs.
 function kpiRouteToOwnPage() {
@@ -6085,7 +6085,7 @@ function renderKpiLanding() {
 
             li('Productivity', k.productivity != null ? pct(k.productivity) : '—') + li('Awaiting approval', k.pendingApproval + ' content') + '</div>' +
 
-            '<p class="kpi-live-status">Accuracy = (Target − Revisions) ÷ Target. Efficiency = Approved content mins ÷ Monthly Plan content mins. Timeliness = Daily Actual mins ÷ Daily Plan mins. Productivity = Daily Actual ÷ (Monthly Plan − leave×480) (15% weight). S+ weights: Target Count 25%, Accuracy 20%, Efficiency 20%, Timeliness 20%, Productivity 15%.</p>';
+            '<p class="kpi-live-status">Accuracy = (Target − Revisions) ÷ Target (Revisions = Rejected files matched to Monthly Plan by file name or category). Efficiency = Approved content mins ÷ Monthly Plan content mins. Timeliness = Daily Actual mins ÷ Daily Plan mins. Productivity = Daily Actual ÷ (Monthly Plan − leave×480) (15% weight). S+ weights: Target Count 25%, Accuracy 20%, Efficiency 20%, Timeliness 20%, Productivity 15%.</p>';
 
     }
 
