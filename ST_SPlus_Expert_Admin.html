@@ -1430,7 +1430,18 @@ html[data-theme="light"] .cat-progress-wrap {
     font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
     padding: 11px 12px; text-align: left; white-space: nowrap;
 }
-.cat-progress-table th.num, .cat-progress-table td.num { text-align: right; }
+.cat-progress-table th.num, .cat-progress-table td.num { text-align: center; }
+.cat-progress-table th.cat-remark-h, .cat-progress-table td.cat-remark-cell { text-align: left; font-weight: 500; font-size: 12px; max-width: 280px; white-space: normal; line-height: 1.35; }
+.cat-remark.plus { color: #16a34a; font-weight: 700; }
+.cat-remark.miss { color: #ef4444; font-weight: 600; }
+.cat-remark.partial { color: #d97706; font-weight: 600; }
+.cat-remark.ok { color: #2563eb; font-weight: 600; }
+.cat-remark.enhance { color: #d97706; font-weight: 700; }
+html[data-theme="light"] .cat-remark.enhance { color: #b45309; }
+html[data-theme="light"] .cat-remark.plus { color: #15803d; }
+html[data-theme="light"] .cat-remark.miss { color: #dc2626; }
+html[data-theme="light"] .cat-remark.partial { color: #b45309; }
+html[data-theme="light"] .cat-remark.ok { color: #1d4ed8; }
 .cat-progress-table td {
     padding: 12px; font-size: 13px; font-weight: 600; color: var(--text-main);
     border-bottom: 1px solid rgba(148,163,184,0.12); background: rgba(148,163,184,0.04);
@@ -1714,244 +1725,339 @@ html[data-theme="light"] .cat-totals-row td { background: #eff6ff !important; }
 
 <style id="approval-form-alignment">
 /* ==========================================================
-   APPROVAL REQUESTS — form layout (desktop + mobile)
+   APPROVAL REQUESTS — clean form layout (desktop + mobile)
    ========================================================== */
+#approvalTab .approval-hint {
+    font-size: 12.5px;
+    color: var(--aura-muted, #8795b1);
+    margin: 0 0 14px 0;
+    line-height: 1.45;
+}
+#approvalTab .approval-hint strong {
+    color: var(--aura-blue-soft, #8ab8ff);
+    font-weight: 600;
+}
+
 #approvalTab .approval-upload-card {
     background: linear-gradient(180deg, rgba(20, 30, 50, 0.85), rgba(14, 22, 38, 0.9));
     border: 1px solid var(--aura-line, rgba(148,163,184,0.13));
     border-radius: 16px;
-    padding: 18px 18px 16px;
-    margin-bottom: 16px;
+    padding: 20px 20px 18px;
+    margin-bottom: 18px;
     box-shadow: 0 8px 28px rgba(0,0,0,0.18);
 }
+
 #approvalTab .approval-upload-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px 14px;
-    align-items: end;
-}
-#approvalTab .approval-field-file {
-    grid-column: 1 / 3;
-}
-#approvalTab .approval-actions {
-    grid-column: 3 / 4;
-    justify-content: stretch;
-}
-#approvalTab .approval-actions #uploadFileBtn {
-    width: 100%;
-}
-#approvalTab .approval-field {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-#approvalTab .approval-field label {
-    display: block;
-    margin: 0 0 6px !important;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--aura-muted, #8795b1);
-    height: auto;
-    line-height: 1.3;
-}
-#approvalTab .approval-field select,
-#approvalTab .approval-field input[type="file"] {
-    width: 100% !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    padding: 0 12px !important;
-    font: inherit;
-    font-size: 13px;
-    color: var(--aura-text, #e6ebf5);
-    background: rgba(8, 13, 25, 0.75) !important;
-    border: 1px solid rgba(148, 163, 184, 0.24) !important;
-    border-radius: 10px !important;
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-#approvalTab .approval-field select:focus,
-#approvalTab .approval-field input[type="file"]:focus {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
-}
-#approvalTab .approval-field input[type="file"] {
-    padding: 6px 10px !important;
-    line-height: 28px;
-    color: var(--aura-soft, #c4cee0);
-}
-#approvalTab .approval-field input[type="file"]::file-selector-button {
-    height: 28px;
-    margin: 0 10px 0 0;
-    padding: 0 12px;
-    border: none;
-    border-radius: 7px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-}
-#approvalTab .approval-actions {
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
-}
-#approvalTab #uploadFileBtn {
-    height: 42px !important;
-    min-height: 42px !important;
-    min-width: 120px;
-    padding: 0 22px !important;
-    margin: 0 !important;
-    border: none;
-    border-radius: 10px !important;
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-    color: #fff !important;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
-    transition: filter 0.15s, transform 0.15s;
-    white-space: nowrap;
-}
-#approvalTab #uploadFileBtn:hover { filter: brightness(1.08); }
-#approvalTab #uploadFileBtn:active { transform: translateY(1px); }
-#approvalTab #uploadFileBtn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    filter: none;
+    gap: 14px 16px;
+    align-items: start;
 }
 
-/* Filter bar */
-#approvalTab .approval-filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-}
-#approvalTab .approval-filter-bar label {
-    margin: 0 !important;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--aura-muted, #8795b1);
-}
-#approvalTab .approval-filter-bar select {
-    min-width: 200px;
-    height: 36px;
-    padding: 0 12px;
-    font-size: 12px;
-    color: var(--aura-text, #e6ebf5);
-    background: rgba(8, 13, 25, 0.75);
-    border: 1px solid rgba(148, 163, 184, 0.24);
-    border-radius: 9px;
-}
-
-/* Upload / Link switch */
+/* Mode switch — full width, top */
 #approvalTab .approval-mode {
     grid-column: 1 / -1;
-    display: flex;
-    gap: 6px;
+    display: inline-flex;
+    gap: 4px;
     padding: 4px;
     width: max-content;
     max-width: 100%;
     border-radius: 12px;
     background: rgba(8, 13, 25, 0.6);
     border: 1px solid rgba(148, 163, 184, 0.24);
+    margin-bottom: 2px;
 }
 #approvalTab .approval-mode button {
-    padding: 8px 18px;
+    padding: 9px 20px;
     border: none;
     border-radius: 9px;
     background: transparent;
     color: var(--aura-muted, #8795b1);
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+#approvalTab .approval-mode button:hover {
+    color: var(--aura-text, #e6ebf5);
 }
 #approvalTab .approval-mode button.active {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: #fff;
     box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
 }
-html[data-theme="light"] #approvalTab .approval-mode { background: #f1f5f9; border-color: #cbd5e1; }
-html[data-theme="light"] #approvalTab .approval-mode button { color: #475569; }
-html[data-theme="light"] #approvalTab .approval-mode button.active { color: #fff; }
-#approvalTab .approval-field-title { grid-column: 1 / -1; }
-#approvalTab .approval-field input[type="text"] {
-    width: 100% !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    padding: 0 12px !important;
-    font-size: 13px;
-    border-radius: 10px !important;
+
+/* Fields */
+#approvalTab .approval-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0;
+}
+#approvalTab .approval-field label {
+    display: block;
+    margin: 0 0 7px !important;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--aura-muted, #8795b1);
+    line-height: 1.3;
 }
 
-/* Searchable category dropdown */
-#approvalTab .cat-combo { position: relative; width: 100%; }
+/* Shared control look */
+#approvalTab .approval-field select,
+#approvalTab .approval-field input[type="text"],
+#approvalTab .approval-field input[type="file"],
+#approvalTab .cat-combo input[type="text"] {
+    width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    font: inherit;
+    font-size: 13.5px;
+    color: var(--aura-text, #e6ebf5);
+    background: rgba(8, 13, 25, 0.75) !important;
+    border: 1px solid rgba(148, 163, 184, 0.28) !important;
+    border-radius: 10px !important;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+#approvalTab .approval-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238795b1' d='M1.4 0.6L6 5.2 10.6 0.6 12 2 6 8 0 2z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    padding-right: 36px !important;
+    cursor: pointer;
+}
+#approvalTab .approval-field select:focus,
+#approvalTab .approval-field input[type="text"]:focus,
+#approvalTab .approval-field input[type="file"]:focus,
+#approvalTab .cat-combo input[type="text"]:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+}
+
+/* File input — match other controls */
+#approvalTab .approval-field input[type="file"] {
+    padding: 7px 10px !important;
+    line-height: 28px;
+    color: var(--aura-soft, #c4cee0);
+    cursor: pointer;
+}
+#approvalTab .approval-field input[type="file"]::file-selector-button {
+    height: 28px;
+    margin: 0 12px 0 0;
+    padding: 0 14px;
+    border: none;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+#approvalTab .approval-field input[type="file"]::file-selector-button:hover {
+    opacity: 0.9;
+}
+
+/* Textarea */
+#approvalTab .approval-field textarea {
+    width: 100% !important;
+    min-height: 72px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    font: inherit;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--aura-text, #e6ebf5);
+    background: rgba(8, 13, 25, 0.75) !important;
+    border: 1px solid rgba(148, 163, 184, 0.28) !important;
+    border-radius: 10px !important;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+#approvalTab .approval-field textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+}
+#approvalTab .approval-field textarea::placeholder,
+#approvalTab .approval-field input[type="text"]::placeholder,
+#approvalTab .cat-combo input[type="text"]::placeholder {
+    color: var(--aura-muted, #8795b1);
+}
+
+/* Layout spans — clean rows */
+#approvalTab .approval-field-file,
+#approvalTab .approval-field-title,
+#approvalTab #linkField {
+    grid-column: 1 / -1;
+}
+#approvalTab .approval-field-note {
+    grid-column: 1 / -1;
+}
+#approvalTab .approval-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 4px;
+    padding-top: 4px;
+}
+#approvalTab .approval-actions #uploadFileBtn {
+    min-width: 140px;
+    height: 44px;
+    padding: 0 28px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+    transition: transform 0.12s, box-shadow 0.12s, opacity 0.12s;
+}
+#approvalTab .approval-actions #uploadFileBtn:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+#approvalTab .approval-actions #uploadFileBtn:active {
+    transform: translateY(0);
+}
+
+/* Category searchable combo */
+#approvalTab .cat-combo {
+    position: relative;
+    width: 100%;
+}
 #approvalTab .cat-combo::after {
-    content: '\25BE';
+    content: '';
     position: absolute;
     right: 14px;
     top: 50%;
     transform: translateY(-50%);
+    width: 12px;
+    height: 8px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238795b1' d='M1.4 0.6L6 5.2 10.6 0.6 12 2 6 8 0 2z'/%3E%3C/svg%3E") no-repeat center;
     pointer-events: none;
-    color: var(--aura-muted, #8795b1);
-    font-size: 13px;
 }
-#approvalTab .cat-combo input[type="text"] { padding-right: 34px !important; }
+#approvalTab .cat-combo input[type="text"] {
+    padding-right: 36px !important;
+}
 #approvalTab .cat-list {
-    display: none;
     position: absolute;
-    top: calc(100% + 6px);
     left: 0;
     right: 0;
-    z-index: 60;
-    max-height: 260px;
+    top: calc(100% + 4px);
+    max-height: 240px;
     overflow-y: auto;
-    border-radius: 12px;
-    background: rgba(14, 22, 38, 0.98);
+    z-index: 40;
+    background: #101828;
     border: 1px solid rgba(148, 163, 184, 0.28);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    padding: 4px;
+    border-radius: 10px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    display: none;
 }
 #approvalTab .cat-list.open { display: block; }
 #approvalTab .cat-item {
-    padding: 9px 12px;
-    border-radius: 8px;
+    padding: 10px 14px;
     font-size: 13px;
     color: var(--aura-text, #e6ebf5);
     cursor: pointer;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
 }
-#approvalTab .cat-item:hover, #approvalTab .cat-item.hl { background: rgba(59, 130, 246, 0.2); }
-#approvalTab .cat-item.sel { color: #8ab8ff; font-weight: 700; }
-#approvalTab .cat-empty { padding: 12px; font-size: 12px; color: var(--aura-muted, #8795b1); text-align: center; }
-html[data-theme="light"] #approvalTab .cat-list { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16); }
-html[data-theme="light"] #approvalTab .cat-item { color: #0f172a; }
-html[data-theme="light"] #approvalTab .cat-item:hover, html[data-theme="light"] #approvalTab .cat-item.hl { background: rgba(37, 99, 235, 0.1); }
+#approvalTab .cat-item:last-child { border-bottom: none; }
+#approvalTab .cat-item:hover,
+#approvalTab .cat-item.hl {
+    background: rgba(59, 130, 246, 0.18);
+    color: #9cc3ff;
+}
+#approvalTab .cat-empty {
+    padding: 14px;
+    font-size: 12.5px;
+    color: var(--aura-muted, #8795b1);
+    text-align: center;
+}
 
-/* ---------- APPROVAL REQUESTS — Light mode polish ---------- */
+/* Filter bar */
+#approvalTab .approval-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+#approvalTab .approval-filter-bar label {
+    margin: 0 !important;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--aura-muted, #8795b1);
+}
+#approvalTab .approval-filter-bar select {
+    min-width: 200px;
+    height: 38px;
+    padding: 0 32px 0 12px;
+    font-size: 13px;
+    color: var(--aura-text, #e6ebf5);
+    background: rgba(8, 13, 25, 0.75);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 9px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238795b1' d='M1.4 0.6L6 5.2 10.6 0.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+}
+#approvalTab .approval-filter-bar select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Table polish */
+#approvalTab .task-table-container {
+    border-radius: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+#approvalTab .task-table th {
+    white-space: nowrap;
+    font-size: 10px;
+}
+#approvalTab .task-table td {
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* ---------- LIGHT THEME ---------- */
+html[data-theme="light"] #approvalTab .approval-hint { color: #64748b; }
+html[data-theme="light"] #approvalTab .approval-hint strong { color: #2563eb; }
 html[data-theme="light"] #approvalTab .approval-upload-card {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06) !important;
 }
 html[data-theme="light"] #approvalTab .approval-field label,
 html[data-theme="light"] #approvalTab .approval-filter-bar label {
     color: #64748b !important;
 }
 html[data-theme="light"] #approvalTab .approval-field select,
-html[data-theme="light"] #approvalTab .approval-field input[type="file"],
 html[data-theme="light"] #approvalTab .approval-field input[type="text"],
+html[data-theme="light"] #approvalTab .approval-field input[type="file"],
+html[data-theme="light"] #approvalTab .approval-field textarea,
 html[data-theme="light"] #approvalTab .approval-filter-bar select,
 html[data-theme="light"] #approvalTab .cat-combo input[type="text"] {
     color: #0f172a !important;
@@ -1959,9 +2065,15 @@ html[data-theme="light"] #approvalTab .cat-combo input[type="text"] {
     border: 1px solid #cbd5e1 !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
+html[data-theme="light"] #approvalTab .approval-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.4 0.6L6 5.2 10.6 0.6 12 2 6 8 0 2z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+}
 html[data-theme="light"] #approvalTab .approval-field select:focus,
-html[data-theme="light"] #approvalTab .approval-field input[type="file"]:focus,
 html[data-theme="light"] #approvalTab .approval-field input[type="text"]:focus,
+html[data-theme="light"] #approvalTab .approval-field input[type="file"]:focus,
+html[data-theme="light"] #approvalTab .approval-field textarea:focus,
 html[data-theme="light"] #approvalTab .approval-filter-bar select:focus,
 html[data-theme="light"] #approvalTab .cat-combo input[type="text"]:focus {
     border-color: #3b82f6 !important;
@@ -1982,109 +2094,35 @@ html[data-theme="light"] #approvalTab .approval-mode {
 html[data-theme="light"] #approvalTab .approval-mode button {
     color: #475569 !important;
 }
+html[data-theme="light"] #approvalTab .approval-mode button:hover {
+    color: #0f172a !important;
+}
 html[data-theme="light"] #approvalTab .approval-mode button.active {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
     color: #fff !important;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25) !important;
 }
 html[data-theme="light"] #approvalTab .cat-combo::after {
-    color: #64748b !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.4 0.6L6 5.2 10.6 0.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
 }
 html[data-theme="light"] #approvalTab .cat-list {
-    background: #ffffff !important;
-    border-color: #cbd5e1 !important;
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12) !important;
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
 }
 html[data-theme="light"] #approvalTab .cat-item {
-    color: #0f172a !important;
+    color: #0f172a;
+    border-bottom-color: #f1f5f9;
 }
 html[data-theme="light"] #approvalTab .cat-item:hover,
 html[data-theme="light"] #approvalTab .cat-item.hl {
-    background: rgba(37, 99, 235, 0.08) !important;
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
 }
-html[data-theme="light"] #approvalTab .cat-item.sel {
-    color: #1d4ed8 !important;
-    background: rgba(37, 99, 235, 0.1) !important;
-}
-html[data-theme="light"] #approvalTab .cat-empty {
-    color: #64748b !important;
-}
-html[data-theme="light"] #approvalTab .approval-hint {
-    color: #64748b !important;
-}
-html[data-theme="light"] #approvalTab .approval-hint strong {
-    color: #2563eb !important;
-}
+html[data-theme="light"] #approvalTab .cat-empty { color: #64748b; }
 html[data-theme="light"] #approvalTab .approval-filter-bar select {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border-color: #cbd5e1 !important;
-}
-/* Readonly RTO / SEPCO fields */
-html[data-theme="light"] #approvalTab .approval-field input[readonly],
-html[data-theme="light"] #approvalTab .approval-field select:disabled {
-    background: #f1f5f9 !important;
-    color: #64748b !important;
-    border-color: #e2e8f0 !important;
-}
-/* Table under approval */
-html[data-theme="light"] #approvalTab .task-table-container {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04) !important;
-}
-html[data-theme="light"] #approvalTab .task-table th {
-    background: #f8fafc !important;
-    color: #64748b !important;
-    border-bottom-color: #e2e8f0 !important;
-}
-html[data-theme="light"] #approvalTab .task-table td {
-    color: #0f172a !important;
-    border-bottom-color: #f1f5f9 !important;
-}
-html[data-theme="light"] #approvalTab .task-table tbody tr:hover td {
-    background: rgba(37, 99, 235, 0.04) !important;
-}
-/* Section container title area */
-html[data-theme="light"] #approvalTab .section-container {
-    background: #ffffff !important;
-    border-color: #e2e8f0 !important;
-}
-html[data-theme="light"] #approvalTab h4,
-html[data-theme="light"] #approvalTab .section-container > p {
-    color: #0f172a !important;
-}
-html[data-theme="light"] #approvalTab .section-container > p {
-    color: #64748b !important;
-}
-
-@media (max-width: 560px) {
-    #approvalTab .approval-mode { width: 100%; }
-    #approvalTab .approval-mode button { flex: 1; }
-}
-
-/* Hint text */
-#approvalTab .approval-hint {
-    margin: 0 0 14px;
-    font-size: 12px;
-    line-height: 1.55;
-    color: var(--aura-muted, #8795b1);
-}
-#approvalTab .approval-hint strong { color: var(--aura-blue-soft, #8ab8ff); font-weight: 600; }
-
-/* Table polish for approval */
-#approvalTab .task-table-container {
-    border-radius: 14px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-#approvalTab .task-table th {
-    white-space: nowrap;
-    font-size: 10px;
-}
-#approvalTab .task-table td {
-    font-size: 12px;
-    vertical-align: middle;
+    color: #0f172a;
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.4 0.6L6 5.2 10.6 0.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
 }
 
 /* ---------- MOBILE ---------- */
@@ -2092,35 +2130,45 @@ html[data-theme="light"] #approvalTab .section-container > p {
     #approvalTab .approval-upload-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    #approvalTab .approval-field-file {
-        grid-column: 1 / -1;
-    }
+    #approvalTab .approval-field-file,
+    #approvalTab .approval-field-title,
+    #approvalTab #linkField,
+    #approvalTab .approval-field-note,
     #approvalTab .approval-actions {
         grid-column: 1 / -1;
     }
-    #approvalTab #uploadFileBtn {
+    #approvalTab .approval-actions {
+        justify-content: stretch;
+    }
+    #approvalTab .approval-actions #uploadFileBtn {
         width: 100%;
         min-width: 0;
     }
 }
 @media (max-width: 560px) {
     #approvalTab .approval-upload-card {
-        padding: 14px 12px 12px;
+        padding: 14px 12px 14px;
         border-radius: 14px;
     }
     #approvalTab .approval-upload-grid {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 12px;
     }
-    #approvalTab .approval-field-file,
-    #approvalTab .approval-actions {
-        grid-column: auto;
+    #approvalTab .approval-mode {
+        width: 100%;
+    }
+    #approvalTab .approval-mode button {
+        flex: 1;
+        text-align: center;
+        padding: 10px 12px;
     }
     #approvalTab .approval-field select,
+    #approvalTab .approval-field input[type="text"],
     #approvalTab .approval-field input[type="file"],
-    #approvalTab #uploadFileBtn {
-        height: 44px !important;
-        min-height: 44px !important;
+    #approvalTab .cat-combo input[type="text"],
+    #approvalTab .approval-actions #uploadFileBtn {
+        height: 46px !important;
+        min-height: 46px !important;
         font-size: 14px;
     }
     #approvalTab .approval-filter-bar {
@@ -2131,7 +2179,7 @@ html[data-theme="light"] #approvalTab .section-container > p {
     #approvalTab .approval-filter-bar select {
         min-width: 0;
         width: 100%;
-        height: 40px;
+        height: 42px;
     }
     #approvalTab .task-table th,
     #approvalTab .task-table td {
@@ -3238,6 +3286,10 @@ html[data-theme="light"] .btn-download-min:hover {
                         <div class="approval-field approval-field-file" id="linkField" style="display:none;">
                             <label for="approvalLinkInput">Link (URL)</label>
                             <input type="text" id="approvalLinkInput" placeholder="https://...">
+                        </div>
+                        <div class="approval-field approval-field-note" id="noteField">
+                            <label for="approvalNote">Note (optional)</label>
+                            <textarea id="approvalNote" rows="2" placeholder="Add a note for the approvers before submitting..."></textarea>
                         </div>
                         <div class="approval-actions">
                             <button type="button" onclick="handleFileUpload()" id="uploadFileBtn">Upload</button>
@@ -5224,6 +5276,9 @@ html[data-theme="light"] .btn-download-min:hover {
                     reader.readAsDataURL(file);
                 });
 
+                let noteEl = document.getElementById('approvalNote');
+                let noteVal = noteEl ? String(noteEl.value || '').trim() : '';
+
                 let payload = {
                     action: APPROVAL_ACTIONS.upload,
                     fileName: submitName,
@@ -5236,6 +5291,7 @@ html[data-theme="light"] .btn-download-min:hover {
                     category: category,
                     rtoEmail: rtoEmail,
                     sepcoEmail: sepcoEmail,
+                    note: noteVal,
                     // keep legacy field for older script versions
                     approverEmail: rtoEmail
                 };
@@ -5271,7 +5327,7 @@ html[data-theme="light"] .btn-download-min:hover {
                 if (confirmed) {
                     alert((isLink ? 'Link submitted!' : 'File uploaded!') + ' Sent to RTO (' + rtoLabel + ') first. SEPCO (' + sepcoLabel + ') will receive it only after RTO approves.');
                     fileInput.value = '';
-                    resetCategoryCombo(); let _li = document.getElementById('approvalLinkInput'); if (_li) _li.value = ''; let _lt = document.getElementById('approvalLinkTitle'); if (_lt) _lt.value = '';
+                    resetCategoryCombo(); let _li = document.getElementById('approvalLinkInput'); if (_li) _li.value = ''; let _lt = document.getElementById('approvalLinkTitle'); if (_lt) _lt.value = ''; let _note = document.getElementById('approvalNote'); if (_note) _note.value = '';
                     if (rtoSel) rtoSel.value = '';
                     if (sepcoSel) sepcoSel.value = '';
                     loadApprovals();
@@ -5359,11 +5415,16 @@ var KPI_GROUP_LABEL = { CD: 'Content Developer', SES: 'SES / NSO / Customer Expe
 
 // k = component key, w = weight, c = cap
 var KPI_PROFILES = {
-    CD:        [ {k:'SO',w:.05,c:2}, {k:'TC',w:.20,c:1}, {k:'ACC',w:.20,c:1}, {k:'EFF',w:.10,c:1}, {k:'TIM',w:.20,c:1}, {k:'SOC',w:.10,c:2}, {k:'PROD',w:.15,c:1} ],
-    SES_CC:    [ {k:'SO',w:.05,c:2}, {k:'TC',w:.10,c:1}, {k:'ACC',w:.10,c:1}, {k:'EFF',w:.10,c:1}, {k:'TIM',w:.15,c:1}, {k:'SOC',w:.15,c:2}, {k:'POSTS',w:.05,c:1}, {k:'ENG',w:.15,c:1}, {k:'PROD',w:.15,c:1} ],
-    SES_TRAIN: [ {k:'SO',w:.05,c:2}, {k:'TC',w:.10,c:1}, {k:'ACC',w:.10,c:1}, {k:'EFF',w:.10,c:1}, {k:'TIM',w:.10,c:1}, {k:'TRAIN',w:.15,c:1}, {k:'SOC',w:.15,c:2}, {k:'POSTS',w:.05,c:1}, {k:'ENG',w:.05,c:1}, {k:'PROD',w:.15,c:1} ],
-    SPLUS_ADM: [ {k:'TC',w:.25,c:1}, {k:'ACC',w:.20,c:1}, {k:'EFF',w:.20,c:1}, {k:'TIM',w:.20,c:1}, {k:'PROD',w:.15,c:1} ],
-    SPLUS_MGT: [ {k:'TC',w:.25,c:1}, {k:'ACC',w:.20,c:1}, {k:'EFF',w:.20,c:1}, {k:'TIM',w:.20,c:1}, {k:'PROD',w:.15,c:1} ]
+    /* Weights from incentive sheet (weight-capped):
+       Content Developer:           TC 20% · ACC 20% · EFF 10% · TIM 20% · PROD 30%
+       SES / NSO / Cust. Exp.:      TC 20% · ACC 15% · EFF 15% · TIM 20% · PROD 30%
+       S+ Expert and Admin:         TC 20% · ACC 15% · EFF 15% · TIM 15% · PROD 35%
+    */
+    CD:        [ {k:'TC',w:.20,c:1}, {k:'ACC',w:.20,c:1}, {k:'EFF',w:.10,c:1}, {k:'TIM',w:.20,c:1}, {k:'PROD',w:.30,c:1} ],
+    SES_CC:    [ {k:'TC',w:.20,c:1}, {k:'ACC',w:.15,c:1}, {k:'EFF',w:.15,c:1}, {k:'TIM',w:.20,c:1}, {k:'PROD',w:.30,c:1} ],
+    SES_TRAIN: [ {k:'TC',w:.20,c:1}, {k:'ACC',w:.15,c:1}, {k:'EFF',w:.15,c:1}, {k:'TIM',w:.20,c:1}, {k:'PROD',w:.30,c:1} ],
+    SPLUS_ADM: [ {k:'TC',w:.20,c:1}, {k:'ACC',w:.15,c:1}, {k:'EFF',w:.15,c:1}, {k:'TIM',w:.15,c:1}, {k:'PROD',w:.35,c:1} ],
+    SPLUS_MGT: [ {k:'TC',w:.20,c:1}, {k:'ACC',w:.15,c:1}, {k:'EFF',w:.15,c:1}, {k:'TIM',w:.15,c:1}, {k:'PROD',w:.35,c:1} ]
 };
 var KPI_LABELS = {
     SO: 'SO Achievement', TC: 'Target Count (Content)', ACC: 'Accuracy (Quality)', EFF: 'Efficiency', TIM: 'Timeliness (On-time)',
@@ -5854,6 +5915,7 @@ function renderCategoryProgress(monthKey, targetId) {
         '<li><strong>Minutes:</strong> Plan Minutes = Monthly Plan frequency × duration per minute. Actual Minutes uses the DURATION PER MIN value from Daily Actual.</li>' +
         '<li><strong>Achievement:</strong> Category Achievement = Actual Count ÷ Target Count × 100.</li>' +
         '<li><strong>Productivity:</strong> Daily Actual mins ÷ (Monthly Plan mins − leave/absent × 480) × 100. CONTENT mins count only when approved; TASK / OTHERS always count.</li>' +
+        '<li><strong>Unplanned actual (no target):</strong> Rows with Target Count = 0 but Actual Count &gt; 0 were not in the Monthly Plan. They count as <strong>plus to productivity only if</strong> your Monthly Plan minutes meet or exceed <strong>Designated Minutes</strong> ((working days − leave) × 480). If the plan is <strong>Short</strong>, the remark becomes <em>Please add to Monthly Plan — enhance your plan first</em> so you fill the plan gap before unplanned work is treated as a plus.</li>' +
         '</ul></details>';
 
     var hasAny = totTC > 0 || totAC > 0 || totPlan > 0 || totAct > 0;
@@ -5912,6 +5974,16 @@ function ensureD(c, c2) {
         if (A.cat !== B.cat) return A.cat < B.cat ? -1 : 1;
         return A.cat2 < B.cat2 ? -1 : (A.cat2 > B.cat2 ? 1 : 0);
     });
+    // Plan completeness vs Designated Minutes (working − leave) × 480
+    // Unplanned actual only earns "plus to productivity" when plan is NOT short.
+    var mkParts = String(monthKey || '').split('-');
+    var yrP = parseInt(mkParts[0], 10) || new Date().getFullYear();
+    var miP = (parseInt(mkParts[1], 10) || 1) - 1;
+    var workingDaysP = (typeof calculateTargetDays === 'function') ? calculateTargetDays(yrP, miP, 0) : 22;
+    var designatedMinsP = Math.max(0, workingDaysP - leaveDays) * 480;
+    var planIsShort = monthlyPlanMins < (designatedMinsP - 0.5);
+    var planShortGap = Math.max(0, designatedMinsP - monthlyPlanMins);
+
     var detailRows = '';
     var dTotTC = 0, dTotAC = 0, dTotPlan = 0, dTotAct = 0;
     detailKeys.forEach(function (k) {
@@ -5925,6 +5997,25 @@ function ensureD(c, c2) {
         var barCls = pct == null ? 'low' : (pct >= 100 ? 'over' : (pct < 40 ? 'low' : ''));
         var diff = s.actualMins - s.planMins;
         var diffCls = diff > 0 ? 'pos' : (diff < 0 ? 'neg' : 'zero');
+        // Automated remarks — unplanned plus only if Monthly Plan meets Designated Minutes
+        var remarkHtml = '';
+        if (s.targetCount === 0 && s.actualCount > 0) {
+            if (planIsShort) {
+                remarkHtml = '<span class="cat-remark enhance">Please add to Monthly Plan — enhance your plan first (plan is short vs designated minutes)</span>';
+            } else {
+                remarkHtml = '<span class="cat-remark plus">Not in Monthly Plan — unplanned actual (plus to productivity)</span>';
+            }
+        } else if (s.targetCount > 0 && s.actualCount === 0) {
+            remarkHtml = '<span class="cat-remark miss">In Monthly Plan — no actual yet</span>';
+        } else if (s.targetCount > 0 && s.actualCount > 0) {
+            if (s.actualCount >= s.targetCount) {
+                remarkHtml = '<span class="cat-remark ok">Met / exceeded plan target</span>';
+            } else {
+                remarkHtml = '<span class="cat-remark partial">Partial vs plan target</span>';
+            }
+        } else {
+            remarkHtml = '<span class="cat-muted">—</span>';
+        }
         detailRows += '<tr>' +
             '<td class="cat-name">' + escHtml(s.cat) + '</td>' +
             '<td>' + escHtml(s.cat2) + '</td>' +
@@ -5935,12 +6026,26 @@ function ensureD(c, c2) {
             '<td class="num">' + Math.round(s.actualMins).toLocaleString() + '</td>' +
             '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + barW + '%"></div></div></td>' +
             '<td class="num"><span class="cat-diff ' + diffCls + '">' + (diff > 0 ? '+' : '') + Math.round(diff).toLocaleString() + '</span></td>' +
+            '<td class="cat-remark-cell">' + remarkHtml + '</td>' +
             '</tr>';
     });
     if (detailKeys.length) {
         var dPct = dTotTC > 0 ? (dTotAC / dTotTC) * 100 : null;
         var dPctHtml = dPct == null ? '—' : (Math.round(dPct * 10) / 10) + '%';
         var dDiff = dTotAct - dTotPlan;
+        var unplannedN = 0;
+        detailKeys.forEach(function (k) {
+            var s = detail[k];
+            if (s.targetCount === 0 && s.actualCount > 0) unplannedN += s.actualCount;
+        });
+        var totRemark = '';
+        if (unplannedN > 0) {
+            if (planIsShort) {
+                totRemark = '<span class="cat-remark enhance">' + unplannedN + ' unplanned actual(s) — please add to Monthly Plan first (short by ' + Math.round(planShortGap).toLocaleString() + ' mins)</span>';
+            } else {
+                totRemark = '<span class="cat-remark plus">' + unplannedN + ' unplanned actual(s) count as plus to productivity</span>';
+            }
+        }
         detailRows += '<tr class="cat-totals-row">' +
             '<td class="cat-name" colspan="2">TOTAL</td>' +
             '<td class="num">' + dTotTC + '</td>' +
@@ -5950,6 +6055,7 @@ function ensureD(c, c2) {
             '<td class="num">' + Math.round(dTotAct).toLocaleString() + '</td>' +
             '<td></td>' +
             '<td class="num"><span class="cat-diff ' + (dDiff > 0 ? 'pos' : (dDiff < 0 ? 'neg' : 'zero')) + '">' + (dDiff > 0 ? '+' : '') + Math.round(dDiff).toLocaleString() + '</span></td>' +
+            '<td class="cat-remark-cell">' + totRemark + '</td>' +
             '</tr>';
     }
     var detailTable = detailKeys.length === 0 ? '' :
@@ -5961,6 +6067,7 @@ function ensureD(c, c2) {
         '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
         '<th class="num">Plan (mins)</th><th class="num">Actual (mins)</th>' +
         '<th>Progress</th><th class="num">Difference</th>' +
+        '<th class="cat-remark-h">Remarks</th>' +
         '</tr></thead><tbody>' + detailRows + '</tbody></table></div></div>';
 
     el.innerHTML =
@@ -6085,7 +6192,7 @@ function renderKpiLanding() {
 
             li('Productivity', k.productivity != null ? pct(k.productivity) : '—') + li('Awaiting approval', k.pendingApproval + ' content') + '</div>' +
 
-            '<p class="kpi-live-status">Accuracy = (Target − Revisions) ÷ Target. Efficiency = Approved content mins ÷ Monthly Plan content mins. Timeliness = Daily Actual mins ÷ Daily Plan mins. Productivity = Daily Actual ÷ (Monthly Plan − leave×480) (15% weight). S+ weights: Target Count 25%, Accuracy 20%, Efficiency 20%, Timeliness 20%, Productivity 15%.</p>';
+            '<p class="kpi-live-status">Accuracy = (Target − Revisions) ÷ Target (Revisions = Rejected files matched to Monthly Plan by file name or category). Efficiency = Approved content mins ÷ Monthly Plan content mins. Timeliness = Daily Actual mins ÷ Daily Plan mins. Productivity = Daily Actual ÷ (Monthly Plan − leave×480). Weights by Job Group — Content Developer: TC 20% · ACC 20% · EFF 10% · TIM 20% · PROD 30%. SES/NSO/CX: TC 20% · ACC 15% · EFF 15% · TIM 20% · PROD 30%. S+ Expert and Admin: TC 20% · ACC 15% · EFF 15% · TIM 15% · PROD 35%.</p>';
 
     }
 
