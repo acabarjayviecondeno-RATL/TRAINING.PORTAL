@@ -428,6 +428,241 @@
 html[data-theme="light"] .summary-grid .summary-card p.pct-big span { color: #2563eb !important; text-shadow: none; }
 html[data-theme="light"] .summary-grid .summary-card p.pct-big small { color: #64748b !important; }
 @media (max-width: 768px) { .summary-grid .summary-card p.pct-big span { font-size: 16px !important; } }
+
+/* ---------- Raw data accordion (Plan / Actual) — SEPCO-style polish ---------- */
+.raw-data-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+.raw-data-stack > .raw-data-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted, #94a3b8);
+    margin: 0 0 2px 2px;
+}
+details.computation-notes-box,
+details.raw-data-panel {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(148, 163, 184, 0.16) !important;
+    border-left: 3px solid #3b82f6 !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+details.computation-notes-box:hover,
+details.raw-data-panel:hover {
+    border-color: rgba(59, 130, 246, 0.45) !important;
+    background: rgba(59, 130, 246, 0.06) !important;
+}
+details.computation-notes-box[open],
+details.raw-data-panel[open] {
+    background: rgba(8, 13, 25, 0.45) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+details.computation-notes-box > summary,
+details.raw-data-panel > summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px !important;
+    margin: 0 !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    color: #93c5fd !important;
+    outline: none;
+    transition: color 0.15s ease;
+}
+details.computation-notes-box > summary::-webkit-details-marker,
+details.raw-data-panel > summary::-webkit-details-marker { display: none; }
+details.computation-notes-box > summary::marker,
+details.raw-data-panel > summary::marker { content: ""; }
+details.computation-notes-box > summary::before,
+details.raw-data-panel > summary::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    opacity: 0.85;
+    margin-right: 2px;
+}
+details.computation-notes-box[open] > summary::before,
+details.raw-data-panel[open] > summary::before {
+    transform: rotate(45deg);
+    margin-top: -2px;
+}
+details.computation-notes-box > summary:hover,
+details.raw-data-panel > summary:hover { color: #bfdbfe !important; }
+details.computation-notes-box > .raw-data-body,
+details.raw-data-panel > .raw-data-body {
+    padding: 0 14px 14px 14px;
+}
+details.computation-notes-box .task-table-container,
+details.raw-data-panel .task-table-container {
+    margin-top: 4px;
+    border-radius: 10px !important;
+}
+html[data-theme="light"] details.computation-notes-box,
+html[data-theme="light"] details.raw-data-panel {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    border-left-color: #2563eb !important;
+}
+html[data-theme="light"] details.computation-notes-box:hover,
+html[data-theme="light"] details.raw-data-panel:hover {
+    background: #eff6ff !important;
+}
+html[data-theme="light"] details.computation-notes-box[open],
+html[data-theme="light"] details.raw-data-panel[open] {
+    background: #fff !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+}
+html[data-theme="light"] details.computation-notes-box > summary,
+html[data-theme="light"] details.raw-data-panel > summary {
+    color: #1d4ed8 !important;
+}
+
+/* ---------- SEPCO-style filter bar + Plan/Monthly progress UI ---------- */
+.filter-container {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+    padding: 12px 16px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--aura-line, rgba(148,163,184,0.13)) !important;
+}
+.filter-container label {
+    display: inline !important;
+    width: auto !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--text-muted) !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap;
+}
+.filter-container .filter-input,
+.filter-container select,
+.filter-container input[type="date"],
+.filter-container input[type="month"],
+.filter-container input[type="text"] {
+    width: auto !important;
+    min-width: 140px;
+    max-width: 220px;
+    flex: 0 1 auto;
+    padding: 7px 12px !important;
+    font-size: 12px !important;
+    min-height: 36px;
+    border-radius: 8px !important;
+    background: rgba(8, 13, 25, 0.55) !important;
+    border: 1px solid var(--aura-line, rgba(148,163,184,0.18)) !important;
+    color: var(--text-main) !important;
+}
+.filter-container button {
+    width: auto !important;
+    min-height: 36px !important;
+    padding: 7px 14px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    background: var(--primary, #3b82f6) !important;
+    color: #fff !important;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.filter-container button:hover { filter: brightness(1.08); }
+
+/* Section headers match SEPCO */
+#planActualSection .section-container > h4,
+#monthlyPlanSection .section-container > h4 {
+    font-size: 15px !important;
+    margin: 0 0 6px 0 !important;
+    letter-spacing: -0.01em;
+}
+#planActualSection .section-container > p,
+#monthlyPlanSection .section-container > p {
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+    margin: 0 0 14px 0 !important;
+}
+
+/* Progress table polish (SEPCO parity) */
+.cat-progress-wrap {
+    margin: 0 0 18px 0 !important;
+    padding: 18px !important;
+    border-radius: 16px !important;
+}
+.cat-progress-table th {
+    background: linear-gradient(180deg, #1e3a8a, #1d4ed8) !important;
+    color: #e8f0ff !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    padding: 11px 12px !important;
+}
+.cat-progress-table td {
+    padding: 11px 12px !important;
+    font-size: 13px !important;
+}
+.cat-progress-table td.cat-name { font-weight: 700; }
+.cat-remark.plus { color: #34d399 !important; font-weight: 700; }
+.cat-remark.miss { color: #f87171 !important; font-weight: 600; }
+.cat-remark.partial { color: #fbbf24 !important; font-weight: 600; }
+.cat-remark.enhance { color: #fb923c !important; font-weight: 600; }
+.cat-pct.good { color: #34d399 !important; font-weight: 800; }
+.cat-pct.warn { color: #fbbf24 !important; font-weight: 800; }
+.cat-pct.bad { color: #f87171 !important; font-weight: 800; }
+
+/* Day group header rows */
+.cat-progress-table tr[style*="rgba(59,130,246"] td {
+    border-bottom: 1px solid rgba(148,163,184,0.12) !important;
+}
+
+html[data-theme="light"] .filter-container {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+html[data-theme="light"] .filter-container .filter-input,
+html[data-theme="light"] .filter-container select,
+html[data-theme="light"] .filter-container input {
+    background: #fff !important;
+    border-color: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+@media (max-width: 640px) {
+    .filter-container .filter-input,
+    .filter-container select,
+    .filter-container input[type="date"],
+    .filter-container input[type="month"] {
+        flex: 1 1 140px !important;
+        max-width: none !important;
+        min-width: 120px !important;
+    }
+    .filter-container label { width: auto !important; }
+    .filter-container button { width: auto !important; }
+}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1178,6 +1413,9 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 html[data-theme="light"] .kpi-chip { color:#1d4ed8; background:rgba(37,99,235,.08); border-color:rgba(37,99,235,.3); }
 .kpi-btn { padding:8px 14px; border-radius:8px; border:1px solid var(--border-color); background:transparent; color:var(--text-main); font-weight:600; font-size:12px; cursor:pointer; }
 .kpi-btn:hover { background:rgba(148,163,184,.12); }
+
+.kpi-btn.is-loading { opacity: 0.75; pointer-events: none; }
+
 .kpi-banner { margin:0 0 16px 0; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.55; color:#fbbf24; background:rgba(245,158,11,.10); border:1px solid rgba(245,158,11,.35); }
 html[data-theme="light"] .kpi-banner { color:#92400e; }
 
@@ -2354,10 +2592,174 @@ html[data-theme="light"] #approvalTab .approval-filter-bar select {
     .filter-container .filter-input { flex: 1 1 140px; min-width: 0; }
     #selectedMonthFilter, #socmedMonthFilter { width: 100% !important; }
     div:has(> #selectedMonthFilter), div:has(> #socmedMonthFilter) { width: 100%; }
-    button[onclick="downloadMonthExcel()"] { width: 36px !important; min-width: 36px !important; justify-content: center; }
 
-/* ---------- Minimalist download buttons ---------- */
-button[onclick="downloadMonthExcel()"],
+
+
+/* Section header + filter-bar download */
+.sec-head { margin-bottom: 12px; }
+.sec-title {
+    margin: 0 0 6px 0 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+    line-height: 1.3 !important;
+}
+.sec-sub {
+    margin: 0 !important;
+    font-size: 12.5px !important;
+    line-height: 1.5 !important;
+    color: var(--text-muted) !important;
+    max-width: 720px;
+}
+button.sec-download-btn {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin-left: auto !important;
+    padding: 7px 14px !important;
+    height: auto !important;
+    width: auto !important;
+    min-width: auto !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(148,163,184,0.3) !important;
+    background: rgba(255,255,255,0.06) !important;
+    color: #e2e8f0 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+button.sec-download-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+}
+button.sec-download-btn:hover {
+    background: rgba(59,130,246,0.16) !important;
+    border-color: rgba(59,130,246,0.5) !important;
+    color: #93c5fd !important;
+}
+html[data-theme="light"] button.sec-download-btn {
+    background: #fff !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+}
+html[data-theme="light"] button.sec-download-btn:hover {
+    background: #eff6ff !important;
+    border-color: #93c5fd !important;
+    color: #1d4ed8 !important;
+}
+.filter-container.sec-filters {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+/* ---------- Section toolbar (Plan vs Actual / Monthly Plan) ---------- */
+.sec-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.sec-toolbar-left { flex: 1; min-width: 200px; }
+.sec-title {
+    margin: 0 0 4px 0 !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+    line-height: 1.3;
+}
+.sec-sub {
+    margin: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    color: var(--text-muted) !important;
+    max-width: 640px;
+}
+.sec-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.sec-action-btn {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 8px 14px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(148,163,184,0.28) !important;
+    background: rgba(255,255,255,0.04) !important;
+    color: #e2e8f0 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .1s;
+    white-space: nowrap !important;
+}
+.sec-action-btn svg {
+    flex-shrink: 0;
+    display: block;
+}
+.sec-action-btn span {
+    display: inline-block;
+    line-height: 1;
+}
+.sec-action-btn:hover {
+    background: rgba(59,130,246,0.14) !important;
+    border-color: rgba(59,130,246,0.45) !important;
+}
+.sec-action-btn:active { transform: scale(0.97); }
+.sec-action-btn.is-loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+.sec-action-btn.is-loading i,
+.sec-action-btn.is-loading svg {
+    animation: sec-spin 0.8s linear infinite;
+}
+@keyframes sec-spin { to { transform: rotate(360deg); } }
+.sec-reset-btn {
+    padding: 8px 14px !important;
+    border-radius: 10px !important;
+    border: none !important;
+    background: linear-gradient(135deg,#3b82f6,#2563eb) !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+}
+.sec-reset-btn:hover { filter: brightness(1.08); }
+.sec-filters {
+    margin-bottom: 16px !important;
+}
+html[data-theme="light"] .sec-action-btn {
+    background: #fff !important;
+    border-color: #e2e8f0 !important;
+    color: #334155 !important;
+}
+html[data-theme="light"] .sec-action-btn:hover {
+    background: #eff6ff !important;
+    border-color: #93c5fd !important;
+    color: #1d4ed8 !important;
+}
+@media (max-width: 640px) {
+    .sec-toolbar-actions { width: 100%; }
+    .sec-action-btn { flex: 1; justify-content: center; }
+}
+
+/* ---------- Icon-only download (legacy) ---------- */
 button.download-btn-min,
 .btn-download-min {
     background: transparent !important;
@@ -2368,42 +2770,88 @@ button.download-btn-min,
     width: 36px !important;
     height: 36px !important;
     min-width: 36px !important;
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
     box-shadow: none !important;
-    gap: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transition: background 0.15s, border-color 0.15s, color 0.15s !important;
 }
-button.download-btn-min svg,
-.btn-download-min svg,
-button[onclick="downloadMonthExcel()"] svg {
-    width: 16px !important;
-    height: 16px !important;
-    stroke-width: 2 !important;
-}
-button[onclick="downloadMonthExcel()"]:hover,
 button.download-btn-min:hover,
 .btn-download-min:hover {
     background: rgba(59, 130, 246, 0.1) !important;
     border-color: rgba(59, 130, 246, 0.45) !important;
     color: #8ab8ff !important;
 }
-html[data-theme="light"] button[onclick="downloadMonthExcel()"],
-html[data-theme="light"] button.download-btn-min,
-html[data-theme="light"] .btn-download-min {
-    color: #0f172a !important;
-    border-color: #cbd5e1 !important;
-    background: #ffffff !important;
+
+/* ---------- Section Download button (icon + label, side by side) ---------- */
+.sec-toolbar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+    margin-bottom: 14px !important;
 }
-html[data-theme="light"] button[onclick="downloadMonthExcel()"]:hover,
-html[data-theme="light"] button.download-btn-min:hover,
-html[data-theme="light"] .btn-download-min:hover {
+.sec-toolbar-left {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+.sec-toolbar-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+}
+button.sec-action-btn {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: auto !important;
+    height: auto !important;
+    padding: 9px 16px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(148,163,184,0.3) !important;
+    background: rgba(255,255,255,0.06) !important;
+    color: #e2e8f0 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+button.sec-action-btn svg {
+    width: 15px !important;
+    height: 15px !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+button.sec-action-btn span {
+    display: inline !important;
+    white-space: nowrap !important;
+}
+button.sec-action-btn:hover {
+    background: rgba(59,130,246,0.16) !important;
+    border-color: rgba(59,130,246,0.5) !important;
+    color: #93c5fd !important;
+}
+html[data-theme="light"] button.sec-action-btn {
+    background: #fff !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+}
+html[data-theme="light"] button.sec-action-btn:hover {
     background: #eff6ff !important;
     border-color: #93c5fd !important;
     color: #1d4ed8 !important;
+}
+@media (max-width: 640px) {
+    .sec-toolbar { flex-wrap: wrap !important; }
 }
 
     #socmedTab > div:first-child > div { width: 100%; }
@@ -2514,8 +2962,8 @@ html[data-theme="light"] .btn-download-min:hover {
     /* ---- Filters / selects / buttons: full width, comfortable tap size ---- */
     select, input[type="month"], input[type="date"], input[type="text"] { min-height: 44px; box-sizing: border-box; }
     .filter-container { gap: 10px !important; }
-    .filter-container label { width: 100%; }
-    .filter-container button { width: 100%; min-height: 44px; }
+    .filter-container label { width: auto !important; }
+    .filter-container button { width: auto !important; min-height: 40px; }
     .announcement-box button, .leave-form button { width: 100%; min-height: 44px; }
 
     /* ---- Tables: keep inside card, smooth horizontal scroll ---- */
@@ -2581,6 +3029,122 @@ html[data-theme="light"] .btn-download-min:hover {
     .plan-meta { font-size: 12px !important; }
     .plan-status { align-self: flex-start; }
 }
+
+/* Refined Plan vs Actual UI — compact typography, balanced spacing, responsive filters */
+#planActualSection .section-container,
+#monthlyPlanSection .section-container {
+    padding: 16px 18px !important;
+    margin-bottom: 16px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(148,163,184,.18) !important;
+    box-shadow: 0 4px 14px rgba(15,23,42,.08) !important;
+}
+#planActualSection .sec-head,
+#monthlyPlanSection .sec-head {
+    margin: 0 0 12px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+#planActualSection .sec-title,
+#monthlyPlanSection .sec-title {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    font-weight: 650 !important;
+    letter-spacing: -.01em;
+    margin: 0 !important;
+}
+#planActualSection .sec-sub,
+#monthlyPlanSection .sec-sub {
+    max-width: 100% !important;
+    font-size: 10.5px !important;
+    line-height: 1.45 !important;
+    font-weight: 400 !important;
+    opacity: .82;
+}
+#planActualSection .filter-container.sec-filters,
+#monthlyPlanSection .filter-container.sec-filters {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 9px 10px !important;
+    margin: 0 0 13px !important;
+    border-radius: 9px !important;
+    background: rgba(148,163,184,.055) !important;
+    border: 1px solid rgba(148,163,184,.16) !important;
+}
+#planActualSection .sec-filters label,
+#monthlyPlanSection .sec-filters label {
+    font-size: 10px !important;
+    line-height: 1 !important;
+    font-weight: 600 !important;
+    letter-spacing: .01em !important;
+    color: var(--text-muted) !important;
+    margin: 0 1px 0 3px !important;
+}
+#planActualSection .sec-filters input[type="date"],
+#planActualSection .sec-filters select,
+#monthlyPlanSection .sec-filters select {
+    width: auto !important;
+    min-width: 130px !important;
+    max-width: 210px !important;
+    height: 32px !important;
+    padding: 6px 9px !important;
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+    border-radius: 7px !important;
+}
+#planActualSection .sec-filters input[type="date"] { min-width: 138px !important; }
+#planActualSection .sec-filters button,
+#monthlyPlanSection .sec-filters button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    padding: 0 11px !important;
+    margin: 0 !important;
+    border-radius: 7px !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+#planActualSection .sec-filters button.sec-download-btn,
+#monthlyPlanSection .sec-filters button.sec-download-btn {
+    margin-left: auto !important;
+}
+#planActualSection .sec-filters button svg,
+#monthlyPlanSection .sec-filters button svg {
+    width: 12px !important;
+    height: 12px !important;
+    flex: 0 0 12px;
+}
+#planActualSection #downloadPlanActualBtn { min-width: 78px !important; }
+#monthlyPlanSection #downloadMonthlyPlanBtn { min-width: 78px !important; }
+#planActualSection #stDailyProgressContainer,
+#monthlyPlanSection #stMonthlyProgressContainer {
+    font-size: 11px;
+}
+@media (max-width: 640px) {
+    #planActualSection .section-container,
+    #monthlyPlanSection .section-container { padding: 12px !important; }
+    #planActualSection .filter-container.sec-filters,
+    #monthlyPlanSection .filter-container.sec-filters { gap: 7px !important; }
+    #planActualSection .sec-filters input[type="date"],
+    #planActualSection .sec-filters select,
+    #monthlyPlanSection .sec-filters select {
+        flex: 1 1 135px !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+    #planActualSection .sec-filters button.sec-download-btn,
+    #monthlyPlanSection .sec-filters button.sec-download-btn { margin-left: 0 !important; }
+}
+
 </style>
 <script id="mobile-responsive-js">
 (function () {
@@ -2647,8 +3211,7 @@ html[data-theme="light"] .btn-download-min:hover {
                         </div>
                         <ul class="sub-menu" id="dailyTaskSubMenu" style="display: none;">
                             <li id="subSummary" onclick="switchSubTab(event, 'summarySection')">Summary</li>
-                            <li id="subPlan" onclick="switchSubTab(event, 'planSection')">Daily Plan</li>
-                            <li id="subActual" onclick="switchSubTab(event, 'actualSection')">Daily Actual</li>
+                            <li id="subPlanActual" onclick="switchSubTab(event, 'planActualSection')">Plan vs Actual</li>
                             <li id="subMonthlyPlan" onclick="switchSubTab(event, 'monthlyPlanSection')">Monthly Plan</li>
                             <li id="subLeaveAbsent" onclick="switchSubTab(event, 'leaveAbsentSection')">Leave / Absent Log</li>
                         </ul>
@@ -2736,7 +3299,7 @@ html[data-theme="light"] .btn-download-min:hover {
                             <span id="kpiJobChip" class="kpi-chip">Job Group: loading…</span>
                             <label for="kpiMonthSelect" class="kpi-lbl">Month</label>
                             <select id="kpiMonthSelect" onchange="onKpiMonthChange()"></select>
-                            <button type="button" class="kpi-btn" onclick="refreshKpiLanding()">↻ Refresh</button>
+                            <button type="button" class="kpi-btn" id="kpiRefreshBtn" onclick="refreshKpiLanding(this)">↻ Refresh</button>
                         </div>
                     </div>
 
@@ -2805,20 +3368,13 @@ html[data-theme="light"] .btn-download-min:hover {
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px;">
                     <div>
                         <h3 style="margin:0; font-size: 15px;">Daily Task Time Management</h3>
-                        <p style="color: var(--text-muted); font-size: 12px; margin: 2px 0 0 0; line-height: 1.4;">View your Planned and Actual tasks directly from Google Sheets.</p>
+                        <p style="color: var(--text-muted); font-size: 12px; margin: 2px 0 0 0; line-height: 1.4;">View your planned and actual tasks submitted from Tarkie.</p>
                     </div>
                     <div id="taskSyncStatus" class="sync-status">🔄 Last Synced: --:--:--</div>
                 </div>
                 
-                <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #f8fafc; padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                        <label style="margin:0;">Select Month:</label>
-                        <select id="selectedMonthFilter" onchange="onMonthFilterChange()" style="width: 220px; margin-bottom: 0; padding: 8px;"></select>
-                    </div>
-                    <button onclick="downloadMonthExcel()" class="download-btn-min" id="downloadMonthBtn" title="Download · Current Month" aria-label="Download Excel" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
-                        <i data-lucide="download" style="width:16px;height:16px;"></i>
-                    </button>
-                </div>
+                <!-- Month filter kept hidden for JS (KPI / summary / tables still use selectedMonthFilter). UI month bar + download removed per request. -->
+                <select id="selectedMonthFilter" onchange="onMonthFilterChange()" style="display:none;" aria-hidden="true"></select>
 
                 <!-- SUMMARY SECTION -->
                 <div id="summarySection" class="sub-content-section active">
@@ -2882,61 +3438,89 @@ html[data-theme="light"] .btn-download-min:hover {
                 </div>
 
                 <!-- PLAN SECTION -->
-                <div id="planSection" class="sub-content-section" style="display: none;">
+                <div id="planActualSection" class="sub-content-section" style="display: none;">
                     <div class="section-container">
-                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📋 Daily Plan</h4>
-                        <div class="task-table-container">
-                            <table class="task-table" id="viewPlanTable">
-                                <thead>
-                                    <tr>
-                                        <th>Date Submitted</th>
-                                        <th>Time Submitted</th>
-                                        <th>START TIME</th>
-                                        <th>TIME ENDED</th>
-                                        <th>DURATION PER MIN</th>
-                                        <th>LOCATION</th>
-                                        <th>PLAN [Title]</th>
-                                        <th>CATEGORY</th>
-                                        <th>CATEGORY 2</th>
-                                        <th>REMARKS</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="viewPlanTableBody">
-                                    <tr><td colspan="10" style="text-align:center; padding: 20px; color:var(--text-muted);">No plans found for this user and month.</td></tr>
-                                </tbody>
-                            </table>
+                        <div class="sec-head">
+                            <h4 class="sec-title">📅 Daily Plan vs Actual</h4>
+                            <p class="sec-sub">Daily planned work vs actual. CONTENT counts only when Approved.</p>
                         </div>
-                    </div>
-                </div>
+                        <div class="filter-container sec-filters">
+                            <label for="paDayFilter">Day</label>
+                            <input type="date" id="paDayFilter" class="filter-input" onchange="renderStDailyProgress()">
+                            <label for="paStatusFilter">Show</label>
+                            <select id="paStatusFilter" class="filter-input" onchange="renderStDailyProgress()">
+                                <option value="all">Everything</option>
+                                <option value="notdone">Not done only</option>
+                                <option value="done">Done only</option>
+                                <option value="late">Done late only</option>
+                                <option value="unplanned">Unplanned actuals only</option>
+                            </select>
+                            <button type="button" class="sec-reset-btn" onclick="document.getElementById('paDayFilter').value='';document.getElementById('paStatusFilter').value='all';renderStDailyProgress();">Reset</button>
+                            <button type="button" class="sec-download-btn" onclick="downloadMonthExcel()" id="downloadPlanActualBtn" title="Download Excel">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download
+                            </button>
+                        </div>
+                        <div id="stDailyProgressContainer" style="margin-bottom:16px;"><div class="cat-empty">Loading Plan vs Actual…</div></div>
 
-                <!-- ACTUAL SECTION -->
-                <div id="actualSection" class="sub-content-section" style="display: none;">
-                    <div class="section-container">
-                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📋 Daily Actual</h4>
-                        <div class="task-table-container">
-                            <table class="task-table" id="viewActualTable">
-                                <thead>
-                                    <tr>
-                                        <th>Date Submitted</th>
-                                        <th>Time Submitted</th>
-                                        <th>START TIME</th>
-                                        <th>TIME ENDED</th>
-                                        <th>DURATION PER MIN</th>
-                                        <th>LOCATION</th>
-                                        <th>CATEGORY</th>
-                                        <th>CATEGORY 2</th>
-                                        <th>ACTUAL [Title]</th>
-                                        <th>FORMAT</th>
-                                        <th>Is this the start date?</th>
-                                        <th>TARGET DATE</th>
-                                        <th>APPROVAL DATE</th>
-                                        <th>REMARKS FOR ACTUAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="viewActualTableBody">
-                                    <tr><td colspan="14" style="text-align:center; padding: 20px; color:var(--text-muted);">No actuals found for this user and month.</td></tr>
-                                </tbody>
-                            </table>
+                        <div class="raw-data-stack">
+                            <div class="raw-data-label">Raw sheet records</div>
+                            <details class="raw-data-panel computation-notes-box">
+                                <summary>View raw Daily Plan data</summary>
+                                <div class="raw-data-body">
+                                    <div class="task-table-container">
+                                        <table class="task-table" id="viewPlanTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date Submitted</th>
+                                                    <th>Time Submitted</th>
+                                                    <th>START TIME</th>
+                                                    <th>TIME ENDED</th>
+                                                    <th>DURATION PER MIN</th>
+                                                    <th>LOCATION</th>
+                                                    <th>PLAN [Title]</th>
+                                                    <th>CATEGORY</th>
+                                                    <th>CATEGORY 2</th>
+                                                    <th>REMARKS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="viewPlanTableBody">
+                                                <tr><td colspan="10" style="text-align:center; padding: 20px; color:var(--text-muted);">No plans found for this user and month.</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </details>
+                            <details class="raw-data-panel computation-notes-box">
+                                <summary>View raw Daily Actual data</summary>
+                                <div class="raw-data-body">
+                                    <div class="task-table-container">
+                                        <table class="task-table" id="viewActualTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date Submitted</th>
+                                                    <th>Time Submitted</th>
+                                                    <th>START TIME</th>
+                                                    <th>TIME ENDED</th>
+                                                    <th>DURATION PER MIN</th>
+                                                    <th>LOCATION</th>
+                                                    <th>CATEGORY</th>
+                                                    <th>CATEGORY 2</th>
+                                                    <th>ACTUAL [Title]</th>
+                                                    <th>FORMAT</th>
+                                                    <th>Is this the start date?</th>
+                                                    <th>TARGET DATE</th>
+                                                    <th>APPROVAL DATE</th>
+                                                    <th>REMARKS FOR ACTUAL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="viewActualTableBody">
+                                                <tr><td colspan="14" style="text-align:center; padding: 20px; color:var(--text-muted);">No actuals found for this user and month.</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </details>
                         </div>
                     </div>
                 </div>
@@ -2944,50 +3528,25 @@ html[data-theme="light"] .btn-download-min:hover {
                 <!-- MONTHLY PLAN SECTION -->
                 <div id="monthlyPlanSection" class="sub-content-section" style="display: none;">
                     <div class="section-container">
-                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 15px; color: var(--text-main);">📅 Monthly Plan Overview</h4>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Summary of your set tasks from the Monthly Plan sheet.</p>
-                        
-                        <div class="summary-grid" id="monthlyPlanSummaryGrid">
-                            <!-- Dynamic populated summary cards -->
+                        <div class="sec-head">
+                            <h4 class="sec-title">🗓️ Monthly Plan Progress vs Actual</h4>
+                            <p class="sec-sub">Monthly plan progress, including unfinished items. CONTENT counts only when <strong>Approved</strong>.</p>
                         </div>
-
-                        <div class="mp-filter" id="mpFilterBar">
-                            <div class="mp-field">
-                                <label for="mpMonthFilter">Month</label>
-                                <select id="mpMonthFilter" onchange="onMonthlyPlanFilter()"></select>
-                            </div>
-                            <div class="mp-field">
-                                <label for="mpCategoryFilter">Category</label>
-                                <select id="mpCategoryFilter" onchange="onMonthlyPlanFilter()"></select>
-                            </div>
-                            <div class="mp-field grow">
-                                <label for="mpSearchInput">Search</label>
-                                <input type="text" id="mpSearchInput" placeholder="Title, format or remarks…" oninput="onMonthlyPlanFilter()">
-                            </div>
-                            <button type="button" class="mp-reset" onclick="resetMonthlyPlanFilter()">↺ Reset</button>
-                            <div class="mp-count" id="mpCount"></div>
+                        <div class="filter-container sec-filters">
+                            <label for="mpStatusFilter">Show</label>
+                            <select id="mpStatusFilter" class="filter-input" onchange="renderStMonthlyProgress()">
+                                <option value="all">All plan lines</option>
+                                <option value="incomplete">Not finished (not done + in progress)</option>
+                                <option value="notdone">Not done only (0 actual)</option>
+                                <option value="partial">In progress only</option>
+                                <option value="done">Done only</option>
+                            </select>
+                            <button type="button" class="sec-download-btn" onclick="downloadMonthExcel()" id="downloadMonthlyPlanBtn" title="Download Excel">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download
+                            </button>
                         </div>
-
-                        <div class="task-table-container" style="margin-top: 14px;">
-                            <table class="task-table" id="monthlyPlanTable">
-                                <thead>
-                                    <tr>
-                                        <th>MONTH</th>
-                                        <th>DURATION PER MIN</th>
-                                        <th>CATEGORY</th>
-                                        <th>CATEGORY 2</th>
-                                        <th>TITLE</th>
-                                        <th>FORMAT</th>
-                                        <th>AVERAGE TIME (in minutes)</th>
-                                        <th>FREQUENCY PER MONTH</th>
-                                        <th>REMARKS</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="monthlyPlanTableBody">
-                                    <tr><td colspan="8" style="text-align:center; padding: 20px; color:var(--text-muted);">No monthly plan data available.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <div id="stMonthlyProgressContainer" style="margin-bottom:16px;"></div>
                     </div>
                 </div>
 
@@ -3456,23 +4015,26 @@ html[data-theme="light"] .btn-download-min:hover {
             }
 
             initDynamicMonthDropdown();
-            loadMonthlyPlanData().then(() => {
-                loadUserTasks();
-            });
-            loadApprovals();
+            // Parallel bootstrap — do not wait for monthly plan before daily tasks
+            Promise.all([
+                loadUserTasks(),
+                loadMonthlyPlanData(),
+                loadApprovals(),
+                loadLeavesFromSheet(),
+                loadNotifications()
+            ]).catch(function (e) { console.error('bootstrap load error', e); });
             loadSepcoApprovers();
             loadRtoApprovers();
             loadRcodeCategories();
             initSocMedData();
-            loadNotifications();
             renderLeaveAbsentTable();
-            loadLeavesFromSheet();
 
-            setInterval(() => {
+            // Background refresh every 60s (was 15s) — uses cache + parallel fetches
+            setInterval(function () {
                 loadUserTasks(true);
-                loadMonthlyPlanData();
+                loadMonthlyPlanData(true);
                 loadNotifications();
-            }, 15000);
+            }, 60000);
         };
 
         function toggleRawRecords(containerId, btn) {
@@ -3866,7 +4428,12 @@ html[data-theme="light"] .btn-download-min:hover {
                 var mp = (allLoadedTasks.monthlyPlan || []).filter(function (t) { return matchesUser(t); });
                 if (monthlyPlanDataLoaded && mp.length === 0) showNoMonthlyPlanPopup(true);
                 else if (mp.length > 0) { closeNoMonthlyPlanPopup(); _mpEmptyPopupShown = false; }
+                try { renderStMonthlyProgress(); } catch (e) { console.error(e); }
             }
+            if (sectionId === 'planActualSection') {
+                try { renderStDailyProgress(); } catch (e) { console.error(e); }
+            }
+            try { if (window.lucide) lucide.createIcons(); } catch (e) {}
         }
 
         function switchTab(evt, tabId) {
@@ -4380,30 +4947,49 @@ html[data-theme="light"] .btn-download-min:hover {
         }
 
         function parseSheetToObjects(csvText) {
-            let parsed = Papa.parse(csvText, { skipEmptyLines: true });
-            let rows = parsed.data;
+            // Fast parse: skip empty lines, no dynamic typing (strings only)
+            var parsed = Papa.parse(csvText, { skipEmptyLines: true, fastMode: false, dynamicTyping: false });
+            var rows = parsed.data;
             if (!rows || rows.length === 0) return [];
 
-            let headerRowIndex = 0;
-            for (let i = 0; i < Math.min(rows.length, 5); i++) {
-                let rowStr = rows[i].join(" ").toLowerCase();
-                if (rowStr.includes('ns+') || rowStr.includes('date') || rowStr.includes('type')) {
+            var headerRowIndex = 0;
+            var maxScan = Math.min(rows.length, 5);
+            for (var i = 0; i < maxScan; i++) {
+                var rowStr = rows[i].join(" ").toLowerCase();
+                if (rowStr.indexOf('ns+') !== -1 || rowStr.indexOf('date') !== -1 || rowStr.indexOf('type') !== -1) {
                     headerRowIndex = i;
                     break;
                 }
             }
 
-            let headers = rows[headerRowIndex].map(h => String(h || "").trim());
-            let dataObjects = [];
+            var headers = rows[headerRowIndex].map(function (h) { return String(h || "").trim(); });
+            var headerLen = headers.length;
+            var dataObjects = [];
+            var userFilter = (typeof loggedInUser === 'string' && loggedInUser) ? loggedInUser : '';
 
-            for (let i = headerRowIndex + 1; i < rows.length; i++) {
-                let r = rows[i];
-                if (!r || r.length === 0 || !r.some(cell => String(cell).trim() !== "")) continue;
-                let obj = {};
-                for (let j = 0; j < headers.length; j++) {
+            for (var ri = headerRowIndex + 1; ri < rows.length; ri++) {
+                var r = rows[ri];
+                if (!r || r.length === 0) continue;
+                var hasVal = false;
+                for (var c = 0; c < r.length; c++) {
+                    if (r[c] != null && String(r[c]).trim() !== '') { hasVal = true; break; }
+                }
+                if (!hasVal) continue;
+
+                // Early user filter when possible (col 0 = NS+ user id) — huge speedup on shared sheets
+                var nsId = r[0] !== undefined ? String(r[0]).toLowerCase().trim() : '';
+                if (userFilter && nsId) {
+                    if (nsId !== userFilter && nsId.indexOf(userFilter) === -1 && userFilter.indexOf(nsId) === -1) {
+                        // still allow name-based match later only if no email-like id — skip obvious others
+                        if (nsId.indexOf('@') !== -1 || userFilter.indexOf('@') !== -1) continue;
+                    }
+                }
+
+                var obj = {};
+                for (var j = 0; j < headerLen; j++) {
                     if (headers[j]) obj[headers[j]] = r[j] !== undefined ? r[j] : "";
                 }
-                obj["_nsUserId"] = r[0] !== undefined ? String(r[0]).toLowerCase().trim() : "";
+                obj["_nsUserId"] = nsId;
                 dataObjects.push(obj);
             }
             return dataObjects;
@@ -4437,6 +5023,8 @@ html[data-theme="light"] .btn-download-min:hover {
                 if (typeof mpFilter !== 'undefined') mpFilter.month = null;
                 if (typeof renderMonthlyPlanView === 'function') renderMonthlyPlanView();
             } catch (e) { console.error(e); }
+            try { renderStMonthlyProgress(); } catch (e) { console.error(e); }
+            try { renderStDailyProgress(); } catch (e) { console.error(e); }
         }
 
         // Keep the month dropdown in sync with the data: last 12 months + any month that has plan/actual/leave records
@@ -4529,47 +5117,118 @@ html[data-theme="light"] .btn-download-min:hover {
             `).join('') : `<tr><td colspan="14" style="text-align:center; padding: 20px; color:var(--text-muted);">No actuals found.</td></tr>`;
         }
 
-        async function loadUserTasks(isBackground = false) {
+        // ---- Fast data layer: parallel fetch + short TTL cache ----
+        // Expose on window so Overview Refresh (other script block) can invalidate
+        var _dataCache = window._dataCache = {
+            planText: null, actualText: null, planAt: 0, actualAt: 0,
+            monthly: null, monthlyAt: 0,
+            inFlightTasks: null, inFlightMonthly: null
+        };
+        var DATA_TTL_MS = 45000; // reuse response for 45s (background polls skip network)
+        window._invalidateDataCache = function () {
+            try {
+                _dataCache.planAt = 0; _dataCache.actualAt = 0; _dataCache.monthlyAt = 0;
+                _dataCache.planText = null; _dataCache.actualText = null; _dataCache.monthly = null;
+            } catch (e) {}
+        };
+
+        function _cacheFresh(ts) { return ts && (Date.now() - ts) < DATA_TTL_MS; }
+
+        async function _fetchText(url, useCacheBust) {
+            var u = useCacheBust ? (url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now()) : url;
+            var res = await fetch(u, { cache: useCacheBust ? 'no-store' : 'default' });
+            if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + url);
+            return await res.text();
+        }
+
+        async function loadUserTasks(isBackground) {
+            if (isBackground === undefined) isBackground = false;
             updateMonthDownloadLabel();
-            let statusEl = document.getElementById('taskSyncStatus');
-            if(!isBackground && statusEl) statusEl.innerText = "🔄 Syncing data...";
+            var statusEl = document.getElementById('taskSyncStatus');
+            if (!isBackground && statusEl) statusEl.innerText = "🔄 Syncing data...";
             function setSynced(ok) {
                 if (!statusEl) return;
                 statusEl.innerText = ok
                     ? ("🔄 Last Synced: " + new Date().toLocaleTimeString())
                     : "⚠️ Sync failed — retrying…";
             }
-            try {
-                const planRes = await fetch(PLAN_CSV_URL + "&t=" + new Date().getTime());
-                const planCsvText = await planRes.text();
-                const planTasks = parseSheetToObjects(planCsvText);
-                const actualRes = await fetch(ACTUAL_CSV_URL + "&t=" + new Date().getTime());
-                const actualCsvText = await actualRes.text();
-                const actualTasks = parseSheetToObjects(actualCsvText);
-                allLoadedTasks.plan = planTasks;
-                allLoadedTasks.actual = actualTasks;
-                refreshMonthOptions();
-                renderViewTables([...planTasks, ...actualTasks]);
-                try { updateDailyTaskSummaryAndChart(); } catch (e) { console.error('summary error', e); }
-                setSynced(true);
-            } catch (e) {
-                console.error('loadUserTasks error', e);
-                setSynced(false);
+            // Coalesce concurrent calls
+            if (_dataCache.inFlightTasks) {
+                try { await _dataCache.inFlightTasks; } catch (e) {}
+                if (!isBackground) setSynced(true);
+                return;
             }
+            var run = (async function () {
+                try {
+                    var needNetwork = !_cacheFresh(_dataCache.planAt) || !_cacheFresh(_dataCache.actualAt);
+                    var planCsvText, actualCsvText;
+                    if (needNetwork) {
+                        // Parallel CSV downloads (was sequential)
+                        var pair = await Promise.all([
+                            _fetchText(PLAN_CSV_URL, true),
+                            _fetchText(ACTUAL_CSV_URL, true)
+                        ]);
+                        planCsvText = pair[0];
+                        actualCsvText = pair[1];
+                        _dataCache.planText = planCsvText;
+                        _dataCache.actualText = actualCsvText;
+                        _dataCache.planAt = Date.now();
+                        _dataCache.actualAt = Date.now();
+                    } else {
+                        planCsvText = _dataCache.planText;
+                        actualCsvText = _dataCache.actualText;
+                    }
+                    var planTasks = parseSheetToObjects(planCsvText);
+                    var actualTasks = parseSheetToObjects(actualCsvText);
+                    allLoadedTasks.plan = planTasks;
+                    allLoadedTasks.actual = actualTasks;
+                    refreshMonthOptions();
+                    renderViewTables([].concat(planTasks, actualTasks));
+                    try { updateDailyTaskSummaryAndChart(); } catch (e) { console.error('summary error', e); }
+                    try { if (typeof renderStDailyProgress === 'function') renderStDailyProgress(); } catch (e) {}
+                    try { if (typeof renderStMonthlyProgress === 'function') renderStMonthlyProgress(); } catch (e) {}
+                    setSynced(true);
+                } catch (e) {
+                    console.error('loadUserTasks error', e);
+                    setSynced(false);
+                }
+            })();
+            _dataCache.inFlightTasks = run;
+            try { await run; } finally { _dataCache.inFlightTasks = null; }
         }
 
-        async function loadMonthlyPlanData() {
-            try {
-                let response = await fetch(WEB_APP_URL + "?action=getMonthlyPlan");
-                let result = await response.json();
-                if (result.success) {
-                    allLoadedTasks.monthlyPlan = Array.isArray(result.monthlyPlan) ? result.monthlyPlan : [];
-                    monthlyPlanDataLoaded = true;
-                    renderMonthlyPlanView();
-                }
-            } catch (e) {
-                console.error("Error loading monthly plan data:", e);
+        async function loadMonthlyPlanData(isBackground) {
+            if (isBackground === undefined) isBackground = false;
+            if (_dataCache.inFlightMonthly) {
+                try { await _dataCache.inFlightMonthly; } catch (e) {}
+                return;
             }
+            var run = (async function () {
+                try {
+                    if (_cacheFresh(_dataCache.monthlyAt) && _dataCache.monthly) {
+                        allLoadedTasks.monthlyPlan = _dataCache.monthly;
+                        monthlyPlanDataLoaded = true;
+                        if (!isBackground) renderMonthlyPlanView();
+                        try { if (typeof renderStMonthlyProgress === 'function') renderStMonthlyProgress(); } catch (e) {}
+                        return;
+                    }
+                    var response = await fetch(WEB_APP_URL + "?action=getMonthlyPlan&t=" + Date.now(), { cache: 'no-store' });
+                    var result = await response.json();
+                    if (result.success) {
+                        var list = Array.isArray(result.monthlyPlan) ? result.monthlyPlan : [];
+                        allLoadedTasks.monthlyPlan = list;
+                        _dataCache.monthly = list;
+                        _dataCache.monthlyAt = Date.now();
+                        monthlyPlanDataLoaded = true;
+                        renderMonthlyPlanView();
+                        try { if (typeof renderStMonthlyProgress === 'function') renderStMonthlyProgress(); } catch (e) {}
+                    }
+                } catch (e) {
+                    console.error("Error loading monthly plan data:", e);
+                }
+            })();
+            _dataCache.inFlightMonthly = run;
+            try { await run; } finally { _dataCache.inFlightMonthly = null; }
         }
 
         function parseTimeToMinutes(timeStr) {
@@ -5458,7 +6117,7 @@ html[data-theme="light"] .btn-download-min:hover {
         }
 
         // Keep the request list fresh while the tab is open
-        setInterval(loadApprovals, 30000);
+        setInterval(function () { loadApprovals(); }, 60000);
 
         function downloadMonthExcel() {
             let sel = document.getElementById('selectedMonthFilter');
@@ -5624,8 +6283,66 @@ function kpiInputRatio(metricNames, rowsForMonth) {
 // ---------- Duration rule: a CONTENT task's duration counts only AFTER the content is approved ----------
 // Approved = APPROVAL DATE filled in on the content's rows, or an "Approved" file in Approval Requests whose name contains the title.
 // Non-content tasks (meetings, socmed, etc.) are always counted. Returns a Set of the approved content rows.
+// Normalize title for approval matching (same idea as SEPCO ovNormTitle / sepcoIsContentApproved)
+function kpiNormTitle(s) {
+    return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+// Fuzzy title match — SEPCO-style (exact, contains, or token overlap)
+function kpiTitlesMatch(a, b) {
+    var ta = kpiNormTitle(a), tb = kpiNormTitle(b);
+    if (!ta || !tb) return false;
+    if (ta === tb || ta.indexOf(tb) !== -1 || tb.indexOf(ta) !== -1) return true;
+    var aa = ta.split(/\s+/).filter(function (t) { return t.length > 2; });
+    var bb = tb.split(/\s+/).filter(function (t) { return t.length > 2; });
+    if (!aa.length || !bb.length) return false;
+    var overlap = aa.filter(function (t) { return bb.indexOf(t) !== -1; }).length;
+    return overlap >= Math.min(2, aa.length, bb.length) || (aa.length === 1 && bb.indexOf(aa[0]) !== -1);
+}
+// List of normalized approved file names (current user if possible)
+function kpiApprovedFileNames(monthKey) {
+    var list = [];
+    (allApprovals || []).forEach(function (a) {
+        if (!/approve/i.test(String(a.status || ''))) return;
+        if (monthKey && getRowMonthKey(a.uploadDate) !== monthKey) return;
+        // Prefer this user's uploads when we can identify them
+        try {
+            var by = String(a.uploadedBy || a.user || a.email || '').toLowerCase().trim();
+            var me = String(typeof loggedInUser !== 'undefined' ? loggedInUser : '').toLowerCase().trim();
+            if (me && by && by !== me && by.indexOf(me) === -1 && me.indexOf(by) === -1) return;
+        } catch (e) {}
+        var nt = kpiNormTitle(a.fileName || a.title || '');
+        if (nt) list.push(nt);
+    });
+    return list;
+}
+// CONTENT row is approved if APPROVAL DATE is set OR title matches an Approved file (SEPCO rule)
+function kpiIsContentApproved(title, approvalDate, approvedFiles) {
+    var apr = String(approvalDate || '').trim();
+    if (apr && apr !== '' && !/^n\/?a$/i.test(apr) && apr !== '0') {
+        // also accept date objects already formatted
+        if (kpiDate(apr) || /\d{4}/.test(apr)) return true;
+    }
+    var tn = kpiNormTitle(title);
+    if (!tn) return false;
+    return (approvedFiles || []).some(function (f) { return kpiTitlesMatch(tn, f); });
+}
+// Approvals category is CONTENT (SEPCO: anything starting with CONTENT, blank = content)
+function kpiApprovalIsContent(cat, cat2) {
+    var c = String(cat || '').trim().toUpperCase(), c2 = String(cat2 || '').trim().toUpperCase();
+    if (!c && !c2) return true;
+    if (c2 === 'TASK' || c2 === 'OTHERS') return false;
+    return c.indexOf('CONTENT') === 0 || c2.indexOf('CONTENT') === 0;
+}
 function kpiApprovedContentRows(monthKey) {
     var approvedSet = new Set();
+    var approvedFiles = kpiApprovedFileNames(monthKey);
+    // Also include approved files from any month for title match fallback (file may be approved after month ends)
+    var allApprovedFiles = approvedFiles.slice();
+    (allApprovals || []).forEach(function (a) {
+        if (!/approve/i.test(String(a.status || ''))) return;
+        var nt = kpiNormTitle(a.fileName || a.title || '');
+        if (nt && allApprovedFiles.indexOf(nt) === -1) allApprovedFiles.push(nt);
+    });
     var rows = (allLoadedTasks.actual || []).filter(function (r) {
         return matchesUser(r) && getRowMonthKey(r['Date Submitted']) === monthKey && kpiIsContentRow(r) && kpiTitle(r) !== '';
     }).sort(function (a, b) { return kpiDate(a['Date Submitted']) < kpiDate(b['Date Submitted']) ? -1 : 1; });
@@ -5640,13 +6357,15 @@ function kpiApprovedContentRows(monthKey) {
         var map = {};
         rows.forEach(function (r) { var k = kpiTitle(r).toLowerCase(); if (!map[k]) { map[k] = { title: kpiTitle(r), rows: [] }; units.push(map[k]); } map[k].rows.push(r); });
     }
-    function nt(s) { return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
-    var approvedFiles = (allApprovals || []).filter(function (a) { return /approve/i.test(String(a.status || '')); }).map(function (a) { return nt(a.fileName); });
     units.forEach(function (u) {
         var apr = '';
-        u.rows.forEach(function (r) { var a = kpiDate(getRowVal(r, ['APPROVAL DATE'])); if (a) apr = a; });
-        var tn = nt(u.title);
-        if (!!apr || (tn !== '' && approvedFiles.some(function (f) { return f.indexOf(tn) !== -1; }))) u.rows.forEach(function (r) { approvedSet.add(r); });
+        u.rows.forEach(function (r) {
+            var a = getRowVal(r, ['APPROVAL DATE', 'Approval Date']);
+            if (a) apr = a;
+        });
+        if (kpiIsContentApproved(u.title, apr, allApprovedFiles)) {
+            u.rows.forEach(function (r) { approvedSet.add(r); });
+        }
     });
     return approvedSet;
 }
@@ -5717,7 +6436,7 @@ function computeKpi(monthKey) {
         for (var i = 0; i < planSlots.length; i++) {
             var s = planSlots[i];
             if (s.used) continue;
-            if (s.nt && (fn.indexOf(s.nt) !== -1 || s.nt.indexOf(fn) !== -1)) { s.used = true; return s; }
+            if (s.nt && (typeof kpiTitlesMatch === 'function' ? kpiTitlesMatch(fn, s.nt) : (fn.indexOf(s.nt) !== -1 || s.nt.indexOf(fn) !== -1))) { s.used = true; return s; }
         }
         return null;
     }
@@ -5910,6 +6629,440 @@ function xlTable(title, band, heads, cells) {
 }
 
 
+
+// ---------- ST Monthly Plan Progress vs Actual + Daily Plan vs Actual (SEPCO logic) ----------
+function stNormCat2(s) {
+    var t = String(s || '').toLowerCase().replace(/#n\/?a/g, '').trim();
+    t = t.replace(/^(content|task|others)\s*[-–—:]\s*/i, '');
+    return t.replace(/[^a-z0-9]+/g, ' ').trim();
+}
+function stCatEq(a, b) { return !!a && !!b && a === b; }
+function stCatFuzzy(a, b) { return !!a && !!b && (a === b || a.indexOf(b) !== -1 || b.indexOf(a) !== -1); }
+function stTitleMatch(a, b) {
+    if (!a || !b) return false;
+    if (a === b || a.indexOf(b) !== -1 || b.indexOf(a) !== -1) return true;
+    var ta = a.split(/\s+/).filter(function (t) { return t.length > 2; });
+    var tb = b.split(/\s+/).filter(function (t) { return t.length > 2; });
+    if (!ta.length || !tb.length) return false;
+    var ov = ta.filter(function (t) { return tb.indexOf(t) !== -1; }).length;
+    return ov >= Math.min(2, ta.length, tb.length);
+}
+function stNormTitle(s) {
+    return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,4}$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+function stField(row, keys) {
+    for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        if (row && row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return String(row[k]).trim();
+    }
+    if (typeof getRowVal === 'function') {
+        var v = getRowVal(row, keys);
+        if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+    }
+    if (row) {
+        var rk = Object.keys(row);
+        for (var j = 0; j < keys.length; j++) {
+            var want = keys[j].toLowerCase();
+            for (var x = 0; x < rk.length; x++) {
+                if (rk[x].toLowerCase() === want && String(row[rk[x]] || '').trim() !== '') return String(row[rk[x]]).trim();
+            }
+        }
+    }
+    return '';
+}
+function stParseMins(row) {
+    var d = parseFloat(String(stField(row, ['DURATION PER MIN', 'Duration per Min', 'DURATION']) || '').replace(/[^0-9.\-]/g, ''));
+    return (!isNaN(d) && d > 0) ? d : 0;
+}
+function stIsContentApproved(title, approvalDateCell, approvedFiles) {
+    var apr = String(approvalDateCell || '').trim();
+    if (apr && apr !== '' && !/^n\/?a$/i.test(apr) && apr !== '0') return true;
+    var nt = stNormTitle(title);
+    if (!nt) return false;
+    return (approvedFiles || []).some(function (f) { return stTitleMatch(f, nt); });
+}
+function stNormalizeCatPair(row) {
+    var c = stField(row, ['CATEGORY', 'Category']);
+    var c2 = stField(row, ['CATEGORY 2', 'Category 2', 'CATEGORY2']);
+    var title = stField(row, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'ACTUAL [Title]', 'ACTUAL [TITLE]']);
+    var buckets = ['CONTENT', 'TASK', 'OTHERS'];
+    var cUp = c.toUpperCase(), c2Up = c2.toUpperCase();
+    if (buckets.indexOf(c2Up) !== -1) return { cat: c2Up, cat2: c || title || '—' };
+    if (buckets.indexOf(cUp) !== -1) return { cat: cUp, cat2: c2 || title || '—' };
+    var probe = c2Up || cUp;
+    var b = 'OTHERS';
+    if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) b = 'CONTENT';
+    else if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TASK';
+    return { cat: b, cat2: (c2 || c || title || '—') };
+}
+function stApprovedFiles() {
+    var approvedFiles = [];
+    (typeof allApprovals !== 'undefined' ? allApprovals : []).forEach(function (a) {
+        if (!/approve/i.test(String(a.status || ''))) return;
+        var nt = stNormTitle(a.fileName || a.title || '');
+        if (nt) approvedFiles.push(nt);
+    });
+    return approvedFiles;
+}
+
+function renderStMonthlyProgress() {
+    var el = document.getElementById('stMonthlyProgressContainer');
+    if (!el) return;
+    var monthKey = '';
+    try {
+        var sel = document.getElementById('selectedMonthFilter');
+        if (sel && sel.value) monthKey = sel.value;
+    } catch (e) {}
+    var monthLabel = monthKey
+        ? new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1)
+            .toLocaleString('en-US', { month: 'long', year: 'numeric' })
+        : 'All months';
+
+    var lines = [];
+    (allLoadedTasks.monthlyPlan || []).filter(function (r) {
+        return matchesUser(r) && kpiMonthMatches(stField(r, ['MONTH']) || (typeof getRowVal === 'function' ? getRowVal(r, ['MONTH']) : ''), monthKey);
+    }).forEach(function (r) {
+        var f = parseInt(String(stField(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
+        if (!(f > 0)) f = 1;
+        var pair = stNormalizeCatPair(r);
+        var title = stField(r, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'Plan [Title]']);
+        if (!title) title = pair.cat2 || '—';
+        var nt = stNormTitle(title);
+        var nc = stNormCat2(pair.cat2);
+        var d = stParseMins(r);
+        var mins = d > 0 ? d * f : 480 * f;
+        var key = pair.cat + '||' + (nt || nc || title.toLowerCase());
+        var line = lines.find(function (l) { return l.key === key; });
+        if (!line) {
+            line = { key: key, bucket: pair.cat, cat2: pair.cat2, title: title, nt: nt, norm: nc, target: 0, actual: 0, approved: 0, planMins: 0, actualMins: 0 };
+            lines.push(line);
+        }
+        line.target += f;
+        line.planMins += mins;
+    });
+
+    var approvedFiles = stApprovedFiles();
+    var countedTitles = [];
+
+    (allLoadedTasks.actual || []).filter(function (t) {
+        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey;
+    }).forEach(function (t) {
+        var title = stField(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Actual [Title]']);
+        if (!title) return;
+        var pair = stNormalizeCatPair(t);
+        var mins = stParseMins(t);
+        var nt = stNormTitle(title);
+        if (pair.cat === 'CONTENT' && !stIsContentApproved(title, stField(t, ['APPROVAL DATE', 'Approval Date']), approvedFiles)) return;
+
+        var line = null, i;
+        for (i = 0; i < lines.length; i++) {
+            if (lines[i].bucket === pair.cat && lines[i].nt && nt && lines[i].nt === nt) { line = lines[i]; break; }
+        }
+        if (!line) {
+            for (i = 0; i < lines.length; i++) {
+                if (lines[i].bucket === pair.cat && lines[i].nt && nt && stTitleMatch(lines[i].nt, nt)) { line = lines[i]; break; }
+            }
+        }
+        if (!line) {
+            var nc = stNormCat2(pair.cat2);
+            for (i = 0; i < lines.length; i++) {
+                if (lines[i].bucket === pair.cat && lines[i].norm && nc && (stCatEq(lines[i].norm, nc) || stCatFuzzy(lines[i].norm, nc))) { line = lines[i]; break; }
+            }
+        }
+        if (!line) return;
+        if (pair.cat === 'CONTENT') {
+            if (nt && countedTitles.some(function (x) { return x === nt || stTitleMatch(x, nt); })) return;
+            if (nt) countedTitles.push(nt);
+        }
+        line.actual += 1;
+        line.actualMins += mins || 0;
+    });
+
+    (typeof allApprovals !== 'undefined' ? allApprovals : []).forEach(function (a) {
+        if (!/approve/i.test(String(a.status || ''))) return;
+        var fileName = a.fileName || a.title || '';
+        var nt = stNormTitle(fileName);
+        if (!nt) return;
+        var cat = String(a.category || '').trim();
+        var pair = stNormalizeCatPair({ CATEGORY: cat, 'CATEGORY 2': a.category2 || '', TITLE: fileName });
+        if (pair.cat !== 'CONTENT') return;
+        var line = null, i;
+        for (i = 0; i < lines.length; i++) {
+            if (lines[i].bucket === 'CONTENT' && lines[i].nt && stTitleMatch(lines[i].nt, nt)) { line = lines[i]; break; }
+        }
+        if (!line) {
+            var nc = stNormCat2(pair.cat2);
+            for (i = 0; i < lines.length; i++) {
+                if (lines[i].bucket === 'CONTENT' && lines[i].norm && nc && (stCatEq(lines[i].norm, nc) || stCatFuzzy(lines[i].norm, nc))) { line = lines[i]; break; }
+            }
+        }
+        if (!line) return;
+        line.approved += 1;
+        if (!countedTitles.some(function (x) { return x === nt || stTitleMatch(x, nt); })) {
+            countedTitles.push(nt);
+            line.actual += 1;
+        }
+    });
+
+    var statusFilter = 'all';
+    try {
+        var sf = document.getElementById('mpStatusFilter');
+        if (sf) statusFilter = sf.value || 'all';
+    } catch (e) {}
+    var lineStatus = function (l) { return l.actual <= 0 ? 'notdone' : (l.actual < l.target ? 'partial' : 'done'); };
+    var statusHtml = function (l) {
+        if (l.actual <= 0) return '<span class="cat-remark miss">Not done — 0 of ' + l.target + '</span>';
+        if (l.actual < l.target) return '<span class="cat-remark partial">In progress — ' + (l.target - l.actual) + ' remaining</span>';
+        if (l.actual > l.target) return '<span class="cat-remark plus">Done — ' + (l.actual - l.target) + ' over target</span>';
+        return '<span class="cat-remark plus">Done</span>';
+    };
+    var bucketColor = { CONTENT: '#4f8f46', TASK: '#d8ad24', OTHERS: '#397d89' };
+
+    var gLines = 0, gDone = 0, gNot = 0, gTarget = 0, gCredit = 0, gAppr = 0;
+    lines.forEach(function (l) {
+        gLines++; gTarget += l.target; gCredit += Math.min(l.actual, l.target);
+        if (l.bucket === 'CONTENT') gAppr += l.approved;
+        if (l.actual >= l.target) gDone++;
+        if (l.actual <= 0) gNot++;
+    });
+    var gPct = gTarget > 0 ? gCredit / gTarget * 100 : null;
+    var cards = '<div class="summary-grid" style="margin-bottom:16px;">' +
+        '<div class="summary-card"><h4>Overall Plan Completion</h4><p class="val">' + (gPct == null ? '—' : (Math.round(gPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">' + gCredit + ' of ' + gTarget + ' planned items done</p></div>' +
+        '<div class="summary-card"><h4>Plan Lines Done</h4><p class="val">' + gDone + ' / ' + gLines + '</p><p style="font-size:10px;margin:4px 0 0 0;">Targets met</p></div>' +
+        '<div class="summary-card"><h4>Approved Content</h4><p class="val">' + gAppr + '</p><p style="font-size:10px;margin:4px 0 0 0;">Approved requests in Monthly Plan</p></div>' +
+        '<div class="summary-card"><h4>Not Started</h4><p class="val">' + gNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but 0 actual</p></div>' +
+        '</div>';
+
+    if (!lines.length) {
+        el.innerHTML = cards + '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + escHtml(monthLabel) + '</h5></div><div class="cat-empty">No Monthly Plan for this month yet.</div></div>';
+        return;
+    }
+
+    var visible = lines.slice().sort(function (a, b) {
+        if (a.bucket !== b.bucket) return a.bucket < b.bucket ? -1 : 1;
+        return (a.title || '').localeCompare(b.title || '');
+    }).filter(function (l) {
+        if (statusFilter === 'all') return true;
+        if (statusFilter === 'incomplete') return lineStatus(l) !== 'done';
+        return lineStatus(l) === statusFilter;
+    });
+
+    var body = '';
+    if (!visible.length) {
+        body = '<tr><td colspan="6" class="cat-muted" style="text-align:center;padding:16px;">Nothing matches this filter.</td></tr>';
+    } else {
+        visible.forEach(function (l) {
+            var pct = l.target > 0 ? (l.actual / l.target) * 100 : null;
+            var barW = pct == null ? 0 : Math.min(100, Math.round(pct));
+            var barCls = pct == null ? 'low' : (pct >= 100 ? 'over' : (pct < 40 ? 'low' : ''));
+            var bc = bucketColor[l.bucket] || '#64748b';
+            var catLabel = (l.cat2 && l.cat2 !== l.bucket && l.cat2 !== '—') ? l.cat2 : l.bucket;
+            body += '<tr>' +
+                '<td class="cat-name" style="text-align:left;"><span style="color:' + bc + ';">●</span> ' + escHtml(catLabel) + '</td>' +
+                '<td style="text-align:left;white-space:normal;min-width:180px;">' + escHtml(l.title || '—') + '</td>' +
+                '<td class="num">' + l.target + '</td>' +
+                '<td class="num">' + l.actual + '</td>' +
+                '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + barW + '%"></div></div></td>' +
+                '<td class="cat-remark-cell">' + statusHtml(l) + '</td>' +
+                '</tr>';
+        });
+    }
+
+    el.innerHTML = cards +
+        '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + escHtml(monthLabel) + '</h5></div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a plan line (title) from your Monthly Plan, matched against your Actual by title or Category 2. CONTENT counts only when <strong>Approved</strong>. Planned items with 0 actual are <span class="cat-remark miss">Not done</span>.</div>' +
+        '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
+        '<th>Category</th><th>Plan [Title]</th><th class="num">Target</th><th class="num">Actual</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
+        '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
+}
+
+function renderStDailyProgress() {
+    var el = document.getElementById('stDailyProgressContainer');
+    if (!el) return;
+    var monthKey = '';
+    try {
+        var sel = document.getElementById('selectedMonthFilter');
+        if (sel && sel.value) monthKey = sel.value;
+    } catch (e) {}
+    var dayFilter = '';
+    try {
+        var df = document.getElementById('paDayFilter');
+        if (df && df.value) dayFilter = df.value;
+    } catch (e) {}
+    var statusFilter = 'all';
+    try {
+        var sf = document.getElementById('paStatusFilter');
+        if (sf) statusFilter = sf.value || 'all';
+    } catch (e) {}
+
+    var monthLabel = monthKey
+        ? new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1)
+            .toLocaleString('en-US', { month: 'long', year: 'numeric' })
+        : '';
+
+    var approvedFiles = stApprovedFiles();
+    var days = {};
+    function ensureDay(d) {
+        if (!days[d]) days[d] = { plans: [], actuals: [] };
+        return days[d];
+    }
+
+    (allLoadedTasks.plan || []).filter(function (t) {
+        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey;
+    }).forEach(function (r) {
+        var date = cleanDateDisplay(r['Date Submitted']);
+        if (!date) return;
+        if (dayFilter && date !== dayFilter) return;
+        var title = stField(r, ['PLAN [Title]', 'PLAN [TITLE]', 'TITLE', 'Plan [Title]']);
+        if (!title) return;
+        var pair = stNormalizeCatPair(r);
+        var dur = stParseMins(r);
+        ensureDay(date).plans.push({
+            title: title, nt: stNormTitle(title), bucket: pair.cat, cat2: pair.cat2,
+            nc: stNormCat2(pair.cat2), dur: dur, match: null
+        });
+    });
+
+    (allLoadedTasks.actual || []).filter(function (t) {
+        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey;
+    }).forEach(function (r) {
+        var date = cleanDateDisplay(r['Date Submitted']);
+        if (!date) return;
+        if (dayFilter && date !== dayFilter) return;
+        var title = stField(r, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Actual [Title]']);
+        if (!title) return;
+        var pair = stNormalizeCatPair(r);
+        var dur = stParseMins(r);
+        var isContent = pair.cat === 'CONTENT';
+        var approved = !isContent || stIsContentApproved(title, stField(r, ['APPROVAL DATE', 'Approval Date']), approvedFiles);
+        ensureDay(date).actuals.push({
+            title: title, nt: stNormTitle(title), bucket: pair.cat, cat2: pair.cat2,
+            nc: stNormCat2(pair.cat2), dur: dur, approved: approved, used: false
+        });
+    });
+
+    Object.keys(days).forEach(function (dk) {
+        var day = days[dk];
+        var passes = [
+            function (p, a) { return p.nt && a.nt && p.nt === a.nt; },
+            function (p, a) { return stTitleMatch(p.nt, a.nt); },
+            function (p, a) { return p.bucket === a.bucket && p.nc && a.nc && p.nc === a.nc; }
+        ];
+        passes.forEach(function (fn) {
+            day.plans.forEach(function (p) {
+                if (p.match) return;
+                var a = day.actuals.find(function (x) { return !x.used && fn(p, x); });
+                if (a) { a.used = true; p.match = a; }
+            });
+        });
+    });
+
+    function itemState(p) {
+        if (!p.match) return 'notdone';
+        if (p.match.bucket === 'CONTENT' && !p.match.approved) return 'notdone';
+        if (p.match.dur > p.dur && p.dur > 0) return 'late';
+        return 'done';
+    }
+
+    var tPlans = 0, tDone = 0, tNot = 0, tLate = 0, tPM = 0, tAM = 0;
+    Object.keys(days).forEach(function (dk) {
+        var day = days[dk];
+        day.plans.forEach(function (p) {
+            tPlans++; tPM += p.dur;
+            var s = itemState(p);
+            if (s === 'notdone') tNot++;
+            else { tDone++; if (s === 'late') tLate++; }
+        });
+        day.actuals.forEach(function (a) {
+            if (a.bucket !== 'CONTENT' || a.approved) tAM += a.dur;
+        });
+    });
+    var tPct = tPlans > 0 ? tDone / tPlans * 100 : null;
+    var cards = '<div class="summary-grid" style="margin-bottom:16px;">' +
+        '<div class="summary-card"><h4>Daily Plan Completion</h4><p class="val">' + (tPct == null ? '—' : (Math.round(tPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">' + tDone + ' of ' + tPlans + ' planned items done</p></div>' +
+        '<div class="summary-card"><h4>Not Done</h4><p class="val">' + tNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but no actual</p></div>' +
+        '<div class="summary-card"><h4>Done Late</h4><p class="val">' + tLate + '</p><p style="font-size:10px;margin:4px 0 0 0;">Actual longer than plan</p></div>' +
+        '<div class="summary-card"><h4>Plan / Actual Mins</h4><p class="val" style="font-size:20px;">' + Math.round(tPM).toLocaleString() + ' / ' + Math.round(tAM).toLocaleString() + '</p><p style="font-size:10px;margin:4px 0 0 0;">CONTENT counts once approved</p></div>' +
+        '</div>';
+
+    var body = '';
+    var shown = 0;
+    Object.keys(days).sort().reverse().forEach(function (dk) {
+        var day = days[dk];
+        var rows = '';
+        var dPlans = day.plans.length, dDone = 0, dPM = 0, dAM = 0;
+
+        day.plans.forEach(function (p) {
+            var s = itemState(p);
+            dPM += p.dur;
+            if (s !== 'notdone') dDone++;
+            if (p.match && (p.match.bucket !== 'CONTENT' || p.match.approved)) dAM += p.match.dur;
+            if (statusFilter === 'notdone' && s !== 'notdone') return;
+            if (statusFilter === 'done' && s === 'notdone') return;
+            if (statusFilter === 'late' && s !== 'late') return;
+            if (statusFilter === 'unplanned') return;
+            var aTitle = p.match ? p.match.title : '';
+            var aMins = p.match && (p.match.bucket !== 'CONTENT' || p.match.approved) ? p.match.dur : 0;
+            var statusHtml;
+            if (s === 'notdone') statusHtml = '<span class="cat-remark miss">Not done</span>';
+            else if (s === 'late') statusHtml = '<span class="cat-remark partial">Done late</span>';
+            else statusHtml = '<span class="cat-remark plus">Done</span>';
+            var pct = p.dur > 0 ? Math.min(100, Math.round((aMins / p.dur) * 100)) : (s !== 'notdone' ? 100 : 0);
+            var barCls = s === 'notdone' ? 'low' : (pct >= 100 ? 'over' : '');
+            rows += '<tr>' +
+                '<td class="cat-name">' + escHtml(p.bucket) + '</td>' +
+                '<td style="text-align:left;white-space:normal;min-width:160px;">' + escHtml(p.title) + '</td>' +
+                '<td class="num">' + Math.round(p.dur).toLocaleString() + '</td>' +
+                '<td style="text-align:left;white-space:normal;min-width:160px;">' + (aTitle ? escHtml(aTitle) : '<span class="cat-muted">—</span>') + '</td>' +
+                '<td class="num">' + (aMins ? Math.round(aMins).toLocaleString() : (s === 'notdone' ? '0' : '—')) + '</td>' +
+                '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + pct + '%"></div></div></td>' +
+                '<td class="cat-remark-cell">' + statusHtml + '</td>' +
+                '</tr>';
+        });
+
+        day.actuals.filter(function (a) { return !a.used; }).forEach(function (a) {
+            if (statusFilter === 'notdone' || statusFilter === 'done') return;
+            if (statusFilter === 'unplanned' || statusFilter === 'all') {
+                var showMins = (a.bucket !== 'CONTENT' || a.approved) ? a.dur : 0;
+                dAM += showMins;
+                rows += '<tr>' +
+                    '<td class="cat-name">' + escHtml(a.bucket) + '</td>' +
+                    '<td class="cat-muted">—</td>' +
+                    '<td class="num cat-muted">—</td>' +
+                    '<td style="text-align:left;white-space:normal;min-width:160px;">' + escHtml(a.title) + '</td>' +
+                    '<td class="num">' + Math.round(showMins).toLocaleString() + '</td>' +
+                    '<td class="cat-bar-cell"></td>' +
+                    '<td class="cat-remark-cell"><span class="cat-remark enhance">○ Unplanned actual' + ((a.bucket === 'CONTENT' && !a.approved) ? ' · awaiting approval' : '') + '</span></td>' +
+                    '</tr>';
+            }
+        });
+
+        if (!rows) return;
+        shown++;
+        var dPct = dPlans > 0 ? dDone / dPlans * 100 : null;
+        var dLabel = dk;
+        try {
+            dLabel = new Date(dk + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        } catch (e) {}
+        body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="7" style="text-align:left;padding:10px 14px;font-weight:800;">📅 ' + escHtml(dLabel) +
+            '<span style="font-weight:500;color:var(--text-muted);margin-left:10px;">' + dDone + '/' + dPlans + ' planned done · ' + Math.round(dPM).toLocaleString() + ' plan mins / ' + Math.round(dAM).toLocaleString() + ' actual mins</span> ' +
+            (dPct == null ? '' : '<span class="cat-pct ' + (dPct >= 100 ? 'good' : (dPct >= 80 ? 'warn' : 'bad')) + '">' + (Math.round(dPct * 10) / 10) + '%</span>') +
+            '</td></tr>' + rows;
+    });
+
+    if (!shown) {
+        el.innerHTML = cards + '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Daily Plan vs Actual · ' + escHtml(dayFilter || monthLabel) + '</h5></div><div class="cat-empty">Nothing to show for this view. Rows without a title are skipped (same as SEPCO).</div></div>';
+        return;
+    }
+    el.innerHTML = cards +
+        '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Daily Plan vs Actual · ' + escHtml(dayFilter || monthLabel) + '</h5></div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is something in your Daily Plan, matched to your Daily Actual of the same day (exact title → similar title → same Category 2). Planned items with no actual are <span class="cat-remark miss">Not done</span>. Rows marked ○ are actuals not in that day\'s plan. CONTENT only counts once Approved.</div>' +
+        '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
+        '<th>Category</th><th>Plan [Title]</th><th class="num">Plan mins</th><th>Actual [Title]</th><th class="num">Actual mins</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
+        '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
+}
+
+
 // ---------- Category Plan vs Actual + Peak (Overview) ----------
 
 function kpiCatLabel(row) {
@@ -5947,18 +7100,25 @@ function renderCategoryProgress(monthKey, targetId) {
     });
 
     // Daily Actual → actual count + actual minutes
-    // CONTENT: count + mins ONLY when approved (For Approval logic)
+    // CONTENT: count + mins ONLY when approved (SEPCO rule: APPROVAL DATE or matching Approved file)
     // TASK / OTHERS: always count
+    // Plus: Approved CONTENT from Approvals sheet counts even without Daily Actual (SEPCO)
     var apprSet = kpiApprovedContentRows(monthKey);
     var dayMins = {}, hourMins = {}, dayCount = {};
+    var countedContentTitles = [];
     (allLoadedTasks.actual || []).filter(function (t) {
-        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey && String(t['ACTUAL [Title]'] || '').trim() !== '';
+        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey && String(t['ACTUAL [Title]'] || t['ACTUAL [TITLE]'] || '').trim() !== '';
     }).forEach(function (t) {
         var b = kpiRowBucket(t);
         var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
         if (isNaN(d) || d < 0) d = 0;
-        // CONTENT must be approved to count (same as SEPCO For Approval rule)
-        if (!kpiDurationCounts(t, apprSet)) return;
+        var title = String(getRowVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE']) || t['ACTUAL [Title]'] || '').trim();
+        // CONTENT must be approved to count (same as SEPCO)
+        if (b === 'CONTENT') {
+            if (!kpiDurationCounts(t, apprSet)) return;
+            var nt0 = kpiNormTitle(title);
+            if (nt0) countedContentTitles.push(nt0);
+        }
         stats[b].actualCount += 1;
         stats[b].actualMins += d;
 
@@ -5978,6 +7138,26 @@ function renderCategoryProgress(monthKey, targetId) {
             var label = (h % 12 || 12) + ':00 ' + (h < 12 ? 'AM' : 'PM');
             hourMins[label] = (hourMins[label] || 0) + d;
         }
+    });
+    // Approved CONTENT from Approvals (no Daily Actual required) — one per unique file
+    var apprSeenBucket = {};
+    (allApprovals || []).forEach(function (a) {
+        if (!/approve/i.test(String(a.status || ''))) return;
+        if (monthKey && getRowMonthKey(a.uploadDate) !== monthKey) return;
+        try {
+            var by = String(a.uploadedBy || a.user || a.email || '').toLowerCase().trim();
+            var me = String(typeof loggedInUser !== 'undefined' ? loggedInUser : '').toLowerCase().trim();
+            if (me && by && by !== me && by.indexOf(me) === -1 && me.indexOf(by) === -1) return;
+        } catch (e) {}
+        var cat = a.category || a.Category || a.CATEGORY || '';
+        var cat2 = a.category2 || a['CATEGORY 2'] || a['Category 2'] || '';
+        if (!kpiApprovalIsContent(cat, cat2)) return;
+        var nt = kpiNormTitle(a.fileName || a.title || '');
+        if (!nt || apprSeenBucket[nt]) return;
+        if (countedContentTitles.some(function (x) { return kpiTitlesMatch(x, nt); })) return;
+        apprSeenBucket[nt] = true;
+        countedContentTitles.push(nt);
+        stats['CONTENT'].actualCount += 1;
     });
 
     // Peak pills removed from UI (kept internal vars unused)
@@ -6078,17 +7258,56 @@ function ensureD(c, c2) {
         row.targetCount += f;
         row.planMins += mins;
     });
+    var countedDetailTitles = [];
     (allLoadedTasks.actual || []).filter(function (t) {
-        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey && String(t['ACTUAL [Title]'] || '').trim() !== '';
+        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey && String(t['ACTUAL [Title]'] || t['ACTUAL [TITLE]'] || '').trim() !== '';
     }).forEach(function (t) {
         var pair = normalizeCatPair(t);
         var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
         if (isNaN(d) || d < 0) d = 0;
-        // CONTENT: count + mins only when approved; TASK / OTHERS always
-        if (!kpiDurationCounts(t, apprSet)) return;
+        var title = String(getRowVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE']) || t['ACTUAL [Title]'] || '').trim();
+        // CONTENT: count + mins only when approved; TASK / OTHERS always (SEPCO)
+        if (pair.cat === 'CONTENT') {
+            if (!kpiDurationCounts(t, apprSet)) return;
+            var nt = kpiNormTitle(title);
+            if (nt) countedDetailTitles.push(nt);
+        }
         var row = ensureD(pair.cat, pair.cat2);
         row.actualCount += 1;
         row.actualMins += d;
+    });
+    // SEPCO: Approved CONTENT from Approvals also counts (even without Daily Actual), matched to plan Category when possible
+    var apprSeenD = {};
+    (allApprovals || []).forEach(function (a) {
+        if (!/approve/i.test(String(a.status || ''))) return;
+        if (monthKey && getRowMonthKey(a.uploadDate) !== monthKey) return;
+        try {
+            var by = String(a.uploadedBy || a.user || a.email || '').toLowerCase().trim();
+            var me = String(typeof loggedInUser !== 'undefined' ? loggedInUser : '').toLowerCase().trim();
+            if (me && by && by !== me && by.indexOf(me) === -1 && me.indexOf(by) === -1) return;
+        } catch (e) {}
+        var cat = a.category || a.Category || a.CATEGORY || '';
+        var cat2 = a.category2 || a['CATEGORY 2'] || a['Category 2'] || '';
+        if (!kpiApprovalIsContent(cat, cat2)) return;
+        var nt = kpiNormTitle(a.fileName || a.title || '');
+        if (!nt || apprSeenD[nt]) return;
+        if (countedDetailTitles.some(function (x) { return kpiTitlesMatch(x, nt); })) return;
+        apprSeenD[nt] = true;
+        countedDetailTitles.push(nt);
+        // Prefer matching an existing plan line by category
+        var bestKey = null, bestCat2 = cat2 || cat || 'Approved Content';
+        var nc = String(bestCat2 || '').toLowerCase().replace(/^(content|task|others)\s*[-–—:]\s*/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+        Object.keys(detail).forEach(function (dk) {
+            if (bestKey) return;
+            var s = detail[dk];
+            if (s.cat !== 'CONTENT') return;
+            var sn = String(s.cat2 || '').toLowerCase().replace(/^(content|task|others)\s*[-–—:]\s*/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+            if (sn && nc && (sn === nc || sn.indexOf(nc) !== -1 || nc.indexOf(sn) !== -1)) bestKey = dk;
+        });
+        var row;
+        if (bestKey) row = detail[bestKey];
+        else row = ensureD('CONTENT', bestCat2);
+        row.actualCount += 1;
     });
     var detailKeys = Object.keys(detail).sort(function (a, b) {
         var A = detail[a], B = detail[b];
@@ -6361,16 +7580,92 @@ async function loadKpiInputs() {
     } catch (e) { console.error('Error loading KPI inputs:', e); }
     renderKpiLanding();
 }
-function refreshKpiLanding() {
-    loadKpiProfile(); loadKpiInputs(); loadMonthlyPlanData(); loadApprovals(); loadUserTasks();
+
+// Force-refresh Plan/Actual/Monthly data (bypasses client cache)
+async function refreshDailyTaskData(btn) {
+    try {
+        if (btn) {
+            btn.classList.add('is-loading');
+            btn.disabled = true;
+        }
+        // Invalidate client-side caches so loaders hit the network
+        try {
+            if (typeof _dataCache !== 'undefined' && _dataCache) {
+                _dataCache.planAt = 0;
+                _dataCache.actualAt = 0;
+                _dataCache.monthlyAt = 0;
+            }
+        } catch (e) {}
+        var jobs = [];
+        if (typeof loadUserTasks === 'function') jobs.push(loadUserTasks(false));
+        if (typeof loadMonthlyPlanData === 'function') jobs.push(loadMonthlyPlanData(false));
+        if (typeof loadApprovals === 'function') jobs.push(loadApprovals());
+        if (typeof loadLeavesFromSheet === 'function') jobs.push(loadLeavesFromSheet());
+        await Promise.all(jobs);
+        try { if (typeof renderStDailyProgress === 'function') renderStDailyProgress(); } catch (e) {}
+        try { if (typeof renderStMonthlyProgress === 'function') renderStMonthlyProgress(); } catch (e) {}
+        try { if (typeof updateDailyTaskSummaryAndChart === 'function') updateDailyTaskSummaryAndChart(); } catch (e) {}
+        try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+    } catch (err) {
+        console.error('refreshDailyTaskData', err);
+    } finally {
+        if (btn) {
+            btn.classList.remove('is-loading');
+            btn.disabled = false;
+        }
+    }
+}
+
+async function refreshKpiLanding(btn) {
+    try {
+        if (btn && btn.classList) {
+            btn.classList.add('is-loading');
+            btn.disabled = true;
+            var _prev = btn.innerHTML;
+            btn.setAttribute('data-prev', _prev);
+            btn.innerHTML = '↻ Refreshing…';
+        }
+        // Clear client cache so loaders hit network (cache lives in main script → window._dataCache)
+        try {
+            if (typeof window._invalidateDataCache === 'function') window._invalidateDataCache();
+            else if (window._dataCache) {
+                window._dataCache.planAt = 0; window._dataCache.actualAt = 0; window._dataCache.monthlyAt = 0;
+                window._dataCache.planText = null; window._dataCache.actualText = null; window._dataCache.monthly = null;
+            }
+        } catch (e) {}
+        var jobs = [];
+        if (typeof loadKpiProfile === 'function') jobs.push(Promise.resolve(loadKpiProfile()));
+        if (typeof loadKpiInputs === 'function') jobs.push(Promise.resolve(loadKpiInputs()));
+        if (typeof loadMonthlyPlanData === 'function') jobs.push(loadMonthlyPlanData(false));
+        if (typeof loadApprovals === 'function') jobs.push(loadApprovals());
+        if (typeof loadUserTasks === 'function') jobs.push(loadUserTasks(false));
+        if (typeof loadLeavesFromSheet === 'function') jobs.push(loadLeavesFromSheet());
+        await Promise.all(jobs.map(function (p) { return Promise.resolve(p).catch(function (e) { console.error(e); }); }));
+        try { if (typeof renderKpiLanding === 'function') renderKpiLanding(); } catch (e) { console.error(e); }
+        try { if (typeof updateDailyTaskSummaryAndChart === 'function') updateDailyTaskSummaryAndChart(); } catch (e) {}
+        try { if (typeof renderCategoryProgress === 'function') {
+            var sel = document.getElementById('selectedMonthFilter') || document.getElementById('kpiMonthSelect');
+            renderCategoryProgress(sel ? sel.value : '');
+        } } catch (e) {}
+    } catch (err) {
+        console.error('refreshKpiLanding', err);
+    } finally {
+        if (btn && btn.classList) {
+            btn.classList.remove('is-loading');
+            btn.disabled = false;
+            var prev = btn.getAttribute('data-prev');
+            if (prev) btn.innerHTML = prev;
+            else btn.innerHTML = '↻ Refresh';
+        }
+    }
 }
 
 // ---------- hook into the existing loaders so the page re-renders when data arrives ----------
 (function () {
     var _upd = updateDailyTaskSummaryAndChart;
-    updateDailyTaskSummaryAndChart = function () { _upd.apply(this, arguments); try { renderKpiLanding(); } catch (e) { console.error(e); } };
+    updateDailyTaskSummaryAndChart = function () { _upd.apply(this, arguments); try { renderKpiLanding(); } catch (e) { console.error(e); } try { renderStDailyProgress(); } catch (e) { console.error(e); } try { renderStMonthlyProgress(); } catch (e) { console.error(e); } };
     var _mp = renderMonthlyPlanView;
-    renderMonthlyPlanView = function () { _mp.apply(this, arguments); try { renderKpiLanding(); } catch (e) { console.error(e); } };
+    renderMonthlyPlanView = function () { _mp.apply(this, arguments); try { renderKpiLanding(); } catch (e) { console.error(e); } try { renderStMonthlyProgress(); } catch (e) { console.error(e); } };
     var _la = loadApprovals;
     loadApprovals = async function () { await _la.apply(this, arguments); try { updateDailyTaskSummaryAndChart(); } catch (e) { console.error(e); } };
     window.addEventListener('load', function () { setTimeout(function () { loadKpiProfile(); loadKpiInputs(); }, 0); });
