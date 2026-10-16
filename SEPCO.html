@@ -392,6 +392,77 @@
             margin-bottom: 4px;
             line-height: 1.4;
         }
+    
+        /* ---------- Category Plan vs Actual (ST-style) ---------- */
+        .cat-progress-wrap {
+            margin: 18px 0 22px 0;
+            padding: 18px 18px 14px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(20,30,50,0.7), rgba(14,22,38,0.85));
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+        }
+        .cat-progress-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+        .cat-progress-head h5 {
+            margin: 0; font-size: 14px; font-weight: 700; color: var(--text-main);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .cat-progress-head h5::before {
+            content: ''; width: 4px; height: 16px; border-radius: 4px;
+            background: linear-gradient(180deg,#f97316,#8b5cf6);
+        }
+        .cat-progress-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 640px; }
+        .cat-progress-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid rgba(148,163,184,0.18); }
+        .cat-progress-table th {
+            background: linear-gradient(180deg,#1e3a8a,#1d4ed8); color: #e8f0ff;
+            font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+            padding: 11px 12px; text-align: left; white-space: nowrap;
+        }
+        .cat-progress-table th.num, .cat-progress-table td.num { text-align: center; }
+        .cat-progress-table th.cat-remark-h, .cat-progress-table td.cat-remark-cell {
+            text-align: left; font-weight: 500; font-size: 12px; max-width: 280px; white-space: normal; line-height: 1.35;
+        }
+        .cat-remark.plus { color: #16a34a; font-weight: 700; }
+        .cat-remark.miss { color: #ef4444; font-weight: 600; }
+        .cat-remark.partial { color: #d97706; font-weight: 600; }
+        .cat-remark.ok { color: #2563eb; font-weight: 600; }
+        .cat-remark.enhance { color: #d97706; font-weight: 700; }
+        .cat-progress-table td {
+            padding: 12px; font-size: 13px; font-weight: 600; color: var(--text-main);
+            border-bottom: 1px solid rgba(148,163,184,0.12); background: rgba(148,163,184,0.04);
+            font-variant-numeric: tabular-nums; vertical-align: middle;
+        }
+        .cat-progress-table tr:last-child td { border-bottom: none; }
+        .cat-progress-table tbody tr:hover td { background: rgba(59,130,246,0.08); }
+        .cat-name { font-weight: 700; letter-spacing: 0.02em; }
+        .cat-bar-cell { min-width: 160px; }
+        .cat-bar-track {
+            height: 8px; border-radius: 999px; background: rgba(148,163,184,0.2); overflow: hidden;
+        }
+        .cat-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#3b82f6,#22c55e); }
+        .cat-bar-fill.low { background: linear-gradient(90deg,#ef4444,#f59e0b); }
+        .cat-bar-fill.over { background: linear-gradient(90deg,#22c55e,#4ade80); }
+        .cat-pct.good { color: #22c55e; font-weight: 800; }
+        .cat-pct.warn { color: #f59e0b; font-weight: 800; }
+        .cat-pct.bad { color: #ef4444; font-weight: 800; }
+        .cat-muted { color: var(--text-muted); }
+        .cat-strong { font-weight: 800; }
+        .cat-diff.pos { color: #22c55e; }
+        .cat-diff.neg { color: #ef4444; }
+        .cat-diff.zero { color: var(--text-muted); }
+        .cat-empty { padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; }
+        .cat-progress-table--grouped th { text-align: center; }
+        .cat-progress-table--grouped td.num { font-size: 13px; }
+        .cat-group-row th { background: linear-gradient(180deg,#1e40af,#2563eb); }
+        .cat-subhead th { background: linear-gradient(180deg,#1e3a8a,#1d4ed8); font-size: 10px; }
+        html[data-theme="light"] .cat-progress-wrap {
+            background: linear-gradient(180deg,#fff,#f8fafc);
+            box-shadow: 0 4px 16px rgba(15,23,42,0.06);
+        }
+        html[data-theme="light"] .cat-progress-table th { background: linear-gradient(180deg,#1d4ed8,#2563eb); }
+        html[data-theme="light"] .cat-progress-table td { background: #fff; }
+        html[data-theme="light"] .cat-progress-table tbody tr:hover td { background: #f1f5f9; }
+
     </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1395,6 +1466,23 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     </li>
                 </ul>
 
+                <div class="sidebar-category-title" style="margin-top: 16px;">Reports</div>
+                <ul class="sidebar-menu">
+                    <li class="has-sub-menu" id="reportsMenuParent">
+                        <div class="main-menu-item" onclick="toggleSubMenu(event, 'reportsMenuParent', 'reportsSubMenu')">
+                            <span class="sidebar-icon">📊</span>
+                            <span>Daily Task Time</span>
+                            <span class="arrow-icon">▶</span>
+                        </div>
+                        <ul class="sub-menu" id="reportsSubMenu" style="display: none;">
+                            <li id="subOverview" onclick="switchSubTab(event, 'overviewSection', 'reportsMenuParent')">Overview</li>
+                            <li id="subMonthlyPlan" onclick="switchSubTab(event, 'monthlyPlanSection', 'reportsMenuParent')">Monthly Plan</li>
+                            <li id="subPlanActual" onclick="switchSubTab(event, 'planActualSection', 'reportsMenuParent')">Plan vs Actual</li>
+                        </ul>
+                    </li>
+                </ul>
+
+
                 <div class="sidebar-category-title" style="margin-top: 16px;">Approval</div>
                 <ul class="sidebar-menu">
                     <li class="has-sub-menu" id="approvalMenuParent">
@@ -1411,22 +1499,6 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     </li>
                 </ul>
 
-                <div class="sidebar-category-title" style="margin-top: 16px;">Reports</div>
-                <ul class="sidebar-menu">
-                    <li class="has-sub-menu" id="reportsMenuParent">
-                        <div class="main-menu-item" onclick="toggleSubMenu(event, 'reportsMenuParent', 'reportsSubMenu')">
-                            <span class="sidebar-icon">📊</span>
-                            <span>Daily Task Time</span>
-                            <span class="arrow-icon">▶</span>
-                        </div>
-                        <ul class="sub-menu" id="reportsSubMenu" style="display: none;">
-                            <li id="subOverview" onclick="switchSubTab(event, 'overviewSection', 'reportsMenuParent')">Overview</li>
-                            <li id="subMonthlyPlan" onclick="switchSubTab(event, 'monthlyPlanSection', 'reportsMenuParent')">Monthly Plan</li>
-                            <li id="subPlan" onclick="switchSubTab(event, 'planSection', 'reportsMenuParent')">Plan</li>
-                            <li id="subActual" onclick="switchSubTab(event, 'actualSection', 'reportsMenuParent')">Actual</li>
-                        </ul>
-                    </li>
-                </ul>
             </div>
         </div>
 
@@ -1447,22 +1519,44 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
             <!-- DASHBOARD SECTION -->
             <div id="dashboardSection" class="content-section active">
-                <h3 style="margin-top:0; font-size: 15px;">🏠 Portal Dashboard & Broadcast</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Welcome to SEPCO Portal. Use the tool below to publish and broadcast announcements to specialized trainers.</p>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+                    <div>
+                        <h3 style="margin:0 0 4px 0; font-size: 17px; display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:20px;">📊</span> Specialized Trainers · KPI Landing Page
+                        </h3>
+                        <p style="color: var(--text-muted); font-size: 12px; margin:0;">Monthly KPI scorecard for <strong>all Specialized Trainers</strong> (from Monthly Plan, Daily Actual &amp; Approvals).</p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span style="background:rgba(59,130,246,.18); color:#8ab8ff; padding:5px 12px; border-radius:999px; font-size:11px; font-weight:700;">All Job Groups</span>
+                        <input type="month" id="dashKpiMonth" class="filter-input" style="width:auto;" onchange="renderAllTrainersKpi()">
+                        <button style="background:var(--primary); padding:7px 14px;" onclick="renderAllTrainersKpi()">↻ Refresh</button>
+                    </div>
+                </div>
 
-                <!-- Input Announcement Widget -->
-                <div class="announcement-box">
-                    <h4 style="margin: 0 0 8px 0; font-size: 13px; color: var(--primary);">📢 Broadcast New Announcement to Specialized Trainers</h4>
-                    <input type="text" id="announcementTitle" class="announcement-input" placeholder="Announcement Title (e.g., Important Policy Update)">
-                    <textarea id="announcementMessage" class="announcement-textarea" placeholder="Type announcement details here..."></textarea>
-                    <button style="background: var(--primary);" onclick="postAnnouncement()">Publish Announcement</button>
+                <!-- Announcement (button reveals form) -->
+                <div style="margin-bottom:20px;">
+                    <button id="announceToggleBtn" style="background: var(--primary); padding:8px 16px;" onclick="toggleAnnouncementForm()">📢 New Announcement</button>
+                    <div id="announcementBox" class="announcement-box" style="display:none; margin-top:12px; margin-bottom:0;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 13px; color: var(--primary);">📢 Broadcast New Announcement to Specialized Trainers</h4>
+                        <input type="text" id="announcementTitle" class="announcement-input" placeholder="Announcement Title (e.g., Important Policy Update)">
+                        <textarea id="announcementMessage" class="announcement-textarea" placeholder="Type announcement details here..."></textarea>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button style="background: var(--primary);" onclick="postAnnouncement()">Publish Announcement</button>
+                            <button style="background: transparent; border:1px solid var(--border-color); color: var(--text-muted);" onclick="toggleAnnouncementForm(false)">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Trainers KPI Cards -->
+                <div id="allTrainersKpiContainer">
+                    <div style="text-align:center; padding:40px; color:var(--text-muted);">Loading KPI data for all Specialized Trainers...</div>
                 </div>
             </div>
 
             <!-- SUMMARY SECTION -->
             <div id="summarySection" class="content-section">
                 <h3 style="margin-top:0; font-size: 15px;">📊 Approval Summary & Statistics</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Summary of approved, rejected, and revised files.</p>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Two-stage pipeline: Pending RTO → Pending SEPCO → Approved / Rejected. Revised = approved after a prior rejection of the same file name.</p>
 
                 <div class="filter-container">
                     <label for="monthYearFilter">Select Month and Year:</label>
@@ -1471,6 +1565,16 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 </div>
 
                 <div class="summary-grid">
+                    <div class="summary-card">
+                        <h4>Pending RTO</h4>
+                        <p class="val" id="sumPendingRto">0</p>
+                        <p style="font-size:10px; margin:4px 0 0 0;">Awaiting first approver</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Pending SEPCO</h4>
+                        <p class="val" id="sumPendingSepco">0</p>
+                        <p style="font-size:10px; margin:4px 0 0 0;">Awaiting final approval</p>
+                    </div>
                     <div class="summary-card">
                         <h4>Total Approved</h4>
                         <p class="val" id="sumApproved">0</p>
@@ -1509,24 +1613,34 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
             <!-- FOR APPROVAL SECTION -->
             <div id="forApprovalSection" class="content-section">
-                <h3 style="margin-top:0; font-size: 15px;">⏳ For Approval - New Requests</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">New reports awaiting action.</p>
+                <h3 style="margin-top:0; font-size: 15px;">⏳ For Approval - Awaiting SEPCO</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
+                    Two-stage flow (same as ST): <strong>RTO</strong> reviews first → after RTO approves, status becomes <strong>Pending SEPCO</strong> and appears here for your final decision.
+                </p>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">
+                    Only requests already cleared by RTO (status <em>Pending SEPCO</em>) are listed. Items still at RTO are hidden until they advance.
+                </p>
 
                 <div class="task-table-container">
                     <table class="task-table">
                         <thead>
                             <tr>
                                 <th>File Name</th>
-                                <th>Request User ID</th>
+                                <th>Category</th>
+                                <th>Request User</th>
+                                <th>RTO</th>
+                                <th>SEPCO</th>
                                 <th>Request Date</th>
                                 <th>Status</th>
+                                <th>Note from requester</th>
+                                <th>RTO Remarks</th>
                                 <th>Action</th>
-                                <th>Remarks</th>
+                                <th>SEPCO Remarks</th>
                             </tr>
                         </thead>
                         <tbody id="forApprovalTableBody">
                             <tr>
-                                <td colspan="6" style="color: var(--text-muted); padding: 20px;">Fetching data...</td>
+                                <td colspan="11" style="color: var(--text-muted); padding: 20px;">Fetching data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1536,7 +1650,9 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             <!-- LIST OF REQUEST SECTION -->
             <div id="requestsSection" class="content-section">
                 <h3 style="margin-top:0; font-size: 15px;">📋 Approval Requests - List of Requests</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">List of submitted reports that already have a decision.</p>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">
+                    Final decisions (Approved / Rejected). RTO and SEPCO remarks are shown separately, matching the ST approval history view.
+                </p>
 
                 <div class="filter-container">
                     <label for="requestMonthYearFilter">Select Month and Year:</label>
@@ -1549,16 +1665,19 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         <thead>
                             <tr>
                                 <th>File Name</th>
-                                <th>Request User ID</th>
+                                <th>Category</th>
+                                <th>Request User</th>
+                                <th>RTO</th>
+                                <th>SEPCO</th>
                                 <th>Request Date</th>
                                 <th>Status</th>
-                                <th>Action</th>
-                                <th>Remarks</th>
+                                <th>RTO Remarks</th>
+                                <th>SEPCO Remarks</th>
                             </tr>
                         </thead>
                         <tbody id="sepcoTableBody">
                             <tr>
-                                <td colspan="6" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td>
+                                <td colspan="9" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1567,20 +1686,30 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
             <!-- OVERVIEW SECTION -->
             <div id="overviewSection" class="content-section">
-                <h3 style="margin-top:0; font-size: 15px;">📈 Overview - Actual Report Summary per Specialized Trainer</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Comparison of Actual tasks/durations vs Monthly Plan per trainer.</p>
+                <h3 style="margin-top:0; font-size: 15px;">📈 Overview - Plan vs Actual per Specialized Trainer</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">
+                    Same rules as ST dashboards (Content Developer · SES/NSO/CX · S+ Expert/Admin): category buckets, approved-content minutes, productivity &amp; efficiency.
+                </p>
 
-                <!-- Computation Notes Box -->
+                <div class="filter-container">
+                    <label for="overviewMonthFilter">Select Month and Year:</label>
+                    <input type="month" id="overviewMonthFilter" class="filter-input" onchange="onOverviewMonthChange()">
+                    <button style="background: var(--primary);" onclick="resetOverviewMonthFilter()">Current Month</button>
+                </div>
+
+                <!-- Computation Notes Box — aligned with ST.html / ST_* job-group pages -->
                 <details class="computation-notes-box" open>
-                    <summary>📝 Computation Guide & Notes</summary>
+                    <summary>📝 Computation Guide & Notes (same as ST)</summary>
                     <ul>
-                        <li><strong>Category targets:</strong> Monthly Plan frequency per month is counted by category (Content, Task, Others).</li>
-                        <li><strong>Count:</strong> Target Count comes from Monthly Plan Frequency per Month by category. Each Daily Actual record counts as 1 Actual Count.</li>
-                        <li><strong>Minutes:</strong> Plan Minutes comes from Monthly Plan frequency × duration per minute. Actual Minutes uses the DURATION PER MIN value from the Daily Actual Google Sheet.</li>
-                        <li><strong>Achievement:</strong> Category Achievement = Actual Count ÷ Target Count × 100.</li>
-                        <li><strong>On Time / Late:</strong> A matched actual is On Time only when actual duration is less than the Daily Plan duration; it is Late when actual duration exceeds the plan. Equal durations are neither.</li>
-                        <li><strong>Productivity:</strong> Actual minutes divided by Monthly Plan target minutes × 100.</li>
-                        <li><strong>Efficiency:</strong> Daily Plan minutes ÷ Actual minutes × 100, counting only actuals matched to a Daily Plan. 100% = finished exactly on plan; above 100% = faster than plan; below 100% = slower than plan.</li>
+                        <li><strong>Category bucket:</strong> Uses <em>CATEGORY 2</em> first if it is CONTENT / TASK / OTHERS; otherwise CATEGORY. Detailed types like “CONTENT - One-Pager Templated” are <em>not</em> counted as CONTENT unless CATEGORY 2 says so.</li>
+                        <li><strong>Target Count:</strong> Sum of Monthly Plan <em>FREQUENCY PER MONTH</em> per bucket.</li>
+                        <li><strong>Actual Count:</strong> CONTENT = Approved items (from Approvals sheet <em>or</em> Daily Actual with APPROVAL DATE / matching Approved file) <strong>and</strong> its Category 2 must exist in that trainer's Monthly Plan; not yet approved or not in the Monthly Plan = not counted. TASK / OTHERS: each Daily Actual row with a title counts as 1.</li>
+                        <li><strong>Plan Minutes:</strong> FREQUENCY × DURATION PER MIN (defaults to 480 × frequency when duration is blank).</li>
+                        <li><strong>Actual Minutes:</strong> DURATION PER MIN from Daily Actual. <strong>CONTENT</strong> count <em>and</em> minutes count only after Approved (APPROVAL DATE on the Daily Actual row, or a matching Approved file in Approvals — same rule as all ST files). TASK / OTHERS always count.</li>
+                        <li><strong>Achievement %:</strong> Actual Count ÷ Target Count × 100 (— when target is 0).</li>
+                        <li><strong>On Time / Late:</strong> Matched Daily Actual vs Daily Plan by user + date + title. On Time = actual duration &lt; plan duration; Late = actual &gt; plan.</li>
+                        <li><strong>Productivity:</strong> Total Actual mins ÷ Monthly Plan mins × 100 (ST formula; leave adjustment applied when leave data is available).</li>
+                        <li><strong>Efficiency:</strong> Matched Daily Plan mins ÷ matched Actual mins × 100. ≥100% = on/faster than plan.</li>
                     </ul>
                 </details>
 
@@ -1612,13 +1741,33 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         </tbody>
                     </table>
                 </div>
+
             </div>
 
             <!-- MONTHLY PLAN SECTION -->
             <div id="monthlyPlanSection" class="content-section">
                 <h3 style="margin-top:0; font-size: 15px;">🗓️ Monthly Plan Data</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Live data fetched from Monthly Plan Google Sheet based on requested headers.</p>
-                <div class="task-table-container">
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Progress of each Specialized Trainer's Monthly Plan vs their Daily Actual, per Category 2 &mdash; including planned items they have not done yet.</p>
+                <div class="filter-container" style="flex-wrap:wrap;">
+                    <label for="monthlyPlanMonthFilter">Month:</label>
+                    <input type="month" id="monthlyPlanMonthFilter" class="filter-input" onchange="onMonthlyPlanMonthChange()">
+                    <button style="background: var(--primary);" onclick="resetMonthlyPlanMonthFilter()">Current Month</button>
+                    <label for="monthlyPlanTrainerFilter">Trainer:</label>
+                    <select id="monthlyPlanTrainerFilter" class="filter-input" onchange="onMonthlyPlanViewChange()"><option value="all">All trainers</option></select>
+                    <label for="monthlyPlanStatusFilter">Show:</label>
+                    <select id="monthlyPlanStatusFilter" class="filter-input" onchange="onMonthlyPlanViewChange()">
+                        <option value="all">All plan lines</option>
+                        <option value="incomplete">Not finished (not done + in progress)</option>
+                        <option value="notdone">Not done only (0 actual)</option>
+                        <option value="partial">In progress only</option>
+                        <option value="done">Done only</option>
+                    </select>
+                </div>
+                <div id="monthlyPlanCategoryProgress" style="margin-bottom:20px;"></div>
+                <details class="computation-notes-box" style="margin-top:8px;">
+                    <summary style="cursor:pointer;font-weight:700;color:var(--primary);">📋 View raw Monthly Plan data</summary>
+                    <div style="margin-top:12px;">
+                    <div class="task-table-container">
                     <table class="task-table">
                         <thead>
                             <tr>
@@ -1639,13 +1788,36 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         </tbody>
                     </table>
                 </div>
+                    </div>
+                </details>
             </div>
 
-            <!-- PLAN SECTION -->
-            <div id="planSection" class="content-section">
-                <h3 style="margin-top:0; font-size: 15px;">📅 Daily Plan Data</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Live data fetched from Task Plan Google Sheet based on Row 3 header mapping.</p>
-                <div class="task-table-container">
+            <!-- PLAN VS ACTUAL (DAILY) SECTION -->
+            <div id="planActualSection" class="content-section">
+                <h3 style="margin-top:0; font-size: 15px;">📅 Daily Plan vs Actual</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Daily progress of each Specialized Trainer: what they planned for the day vs what they actually did, including planned items they have not done.</p>
+                <div class="filter-container" style="flex-wrap:wrap;">
+                    <label for="dailyMonthFilter">Month:</label>
+                    <input type="month" id="dailyMonthFilter" class="filter-input" onchange="renderDailyProgress()">
+                    <label for="dailyDayFilter">Day:</label>
+                    <input type="date" id="dailyDayFilter" class="filter-input" onchange="renderDailyProgress()">
+                    <button style="background: var(--primary);" onclick="resetDailyProgressFilters()">Current Month</button>
+                    <label for="dailyTrainerFilter">Trainer:</label>
+                    <select id="dailyTrainerFilter" class="filter-input" onchange="renderDailyProgress()"><option value="all">All trainers</option></select>
+                    <label for="dailyStatusFilter">Show:</label>
+                    <select id="dailyStatusFilter" class="filter-input" onchange="renderDailyProgress()">
+                        <option value="all">Everything</option>
+                        <option value="notdone">Not done only</option>
+                        <option value="done">Done only</option>
+                        <option value="late">Done late only</option>
+                        <option value="unplanned">Unplanned actuals only</option>
+                    </select>
+                </div>
+                <div id="dailyProgressContainer" style="margin-bottom:20px;"><div class="cat-empty">Loading Daily Plan and Daily Actual data...</div></div>
+                <details class="computation-notes-box" style="margin-top:8px;">
+                    <summary style="cursor:pointer;font-weight:700;color:var(--primary);">📋 View raw Daily Plan data</summary>
+                    <div style="margin-top:12px;">
+                    <div class="task-table-container">
                     <table class="task-table">
                         <thead>
                             <tr>
@@ -1667,13 +1839,12 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            <!-- ACTUAL SECTION -->
-            <div id="actualSection" class="content-section">
-                <h3 style="margin-top:0; font-size: 15px;">⚡ Daily Actual Data</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Live data fetched from Task Actual Google Sheet based on Row 3 header mapping.</p>
-                <div class="task-table-container">
+                    </div>
+                </details>
+                <details class="computation-notes-box" style="margin-top:8px;">
+                    <summary style="cursor:pointer;font-weight:700;color:var(--primary);">📋 View raw Daily Actual data</summary>
+                    <div style="margin-top:12px;">
+                    <div class="task-table-container">
                     <table class="task-table">
                         <thead>
                             <tr>
@@ -1700,6 +1871,8 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                         </tbody>
                     </table>
                 </div>
+                    </div>
+                </details>
             </div>
         </div>
     </div>
@@ -1713,6 +1886,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
         let planDataGlobal = [];
         let actualDataGlobal = [];
         let monthlyPlanDataGlobal = [];
+        let specializedTrainersGlobal = []; // all STs from user account (email, name, jobGroup)
 
         window.onload = function() {
             let savedName = localStorage.getItem('portal_name');
@@ -1742,11 +1916,29 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             let currentYearMonth = `${year}-${month}`;
 
             document.getElementById('monthYearFilter').value = currentYearMonth;
+            var ovMf = document.getElementById('overviewMonthFilter');
+            if (ovMf) ovMf.value = currentYearMonth;
+            var mpMf = document.getElementById('monthlyPlanMonthFilter');
+            if (mpMf) mpMf.value = currentYearMonth;
+            var dpMf = document.getElementById('dailyMonthFilter');
+            if (dpMf) dpMf.value = currentYearMonth;
             document.getElementById('requestMonthYearFilter').value = currentYearMonth;
+            const dashMonth = document.getElementById('dashKpiMonth');
+            if (dashMonth) dashMonth.value = currentYearMonth;
 
             fetchApprovalsFromAppsScript();
             fetchAllSheetsData();
         };
+
+        function toggleAnnouncementForm(forceShow) {
+            const box = document.getElementById('announcementBox');
+            const btn = document.getElementById('announceToggleBtn');
+            if (!box) return;
+            const show = (typeof forceShow === 'boolean') ? forceShow : (box.style.display === 'none');
+            box.style.display = show ? 'block' : 'none';
+            if (btn) btn.style.display = show ? 'none' : 'inline-block';
+            if (show) { const t = document.getElementById('announcementTitle'); if (t) t.focus(); }
+        }
 
         function postAnnouncement() {
             let titleInput = document.getElementById('announcementTitle');
@@ -1776,6 +1968,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 alert("Announcement successfully broadcasted to Google Sheets!");
                 titleInput.value = '';
                 msgInput.value = '';
+                toggleAnnouncementForm(false);
             }).catch(err => {
                 alert("Error posting announcement: " + err);
             });
@@ -1831,7 +2024,66 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             window.location.replace('index.html');
         }
 
+
+        function updateSheetSummary(sumId, rows, opts) {
+            opts = opts || {};
+            const userKeys = opts.userKeys || [];
+            const totalMins = opts.totalMins || 0;
+            const buckets = opts.buckets || { content: 0, task: 0, others: 0 };
+            const el = id => document.getElementById(id);
+            if (el(sumId + 'Rows')) {
+                const n = rows;
+                el(sumId + 'Rows').innerHTML = n === 0 ? '<span style="color:#fff;">0</span>' : n;
+            }
+            if (el(sumId + 'Users')) {
+                const n = userKeys.length;
+                el(sumId + 'Users').innerHTML = n === 0 ? '<span style="color:#fff;">0</span>' : n;
+            }
+            if (el(sumId + 'Mins')) {
+                const n = Math.round(totalMins);
+                el(sumId + 'Mins').innerHTML = n === 0 ? '<span style="color:#fff;">0</span>' : n.toLocaleString();
+            }
+            if (el(sumId + 'Buckets')) {
+                const c = buckets.content || 0, t = buckets.task || 0, o = buckets.others || 0;
+                el(sumId + 'Buckets').innerHTML =
+                    (c === 0 ? '<span style="color:#fff;">0</span>' : c) + ' / ' +
+                    (t === 0 ? '<span style="color:#fff;">0</span>' : t) + ' / ' +
+                    (o === 0 ? '<span style="color:#fff;">0</span>' : o);
+            }
+        }
+        function ovBucketSimple(cat, cat2) {
+            if (typeof ovBucket === 'function') return ovBucket(cat, cat2);
+            const c = String(cat2 || cat || '').toUpperCase();
+            if (c.indexOf('CONTENT') !== -1 && c.indexOf('-') === -1) return 'CONTENT';
+            if (c.indexOf('TASK') !== -1) return 'TASK';
+            return 'OTHERS';
+        }
+
+        function fetchSpecializedTrainers() {
+            const cb = 'jsonp_stlist_' + Math.round(100000 * Math.random());
+            window[cb] = function(data) {
+                delete window[cb];
+                if (tag && tag.parentNode) document.body.removeChild(tag);
+                if (data && data.success && Array.isArray(data.trainers)) {
+                    specializedTrainersGlobal = data.trainers;
+                } else {
+                    specializedTrainersGlobal = [];
+                }
+                checkAndComputeOverview();
+                try { renderAllTrainersKpi(); } catch (e) {}
+            };
+            const tag = document.createElement('script');
+            tag.src = `${GA_WEB_APP_URL}?action=getSpecializedTrainers&callback=${cb}`;
+            tag.onerror = function() {
+                delete window[cb];
+                if (tag.parentNode) document.body.removeChild(tag);
+                specializedTrainersGlobal = [];
+            };
+            document.body.appendChild(tag);
+        }
+
         function fetchAllSheetsData() {
+            fetchSpecializedTrainers();
             // Fetch Monthly Plan from Apps Script
             const cbMonthlyName = 'jsonp_monthly_' + Math.round(100000 * Math.random());
             window[cbMonthlyName] = function(data) {
@@ -1863,6 +2115,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 complete: function(results) {
                     planDataGlobal = results.data;
                     renderPlanTable(planDataGlobal);
+                    try { renderDailyProgress(); } catch (e) { console.error(e); }
                 }
             });
 
@@ -1893,14 +2146,27 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
         function renderMonthlyPlanTableFromJson(list) {
             let tbody = document.getElementById('monthlyPlanTableBody');
             tbody.innerHTML = '';
-            
+            const users = {}, buckets = { content: 0, task: 0, others: 0 };
+            let totalMins = 0;
+
             if (!list || list.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" style="color: var(--text-muted); padding: 20px;">No records found in Monthly Plan.</td></tr>`;
+                updateSheetSummary('monthlyPlanSummary', 0, { userKeys: [], totalMins: 0, buckets });
                 return;
             }
 
             list.forEach(item => {
                 let avgTimeVal = item["AVERAGE TIME (IN MINUTES)"] || item["AVERAGE TIME"] || item["Average Time (in Minutes)"] || item["Average Time"] || "";
+                const uid = String(item["NS+ USER ID"] || item["NS+ USER ID / Email"] || item["EMAIL"] || "").trim();
+                if (uid) users[uid.toLowerCase()] = true;
+                const freq = parseFloat(String(item["FREQUENCY PER MONTH"] || item["FREQUENCY"] || "0").replace(/[^0-9.\-]/g, "")) || 0;
+                let dur = parseFloat(String(item["DURATION PER MIN"] || item["DURATION"] || "").replace(/[^0-9.\-]/g, ""));
+                if (isNaN(dur) || dur <= 0) dur = 480;
+                totalMins += dur * (freq > 0 ? freq : 1);
+                const b = ovBucketSimple(item["CATEGORY"], item["CATEGORY 2"]);
+                if (b === 'CONTENT') buckets.content++;
+                else if (b === 'TASK') buckets.task++;
+                else buckets.others++;
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -1915,6 +2181,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 `;
                 tbody.appendChild(tr);
             });
+            updateSheetSummary('monthlyPlanSummary', list.length, { userKeys: Object.keys(users), totalMins, buckets });
         }
 
         function formatDurationMinutes(startValue, endValue) {
@@ -1957,6 +2224,8 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
         function renderPlanTable(rows) {
             let tbody = document.getElementById('planTableBody');
             tbody.innerHTML = '';
+            const _sumUsers = {}, _sumBuckets = { content: 0, task: 0, others: 0 };
+            let _sumMins = 0, _sumRows = 0;
             
             if (!rows || rows.length < 3) {
                 tbody.innerHTML = `<tr><td colspan="9" style="color: var(--text-muted); padding: 20px;">Insufficient rows in Plan data for Row 3 header.</td></tr>`;
@@ -1979,6 +2248,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             let dataRows = rows.slice(headerRowIndex + 1).filter(r => r.length > 0 && r.some(cell => cell !== ""));
             if (dataRows.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="9" style="color: var(--text-muted); padding: 20px;">No data records in Plan after Row 3.</td></tr>`;
+                updateSheetSummary('planSummary', 0, { userKeys: [], totalMins: 0, buckets: { content: 0, task: 0, others: 0 } });
                 return;
             }
 
@@ -1995,13 +2265,28 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     <td>${iCat !== -1 ? (row[iCat] || '') : (row[7] || '')}</td>
                     <td>${durationFromSheet(iDuration !== -1 ? row[iDuration] : '', iStart !== -1 ? row[iStart] : row[3], iEnd !== -1 ? row[iEnd] : row[4])}</td>
                 `;
+                // summary tallies
+                _sumRows++;
+                const _uid = (iUser !== -1 ? row[iUser] : row[0]) || '';
+                if (String(_uid).trim()) _sumUsers[String(_uid).trim().toLowerCase()] = true;
+                const _cat = (typeof iCat !== 'undefined' && iCat !== -1) ? row[iCat] : '';
+                const _b = ovBucketSimple(_cat, '');
+                if (_b === 'CONTENT') _sumBuckets.content++;
+                else if (_b === 'TASK') _sumBuckets.task++;
+                else _sumBuckets.others++;
+                let _d = (typeof iDuration !== 'undefined' && iDuration !== -1) ? parseFloat(row[iDuration]) : NaN;
+                if (isNaN(_d) || _d < 0) _d = 0;
+                _sumMins += _d;
                 tbody.appendChild(tr);
             });
+            updateSheetSummary('planSummary', _sumRows, { userKeys: Object.keys(_sumUsers), totalMins: _sumMins, buckets: _sumBuckets });
         }
 
         function renderActualTable(rows) {
             let tbody = document.getElementById('actualTableBody');
             tbody.innerHTML = '';
+            const _sumUsers = {}, _sumBuckets = { content: 0, task: 0, others: 0 };
+            let _sumMins = 0, _sumRows = 0;
             
             if (!rows || rows.length < 3) {
                 tbody.innerHTML = `<tr><td colspan="14" style="color: var(--text-muted); padding: 20px;">Insufficient rows in Actual data for Row 3 header.</td></tr>`;
@@ -2029,6 +2314,7 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             let dataRows = rows.slice(headerRowIndex + 1).filter(r => r.length > 0 && r.some(cell => cell !== ""));
             if (dataRows.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="14" style="color: var(--text-muted); padding: 20px;">No data records in Actual after Row 3.</td></tr>`;
+                updateSheetSummary('actualSummary', 0, { userKeys: [], totalMins: 0, buckets: { content: 0, task: 0, others: 0 } });
                 return;
             }
 
@@ -2050,14 +2336,601 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     <td>${iRemarks !== -1 ? (row[iRemarks] || '') : (row[12] || '')}</td>
                     <td>${durationFromSheet(iDuration !== -1 ? row[iDuration] : '', iStart !== -1 ? row[iStart] : row[3], iEnd !== -1 ? row[iEnd] : row[4])}</td>
                 `;
+                // summary tallies
+                _sumRows++;
+                const _uid = (iUser !== -1 ? row[iUser] : row[0]) || '';
+                if (String(_uid).trim()) _sumUsers[String(_uid).trim().toLowerCase()] = true;
+                const _cat = (typeof iCat !== 'undefined' && iCat !== -1) ? row[iCat] : '';
+                const _b = ovBucketSimple(_cat, '');
+                if (_b === 'CONTENT') _sumBuckets.content++;
+                else if (_b === 'TASK') _sumBuckets.task++;
+                else _sumBuckets.others++;
+                let _d = (typeof iDuration !== 'undefined' && iDuration !== -1) ? parseFloat(row[iDuration]) : NaN;
+                if (isNaN(_d) || _d < 0) _d = 0;
+                _sumMins += _d;
                 tbody.appendChild(tr);
             });
+            updateSheetSummary('actualSummary', _sumRows, { userKeys: Object.keys(_sumUsers), totalMins: _sumMins, buckets: _sumBuckets });
+        }
+
+
+        // ---- ST-style Plan vs Actual by Category (all trainers, selected month) ----
+        function sepcoEsc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function sepcoRowsToObjects(rows) {
+            if (!rows || rows.length < 3) return [];
+            const headers = (rows[2] || []).map(h => String(h || '').trim());
+            const out = [];
+            for (let i = 3; i < rows.length; i++) {
+                const r = rows[i];
+                if (!r || !r.some(c => String(c || '').trim())) continue;
+                const o = {};
+                headers.forEach((h, j) => { if (h) o[h] = r[j]; });
+                // normalize common aliases
+                if (!o['NS+ USER ID'] && o['NS+ USER ID / Email']) o['NS+ USER ID'] = o['NS+ USER ID / Email'];
+                out.push(o);
+            }
+            return out;
+        }
+        function sepcoGetVal(row, keys) {
+            for (const k of keys) {
+                if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k];
+            }
+            const rk = Object.keys(row);
+            for (const k of keys) {
+                const f = rk.find(x => x.toLowerCase().replace(/[^a-z0-9]/g, '') === k.toLowerCase().replace(/[^a-z0-9]/g, ''));
+                if (f && row[f] !== undefined && String(row[f]).trim() !== '') return row[f];
+            }
+            return '';
+        }
+        function sepcoNormalizeCatPair(row, isPlan) {
+            // Exact same rules as ST.html normalizeCatPair + kpiRowBucket / kpiBucketCat:
+            // 1) prefer CATEGORY 2 when it is a clean bucket (CONTENT|TASK|OTHERS)
+            // 2) else CATEGORY when it is a clean bucket (Monthly Plan style)
+            // 3) else keyword probe — detailed "CONTENT - One-Pager …" is NOT CONTENT
+            //    unless CATEGORY 2 already said so (matches ST kpiRowBucket).
+            let c = String(sepcoGetVal(row, ['CATEGORY', 'Category']) || '').trim();
+            let c2 = String(sepcoGetVal(row, ['CATEGORY 2', 'Category 2', 'CATEGORY2']) || '').trim();
+            const title = String(sepcoGetVal(row, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'ACTUAL [Title]', 'ACTUAL [TITLE]']) || '').trim();
+            if (!c2 || /^#?n\/?a$/i.test(c2) || c2 === '-' || c2 === '—') {
+                c2 = '';
+            }
+            const buckets = ['CONTENT', 'TASK', 'OTHERS'];
+            const cUp = c.toUpperCase(), c2Up = c2.toUpperCase();
+            // Daily Actual style: CATEGORY 2 is the clean bucket
+            if (buckets.indexOf(c2Up) !== -1) {
+                return { cat: c2Up, cat2: c || title || '—' };
+            }
+            // Monthly Plan style: CATEGORY is the clean bucket
+            if (buckets.indexOf(cUp) !== -1) {
+                return { cat: cUp, cat2: c2 || title || '—' };
+            }
+            // Fallback — same probe as ST kpiRowBucket (no "CONTENT - …" auto-upgrade)
+            const probe = c2Up || cUp;
+            let b = 'OTHERS';
+            if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) b = 'CONTENT';
+            else if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TASK';
+            return { cat: b, cat2: (c2 || c || title || '—') };
+        }
+        // Normalize Category 2 for matching plan ↔ actual (strip bucket prefix, collapse spaces)
+        function sepcoNormCat2(s) {
+            let t = String(s || '').toLowerCase().replace(/#n\/?a/g, '').trim();
+            t = t.replace(/^(content|task|others)\s*[-–—:]\s*/i, '');
+            return t.replace(/[^a-z0-9]+/g, ' ').trim();
+        }
+        // ---- CONTENT must be in the Monthly Plan (same user + same Category 2) to count as Actual ----
+        function sepcoBuildPlanContentIndex(monthKey) {
+            const idx = {};
+            (Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : []).forEach(r => {
+                if (typeof ovMonthMatches === 'function') {
+                    const mk = r['MONTH'] || r['Month'] || r['month'] || sepcoGetVal(r, ['MONTH', 'Month']);
+                    if (!ovMonthMatches(mk, monthKey)) return;
+                }
+                const user = String(sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'USER ID', 'EMAIL', 'User']) || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                if (!user) return;
+                const pair = sepcoNormalizeCatPair(r);
+                if (pair.cat !== 'CONTENT') return;
+                const f = parseInt(String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
+                if (!(f > 0)) return;
+                const c2 = sepcoNormCat2(pair.cat2);
+                if (!c2) return;
+                if (!idx[user]) idx[user] = [];
+                idx[user].push(c2);
+            });
+            return idx;
+        }
+        // candidates = possible Category 2 / detailed category strings of the actual/approved item
+        function sepcoContentInPlan(planIdx, userRaw, candidates) {
+            const user = String(userRaw || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            const list = planIdx[user];
+            if (!list || !list.length) return false;
+            return (candidates || []).some(c => {
+                const n = sepcoNormCat2(c);
+                if (!n) return false;
+                return list.some(p => p === n || p.indexOf(n) !== -1 || n.indexOf(p) !== -1);
+            });
+        }
+        // Approvals rows carry detailed categories like "CONTENT - Comparison Talk/Why Galaxy (Flagship)".
+        // Anything starting with CONTENT (or blank) is a content submission.
+        function sepcoApprovalIsContent(cat, cat2) {
+            const c = String(cat || '').trim().toUpperCase(), c2 = String(cat2 || '').trim().toUpperCase();
+            if (!c && !c2) return true;
+            if (c2 === 'TASK' || c2 === 'OTHERS') return false;
+            return c.indexOf('CONTENT') === 0 || c2.indexOf('CONTENT') === 0;
+        }
+        function sepcoIsContentApproved(title, approvalDate, approvedFiles) {
+            const apr = String(approvalDate || '').trim();
+            if (apr && apr !== '' && !/^n\/?a$/i.test(apr) && apr !== '0') return true;
+            const nt = (typeof ovNormTitle === 'function') ? ovNormTitle(title) : String(title || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+            if (!nt) return false;
+            return (approvedFiles || []).some(f => {
+                if (!f) return false;
+                if (f === nt || f.indexOf(nt) !== -1 || nt.indexOf(f) !== -1) return true;
+                const ta = nt.split(/\s+/).filter(t => t.length > 2);
+                const tb = String(f).split(/\s+/).filter(t => t.length > 2);
+                if (!ta.length || !tb.length) return false;
+                const overlap = ta.filter(t => tb.indexOf(t) !== -1).length;
+                return overlap >= Math.min(2, ta.length, tb.length) || (ta.length === 1 && tb.indexOf(ta[0]) !== -1);
+            });
+        }
+        // ======== Monthly Plan tab: Monthly Plan progress vs Daily Actual (per trainer, per Category 2) ========
+        function sepcoCatEq(a, b) { return !!a && !!b && a === b; }
+        function sepcoCatFuzzy(a, b) { return !!a && !!b && (a === b || a.indexOf(b) !== -1 || b.indexOf(a) !== -1); }
+        // find the plan line (same trainer, same bucket) that a given actual belongs to: exact Category 2 first, then loose match
+        function sepcoFindPlanLine(lines, bucket, candidates) {
+            const norms = (candidates || []).map(c => sepcoNormCat2(c)).filter(Boolean);
+            if (!norms.length) return null;
+            const same = lines.filter(l => l.bucket === bucket);
+            for (const l of same) { if (norms.some(n => sepcoCatEq(n, l.norm))) return l; }
+            for (const l of same) { if (norms.some(n => sepcoCatFuzzy(n, l.norm))) return l; }
+            return null;
+        }
+        function onMonthlyPlanMonthChange() {
+            const mf = document.getElementById('monthlyPlanMonthFilter');
+            const ov = document.getElementById('overviewMonthFilter');
+            if (mf && mf.value && ov) ov.value = mf.value;
+            checkAndComputeOverview();
+        }
+        function resetMonthlyPlanMonthFilter() { resetOverviewMonthFilter(); }
+        function onMonthlyPlanViewChange() { try { renderSepcoCategoryProgress(); } catch (e) { console.error(e); } }
+
+        function renderSepcoCategoryProgress(monthKey) {
+            const mpEl = document.getElementById('monthlyPlanCategoryProgress');
+            if (!mpEl) return;
+            monthKey = monthKey || (typeof ovGetOverviewMonth === 'function' ? ovGetOverviewMonth() : '');
+            const monthLabel = monthKey
+                ? new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1)
+                    .toLocaleString('en-US', { month: 'long', year: 'numeric' })
+                : 'All months';
+            const mf = document.getElementById('monthlyPlanMonthFilter');
+            if (mf && monthKey && mf.value !== monthKey) mf.value = monthKey;
+
+            const norm = v => String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            const users = {}; // key -> { key, email, lines: [], unplanned: {} }
+            const ensureU = (raw) => {
+                const k = norm(raw);
+                if (!k) return null;
+                if (!users[k]) users[k] = { key: k, email: String(raw).trim(), lines: [], unplanned: {} };
+                return users[k];
+            };
+            const labelFor = (u) => {
+                const tr = (specializedTrainersGlobal || []).find(t => norm(t.email) === u.key);
+                if (tr) { const nm = String(tr.name || '').trim(); return nm ? (nm + ' · ' + tr.email) : String(tr.email); }
+                return u.email || u.key;
+            };
+
+            // 1) All Specialized Trainers (so trainers with no Monthly Plan are visible too)
+            (specializedTrainersGlobal || []).forEach(t => ensureU(t.email));
+
+            // 2) Monthly Plan lines (target)
+            (Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : []).forEach(r => {
+                const mk = r['MONTH'] || r['Month'] || r['month'] || sepcoGetVal(r, ['MONTH', 'Month']);
+                if (!ovMonthMatches(mk, monthKey)) return;
+                const userRaw = sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'USER ID', 'EMAIL', 'User']);
+                const u = ensureU(userRaw);
+                if (!u) return;
+                const f = parseInt(String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
+                if (!(f > 0)) return;
+                const pair = sepcoNormalizeCatPair(r);
+                const nc = sepcoNormCat2(pair.cat2) || String(pair.cat2 || '').toLowerCase();
+                let d = parseFloat(String(sepcoGetVal(r, ['DURATION PER MIN', 'Duration per Min', 'DURATION']) || '').replace(/[^0-9.\-]/g, ''));
+                const mins = (!isNaN(d) && d > 0) ? d * f : 480 * f;
+                let line = u.lines.find(l => l.bucket === pair.cat && l.norm === nc);
+                if (!line) { line = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, approved: 0, planMins: 0, actualMins: 0 }; u.lines.push(line); }
+                line.target += f;
+                line.planMins += mins;
+            });
+
+            // 3) Actuals
+            const approvedFiles = [];
+            (globalApprovalsData || []).forEach(a => {
+                if (!/approve/i.test(String(a.status || ''))) return;
+                const nt = ovNormTitle(a.fileName);
+                if (nt) approvedFiles.push(nt);
+            });
+            const addUnplanned = (u, bucket, label, mins, note) => {
+                const k = bucket + '||' + sepcoNormCat2(label);
+                if (!u.unplanned[k]) u.unplanned[k] = { bucket, label, count: 0, mins: 0, note: note || '' };
+                u.unplanned[k].count += 1;
+                u.unplanned[k].mins += mins || 0;
+            };
+            const countedTitles = {}; // userKey -> [norm titles] of CONTENT already counted
+            sepcoRowsToObjects(actualDataGlobal || []).forEach(t => {
+                if (monthKey && ovMonthKeyFromDate(sepcoGetVal(t, ['Date Submitted', 'DATE SUBMITTED'])) !== monthKey) return;
+                const title = String(sepcoGetVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Actual [Title]']) || '').trim();
+                if (!title) return;
+                const u = ensureU(sepcoGetVal(t, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL', 'User']));
+                if (!u) return;
+                const pair = sepcoNormalizeCatPair(t);
+                let d = parseFloat(String(sepcoGetVal(t, ['DURATION PER MIN', 'DURATION']) || '').replace(/[^0-9.\-]/g, ''));
+                if (isNaN(d) || d < 0) d = 0;
+                const isContent = pair.cat === 'CONTENT';
+                if (isContent && !sepcoIsContentApproved(title, sepcoGetVal(t, ['APPROVAL DATE', 'Approval Date']), approvedFiles)) return; // not approved = not counted
+                const line = sepcoFindPlanLine(u.lines, pair.cat, [pair.cat2, sepcoGetVal(t, ['CATEGORY 2', 'Category 2']), sepcoGetVal(t, ['CATEGORY', 'Category'])]);
+                if (line) {
+                    line.actual += 1; line.actualMins += d;
+                    if (isContent) { (countedTitles[u.key] = countedTitles[u.key] || []).push(ovNormTitle(title)); }
+                } else if (!isContent) {
+                    addUnplanned(u, pair.cat, pair.cat2 || title, d, 'Not in Monthly Plan');
+                }
+            });
+            // Approved CONTENT from the Approvals sheet (no Daily Actual row needed)
+            const apprSeen = {};
+            (globalApprovalsData || []).forEach(a => {
+                if (!/approve/i.test(String(a.status || ''))) return;
+                if (monthKey && ovMonthKeyFromDate(a.uploadDate) !== monthKey) return;
+                const cat = a.category || a.Category || a.CATEGORY || '';
+                const cat2 = a.category2 || a['CATEGORY 2'] || a['Category 2'] || '';
+                if (!sepcoApprovalIsContent(cat, cat2)) return;
+                const u = ensureU(a.uploadedBy || a.user || a.email || '');
+                if (!u) return;
+                const nt = ovNormTitle(a.fileName || a.title || '');
+                if (!nt) return;
+                const line = sepcoFindPlanLine(u.lines, 'CONTENT', [cat, cat2]);
+                if (!line) return; // no Monthly Plan line for this Category 2 = nothing shown
+                // Approved Content = Approved requests from the Approvals list (List of Requests), one per file
+                const seenA = apprSeen[u.key] || (apprSeen[u.key] = []);
+                if (!seenA.some(x => x === nt)) { seenA.push(nt); line.approved += 1; }
+                // Actual (CONTENT) also counts it when not already counted from Daily Actual
+                const already = countedTitles[u.key] || [];
+                if (already.some(x => x === nt || x.indexOf(nt) !== -1 || nt.indexOf(x) !== -1)) return;
+                already.push(nt); countedTitles[u.key] = already;
+                line.actual += 1;
+            });
+
+            // 4) View filters (trainer + status)
+            const statusSel = document.getElementById('monthlyPlanStatusFilter');
+            const trainerSel = document.getElementById('monthlyPlanTrainerFilter');
+            const statusFilter = statusSel ? statusSel.value : 'all';
+            let trainerFilter = trainerSel ? trainerSel.value : 'all';
+            const allUsers = Object.keys(users).sort((a, b) => labelFor(users[a]).toLowerCase() < labelFor(users[b]).toLowerCase() ? -1 : 1);
+            if (trainerSel) {
+                const sig = allUsers.join('|');
+                if (trainerSel.getAttribute('data-sig') !== sig) {
+                    trainerSel.innerHTML = '<option value="all">All trainers</option>' + allUsers.map(k => '<option value="' + sepcoEsc(k) + '">' + sepcoEsc(labelFor(users[k])) + '</option>').join('');
+                    trainerSel.setAttribute('data-sig', sig);
+                    trainerSel.value = (trainerFilter !== 'all' && users[trainerFilter]) ? trainerFilter : 'all';
+                    trainerFilter = trainerSel.value;
+                }
+            }
+            const lineStatus = l => l.actual <= 0 ? 'notdone' : (l.actual < l.target ? 'partial' : 'done');
+            const statusHtml = l => {
+                if (l.actual <= 0) return '<span class="cat-remark miss">Not done — 0 of ' + l.target + '</span>';
+                if (l.actual < l.target) return '<span class="cat-remark partial">In progress — ' + (l.target - l.actual) + ' remaining</span>';
+                if (l.actual > l.target) return '<span class="cat-remark plus">Done — ' + (l.actual - l.target) + ' over target</span>';
+                return '<span class="cat-remark plus">Done</span>';
+            };
+            const pctHtml = (a, t) => {
+                if (!(t > 0)) return '<span class="cat-muted">—</span>';
+                const p = a / t * 100;
+                return '<span class="cat-pct ' + (p >= 100 ? 'good' : (p >= 80 ? 'warn' : 'bad')) + '">' + (Math.round(p * 10) / 10) + '%</span>';
+            };
+            const bucketColor = { CONTENT: '#4f8f46', TASK: '#d8ad24', OTHERS: '#397d89' };
+
+            // 5) Summary cards (all trainers, unfiltered)
+            let gLines = 0, gDone = 0, gNot = 0, gTarget = 0, gCredit = 0, gPlanMins = 0, gActMins = 0, gNoPlan = 0, gAppr = 0;
+            allUsers.forEach(k => {
+                const u = users[k];
+                if (!u.lines.length) gNoPlan++;
+                u.lines.forEach(l => { if (l.bucket === 'CONTENT') gAppr += l.approved; });
+                u.lines.forEach(l => {
+                    gLines++; gTarget += l.target; gCredit += Math.min(l.actual, l.target);
+                    gPlanMins += l.planMins; gActMins += l.actualMins;
+                    if (l.actual >= l.target) gDone++;
+                    if (l.actual <= 0) gNot++;
+                });
+            });
+            const gPct = gTarget > 0 ? gCredit / gTarget * 100 : null;
+            const cards = '<div class="summary-grid" style="margin-bottom:16px;">' +
+                '<div class="summary-card"><h4>Overall Plan Completion</h4><p class="val">' + (gPct == null ? '—' : (Math.round(gPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">' + gCredit + ' of ' + gTarget + ' planned items done</p></div>' +
+                '<div class="summary-card"><h4>Plan Lines Done</h4><p class="val">' + gDone + ' / ' + gLines + '</p><p style="font-size:10px;margin:4px 0 0 0;">Category 2 targets met</p></div>' +
+                '<div class="summary-card"><h4>Approved Content</h4><p class="val">' + gAppr + '</p><p style="font-size:10px;margin:4px 0 0 0;">Approved requests in Monthly Plan</p></div>' +
+                '<div class="summary-card"><h4>Not Started</h4><p class="val">' + gNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but 0 actual</p></div>' +
+                '<div class="summary-card"><h4>No Monthly Plan</h4><p class="val">' + gNoPlan + '</p><p style="font-size:10px;margin:4px 0 0 0;">Trainers without a plan</p></div>' +
+                '</div>';
+
+            // 6) Table
+            let body = '', shownUsers = 0;
+            allUsers.forEach(k => {
+                if (trainerFilter !== 'all' && k !== trainerFilter) return;
+                const u = users[k];
+                const lines = u.lines.slice().sort((a, b) => (a.bucket === b.bucket ? (a.cat2 < b.cat2 ? -1 : 1) : (a.bucket < b.bucket ? -1 : 1)));
+                const visible = lines.filter(l => statusFilter === 'all' ? true : (statusFilter === 'incomplete' ? lineStatus(l) !== 'done' : lineStatus(l) === statusFilter));
+                const unplanned = Object.keys(u.unplanned).map(x => u.unplanned[x]);
+                if (statusFilter !== 'all' && !visible.length) return;
+                shownUsers++;
+                let tT = 0, tCredit = 0, tPM = 0, tAM = 0, nDone = 0;
+                const apprInPlan = lines.filter(l => l.bucket === 'CONTENT').reduce((t, l) => t + l.approved, 0);
+                lines.forEach(l => { tT += l.target; tCredit += Math.min(l.actual, l.target); tPM += l.planMins; tAM += l.actualMins; if (l.actual >= l.target) nDone++; });
+                const hdrPct = tT > 0 ? tCredit / tT * 100 : null;
+                const badge = !lines.length ? ' <span style="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.15);padding:2px 6px;border-radius:4px;margin-left:6px;">No Monthly Plan</span>' : '';
+                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="10" style="text-align:left;padding:12px 14px;font-weight:800;">👤 ' + sepcoEsc(labelFor(u)) + badge +
+                    (lines.length ? ' <span style="font-weight:600;font-size:12px;color:var(--text-muted);margin-left:10px;">' + nDone + '/' + lines.length + ' plan lines done · ' + tCredit + '/' + tT + ' items · ' + Math.round(tAM).toLocaleString() + '/' + Math.round(tPM).toLocaleString() + ' mins · </span>' + pctHtml(tCredit, tT) : '') +
+                    (lines.length ? ' <span style="font-weight:700;font-size:12px;margin-left:10px;color:#34d399;">Approved content: ' + apprInPlan + '</span>' : '') +
+                    '</td></tr>';
+                visible.forEach(l => {
+                    const p = l.target > 0 ? l.actual / l.target * 100 : 0;
+                    const barCls = p >= 100 ? 'over' : (p < 40 ? 'low' : '');
+                    const diff = l.actualMins - l.planMins;
+                    body += '<tr>' +
+                        '<td class="cat-name" style="text-align:left;padding-left:26px;"><span style="color:' + (bucketColor[l.bucket] || '#94a3b8') + ';">●</span> ' + sepcoEsc(l.bucket) + '</td>' +
+                        '<td style="text-align:left;white-space:normal;min-width:200px;">' + sepcoEsc(l.cat2) + '</td>' +
+                        '<td class="num">' + l.target + '</td>' +
+                        '<td class="num"' + (l.actual === 0 ? ' style="color:#fff;"' : '') + '>' + l.actual + '</td>' +
+                        '<td class="num">' + pctHtml(l.actual, l.target) + '</td>' +
+                        (l.bucket === 'CONTENT' ? '<td class="num cat-strong" style="color:#34d399;">' + l.approved + '</td>' : '<td class="num cat-muted">—</td>') +
+                        '<td class="num">' + Math.round(l.planMins).toLocaleString() + ' / ' + Math.round(l.actualMins).toLocaleString() + '<div style="font-size:10px;" class="cat-diff ' + (diff > 0 ? 'pos' : (diff < 0 ? 'neg' : 'zero')) + '">' + (diff > 0 ? '+' : '') + Math.round(diff).toLocaleString() + '</div></td>' +
+                        '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + Math.min(100, Math.round(p)) + '%;"></div></div></td>' +
+                        '<td class="cat-remark-cell" colspan="2">' + statusHtml(l) + '</td>' +
+                        '</tr>';
+                });
+                if (statusFilter === 'all' && lines.length && unplanned.length) {
+                    unplanned.forEach(x => {
+                        body += '<tr style="opacity:.8;">' +
+                            '<td class="cat-name" style="text-align:left;padding-left:26px;"><span style="color:' + (bucketColor[x.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc(x.bucket) + '</td>' +
+                            '<td style="text-align:left;white-space:normal;min-width:200px;">' + sepcoEsc(x.label) + '</td>' +
+                            '<td class="num cat-muted">—</td><td class="num">' + x.count + '</td><td class="num cat-muted">—</td>' +
+                            (x.bucket === 'CONTENT' ? '<td class="num cat-strong" style="color:#34d399;">' + x.count + '</td>' : '<td class="num cat-muted">—</td>') +
+                            '<td class="num">— / ' + Math.round(x.mins).toLocaleString() + '</td><td></td>' +
+                            '<td class="cat-remark-cell" colspan="2"><span class="cat-remark enhance">' + sepcoEsc(x.note) + '</span></td></tr>';
+                    });
+                }
+                if (statusFilter === 'all' && !lines.length) {
+                    body += '<tr><td colspan="10" class="cat-muted" style="text-align:left;padding:10px 26px;">No Monthly Plan for this month — no approved or actual content is shown.</td></tr>';
+                }
+            });
+
+            if (!shownUsers) {
+                mpEl.innerHTML = cards + '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress · ' + sepcoEsc(monthLabel) + '</h5></div><div class="cat-empty">Nothing to show for this view.</div></div>';
+                return;
+            }
+            mpEl.innerHTML = cards +
+                '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + sepcoEsc(monthLabel) + '</h5></div>' +
+                '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category 2 the trainer put in their Monthly Plan, matched against their Actual. CONTENT counts only when <strong>Approved</strong> and the Category 2 is in the plan. Planned items with 0 actual are shown as <span class="cat-remark miss">Not done</span>. Approved Content = Approved requests from the List of Requests that match a plan line. Trainers without a Monthly Plan show nothing. Rows marked ○ are TASK / OTHERS actuals that are <em>not</em> in the trainer\'s Monthly Plan.</div>' +
+                '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
+                '<th>Category</th><th>Category 2 (Monthly Plan)</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Achievement %</th><th class="num">Approved Content</th><th class="num">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h" colspan="2">Status</th>' +
+                '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
+        }
+
+
+        // ======== Plan vs Actual: DAILY progress (Daily Plan vs Daily Actual per trainer, per day) ========
+        function dpLabel(email, raw) {
+            const k = skNorm(email);
+            const tr = (specializedTrainersGlobal || []).find(t => skNorm(t.email) === k);
+            if (tr) { const nm = String(tr.name || '').trim(); return nm ? (nm + ' · ' + tr.email) : String(tr.email); }
+            return String(raw || email || '').trim();
+        }
+        function dpTitleMatch(a, b) {
+            if (!a || !b) return false;
+            if (a === b || a.indexOf(b) !== -1 || b.indexOf(a) !== -1) return true;
+            const ta = a.split(/\s+/).filter(t => t.length > 2), tb = b.split(/\s+/).filter(t => t.length > 2);
+            if (!ta.length || !tb.length) return false;
+            const ov = ta.filter(t => tb.indexOf(t) !== -1).length;
+            return ov >= Math.min(2, ta.length, tb.length);
+        }
+        function resetDailyProgressFilters() {
+            const now = new Date();
+            const mf = document.getElementById('dailyMonthFilter');
+            if (mf) mf.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            const df = document.getElementById('dailyDayFilter'); if (df) df.value = '';
+            renderDailyProgress();
+        }
+        function renderDailyProgress() {
+            const el = document.getElementById('dailyProgressContainer');
+            if (!el) return;
+            if (!planDataGlobal.length && !actualDataGlobal.length) {
+                el.innerHTML = '<div class="cat-empty">Loading Daily Plan and Daily Actual data...</div>';
+                return;
+            }
+            const now = new Date();
+            const mf = document.getElementById('dailyMonthFilter');
+            const monthKey = (mf && mf.value) ? mf.value : (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
+            if (mf && !mf.value) mf.value = monthKey;
+            const dayEl = document.getElementById('dailyDayFilter');
+            const dayFilter = dayEl ? dayEl.value : '';
+            const monthLabel = new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            const D = skDailyObjects();
+
+            const approvedFiles = [];
+            (globalApprovalsData || []).forEach(a => {
+                if (!/approve/i.test(String(a.status || ''))) return;
+                const nt = ovNormTitle(a.fileName); if (nt) approvedFiles.push(nt);
+            });
+
+            const users = {}; // key -> { key, raw, days: { date: { plans: [], actuals: [] } } }
+            const ensureU = (key, raw) => users[key] || (users[key] = { key, raw: String(raw || '').trim(), days: {} });
+            const ensureDay = (u, d) => u.days[d] || (u.days[d] = { plans: [], actuals: [] });
+            D.planObjs.forEach(r => {
+                if (!r._u) return;
+                const date = skDate(skRowVal(r, ['Date Submitted', 'DATE SUBMITTED']));
+                if (!date || date.slice(0, 7) !== monthKey) return;
+                if (dayFilter && date !== dayFilter) return;
+                const title = String(skRowVal(r, ['PLAN [Title]', 'PLAN [TITLE]', 'TITLE']) || '').trim();
+                if (!title) return;
+                const pair = sepcoNormalizeCatPair(r);
+                const d = skDur(r);
+                ensureDay(ensureU(r._u, skRowVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL'])), date).plans.push({
+                    title, nt: ovNormTitle(title), bucket: pair.cat, cat2: pair.cat2, nc: sepcoNormCat2(pair.cat2), dur: isNaN(d) ? 0 : d, match: null
+                });
+            });
+            D.actualObjs.forEach(r => {
+                if (!r._u) return;
+                const date = skDate(skRowVal(r, ['Date Submitted', 'DATE SUBMITTED']));
+                if (!date || date.slice(0, 7) !== monthKey) return;
+                if (dayFilter && date !== dayFilter) return;
+                const title = String(skRowVal(r, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE']) || '').trim();
+                if (!title) return;
+                const pair = sepcoNormalizeCatPair(r);
+                const d = skDur(r);
+                const isContent = pair.cat === 'CONTENT';
+                const approved = !isContent || sepcoIsContentApproved(title, skRowVal(r, ['APPROVAL DATE']), approvedFiles);
+                ensureDay(ensureU(r._u, skRowVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL'])), date).actuals.push({
+                    title, nt: ovNormTitle(title), bucket: pair.cat, cat2: pair.cat2, nc: sepcoNormCat2(pair.cat2), dur: isNaN(d) ? 0 : d, approved, used: false
+                });
+            });
+
+            // Trainers that have any Daily Plan this month (no plan = nothing shown)
+            const hasPlan = {};
+            Object.keys(users).forEach(k => { hasPlan[k] = Object.keys(users[k].days).some(d => users[k].days[d].plans.length); });
+
+            // Match plan items to actuals per day: exact title -> similar title -> same Category 2
+            Object.keys(users).forEach(k => {
+                Object.keys(users[k].days).forEach(dk => {
+                    const day = users[k].days[dk];
+                    const passes = [
+                        (p, a) => p.nt && p.nt === a.nt,
+                        (p, a) => dpTitleMatch(p.nt, a.nt),
+                        (p, a) => p.bucket === a.bucket && p.nc && p.nc === a.nc
+                    ];
+                    passes.forEach(fn => {
+                        day.plans.forEach(p => {
+                            if (p.match) return;
+                            const a = day.actuals.find(x => !x.used && fn(p, x));
+                            if (a) { a.used = true; p.match = a; }
+                        });
+                    });
+                });
+            });
+
+            const allKeys = Object.keys(users).filter(k => hasPlan[k]).sort((a, b) => dpLabel(a, users[a].raw).toLowerCase() < dpLabel(b, users[b].raw).toLowerCase() ? -1 : 1);
+
+            // filters
+            const trainerSel = document.getElementById('dailyTrainerFilter');
+            const statusSel = document.getElementById('dailyStatusFilter');
+            let trainerFilter = trainerSel ? trainerSel.value : 'all';
+            const statusFilter = statusSel ? statusSel.value : 'all';
+            if (trainerSel) {
+                const sig = allKeys.join('|');
+                if (trainerSel.getAttribute('data-sig') !== sig) {
+                    trainerSel.innerHTML = '<option value="all">All trainers</option>' + allKeys.map(k => '<option value="' + sepcoEsc(k) + '">' + sepcoEsc(dpLabel(k, users[k].raw)) + '</option>').join('');
+                    trainerSel.setAttribute('data-sig', sig);
+                    trainerSel.value = (trainerFilter !== 'all' && allKeys.indexOf(trainerFilter) !== -1) ? trainerFilter : 'all';
+                    trainerFilter = trainerSel.value;
+                }
+            }
+
+            const itemState = p => {
+                if (!p.match) return 'notdone';
+                if (p.dur > 0 && p.match.dur > p.dur) return 'late';
+                return 'done';
+            };
+            const bucketColor = { CONTENT: '#4f8f46', TASK: '#d8ad24', OTHERS: '#397d89' };
+            const stHtml = (p) => {
+                const s = itemState(p);
+                if (s === 'notdone') return '<span class="cat-remark miss">Not done</span>';
+                const wait = (p.match.bucket === 'CONTENT' && !p.match.approved) ? ' <span class="cat-remark partial">· awaiting approval</span>' : '';
+                if (s === 'late') return '<span class="cat-remark partial">Done · late +' + Math.round(p.match.dur - p.dur) + ' min</span>' + wait;
+                return '<span class="cat-remark plus">Done' + (p.dur > 0 ? ' · on time' : '') + '</span>' + wait;
+            };
+
+            // totals (all trainers, current month / day, unfiltered by status)
+            let tPlans = 0, tDone = 0, tNot = 0, tLate = 0, tPM = 0, tAM = 0;
+            allKeys.forEach(k => Object.keys(users[k].days).forEach(dk => {
+                const day = users[k].days[dk];
+                day.plans.forEach(p => { tPlans++; tPM += p.dur; const s = itemState(p); if (s === 'notdone') tNot++; else { tDone++; if (s === 'late') tLate++; } });
+                day.actuals.forEach(a => { if (a.bucket !== 'CONTENT' || a.approved) tAM += a.dur; });
+            }));
+            const tPct = tPlans > 0 ? tDone / tPlans * 100 : null;
+            const cards = '<div class="summary-grid" style="margin-bottom:16px;">' +
+                '<div class="summary-card"><h4>Daily Plan Completion</h4><p class="val">' + (tPct == null ? '—' : (Math.round(tPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">' + tDone + ' of ' + tPlans + ' planned items done</p></div>' +
+                '<div class="summary-card"><h4>Not Done</h4><p class="val">' + tNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but no actual</p></div>' +
+                '<div class="summary-card"><h4>Done Late</h4><p class="val">' + tLate + '</p><p style="font-size:10px;margin:4px 0 0 0;">Actual longer than plan</p></div>' +
+                '<div class="summary-card"><h4>Plan / Actual Mins</h4><p class="val" style="font-size:20px;">' + Math.round(tPM).toLocaleString() + ' / ' + Math.round(tAM).toLocaleString() + '</p><p style="font-size:10px;margin:4px 0 0 0;">CONTENT counts once approved</p></div>' +
+                '</div>';
+
+            let body = '', shown = 0;
+            allKeys.forEach(k => {
+                if (trainerFilter !== 'all' && k !== trainerFilter) return;
+                const u = users[k];
+                const dates = Object.keys(u.days).sort().reverse();
+                let userRows = '', uPlans = 0, uDone = 0, uPM = 0, uAM = 0;
+                dates.forEach(dk => {
+                    const day = u.days[dk];
+                    const unplanned = day.actuals.filter(a => !a.used);
+                    let rows = '', dPlans = day.plans.length, dDone = 0, dPM = 0, dAM = 0;
+                    day.plans.forEach(p => {
+                        const s = itemState(p);
+                        dPM += p.dur;
+                        if (s !== 'notdone') dDone++;
+                        if (p.match && (p.match.bucket !== 'CONTENT' || p.match.approved)) dAM += p.match.dur;
+                        if (statusFilter === 'notdone' && s !== 'notdone') return;
+                        if (statusFilter === 'done' && s === 'notdone') return;
+                        if (statusFilter === 'late' && s !== 'late') return;
+                        if (statusFilter === 'unplanned') return;
+                        const pct = p.dur > 0 && p.match ? Math.min(100, Math.round(p.match.dur / p.dur * 100)) : (p.match ? 100 : 0);
+                        rows += '<tr>' +
+                            '<td class="cat-name" style="text-align:left;padding-left:26px;"><span style="color:' + (bucketColor[p.bucket] || '#94a3b8') + ';">●</span> ' + sepcoEsc(p.bucket) + '</td>' +
+                            '<td style="text-align:left;white-space:normal;min-width:200px;">' + sepcoEsc(p.title) + '</td>' +
+                            '<td class="num">' + (p.dur > 0 ? Math.round(p.dur).toLocaleString() : '—') + '</td>' +
+                            '<td style="text-align:left;white-space:normal;min-width:180px;">' + (p.match ? sepcoEsc(p.match.title) : '<span class="cat-muted">—</span>') + '</td>' +
+                            '<td class="num"' + (p.match ? '' : ' style="color:#fff;"') + '>' + (p.match ? Math.round(p.match.dur).toLocaleString() : '0') + '</td>' +
+                            '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + (pct >= 100 ? 'over' : (pct < 40 ? 'low' : '')) + '" style="width:' + pct + '%;"></div></div></td>' +
+                            '<td class="cat-remark-cell">' + stHtml(p) + '</td></tr>';
+                    });
+                    unplanned.forEach(a => {
+                        if (a.bucket !== 'CONTENT' || a.approved) dAM += a.dur;
+                        if (statusFilter !== 'all' && statusFilter !== 'unplanned') return;
+                        rows += '<tr style="opacity:.8;">' +
+                            '<td class="cat-name" style="text-align:left;padding-left:26px;"><span style="color:' + (bucketColor[a.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc(a.bucket) + '</td>' +
+                            '<td class="cat-muted" style="text-align:left;">Not in Daily Plan</td><td class="num cat-muted">—</td>' +
+                            '<td style="text-align:left;white-space:normal;min-width:180px;">' + sepcoEsc(a.title) + '</td>' +
+                            '<td class="num">' + Math.round(a.dur).toLocaleString() + '</td><td></td>' +
+                            '<td class="cat-remark-cell"><span class="cat-remark enhance">Unplanned actual' + ((a.bucket === 'CONTENT' && !a.approved) ? ' · awaiting approval' : '') + '</span></td></tr>';
+                    });
+                    uPlans += dPlans; uDone += dDone; uPM += dPM; uAM += dAM;
+                    if (!rows) return;
+                    const dPct = dPlans > 0 ? dDone / dPlans * 100 : null;
+                    const dLabel = new Date(dk + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                    userRows += '<tr style="background:rgba(148,163,184,0.08);"><td colspan="7" style="text-align:left;padding:8px 14px 8px 20px;font-weight:700;font-size:12px;">📅 ' + sepcoEsc(dLabel) +
+                        '<span style="font-weight:500;color:var(--text-muted);margin-left:10px;">' + dDone + '/' + dPlans + ' planned done · ' + Math.round(dPM).toLocaleString() + ' plan mins / ' + Math.round(dAM).toLocaleString() + ' actual mins</span> ' +
+                        (dPct == null ? '' : '<span class="cat-pct ' + (dPct >= 100 ? 'good' : (dPct >= 80 ? 'warn' : 'bad')) + '">' + (Math.round(dPct * 10) / 10) + '%</span>') + '</td></tr>' + rows;
+                });
+                if (!userRows) return;
+                shown++;
+                const uPct = uPlans > 0 ? uDone / uPlans * 100 : null;
+                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="7" style="text-align:left;padding:12px 14px;font-weight:800;">👤 ' + sepcoEsc(dpLabel(k, u.raw)) +
+                    ' <span style="font-weight:600;font-size:12px;color:var(--text-muted);margin-left:10px;">' + uDone + '/' + uPlans + ' planned items done · ' + Math.round(uAM).toLocaleString() + '/' + Math.round(uPM).toLocaleString() + ' mins · </span>' +
+                    (uPct == null ? '' : '<span class="cat-pct ' + (uPct >= 100 ? 'good' : (uPct >= 80 ? 'warn' : 'bad')) + '">' + (Math.round(uPct * 10) / 10) + '%</span>') + '</td></tr>' + userRows;
+            });
+
+            if (!shown) {
+                el.innerHTML = cards + '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Daily Plan vs Actual · ' + sepcoEsc(monthLabel) + '</h5></div><div class="cat-empty">Nothing to show for this view. Trainers without a Daily Plan are not listed.</div></div>';
+                return;
+            }
+            el.innerHTML = cards + '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Daily Plan vs Actual · ' + sepcoEsc(dayFilter ? dayFilter : monthLabel) + '</h5></div>' +
+                '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is something the trainer put in their Daily Plan, matched to their Daily Actual of the same day (same title, similar title, or same Category 2). Planned items with no actual are <span class="cat-remark miss">Not done</span>. Rows marked ○ are actuals that were not in that day\'s plan. CONTENT only counts toward actual minutes once Approved.</div>' +
+                '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
+                '<th>Category</th><th>Plan [Title]</th><th class="num">Plan mins</th><th>Actual [Title]</th><th class="num">Actual mins</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
+                '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
         }
 
         function checkAndComputeOverview() {
-            if (actualDataGlobal.length > 0) {
+            if (actualDataGlobal.length > 0 || (monthlyPlanDataGlobal && monthlyPlanDataGlobal.length > 0)) {
                 computeCategoryOverviewSummary(actualDataGlobal, monthlyPlanDataGlobal);
             }
+            try { renderDailyProgress(); } catch (e) { console.error(e); }
         }
 
         function parseTimeToMins(timeStr) {
@@ -2077,128 +2950,878 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             return 0;
         }
 
+        // ---- Overview helpers (shared rules with ST.html + ST_Content_Developer / ST_SES_NSO_CX / ST_SPlus_Expert_Admin) ----
+        function ovNorm(v) { return String(v || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+        function ovNormTitle(s) {
+            return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+        }
+        function ovMonthKeyFromDate(raw) {
+            if (!raw) return '';
+            const str = String(raw).trim();
+            if (str.includes('T')) return str.split('T')[0].slice(0, 7);
+            const p = str.split('/');
+            if (p.length === 3) {
+                let y = p[2]; if (y.length === 2) y = '20' + y;
+                return y + '-' + String(p[0]).padStart(2, '0');
+            }
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            const m = /^(\d{4})-(\d{2})/.exec(str);
+            return m ? m[1] + '-' + m[2] : '';
+        }
+        function ovMonthMatches(cell, key) {
+            if (!key) return true;
+            const c = String(cell == null ? '' : cell).trim();
+            if (c === '') return true;
+            const m = /^(\d{4})-(\d{2})/.exec(c);
+            if (m) return (m[1] + '-' + m[2]) === key;
+            const names = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+            const idx = names.indexOf(c.toLowerCase().substring(0, 3));
+            if (idx === -1) return true;
+            const y = /(\d{4})/.exec(c), kp = key.split('-');
+            if (y && y[1] !== kp[0]) return false;
+            return (idx + 1) === parseInt(kp[1], 10);
+        }
+        // Same as ST kpiRowBucket — CATEGORY 2 preferred; detailed "CONTENT - …" is NOT CONTENT unless CATEGORY 2 says so
+        function ovBucket(cat, cat2) {
+            const c = String(cat || '').trim().toUpperCase();
+            const c2 = String(cat2 || '').trim().toUpperCase();
+            const buckets = ['CONTENT', 'TASK', 'OTHERS'];
+            if (buckets.indexOf(c2) !== -1) return c2;
+            if (buckets.indexOf(c) !== -1) return c;
+            const probe = c2 || c;
+            if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) return 'CONTENT';
+            if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) return 'TASK';
+            return 'OTHERS';
+        }
+        function ovNumHtml(n) {
+            const v = Math.round(Number(n) || 0);
+            if (v === 0) return '<span style="color:#ffffff;">0</span>';
+            return '<strong>' + v.toLocaleString() + '</strong>';
+        }
+        function ovMinsHtml(n) {
+            const v = Math.round(Number(n) || 0);
+            if (v === 0) return '<span style="color:#ffffff;">0 mins</span>';
+            return '<strong>' + v.toLocaleString() + ' mins</strong>';
+        }
+        function ovPctHtml(actual, target) {
+            if (!(target > 0)) return '<span style="color:var(--text-muted);">—</span>';
+            const p = (actual / target) * 100;
+            const color = p >= 100 ? '#22c55e' : (p >= 80 ? '#f59e0b' : '#ef4444');
+            return '<span style="font-weight:700;color:' + color + ';">' + p.toFixed(1) + '%</span>';
+        }
+        function ovGetOverviewMonth() {
+            const el = document.getElementById('overviewMonthFilter');
+            if (el && el.value) return el.value;
+            const now = new Date();
+            return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        }
+        function onOverviewMonthChange() { checkAndComputeOverview(); }
+        function resetOverviewMonthFilter() {
+            const now = new Date();
+            const el = document.getElementById('overviewMonthFilter');
+            if (el) el.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            checkAndComputeOverview();
+        }
+
         function computeCategoryOverviewSummary(actualRows, monthlyPlanList) {
-            const stats = {};
+            const monthKey = ovGetOverviewMonth();
+            const stats = {}; // userKey -> aggregates
+            const monthlyTargets = {};
             const planRows = planDataGlobal || [];
             const headerIndex = 2;
-            const norm = v => String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
-            const minsBetween = (start, end) => {
-                let a = parseTimeToMins(start), b = parseTimeToMins(end);
-                if (!start || !end) return 0;
-                if (b < a) b += 1440;
-                return Math.max(0, b - a);
-            };
-            const categoryType = cat => {
-                const c = norm(cat);
-                if (c.includes('content')) return 'content';
-                if (c.includes('task')) return 'task';
-                return 'others';
-            };
-            const getUser = (row, headers) => {
-                let i = findColumnIndex(headers, ['ns+ user id', 'email', 'user']);
-                return norm(i >= 0 ? row[i] : row[0]);
-            };
-            const actualHeaders = actualRows[headerIndex] || [];
-            const aUser = findColumnIndex(actualHeaders, ['ns+ user id', 'email', 'user']);
-            const aCat = findColumnIndex(actualHeaders, ['category']);
-            const aTitle = findColumnIndex(actualHeaders, ['actual [title]', 'actual', 'title']);
-            const aDate = findColumnIndex(actualHeaders, ['date submitted']);
-            const aStart = findColumnIndex(actualHeaders, ['start time']);
-            const aEnd = findColumnIndex(actualHeaders, ['time ended', 'end time']);
-            const aDuration = findColumnIndex(actualHeaders, ['duration per min', 'duration per minute']);
-            const actualRecords = actualRows.slice(headerIndex + 1).filter(r => r.some(c => String(c || '').trim()));
 
-            const planHeaders = planRows[headerIndex] || [];
-            const pUser = findColumnIndex(planHeaders, ['ns+ user id', 'email', 'user']);
-            const pCat = findColumnIndex(planHeaders, ['category']);
-            const pTitle = findColumnIndex(planHeaders, ['plan [title]', 'title', 'plan']);
-            const pDate = findColumnIndex(planHeaders, ['date submitted']);
-            const pStart = findColumnIndex(planHeaders, ['start time']);
-            const pEnd = findColumnIndex(planHeaders, ['time ended', 'end time']);
-            const pDuration = findColumnIndex(planHeaders, ['duration per min', 'duration per minute']);
-            const dailyPlans = planRows.slice(headerIndex + 1).filter(r => r.some(c => String(c || '').trim()));
-            const planKey = (user, title, date) => `${norm(user)}|${norm(title)}|${norm(date)}`;
-            const dailyPlanMap = new Map();
-            dailyPlans.forEach(r => {
-                const user = pUser >= 0 ? r[pUser] : r[0];
-                const title = pTitle >= 0 ? r[pTitle] : '';
-                const date = pDate >= 0 ? r[pDate] : '';
-                const duration = durationNumberFromSheet(pDuration >= 0 ? r[pDuration] : '', pStart >= 0 ? r[pStart] : '', pEnd >= 0 ? r[pEnd] : '');
-                dailyPlanMap.set(planKey(user, title, date), duration);
+            const ensureUser = (key, display) => {
+                if (!stats[key]) {
+                    stats[key] = {
+                        display: display || key,
+                        contentCount: 0, taskCount: 0, othersCount: 0,
+                        contentMins: 0, taskMins: 0, othersMins: 0,
+                        actualMins: 0, planMinsMatched: 0, matchedActualMins: 0,
+                        onTime: 0, late: 0
+                    };
+                } else if (display) {
+                    // Prefer "Name · email" over bare email; never downgrade
+                    const cur = String(stats[key].display || '');
+                    const hasName = cur.indexOf('·') !== -1 || (stats[key].nameOnly && cur.indexOf(stats[key].nameOnly) !== -1);
+                    if (!hasName && display !== key) stats[key].display = display;
+                }
+                if (!monthlyTargets[key]) {
+                    monthlyTargets[key] = { content: 0, task: 0, others: 0, targetMins: 0 };
+                }
+                return stats[key];
+            };
+
+
+            // ---- Seed ALL Specialized Trainers from user account (even without Monthly Plan / Actual) ----
+            (specializedTrainersGlobal || []).forEach(tr => {
+                const email = String(tr.email || '').trim();
+                const key = ovNorm(email);
+                if (!key) return;
+                const displayName = String(tr.name || '').trim();
+                const label = displayName
+                    ? (displayName + ' · ' + email)
+                    : email;
+                ensureUser(key, label);
+                // stash job group for optional display
+                stats[key].jobGroup = String(tr.jobGroup || '').trim();
+                stats[key].position = String(tr.position || '').trim();
+                stats[key].nameOnly = displayName;
             });
 
-            const monthlyTargets = {};
-            (monthlyPlanList || []).forEach(item => {
-                const user = norm(item['NS+ USER ID'] || item['NS+ USER ID / EMAIL'] || item['EMAIL']);
-                if (!user) return;
-                if (!monthlyTargets[user]) monthlyTargets[user] = {content:0, task:0, others:0, targetMins:0};
-                const type = categoryType(item['CATEGORY']);
-                const freq = Math.max(0, Number(item['FREQUENCY PER MONTH']) || 0);
-                const duration = Math.max(0, Number(item['DURATION PER MIN'] || item['AVERAGE TIME (IN MINUTES)'] || item['AVERAGE TIME'] || 0) || 0);
-                monthlyTargets[user][type] += freq;
-                monthlyTargets[user].targetMins += freq * duration;
+            // ---- Monthly Plan → Target Count + Plan Minutes (FREQUENCY × DURATION) ----
+            (Array.isArray(monthlyPlanList) ? monthlyPlanList : []).forEach(plan => {
+                const userRaw = plan["NS+ USER ID"] || plan["NS+ USER ID / Email"] || plan["USER ID"] || plan["EMAIL"] || plan["User"] || "";
+                const userKey = ovNorm(userRaw);
+                if (!userKey) return;
+                if (!ovMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"], monthKey)) return;
+
+                const bucket = ovBucket(plan["CATEGORY"] || plan["Category"], plan["CATEGORY 2"] || plan["Category 2"]);
+                const freq = parseFloat(String(plan["FREQUENCY PER MONTH"] || plan["Frequency per Month"] || plan["FREQUENCY"] || "0").replace(/[^0-9.\-]/g, "")) || 0;
+                if (freq <= 0) return;
+                let dur = parseFloat(String(plan["DURATION PER MIN"] || plan["Duration per Min"] || plan["DURATION"] || "").replace(/[^0-9.\-]/g, ""));
+                if (isNaN(dur) || dur <= 0) dur = 480;
+                const mins = dur * freq;
+
+                ensureUser(userKey, String(userRaw).trim());
+                const t = monthlyTargets[userKey];
+                if (bucket === 'CONTENT') t.content += freq;
+                else if (bucket === 'TASK') t.task += freq;
+                else t.others += freq;
+                t.targetMins += mins;
             });
 
-            actualRecords.forEach(r => {
-                const user = norm(aUser >= 0 ? r[aUser] : r[0]);
-                if (!user) return;
-                if (!stats[user]) stats[user] = {display: String(aUser >= 0 ? r[aUser] : r[0]).trim(), contentCount:0, contentMins:0, taskCount:0, taskMins:0, othersCount:0, othersMins:0, actualMins:0, planMins:0, matchedActualMins:0, onTime:0, late:0};
-                const type = categoryType(aCat >= 0 ? r[aCat] : '');
-                const duration = durationNumberFromSheet(aDuration >= 0 ? r[aDuration] : '', aStart >= 0 ? r[aStart] : '', aEnd >= 0 ? r[aEnd] : '');
-                const actualDuration = duration === null ? 0 : duration;
-                const title = aTitle >= 0 ? r[aTitle] : '';
-                const date = aDate >= 0 ? r[aDate] : '';
-                stats[user].actualMins += actualDuration;
-                stats[user][type + 'Count']++;
-                stats[user][type + 'Mins'] += actualDuration;
-                const planned = dailyPlanMap.get(planKey(stats[user].display, title, date));
-                if (planned !== undefined && planned > 0) {
-                    stats[user].planMins += planned;
-                    stats[user].matchedActualMins += actualDuration;
-                    // On Time only when actual duration is strictly less than planned duration.
-                    // Late only when actual duration exceeds the planned duration; equal duration is neither.
-                    if (duration !== null) {
-                        if (duration < planned) stats[user].onTime++;
-                        else if (duration > planned) stats[user].late++;
+            // ---- Daily Plan index (for On Time / Late / Efficiency matching) ----
+            const planHeaders = (planRows[headerIndex] || []).map(h => String(h || '').toLowerCase().trim());
+            const findH = (headers, names) => {
+                for (const n of names) {
+                    const i = headers.findIndex(h => h.indexOf(n) !== -1);
+                    if (i >= 0) return i;
+                }
+                return -1;
+            };
+            // fallback findColumnIndex if available
+            const fc = (headers, names) => {
+                if (typeof findColumnIndex === 'function') {
+                    const i = findColumnIndex(headers, names);
+                    if (i >= 0) return i;
+                }
+                return findH(headers.map(h => String(h || '').toLowerCase()), names);
+            };
+
+            const pUser = fc(planRows[headerIndex] || [], ['ns+ user id', 'email', 'user']);
+            const pCat = fc(planRows[headerIndex] || [], ['category']);
+            const pCat2 = fc(planRows[headerIndex] || [], ['category 2', 'category2']);
+            const pTitle = fc(planRows[headerIndex] || [], ['plan [title]', 'title', 'plan']);
+            const pDate = fc(planRows[headerIndex] || [], ['date submitted', 'date']);
+            const pDuration = fc(planRows[headerIndex] || [], ['duration per min', 'duration per minute', 'duration']);
+            const pStart = fc(planRows[headerIndex] || [], ['start time']);
+            const pEnd = fc(planRows[headerIndex] || [], ['time ended', 'end time']);
+
+            // key: user|date|normTitle -> plan duration mins
+            const dailyPlanMap = {};
+            (planRows.slice(headerIndex + 1) || []).forEach(row => {
+                if (!row || !row.some(c => String(c || '').trim())) return;
+                const userKey = ovNorm(pUser >= 0 ? row[pUser] : row[0]);
+                if (!userKey) return;
+                const dateRaw = pDate >= 0 ? row[pDate] : '';
+                if (monthKey && ovMonthKeyFromDate(dateRaw) !== monthKey) return;
+                const title = ovNormTitle(pTitle >= 0 ? row[pTitle] : '');
+                let dur = parseFloat(pDuration >= 0 ? row[pDuration] : '');
+                if (isNaN(dur) || dur <= 0) {
+                    const a = parseTimeToMins(pStart >= 0 ? row[pStart] : '');
+                    const b = parseTimeToMins(pEnd >= 0 ? row[pEnd] : '');
+                    dur = (a || b) ? Math.max(0, (b < a ? b + 1440 : b) - a) : 0;
+                }
+                const day = ovMonthKeyFromDate(dateRaw) ? String(dateRaw).split('T')[0].split(' ')[0] : '';
+                // normalize date to yyyy-mm-dd-ish key
+                const dk = ovMonthKeyFromDate(dateRaw) + '|' + (function(){
+                    const s = String(dateRaw || '');
+                    if (s.includes('T')) return s.split('T')[0];
+                    const p = s.split('/');
+                    if (p.length === 3) {
+                        let y = p[2]; if (y.length === 2) y = '20' + y;
+                        return y + '-' + String(p[0]).padStart(2,'0') + '-' + String(p[1]).padStart(2,'0');
                     }
+                    return s.substring(0, 10);
+                })() + '|' + title;
+                if (title) dailyPlanMap[userKey + '|' + dk.split('|').slice(1).join('|')] = dur;
+                // also store simpler key
+                dailyPlanMap[userKey + '|' + ovMonthKeyFromDate(dateRaw) + '|' + title] = dur;
+            });
+
+            // ---- Daily Actual → counts + minutes ----
+            // For Approval logic (SEPCO + ST content achievement):
+            // Approved if: (1) APPROVAL DATE filled on the Daily Actual row, OR
+            // (2) an Approvals-sheet file with status Approved whose name matches the title.
+            // CONTENT: actualCount + actualMins ONLY when approved.
+            // TASK / OTHERS: always count.
+            const actualHeaders = actualRows[headerIndex] || [];
+            const aUser = fc(actualHeaders, ['ns+ user id', 'email', 'user']);
+            const aCat = fc(actualHeaders, ['category']);
+            const aCat2 = fc(actualHeaders, ['category 2', 'category2']);
+            const aTitle = fc(actualHeaders, ['actual [title]', 'actual', 'title']);
+            const aDate = fc(actualHeaders, ['date submitted', 'date']);
+            const aDuration = fc(actualHeaders, ['duration per min', 'duration per minute', 'duration']);
+            const aStart = fc(actualHeaders, ['start time']);
+            const aEnd = fc(actualHeaders, ['time ended', 'end time']);
+            const aApproval = fc(actualHeaders, ['approval date']);
+
+            // Build approved title set once (from Approvals) — ST kpiApprovedContentRows style
+            const approvedFileNames = [];
+            (globalApprovalsData || []).forEach(a => {
+                const st = String(a.status || '').toLowerCase();
+                if (!st.includes('approve')) return;
+                const nt = ovNormTitle(a.fileName);
+                if (nt) approvedFileNames.push(nt);
+            });
+            function titlesMatch(a, b) {
+                if (!a || !b) return false;
+                if (a === b || a.indexOf(b) !== -1 || b.indexOf(a) !== -1) return true;
+                const ta = a.split(/\s+/).filter(t => t.length > 2);
+                const tb = b.split(/\s+/).filter(t => t.length > 2);
+                if (!ta.length || !tb.length) return false;
+                const overlap = ta.filter(t => tb.indexOf(t) !== -1).length;
+                return overlap >= Math.min(2, ta.length, tb.length) || (ta.length === 1 && tb.indexOf(ta[0]) !== -1);
+            }
+            function isContentApproved(title, approvalDateCell) {
+                const apr = String(approvalDateCell || '').trim();
+                if (apr && apr !== '' && !/^n\/?a$/i.test(apr) && apr !== '0') return true;
+                const nt = ovNormTitle(title);
+                if (!nt) return false;
+                return approvedFileNames.some(f => titlesMatch(f, nt));
+            }
+
+            const planContentIdx = sepcoBuildPlanContentIndex(monthKey);
+            // Track CONTENT titles already counted per user
+            const countedContentTitles = {}; // userKey -> Set of norm titles
+
+            (actualRows.slice(headerIndex + 1) || []).forEach(row => {
+                if (!row || !row.some(c => String(c || '').trim())) return;
+                const userRaw = aUser >= 0 ? row[aUser] : row[0];
+                const userKey = ovNorm(userRaw);
+                if (!userKey) return;
+                const dateRaw = aDate >= 0 ? row[aDate] : '';
+                if (monthKey && ovMonthKeyFromDate(dateRaw) !== monthKey) return;
+                const title = String(aTitle >= 0 ? row[aTitle] : '').trim();
+                if (!title) return;
+
+                const cat = aCat >= 0 ? row[aCat] : '';
+                const cat2 = aCat2 >= 0 ? row[aCat2] : '';
+                const bucket = ovBucket(cat, cat2);
+
+                let dur = parseFloat(aDuration >= 0 ? row[aDuration] : '');
+                if (isNaN(dur) || dur < 0) {
+                    const a = parseTimeToMins(aStart >= 0 ? row[aStart] : '');
+                    const b = parseTimeToMins(aEnd >= 0 ? row[aEnd] : '');
+                    dur = (a || b) ? Math.max(0, (b < a ? b + 1440 : b) - a) : 0;
+                }
+
+                // CONTENT only when approved (count + mins); TASK / OTHERS always
+                // Approved = APPROVAL DATE filled OR matching Approved file in Approvals sheet
+                if (bucket === 'CONTENT') {
+                    const approved = isContentApproved(title, aApproval >= 0 ? row[aApproval] : '');
+                    if (!approved) return; // unapproved CONTENT: do not count
+                    // Approved CONTENT must ALSO have its Category 2 in this trainer's Monthly Plan
+                    if (!sepcoContentInPlan(planContentIdx, userRaw, [cat2, cat])) return;
+                }
+                const s = ensureUser(userKey, String(userRaw).trim());
+                if (bucket === 'CONTENT') {
+                    s.contentCount++; s.contentMins += dur; s.actualMins += dur;
+                    if (!countedContentTitles[userKey]) countedContentTitles[userKey] = {};
+                    countedContentTitles[userKey][ovNormTitle(title)] = true;
+                } else if (bucket === 'TASK') {
+                    s.taskCount++; s.taskMins += dur; s.actualMins += dur;
+                } else {
+                    s.othersCount++; s.othersMins += dur; s.actualMins += dur;
+                }
+
+                // On Time / Late vs Daily Plan (matched rows only)
+                const nt = ovNormTitle(title);
+                const dayKey = (function(){
+                    const s0 = String(dateRaw || '');
+                    if (s0.includes('T')) return s0.split('T')[0];
+                    const p = s0.split('/');
+                    if (p.length === 3) {
+                        let y = p[2]; if (y.length === 2) y = '20' + y;
+                        return y + '-' + String(p[0]).padStart(2,'0') + '-' + String(p[1]).padStart(2,'0');
+                    }
+                    return s0.substring(0, 10);
+                })();
+                const planDur = dailyPlanMap[userKey + '|' + dayKey + '|' + nt];
+                if (planDur != null && planDur > 0) {
+                    s.planMinsMatched += planDur;
+                    s.matchedActualMins += dur;
+                    if (dur < planDur) s.onTime++;
+                    else if (dur > planDur) s.late++;
                 }
             });
 
+            // ---- Also count Approved CONTENT from Approvals sheet (even without Daily Actual row) ----
+            // User expectation: every Approved content submission counts toward Actual Content.
+            (globalApprovalsData || []).forEach(a => {
+                const st = String(a.status || '').toLowerCase();
+                if (!st.includes('approve')) return;
+                // Month filter by uploadDate
+                if (monthKey && ovMonthKeyFromDate(a.uploadDate) !== monthKey) return;
+                const userKey = ovNorm(a.uploadedBy || a.user || a.email || '');
+                if (!userKey) return;
+                // Bucket from approval category (e.g. "CONTENT - Comparison Talk/…")
+                const cat = a.category || a.Category || a.CATEGORY || '';
+                const cat2 = a.category2 || a['CATEGORY 2'] || a['Category 2'] || '';
+                // Only CONTENT from Approvals ("CONTENT - ..." detailed categories included); TASK/OTHERS stay Daily-Actual based
+                if (!sepcoApprovalIsContent(cat, cat2)) return;
+                const nt = ovNormTitle(a.fileName || a.title || '');
+                if (!nt) return;
+                // Must be in this trainer's Monthly Plan (same Category 2) to count
+                if (!sepcoContentInPlan(planContentIdx, a.uploadedBy || a.user || a.email || '', [cat, cat2])) return;
+                // Skip if already counted from Daily Actual
+                const already = countedContentTitles[userKey] || {};
+                const dup = Object.keys(already).some(t => titlesMatch(t, nt));
+                if (dup) return;
+                const s = ensureUser(userKey, String(a.uploadedBy || '').trim());
+                s.contentCount++;
+                if (!countedContentTitles[userKey]) countedContentTitles[userKey] = {};
+                countedContentTitles[userKey][nt] = true;
+            });
+
+            // ---- Render ----
             const tbody = document.getElementById('overviewTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
-            const users = [...new Set([...Object.keys(stats), ...Object.keys(monthlyTargets)])];
+            const users = [...new Set([...Object.keys(stats), ...Object.keys(monthlyTargets)])].sort((a, b) => {
+                const sa = stats[a] || {}, sb = stats[b] || {};
+                const ta = monthlyTargets[a] || { targetMins: 0, content: 0, task: 0, others: 0 };
+                const tb = monthlyTargets[b] || { targetMins: 0, content: 0, task: 0, others: 0 };
+                const aNo = !(ta.targetMins > 0 || ta.content > 0 || ta.task > 0 || ta.others > 0);
+                const bNo = !(tb.targetMins > 0 || tb.content > 0 || tb.task > 0 || tb.others > 0);
+                if (aNo !== bNo) return aNo ? -1 : 1; // no-plan first so they're visible
+                const an = String(sa.display || a).toLowerCase(), bn = String(sb.display || b).toLowerCase();
+                return an < bn ? -1 : (an > bn ? 1 : 0);
+            });
+            window._kpiStats = stats;
+            window._kpiTargets = monthlyTargets;
+            window._kpiUsers = users;
+
             if (!users.length) {
-                tbody.innerHTML = '<tr><td colspan="16" style="color:var(--text-muted);padding:20px">No trainer records found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="16" style="color:var(--text-muted);padding:20px">No trainer records found for ' + monthKey + '.</td></tr>';
+                try { renderAllTrainersKpi(); } catch (e) {}
+                try { renderSepcoCategoryProgress(monthKey); } catch (e2) { console.error(e2); }
                 return;
             }
+
             users.forEach(user => {
-                const s = stats[user] || {display:user, contentCount:0, contentMins:0, taskCount:0, taskMins:0, othersCount:0, othersMins:0, actualMins:0, planMins:0, matchedActualMins:0, onTime:0, late:0};
-                const t = monthlyTargets[user] || {content:0, task:0, others:0, targetMins:0};
-                const productivity = t.targetMins > 0 ? (s.actualMins / t.targetMins * 100) : 0;
-                const efficiency = s.matchedActualMins > 0 ? (s.planMins / s.matchedActualMins * 100) : null;
-                const effColor = efficiency === null ? '#64748b' : (efficiency >= 100 ? '#16a34a' : (efficiency >= 80 ? '#d97706' : '#dc2626'));
-                const pct = (actual, target) => target > 0 ? (actual / target * 100).toFixed(1) + '%' : '—';
+                const s = stats[user] || { display: user, contentCount: 0, taskCount: 0, othersCount: 0, actualMins: 0, planMinsMatched: 0, matchedActualMins: 0, onTime: 0, late: 0 };
+                const t = monthlyTargets[user] || { content: 0, task: 0, others: 0, targetMins: 0 };
+                // Productivity = Actual ÷ Plan (ST); leave data optional / not loaded globally here
+                const productivity = t.targetMins > 0 ? (s.actualMins / t.targetMins * 100) : null;
+                // Efficiency = Plan mins ÷ Actual mins for matched rows (ST: ≥100% = faster)
+                const efficiency = s.matchedActualMins > 0 ? (s.planMinsMatched / s.matchedActualMins * 100) : null;
+                const prodColor = productivity == null ? '#64748b' : (productivity >= 100 ? '#22c55e' : (productivity >= 80 ? '#f59e0b' : '#ef4444'));
+                const effColor = efficiency == null ? '#64748b' : (efficiency >= 100 ? '#22c55e' : (efficiency >= 80 ? '#f59e0b' : '#ef4444'));
+
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="font-weight:600;text-align:left;padding-left:15px">👤 ${s.display}</td>
-                    <td><strong>${t.content}</strong></td><td>${s.contentCount}</td><td>${pct(s.contentCount, t.content)}</td>
-                    <td><strong>${t.task}</strong></td><td>${s.taskCount}</td><td>${pct(s.taskCount, t.task)}</td>
-                    <td><strong>${t.others}</strong></td><td>${s.othersCount}</td><td>${pct(s.othersCount, t.others)}</td>
-                    <td><strong>${Math.round(t.targetMins)} mins</strong></td>
-                    <td><strong>${Math.round(s.actualMins)} mins</strong></td>
-                                        <td>${s.onTime}</td><td>${s.late}</td>
-                    <td><span style="background:#eff6ff;color:#2563eb;padding:4px 8px;border-radius:4px;font-weight:600;font-size:11px">${productivity.toFixed(1)}%</span></td>
-                    <td><span style="background:#eff6ff;color:${effColor};padding:4px 8px;border-radius:4px;font-weight:600;font-size:11px">${efficiency === null ? '—' : efficiency.toFixed(1) + '%'}</span></td>`;
+                tr.innerHTML =
+                    (function(){
+                    const hasPlan = t.targetMins > 0 || t.content > 0 || t.task > 0 || t.others > 0;
+                    const noPlanBadge = hasPlan ? '' : ' <span style="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.15);padding:2px 6px;border-radius:4px;margin-left:4px;">No Monthly Plan</span>';
+                    return '<td style="font-weight:600;text-align:left;padding-left:15px;white-space:nowrap;">👤 ' + String(s.display || user).replace(/</g,'&lt;') + noPlanBadge + '</td>';
+                })() +
+                    '<td>' + ovNumHtml(t.content) + '</td><td>' + ovNumHtml(s.contentCount) + '</td><td>' + ovPctHtml(s.contentCount, t.content) + '</td>' +
+                    '<td>' + ovNumHtml(t.task) + '</td><td>' + ovNumHtml(s.taskCount) + '</td><td>' + ovPctHtml(s.taskCount, t.task) + '</td>' +
+                    '<td>' + ovNumHtml(t.others) + '</td><td>' + ovNumHtml(s.othersCount) + '</td><td>' + ovPctHtml(s.othersCount, t.others) + '</td>' +
+                    '<td>' + ovMinsHtml(t.targetMins) + '</td>' +
+                    '<td>' + ovMinsHtml(s.actualMins) + '</td>' +
+                    '<td>' + ovNumHtml(s.onTime) + '</td><td>' + ovNumHtml(s.late) + '</td>' +
+                    '<td><span style="background:rgba(59,130,246,.12);color:' + prodColor + ';padding:4px 8px;border-radius:6px;font-weight:700;font-size:11px;">' + (productivity == null ? '—' : productivity.toFixed(1) + '%') + '</span></td>' +
+                    '<td><span style="background:rgba(59,130,246,.12);color:' + effColor + ';padding:4px 8px;border-radius:6px;font-weight:700;font-size:11px;">' + (efficiency == null ? '—' : efficiency.toFixed(1) + '%') + '</span></td>';
                 tbody.appendChild(tr);
             });
+            try { renderAllTrainersKpi(); } catch (e) {}
+            try { renderSepcoCategoryProgress(monthKey); } catch (e2) { console.error(e2); }
+        }
+
+        /* ========== Dashboard: All Specialized Trainers KPI Landing ==========
+           Same computation as ST.html (computeKpi): approvals-based Actual / Revisions, month-filtered,
+           weights per Job Group, accuracy deduction from "KPI Inputs", leave-adjusted productivity. */
+        const SK_WEIGHTS = {
+            CD:    [0.20, 0.20, 0.10, 0.20, 0.30],
+            SES:   [0.20, 0.15, 0.15, 0.20, 0.30],
+            SPLUS: [0.20, 0.15, 0.15, 0.15, 0.35]
+        };
+        const SK_GROUP_LABEL = { CD: 'Content Developer', SES: 'SES / NSO / CX', SPLUS: 'S+ Expert / Admin' };
+        const SK_EXTRA = {};          // user -> { loaded, jobGroup, inputs[], leaves[] }
+        const SK_CACHE = { planSrc: null, planObjs: [], actualSrc: null, actualObjs: [] };
+        let SK_RENDER_TIMER = null;
+
+        function skNorm(v) { return String(v || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+        function skGroupKey(jobGroup) {
+            const g = String(jobGroup || '').toLowerCase();
+            if (g.indexOf('content developer') !== -1) return 'CD';
+            if (g.indexOf('s+') !== -1 || g.indexOf('expert') !== -1) return 'SPLUS';
+            if (/\bses\b|nso|customer/.test(g)) return 'SES';
+            return '';
+        }
+        function skCleanDate(raw) {
+            if (!raw) return '';
+            const str = String(raw).trim();
+            if (str.includes('T')) return str.split('T')[0];
+            const p = str.split('/');
+            if (p.length === 3) {
+                let y = p[2]; if (y.length === 2) y = '20' + y;
+                return y + '-' + String(p[0]).padStart(2, '0') + '-' + String(p[1]).padStart(2, '0');
+            }
+            const dt = new Date(str);
+            if (!isNaN(dt.getTime())) return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+            return str;
+        }
+        function skMonthKey(raw) { const c = skCleanDate(raw); return /^\d{4}-\d{2}/.test(c) ? c.slice(0, 7) : ''; }
+        function skDate(v) { const d = skCleanDate(v); return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : ''; }
+        function skRowVal(row, keys) {
+            for (const k of keys) { if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k]; }
+            const rk = Object.keys(row);
+            for (const k of keys) {
+                const f = rk.find(x => x.toLowerCase().replace(/[^a-z0-9]/g, '') === k.toLowerCase().replace(/[^a-z0-9]/g, ''));
+                if (f && row[f] !== undefined) return row[f];
+            }
+            return '';
+        }
+        function skMonthMatches(cell, key) {
+            if (!key) return true;
+            const c = String(cell == null ? '' : cell).trim();
+            if (c === '') return true;
+            const m = /^(\d{4})-(\d{2})/.exec(c);
+            if (m) return (m[1] + '-' + m[2]) === key;
+            const names = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+            const idx = names.indexOf(c.toLowerCase().substring(0, 3));
+            if (idx === -1) return true;
+            const y = /(\d{4})/.exec(c), kp = key.split('-');
+            if (y && y[1] !== kp[0]) return false;
+            return (idx + 1) === parseInt(kp[1], 10);
+        }
+        function skIsYes(v) { return /^(y|yes|true|1)/i.test(String(v == null ? '' : v).trim()); }
+        function skTitle(r) { return String(skRowVal(r, ['ACTUAL [Title]', 'TITLE', 'PLAN [Title]']) || '').trim(); }
+        function skBucket(r) {
+            const c = String(skRowVal(r, ['CATEGORY']) || '').trim().toUpperCase();
+            const c2 = String(skRowVal(r, ['CATEGORY 2']) || '').trim().toUpperCase();
+            const buckets = ['CONTENT', 'TASK', 'OTHERS'];
+            if (buckets.indexOf(c2) !== -1) return c2;
+            if (buckets.indexOf(c) !== -1) return c;
+            const probe = c2 || c;
+            if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) return 'CONTENT';
+            if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) return 'TASK';
+            return 'OTHERS';
+        }
+        function skIsContent(r) { return skBucket(r) === 'CONTENT'; }
+        function skDur(r) { const d = parseFloat(skRowVal(r, ['DURATION PER MIN', 'DURATION'])); return (!isNaN(d) && d > 0) ? d : NaN; }
+        function skNormTitle(s) { return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+        function skNormCat(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+        function skInputRatio(names, rows) {
+            let sumT = 0, sumA = 0, n = 0, found = false;
+            rows.forEach(r => {
+                const m = String(r.metric || '').trim().toUpperCase();
+                if (names.indexOf(m) === -1) return;
+                found = true;
+                sumT += (r.target === '' || r.target == null) ? 0 : Number(r.target) || 0;
+                sumA += (r.actual === '' || r.actual == null) ? 0 : Number(r.actual) || 0;
+                n++;
+            });
+            if (!found) return { has: false, t: 0, a: 0, ratio: null };
+            return { has: true, t: sumT, a: sumA, ratio: sumT > 0 ? sumA / sumT : (n ? sumA / n : 0) };
+        }
+
+        // CSV rows (header on row 3) -> objects, same shape ST.html uses
+        function skRowsToObjects(rows) {
+            const hi = 2;
+            if (!rows || rows.length <= hi) return [];
+            const headers = (rows[hi] || []).map(h => String(h || '').trim());
+            let iUser = findColumnIndex(headers, ['ns+ user id', 'email', 'user']); if (iUser < 0) iUser = 0;
+            const iDur = findColumnIndex(headers, ['duration per min', 'duration per minute']);
+            const iStart = findColumnIndex(headers, ['start time']);
+            const iEnd = findColumnIndex(headers, ['time ended', 'end time']);
+            const out = [];
+            for (let i = hi + 1; i < rows.length; i++) {
+                const r = rows[i];
+                if (!r || !r.some(c => String(c).trim() !== '')) continue;
+                const o = {};
+                headers.forEach((h, j) => { if (h) o[h] = r[j] !== undefined ? r[j] : ''; });
+                const d = durationNumberFromSheet(iDur >= 0 ? r[iDur] : '', iStart >= 0 ? r[iStart] : '', iEnd >= 0 ? r[iEnd] : '');
+                if (d !== null && d !== undefined) o['DURATION PER MIN'] = d;
+                o._u = skNorm(r[iUser]);
+                out.push(o);
+            }
+            return out;
+        }
+        function skDailyObjects() {
+            if (SK_CACHE.planSrc !== planDataGlobal) { SK_CACHE.planSrc = planDataGlobal; SK_CACHE.planObjs = skRowsToObjects(planDataGlobal); }
+            if (SK_CACHE.actualSrc !== actualDataGlobal) { SK_CACHE.actualSrc = actualDataGlobal; SK_CACHE.actualObjs = skRowsToObjects(actualDataGlobal); }
+            return SK_CACHE;
+        }
+        function skApprovalIsUser(item, userKey, name) {
+            const by = skNorm(item.uploadedBy);
+            if (!by) return false;
+            if (by === userKey || (by.length > 2 && userKey.includes(by)) || (userKey.length > 2 && by.includes(userKey))) return true;
+            if (name && (by === name || (by.length > 2 && name.includes(by)))) return true;
+            return false;
+        }
+
+        // ---- API (fetch, JSONP fallback) + per-trainer extras: job group, KPI inputs, leaves ----
+        function skCallApi(params) {
+            const qs = new URLSearchParams(params).toString();
+            return fetch(GA_WEB_APP_URL + '?' + qs).then(r => r.json()).catch(() => new Promise((resolve, reject) => {
+                const cb = 'jsonp_sk_' + Math.round(1e6 * Math.random());
+                const tag = document.createElement('script');
+                const cleanup = () => { delete window[cb]; if (tag.parentNode) tag.parentNode.removeChild(tag); clearTimeout(timer); };
+                const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 15000);
+                window[cb] = d => { cleanup(); resolve(d); };
+                tag.onerror = () => { cleanup(); reject(new Error('connection error')); };
+                tag.src = GA_WEB_APP_URL + '?' + qs + '&callback=' + cb;
+                document.body.appendChild(tag);
+            }));
+        }
+        function skScheduleRender() {
+            clearTimeout(SK_RENDER_TIMER);
+            SK_RENDER_TIMER = setTimeout(renderAllTrainersKpi, 200);
+        }
+        function skLoadExtras(users) {
+            users.forEach(u => {
+                if (SK_EXTRA[u]) return;
+                const x = SK_EXTRA[u] = { loaded: false, jobGroup: '', name: '', inputs: [], leaves: [] };
+                const safe = p => p.catch(() => null);
+                Promise.all([
+                    safe(skCallApi({ action: 'getUserProfile', user: u, t: Date.now() })),
+                    safe(skCallApi({ action: 'getKpiInputs', user: u, t: Date.now() })),
+                    safe(skCallApi({ action: 'getLeaves', user: u, t: Date.now() }))
+                ]).then(([prof, inp, lv]) => {
+                    if (prof && prof.success) { x.jobGroup = prof.jobGroup || ''; x.name = skNorm(prof.name); }
+                    if (inp && inp.success && Array.isArray(inp.inputs)) x.inputs = inp.inputs;
+                    if (lv && lv.success && Array.isArray(lv.leaves)) x.leaves = lv.leaves.map(l => ({ date: l.date, type: l.type }));
+                    x.loaded = true;
+                    skScheduleRender();
+                });
+            });
+        }
+
+        // ---- Duration rule: CONTENT duration counts only after approval ----
+        function skApprovedContentRows(monthKey, actualRows, approvals) {
+            const set = new Set();
+            const rows = actualRows.filter(r => skMonthKey(r['Date Submitted']) === monthKey && skIsContent(r) && skTitle(r) !== '')
+                .sort((x, y) => skDate(x['Date Submitted']) < skDate(y['Date Submitted']) ? -1 : 1);
+            const flagged = rows.some(r => skIsYes(skRowVal(r, ['Is this the start date?'])));
+            const units = [];
+            if (flagged) {
+                rows.forEach(r => {
+                    if (skIsYes(skRowVal(r, ['Is this the start date?']))) units.push({ title: skTitle(r), rows: [r] });
+                    else for (let i = units.length - 1; i >= 0; i--) { if (units[i].title.toLowerCase() === skTitle(r).toLowerCase()) { units[i].rows.push(r); break; } }
+                });
+            } else {
+                const map = {};
+                rows.forEach(r => { const k = skTitle(r).toLowerCase(); if (!map[k]) { map[k] = { title: skTitle(r), rows: [] }; units.push(map[k]); } map[k].rows.push(r); });
+            }
+            const approvedFiles = approvals.filter(a => /approve/i.test(String(a.status || ''))).map(a => skNormTitle(a.fileName));
+            units.forEach(u => {
+                let apr = '';
+                u.rows.forEach(r => { const d = skDate(skRowVal(r, ['APPROVAL DATE'])); if (d) apr = d; });
+                const tn = skNormTitle(u.title);
+                if (!!apr || (tn !== '' && approvedFiles.some(f => f.indexOf(tn) !== -1))) u.rows.forEach(r => set.add(r));
+            });
+            return set;
+        }
+
+        // ---- Main computation (port of ST.html computeKpi) ----
+        function skComputeKpi(userKey, monthKey, displayName) {
+            const X = SK_EXTRA[userKey] || { loaded: false, jobGroup: '', name: '', inputs: [], leaves: [] };
+            const gk = skGroupKey(X.jobGroup);
+            const weights = SK_WEIGHTS[gk || 'CD'];
+            const D = skDailyObjects();
+            const dailyPlan = D.planObjs.filter(r => r._u === userKey);
+            const dailyActual = D.actualObjs.filter(r => r._u === userKey);
+            const userId = (list) => skNorm(list['NS+ USER ID'] || list['NS+ USER ID / EMAIL'] || list['EMAIL']);
+            const plan = (Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : [])
+                .filter(r => userId(r) === userKey && skMonthMatches(r['MONTH'], monthKey));
+            const nameKey = X.name || skNorm(displayName);
+            const approvalsAll = (globalApprovalsData || []).filter(a => skApprovalIsUser(a, userKey, nameKey));
+
+            // 1) TARGET from Monthly Plan
+            let target = 0;
+            plan.forEach(r => { if (!skIsContent(r)) return; target += parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1; });
+
+            // 2) ACTUAL content: approved approvals matched to plan slots
+            const planSlots = [];
+            plan.forEach(r => {
+                if (!skIsContent(r)) return;
+                const f = parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
+                const title = String(skRowVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']) || '').trim();
+                const cat = String(skRowVal(r, ['CATEGORY']) || '').trim();
+                const cat2 = String(skRowVal(r, ['CATEGORY 2']) || '').trim();
+                const d = skDur(r);
+                for (let i = 0; i < f; i++) planSlots.push({ title, cat, cat2, nt: skNormTitle(title), nc: skNormCat(cat), used: false, mins: isNaN(d) ? 0 : d });
+            });
+            const monthApprovals = approvalsAll.filter(a => skMonthKey(a.uploadDate) === monthKey);
+            const approvedList = monthApprovals.filter(a => /approve/i.test(String(a.status || '')));
+
+            let own = 0, proof = 0, onTime = 0, totalMins = 0, ownMins = 0, onTimeMins = 0;
+            const approvedUnits = [];
+            const daByTitle = {};
+            dailyActual.filter(r => skMonthKey(r['Date Submitted']) === monthKey && skIsContent(r) && skTitle(r) !== '').forEach(r => {
+                const k = skNormTitle(skTitle(r)); if (!k) return;
+                if (!daByTitle[k]) daByTitle[k] = { title: skTitle(r), rows: [], mins: 0, tgt: '', apr: '' };
+                daByTitle[k].rows.push(r);
+                const d = skDur(r); if (!isNaN(d)) daByTitle[k].mins += d;
+                const t = skDate(skRowVal(r, ['TARGET DATE'])), ap = skDate(skRowVal(r, ['APPROVAL DATE']));
+                if (t) daByTitle[k].tgt = t; if (ap) daByTitle[k].apr = ap;
+            });
+            const claimByTitle = fn => {
+                if (!fn) return null;
+                for (const sl of planSlots) { if (sl.used) continue; if (sl.nt && (fn.indexOf(sl.nt) !== -1 || sl.nt.indexOf(fn) !== -1)) { sl.used = true; return sl; } }
+                return null;
+            };
+            const claimByCategory = catRaw => {
+                const nc = skNormCat(catRaw); if (!nc) return null;
+                for (const sl of planSlots) {
+                    if (sl.used) continue;
+                    if (sl.nc && (sl.nc === nc || sl.nc.indexOf(nc) !== -1 || nc.indexOf(sl.nc) !== -1)) { sl.used = true; return sl; }
+                    if (skNormCat(sl.cat2) === nc) { sl.used = true; return sl; }
+                }
+                return null;
+            };
+            approvedList.forEach(a => {
+                const fn = skNormTitle(a.fileName);
+                const slot = claimByTitle(fn) || claimByCategory(a.category);
+                if (!slot) return;
+                const isProof = /proof\s*read|proofread|prpofread/i.test(String(a.fileName || '') + ' ' + String(a.category || ''));
+                let da = fn ? daByTitle[fn] : null;
+                if (!da && fn) Object.keys(daByTitle).forEach(k => { if (!da && (fn.indexOf(k) !== -1 || k.indexOf(fn) !== -1)) da = daByTitle[k]; });
+                const mins = da ? da.mins : (slot.mins || 0);
+                if (da && da.tgt && da.apr && da.apr <= da.tgt) { onTime++; onTimeMins += mins; }
+                approvedUnits.push({ title: a.fileName || slot.title || '', mins });
+                totalMins += mins;
+                if (isProof) proof++; else { own++; ownMins += mins; }
+            });
+            let pendingApproval = planSlots.filter(sl => !sl.used).length;
+            pendingApproval += monthApprovals.filter(a => /pending/i.test(String(a.status || 'pending'))).length;
+            const total = own + proof;
+
+            // 3) REVISIONS: rejected approvals matched to a CONTENT plan item
+            const matchesPlanContent = a => {
+                const fn = skNormTitle(a.fileName), nc = skNormCat(a.category);
+                for (const r of plan) {
+                    if (!skIsContent(r)) continue;
+                    const pt = skNormTitle(skRowVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']));
+                    const pc = skNormCat(skRowVal(r, ['CATEGORY'])), pc2 = skNormCat(skRowVal(r, ['CATEGORY 2']));
+                    if (fn && pt && (fn.indexOf(pt) !== -1 || pt.indexOf(fn) !== -1)) return true;
+                    if (nc && pc && (pc === nc || pc.indexOf(nc) !== -1 || nc.indexOf(pc) !== -1)) return true;
+                    if (nc && pc2 && pc2 === nc) return true;
+                }
+                return false;
+            };
+            const rejectedList = monthApprovals.filter(a => /reject/i.test(String(a.status || '')));
+            const revisions = rejectedList.filter(matchesPlanContent).length;
+            const woRev = Math.max(0, total - revisions);
+            const ach = target > 0 ? own / target : null;
+
+            // Accuracy = (Target - Revisions) / Target, less KPI Inputs error deduction
+            let quality = target > 0 ? Math.max(0, (target - revisions) / target) : null;
+
+            // Efficiency = approved content mins / Monthly Plan content mins
+            let planContentMins = 0;
+            plan.forEach(r => {
+                if (!skIsContent(r)) return;
+                const d = skDur(r), f = parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
+                planContentMins += (!isNaN(d)) ? d * f : 480 * f;
+            });
+            let revMins = 0;
+            const avgMins = approvedUnits.length ? totalMins / approvedUnits.length : 0;
+            rejectedList.forEach(a => {
+                if (!matchesPlanContent(a)) return;
+                const fn = skNormTitle(a.fileName);
+                const m = approvedUnits.filter(u => { const tn = skNormTitle(u.title); return tn !== '' && fn.indexOf(tn) !== -1; })[0];
+                revMins += m ? m.mins : avgMins;
+            });
+            const woRevMins = Math.max(0, totalMins - revMins);
+            const eff = planContentMins > 0 ? totalMins / planContentMins : (totalMins > 0 ? 1 : null);
+
+            // Timeliness = Daily Actual mins / Daily Plan mins
+            let dailyPlanMins = 0, dailyActMins = 0;
+            dailyPlan.filter(t => skMonthKey(t['Date Submitted']) === monthKey).forEach(t => {
+                if (t['PLAN [Title]']) { const d = skDur(t); dailyPlanMins += isNaN(d) ? 480 : d; }
+            });
+            dailyActual.filter(t => skMonthKey(t['Date Submitted']) === monthKey).forEach(t => {
+                if (String(t['ACTUAL [Title]'] || '').trim() === '') return;
+                const d = skDur(t); if (!isNaN(d)) dailyActMins += d;
+            });
+            const timeliness = dailyPlanMins > 0 ? dailyActMins / dailyPlanMins : (dailyActMins > 0 ? 1 : null);
+
+            // KPI Inputs: content errors deduction (1-2 = 1%, 3-4 = 2% ...)
+            const inp = (X.inputs || []).filter(r => skMonthMatches(r.month, monthKey));
+            const errRow = skInputRatio(['CONTENT ERRORS'], inp);
+            const errCount = errRow.has ? errRow.a : 0;
+            const deduction = errCount > 0 ? Math.ceil(errCount / 2) * 0.01 : 0;
+            if (quality != null) quality = Math.max(0, quality - deduction);
+
+            // Productivity = Daily Actual mins / (Monthly Plan mins - leave days x 480)
+            const leaveDays = (X.leaves || []).filter(l => skMonthKey(l.date) === monthKey).length;
+            let planMins = 0;
+            plan.forEach(r => { const d = skDur(r), f = parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1; planMins += (!isNaN(d)) ? d * f : 480 * f; });
+            const adjPlan = Math.max(0, planMins - leaveDays * 480);
+            const apprRows = skApprovedContentRows(monthKey, dailyActual, approvalsAll);
+            let actMins = 0;
+            dailyActual.filter(t => skMonthKey(t['Date Submitted']) === monthKey).forEach(t => {
+                if (String(t['ACTUAL [Title]'] || '').trim() === '') return;
+                if (skIsContent(t) && !apprRows.has(t)) return;
+                const d = skDur(t); if (!isNaN(d)) actMins += d;
+            });
+            const productivity = adjPlan > 0 ? actMins / adjPlan : (actMins > 0 ? 1 : null);
+
+            const vals = [ach, quality, eff, timeliness, productivity];
+            let capped = 0, uncapped = 0;
+            vals.forEach((v, i) => { const val = (v != null && !isNaN(v)) ? v : 0; capped += Math.min(val, 1) * weights[i]; uncapped += val * weights[i]; });
+            return { gk, extrasLoaded: X.loaded, jobGroup: X.jobGroup, vals, weights, capped, uncapped,
+                target, own, proof, total, woRev, revisions, onTime, pendingApproval, errCount,
+                totalMins, woRevMins, revMins, onTimeMins };
+        }
+
+        function renderAllTrainersKpi() {
+            const container = document.getElementById('allTrainersKpiContainer');
+            if (!container) return;
+
+            const stats = window._kpiStats || {};
+            // Always include every Specialized Trainer from user account (with name)
+            (specializedTrainersGlobal || []).forEach(tr => {
+                const email = String(tr.email || '').trim();
+                const key = (typeof skNorm === 'function' ? skNorm(email) : String(email).trim().toLowerCase());
+                if (!key) return;
+                if (!stats[key]) {
+                    const nm = String(tr.name || '').trim();
+                    stats[key] = { display: nm ? (nm + ' · ' + email) : email, jobGroup: tr.jobGroup || '', nameOnly: nm };
+                } else if (tr.name && stats[key].display === key) {
+                    stats[key].display = String(tr.name).trim() + ' · ' + email;
+                }
+            });
+            window._kpiStats = stats;
+            let users = window._kpiUsers || Object.keys(stats);
+            (specializedTrainersGlobal || []).forEach(tr => {
+                const key = (typeof skNorm === 'function' ? skNorm(tr.email) : String(tr.email || '').trim().toLowerCase());
+                if (key && users.indexOf(key) === -1) users.push(key);
+            });
+            const monthEl = document.getElementById('dashKpiMonth');
+            const monthKey = (monthEl && monthEl.value) ? monthEl.value : '';
+            let monthLabel = 'All months';
+            if (monthKey) {
+                const [y, m] = monthKey.split('-');
+                monthLabel = new Date(parseInt(y), parseInt(m) - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            }
+            if (!users.length) {
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">No Specialized Trainer data found for the selected month.</div>';
+                return;
+            }
+            skLoadExtras(users);
+
+            const pctStr = v => (v == null || isNaN(v)) ? '—' : (Math.round(v * 1000) / 10) + '%';
+            const achCls = v => (v == null || isNaN(v)) ? 'color:var(--text-muted)' : (v >= 1 ? 'color:#22c55e' : (v >= 0.8 ? 'color:#f59e0b' : 'color:#ef4444'));
+            const TD = 'padding:10px 8px; border-bottom:1px solid rgba(148,163,184,.12); text-align:center; white-space:nowrap;';
+            const TH = 'padding:8px 8px; font-size:10px; letter-spacing:.03em; text-transform:uppercase; white-space:nowrap; text-align:center;';
+            const GRP = 'padding:8px 10px; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; text-align:center;';
+
+            let rows = '';
+            const results = [];
+            users.slice().sort().forEach(user => {
+                const s = stats[user] || { display: user };
+                const displayName = s.display || user;
+                const k = skComputeKpi(user, monthKey, displayName);
+                results.push({ name: displayName, k });
+                const capPct = Math.round(k.capped * 1000) / 10, uncPct = Math.round(k.uncapped * 1000) / 10;
+                const band = k.capped >= 1.41 ? '141% & up' : k.capped >= 1.21 ? '121–140%' : k.capped >= 1.01 ? '101–120%' : k.capped >= 0.8 ? '80–100%' : 'Below 80%';
+                const bandStyle = k.capped < 0.8
+                    ? 'background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.4); color:#f87171;'
+                    : 'background:rgba(16,185,129,.18); border:1px solid rgba(16,185,129,.4); color:#34d399;';
+                const jgText = !k.extrasLoaded ? 'Loading…' : (k.gk ? SK_GROUP_LABEL[k.gk] : 'Not set (CD weights)');
+                const pctCell = v => '<td style="' + TD + ' font-weight:700; ' + achCls(v) + ';">' + pctStr(v) + '</td>';
+                const numCell = v => {
+                    const n = (v === '' || v == null) ? 0 : Number(v);
+                    const isZero = !isNaN(n) && n === 0;
+                    const col = isZero ? 'color:#ffffff;' : 'font-weight:600;';
+                    return '<td style="' + TD + ' ' + col + '">' + v + '</td>';
+                };
+                rows += '<tr>' +
+                    '<td style="' + TD + ' text-align:left; font-weight:700; position:sticky; left:0; background:var(--card-bg); z-index:1;">👤 ' + displayName + '</td>' +
+                    '<td style="' + TD + ' font-size:11px; color:var(--text-muted);">' + jgText + '</td>' +
+                    '<td style="' + TD + ' font-weight:800; font-size:14px; ' + achCls(k.capped) + ';">' + capPct + '%</td>' +
+                    '<td style="' + TD + ' color:var(--text-muted);">' + uncPct + '%</td>' +
+                    '<td style="' + TD + '"><span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; ' + bandStyle + '">' + band + '</span></td>' +
+                    k.vals.map(pctCell).join('') +
+                    numCell(k.target) + numCell(k.own) + numCell(k.proof) + numCell(k.total) + numCell(k.woRev) + numCell(k.revisions) + numCell(k.onTime) + numCell(k.pendingApproval) +
+                    numCell(Math.round(k.totalMins)) + numCell(Math.round(k.woRevMins)) + numCell(Math.round(k.revMins)) + numCell(Math.round(k.onTimeMins)) +
+                    '</tr>';
+            });
+
+            // ---- Summary KPI cards ----
+            const n = results.length;
+            const avgCap = results.reduce((t, r) => t + r.k.capped, 0) / (n || 1);
+            const avgUnc = results.reduce((t, r) => t + r.k.uncapped, 0) / (n || 1);
+            const okCount = results.filter(r => r.k.capped >= 0.8).length;
+            const lowCount = n - okCount;
+            const sorted = results.slice().sort((a, b) => b.k.capped - a.k.capped);
+            const top = sorted[0], low = sorted[sorted.length - 1];
+            const kpiNames = ['Target Count', 'Accuracy', 'Efficiency', 'Timeliness', 'Productivity'];
+            const kpiAvg = kpiNames.map((_, i) => {
+                const vs = results.map(r => r.k.vals[i]).filter(v => v != null && !isNaN(v));
+                return vs.length ? vs.reduce((t, v) => t + v, 0) / vs.length : null;
+            });
+            const sum = f => results.reduce((t, r) => t + (r.k[f] || 0), 0);
+            const totTarget = sum('target'), totOwn = sum('own'), totRev = sum('revisions'), totAwait = sum('pendingApproval'), totMins = sum('totalMins');
+            const pc = v => (v == null || isNaN(v)) ? '—' : (Math.round(v * 1000) / 10) + '%';
+            const scoreColor = v => v >= 1 ? '#22c55e' : (v >= 0.8 ? '#f59e0b' : '#ef4444');
+            const CARD = 'border:1px solid var(--border-color); border-radius:14px; padding:14px 16px; background:linear-gradient(145deg, rgba(37,99,235,.14), rgba(15,23,42,.35)); min-width:0;';
+            const LBL = 'font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;';
+            const BIG = 'font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.15;';
+            const SUB = 'font-size:11px; color:var(--text-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+            const miniRow = (label, v) => '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:11px; padding:2px 0;"><span style="color:var(--text-muted);">' + label + '</span>' +
+                '<span style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:48px; height:4px; border-radius:4px; background:rgba(148,163,184,.25); overflow:hidden;"><i style="display:block; height:100%; width:' + Math.min(100, Math.round((v || 0) * 100)) + '%; background:' + (v == null ? 'transparent' : scoreColor(v)) + ';"></i></span>' +
+                '<strong style="min-width:42px; text-align:right; color:' + (v == null ? 'var(--text-muted)' : scoreColor(v)) + ';">' + pc(v) + '</strong></span></div>';
+            const cardsHtml = '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin-bottom:18px;">' +
+                '<div style="' + CARD + '"><div style="' + LBL + '">Average Total KPI</div><div style="' + BIG + ' color:' + scoreColor(avgCap) + ';">' + pc(avgCap) + '</div><div style="' + SUB + '">Uncapped avg: <strong>' + pc(avgUnc) + '</strong></div></div>' +
+                '<div style="' + CARD + '"><div style="' + LBL + '">Trainers</div><div style="' + BIG + '">' + n + '</div><div style="' + SUB + '"><span style="color:#22c55e;">● ' + okCount + ' at 80%+</span> &nbsp; <span style="color:#ef4444;">● ' + lowCount + ' below 80%</span></div></div>' +
+                '<div style="' + CARD + '"><div style="' + LBL + '">🏆 Top Performer</div><div style="' + BIG + ' color:' + scoreColor(top.k.capped) + ';">' + pc(top.k.capped) + '</div><div style="' + SUB + '" title="' + top.name + '">' + top.name + '</div></div>' +
+                '<div style="' + CARD + '"><div style="' + LBL + '">⚠️ Needs Attention</div><div style="' + BIG + ' color:' + scoreColor(low.k.capped) + ';">' + pc(low.k.capped) + '</div><div style="' + SUB + '" title="' + low.name + '">' + low.name + '</div></div>' +
+                '<div style="' + CARD + '"><div style="' + LBL + '">Average per KPI</div>' + kpiNames.map((nm, i) => miniRow(nm, kpiAvg[i])).join('') + '</div>' +
+                '<div style="' + CARD + '"><div style="' + LBL + '">Content Summary</div>' +
+                '<div style="display:flex; justify-content:space-between; font-size:12px; padding:2px 0;"><span style="color:var(--text-muted);">Own content / Target</span><strong>' + totOwn + ' / ' + totTarget + '</strong></div>' +
+                '<div style="display:flex; justify-content:space-between; font-size:12px; padding:2px 0;"><span style="color:var(--text-muted);">Revisions</span><strong>' + totRev + '</strong></div>' +
+                '<div style="display:flex; justify-content:space-between; font-size:12px; padding:2px 0;"><span style="color:var(--text-muted);">Awaiting approval</span><strong>' + totAwait + '</strong></div>' +
+                '<div style="display:flex; justify-content:space-between; font-size:12px; padding:2px 0;"><span style="color:var(--text-muted);">Approved mins</span><strong>' + Math.round(totMins).toLocaleString() + '</strong></div></div>' +
+                '</div>';
+
+            const heads = ['Trainer', 'Job Group', 'Total KPI', 'Uncapped', 'KPI Band',
+                'Target Count', 'Accuracy', 'Efficiency', 'Timeliness', 'Productivity',
+                'Target', 'Own Content', 'Proofread', 'Total Content', 'W/o revisions', 'Revisions', 'On Time', 'Awaiting',
+                'Approved mins', 'Mins w/o rev', 'Revision mins', 'On-time mins'];
+
+            container.innerHTML = cardsHtml + '<div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Specialized Trainers KPI · <strong>' + monthLabel + '</strong> · ' + users.length + ' trainer' + (users.length > 1 ? 's' : '') + '</div>' +
+                '<div style="overflow-x:auto; border-radius:12px; border:1px solid var(--border-color);">' +
+                '<table style="width:100%; border-collapse:collapse; font-size:12px; min-width:1800px;">' +
+                '<thead><tr>' +
+                '<th colspan="5" style="' + GRP + ' background:#1e293b; color:#cbd5e1;">Overall</th>' +
+                '<th colspan="5" style="' + GRP + ' background:linear-gradient(90deg,#2563eb,#3b82f6); color:#fff;">KPI Achievement</th>' +
+                '<th colspan="8" style="' + GRP + ' background:linear-gradient(90deg,#10b981,#34d399); color:#052e1f;">Content Creation</th>' +
+                '<th colspan="4" style="' + GRP + ' background:#334155; color:#e2e8f0;">Minutes</th>' +
+                '</tr><tr style="background:linear-gradient(180deg,#1e3a8a,#1d4ed8); color:#e8f0ff;">' +
+                heads.map((h, i) => '<th style="' + TH + (i === 0 ? ' text-align:left; position:sticky; left:0; background:#1e3a8a; z-index:2;' : '') + '">' + h + '</th>').join('') +
+                '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+                '<div style="margin-top:10px; font-size:11px; color:var(--text-muted); line-height:1.7;">' +
+                '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#22c55e;margin-right:3px;"></span>100%+ &nbsp;' +
+                '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f59e0b;margin-right:3px;"></span>80–99% &nbsp;' +
+                '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:3px;"></span>Below 80%<br>' +
+                'Weights (TC · ACC · EFF · TIM · PROD) — Content Developer: 20 · 20 · 10 · 20 · 30 &nbsp;|&nbsp; SES / NSO / CX: 20 · 15 · 15 · 20 · 30 &nbsp;|&nbsp; S+ Expert / Admin: 20 · 15 · 15 · 15 · 35. Each KPI is capped at 100% in the Total KPI.</div>';
         }
 
         function fetchApprovalsFromAppsScript() {
             let tbody = document.getElementById('sepcoTableBody');
             let tbodyForApproval = document.getElementById('forApprovalTableBody');
-            let loadingHtml = `<tr><td colspan="6" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td></tr>`;
-            tbody.innerHTML = loadingHtml;
-            tbodyForApproval.innerHTML = loadingHtml;
+            let loadingHtmlFor = `<tr><td colspan="11" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td></tr>`;
+            let loadingHtmlList = `<tr><td colspan="9" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td></tr>`;
+            tbody.innerHTML = loadingHtmlList;
+            tbodyForApproval.innerHTML = loadingHtmlFor;
 
             const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
             window[callbackName] = function(data) {
@@ -2208,21 +3831,21 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 if (data.success && data.approvals && data.approvals.length > 0) {
                     globalApprovalsData = data.approvals;
                     processAndRenderData(globalApprovalsData);
+                    try { renderAllTrainersKpi(); } catch (e) { console.error(e); }
+                    try { renderDailyProgress(); } catch (e) { console.error(e); }
                 } else {
-                    let emptyHtml = `<tr><td colspan="6" style="color: var(--text-muted); padding: 20px;">No data found in Google Sheet.</td></tr>`;
-                    tbody.innerHTML = emptyHtml;
-                    tbodyForApproval.innerHTML = emptyHtml;
+                    tbody.innerHTML = `<tr><td colspan="9" style="color: var(--text-muted); padding: 20px;">No data found in Google Sheet.</td></tr>`;
+                    tbodyForApproval.innerHTML = `<tr><td colspan="11" style="color: var(--text-muted); padding: 20px;">No data found in Google Sheet.</td></tr>`;
                 }
             };
 
             const script = document.createElement('script');
-            script.src = `${GA_WEB_APP_URL}?action=getApprovals&callback=${callbackName}`;
+            script.src = `${GA_WEB_APP_URL}?action=getApprovals&user=sepco&callback=${callbackName}`;
             script.onerror = function() {
                 delete window[callbackName];
                 document.body.removeChild(script);
-                let errHtml = `<tr><td colspan="6" style="color: #dc2626; padding: 20px;">Failed to fetch data. Please check the Apps Script deployment.</td></tr>`;
-                tbody.innerHTML = errHtml;
-                tbodyForApproval.innerHTML = errHtml;
+                tbody.innerHTML = `<tr><td colspan="9" style="color: #dc2626; padding: 20px;">Failed to fetch data. Please check the Apps Script deployment.</td></tr>`;
+                tbodyForApproval.innerHTML = `<tr><td colspan="11" style="color: #dc2626; padding: 20px;">Failed to fetch data. Please check the Apps Script deployment.</td></tr>`;
             };
             document.body.appendChild(script);
         }
@@ -2267,37 +3890,74 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             filterRequestData();
         }
 
+        // Two-stage approval (mirrors ST.html + Apps Script):
+        //   Pending / Pending RTO  → RTO must act first (SEPCO does NOT act)
+        //   Pending SEPCO          → RTO already approved; SEPCO does final Approve/Reject
+        //   Approved / Rejected    → final decision (shown in List of Requests)
+        function isPendingSepco(item) {
+            let st = String(item.status || "").toLowerCase().trim();
+            if (st.includes("pending sepco") || st === "pending sepco") return true;
+            // Legacy rows: plain "Pending" with no RTO email already assigned to SEPCO
+            if ((st === "pending" || st === "") && !String(item.rtoEmail || "").trim()) return true;
+            return false;
+        }
+        function isFinalDecision(item) {
+            let st = String(item.status || "").toLowerCase();
+            return st.includes("approve") || st.includes("reject");
+        }
+
         function processAndRenderData(list) {
             let filterVal = document.getElementById('monthYearFilter').value;
             let requestFilterVal = document.getElementById('requestMonthYearFilter').value;
 
-            let forApprovalList = list.filter(item => {
-                let st = (item.status || "").toLowerCase();
-                return !st || st.includes("pending") || st === "";
-            });
+            // Only items waiting for SEPCO final action (not still at RTO)
+            let forApprovalList = list.filter(item => isPendingSepco(item));
 
             let filteredSummaryList = list.filter(item => {
-                let st = (item.status || "").toLowerCase();
-                let hasAction = st.includes("approve") || st.includes("reject");
-                return hasAction && matchesSelectedMonth(item.uploadDate, filterVal);
+                return isFinalDecision(item) && matchesSelectedMonth(item.uploadDate, filterVal);
             });
 
             let filteredRequestList = list.filter(item => {
-                let st = (item.status || "").toLowerCase();
-                let hasAction = st.includes("approve") || st.includes("reject");
-                return hasAction && matchesSelectedMonth(item.uploadDate, requestFilterVal);
+                return isFinalDecision(item) && matchesSelectedMonth(item.uploadDate, requestFilterVal);
             });
+
+            // Newest first
+            let byDateDesc = (a, b) => {
+                let da = new Date(a.uploadDate).getTime(), db = new Date(b.uploadDate).getTime();
+                if (!isNaN(da) && !isNaN(db) && da !== db) return db - da;
+                return (Number(b.sheetRow) || 0) - (Number(a.sheetRow) || 0);
+            };
+            forApprovalList.sort(byDateDesc);
+            filteredRequestList.sort(byDateDesc);
 
             renderTableRows('forApprovalTableBody', forApprovalList, true);
             renderTableRows('sepcoTableBody', filteredRequestList, false);
-            computeSummary(filteredSummaryList);
+            // Summary uses final decisions for counts + full month data for pending pipeline
+            let monthAll = list.filter(item => matchesSelectedMonth(item.uploadDate, filterVal));
+            computeSummary(filteredSummaryList, monthAll);
         }
 
-        function computeSummary(list) {
+        function isPendingRto(item) {
+            let st = String(item.status || "").toLowerCase().trim();
+            if (st.includes("pending sepco")) return false;
+            if (st.includes("pending rto") || st === "pending rto") return true;
+            // plain Pending with an RTO assigned = still at RTO stage
+            if ((st === "pending" || st === "") && String(item.rtoEmail || "").trim()) return true;
+            return false;
+        }
+
+        function computeSummary(list, monthAll) {
             let approvedCount = 0;
             let rejectedCount = 0;
             let revisedCount = 0;
+            let pendingRto = 0;
+            let pendingSepco = 0;
             let userStats = {};
+
+            (monthAll || list || []).forEach(item => {
+                if (isPendingRto(item)) pendingRto++;
+                else if (isPendingSepco(item)) pendingSepco++;
+            });
 
             list.forEach(item => {
                 let s = (item.status || "").toLowerCase();
@@ -2349,6 +4009,10 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 }
             });
 
+            let elRto = document.getElementById('sumPendingRto');
+            let elSep = document.getElementById('sumPendingSepco');
+            if (elRto) elRto.innerText = pendingRto;
+            if (elSep) elSep.innerText = pendingSepco;
             document.getElementById('sumApproved').innerText = approvedCount;
             document.getElementById('sumRejected').innerText = rejectedCount;
             document.getElementById('sumRevised').innerText = revisedCount;
@@ -2356,20 +4020,49 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             renderUserSummaryTable(userStats);
         }
 
+        // Same CONTENT detection as ST.html kpiRowBucket / kpiIsContentRow (not loose includes("content")).
+        function sepcoPlanIsContent(plan) {
+            const c = String(plan["CATEGORY"] || plan["Category"] || "").trim().toUpperCase();
+            const c2 = String(plan["CATEGORY 2"] || plan["Category 2"] || plan["CATEGORY2"] || "").trim().toUpperCase();
+            const buckets = ["CONTENT", "TASK", "OTHERS"];
+            if (buckets.indexOf(c2) !== -1) return c2 === "CONTENT";
+            if (buckets.indexOf(c) !== -1) return c === "CONTENT";
+            const probe = c2 || c;
+            if (probe === "CONTENT" || (probe.indexOf("CONTENT") === 0 && probe.indexOf("-") === -1)) return true;
+            return false;
+        }
+        // Month match for Monthly Plan MONTH column — same rules as ST kpiMonthMatches / skMonthMatches
+        function sepcoPlanMonthMatches(cell, monthKey) {
+            if (!monthKey) return true;
+            const c = String(cell == null ? "" : cell).trim();
+            if (c === "") return true;
+            const m = /^(\d{4})-(\d{2})/.exec(c);
+            if (m) return (m[1] + "-" + m[2]) === monthKey;
+            const names = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+            const idx = names.indexOf(c.toLowerCase().substring(0, 3));
+            if (idx === -1) return true;
+            const y = /(\d{4})/.exec(c), kp = monthKey.split("-");
+            if (y && y[1] !== kp[0]) return false;
+            return (idx + 1) === parseInt(kp[1], 10);
+        }
         function getContentMonthlyTarget(userId) {
             const plans = Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : [];
-            const norm = value => String(value || '').trim().toLowerCase();
+            const norm = value => String(value || "").trim().toLowerCase();
+            let monthKey = "";
+            try {
+                const el = document.getElementById("monthYearFilter");
+                if (el && el.value) monthKey = el.value;
+            } catch (e) {}
             return plans.reduce((total, plan) => {
                 const planUser = plan["NS+ USER ID"] || plan["NS+ USER ID / Email"] || plan["USER ID"] || plan["EMAIL"] || "";
-                const category = norm(plan["CATEGORY"] || plan["Category"] || "");
-                const title = norm(plan["TITLE"] || plan["PLAN [TITLE]"] || plan["Plan [Title]"] || "");
-                const type = norm(plan["TYPE"] || plan["CONTENT TYPE"] || "");
-                // Only count monthly-plan entries identified as Content.
                 if (norm(planUser) !== norm(userId)) return total;
-                if (!(category.includes("content") || title.includes("content") || type.includes("content"))) return total;
-                const rawFreq = plan["FREQUENCY PER MONTH"] || plan["Frequency per Month"] || plan["FREQUENCY"] || 0;
-                const freq = Number(String(rawFreq).replace(/[^0-9.\-]/g, ""));
-                return total + (Number.isFinite(freq) && freq > 0 ? freq : 0);
+                // ST rule: only CONTENT bucket rows (CATEGORY / CATEGORY 2), not title/type includes
+                if (!sepcoPlanIsContent(plan)) return total;
+                if (!sepcoPlanMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"] || "", monthKey)) return total;
+                // ST computeKpi: parseInt(freq) || 1
+                const rawFreq = plan["FREQUENCY PER MONTH"] || plan["Frequency per Month"] || plan["FREQUENCY"] || "";
+                const freq = parseInt(String(rawFreq).replace(/[^0-9\-]/g, ""), 10);
+                return total + (Number.isFinite(freq) && freq > 0 ? freq : 1);
             }, 0);
         }
 
@@ -2379,14 +4072,18 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
 
             // Include users listed in the monthly plan so their targets are visible even
             // when they have not yet submitted an approval for the selected month.
+            // Same CONTENT + month rules as ST (sepcoPlanIsContent / sepcoPlanMonthMatches)
+            let _sumMonthKey = "";
+            try {
+                const _mel = document.getElementById("monthYearFilter");
+                if (_mel && _mel.value) _sumMonthKey = _mel.value;
+            } catch (e) {}
             (Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : []).forEach(plan => {
                 const id = plan["NS+ USER ID"] || plan["NS+ USER ID / Email"] || plan["USER ID"] || plan["EMAIL"] || "";
-                const category = String(plan["CATEGORY"] || "").toLowerCase();
-                const title = String(plan["TITLE"] || plan["PLAN [TITLE]"] || "").toLowerCase();
-                const type = String(plan["TYPE"] || plan["CONTENT TYPE"] || "").toLowerCase();
-                if (id && (category.includes("content") || title.includes("content") || type.includes("content")) && !userStats[id]) {
-                    userStats[id] = { approved: 0, rejected: 0, revised: 0 };
-                }
+                if (!id || userStats[id]) return;
+                if (!sepcoPlanIsContent(plan)) return;
+                if (!sepcoPlanMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"] || "", _sumMonthKey)) return;
+                userStats[id] = { approved: 0, rejected: 0, revised: 0 };
             });
             let keys = Object.keys(userStats);
             if (keys.length === 0) {
@@ -2412,65 +4109,146 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             });
         }
 
+        function statusBadgeHtml(status) {
+            let st = String(status || "").toLowerCase().trim();
+            if (st.includes("pending sepco") || st === "pending sepco") {
+                return '<span class="badge-pending" style="background:#dbeafe;color:#1d4ed8;border:1px solid rgba(37,99,235,0.3);">Pending SEPCO</span>';
+            }
+            if (st.includes("pending rto") || st === "pending rto") {
+                return '<span class="badge-pending" style="background:#fef3c7;color:#b45309;">Pending RTO</span>';
+            }
+            if (st.includes("approve")) {
+                return '<span class="badge-approved">Approved</span>';
+            }
+            if (st.includes("reject")) {
+                return '<span class="badge-rejected">Rejected</span>';
+            }
+            if (!st || st.includes("pending")) {
+                return '<span class="badge-pending">Pending</span>';
+            }
+            return '<span class="badge-pending">' + escapeHtmlLocal(status) + '</span>';
+        }
+
+        function escapeHtmlLocal(v) {
+            return String(v === undefined || v === null ? "" : v)
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        function formatWhen(when) {
+            if (!when) return "N/A";
+            let d = new Date(when);
+            if (isNaN(d.getTime())) return escapeHtmlLocal(when);
+            return d.toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+        }
+
+        function personCell(email) {
+            let e = String(email || "").trim();
+            if (!e) return '<span style="color:var(--text-muted);">&mdash;</span>';
+            return '<span style="font-size:11px; font-weight:600; white-space:nowrap;">👤 ' + escapeHtmlLocal(e) + '</span>';
+        }
+
         function renderTableRows(tableBodyId, list, isForApprovalTab) {
             let tbody = document.getElementById(tableBodyId);
-            tbody.innerHTML = '';
-            
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="color: var(--text-muted); padding: 20px;">No records found.</td></tr>`;
+            tbody.innerHTML = "";
+            let colSpan = isForApprovalTab ? 11 : 9;
+
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" style="color: var(--text-muted); padding: 20px;">${isForApprovalTab ? "No requests awaiting SEPCO approval right now." : "No records found for this month."}</td></tr>`;
                 return;
             }
 
             list.forEach((item) => {
-                let tr = document.createElement('tr');
-                let statusLower = (item.status || "").toLowerCase();
-                
+                let tr = document.createElement("tr");
+                let statusLower = String(item.status || "").toLowerCase();
                 let isActionTaken = statusLower.includes("approve") || statusLower.includes("reject");
-                
-                let statusBadge = `<span class="badge-pending">Pending</span>`;
-                if (statusLower.includes("approve")) {
-                    statusBadge = `<span class="badge-approved">Approved</span>`;
-                } else if (statusLower.includes("reject")) {
-                    statusBadge = `<span class="badge-rejected">Rejected</span>`;
+                let statusBadge = statusBadgeHtml(item.status);
+
+                let fileDisplayHtml = "📄 " + escapeHtmlLocal(item.fileName || "N/A");
+                if (item.fileUrl && String(item.fileUrl).startsWith("http")) {
+                    fileDisplayHtml = `<a href="${escapeHtmlLocal(item.fileUrl)}" target="_blank" rel="noopener" class="file-link" title="Click to view or download">📄 ${escapeHtmlLocal(item.fileName || "View File")} 🔗</a>`;
                 }
 
-                let remarksVal = item.remarks || "";
+                let catHtml = item.category
+                    ? `<span style="font-size:11px; font-weight:600;">${escapeHtmlLocal(item.category)}</span>`
+                    : `<span style="color:var(--text-muted);">&mdash;</span>`;
 
-                let fileDisplayHtml = `📄 ${item.fileName || 'N/A'}`;
-                if (item.fileUrl && item.fileUrl.startsWith('http')) {
-                    fileDisplayHtml = `<a href="${item.fileUrl}" target="_blank" class="file-link" title="Click to view or download">📄 ${item.fileName || 'View File'} 🔗</a>`;
+                // RTO / SEPCO assignees (from ST submit form)
+                let rtoPerson = personCell(item.rtoEmail);
+                let sepcoPerson = personCell(item.sepcoEmail || item.approverEmail || item.approver);
+
+                let noteText = String(item.submitterNote || item.note || "").trim();
+                let noteHtml = noteText
+                    ? `<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:220px;">${escapeHtmlLocal(noteText)}</span>`
+                    : `<span style="color:var(--text-muted);">&mdash;</span>`;
+
+                let rtoRem = String(item.rtoRemarks || "").trim();
+                if (!rtoRem && statusLower.includes("pending sepco")) {
+                    rtoRem = String(item.remarks || "").trim();
+                }
+                let rtoHtml = rtoRem
+                    ? `<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:200px;">${escapeHtmlLocal(rtoRem)}</span>`
+                    : `<span style="color:var(--text-muted);">&mdash;</span>`;
+
+                let sepcoRem = String(item.sepcoRemarks || "").trim();
+                if (!sepcoRem && isActionTaken) {
+                    sepcoRem = String(item.remarks || "").trim();
                 }
 
-                let remarksHtml = (isActionTaken && !isForApprovalTab)
-                    ? `<span style="font-size: 11px; color: var(--text-main); font-weight: 500;">${remarksVal || 'No remarks yet'}</span>`
-                    : `<input type="text" id="remarks_${item.sheetRow}" class="remarks-input" value="${remarksVal}" placeholder="Add remarks...">`;
-
-                let actionHtml = (isActionTaken && !isForApprovalTab)
-                    ? `<span style="color: var(--success); font-weight: 600; font-size: 11px;">Done</span>`
-                    : `
-                        <div style="display: flex; gap: 5px; justify-content: center;">
+                if (isForApprovalTab) {
+                    let remarksHtml = `<input type="text" id="remarks_${item.sheetRow}" class="remarks-input" value="${escapeHtmlLocal(sepcoRem)}" placeholder="Add SEPCO remarks...">`;
+                    let actionHtml = `
+                        <div style="display: flex; gap: 5px; justify-content: center; flex-wrap:wrap;">
                             <button class="btn-approve" onclick="updateItemStatus(${item.sheetRow}, 'Approved', this)">Approve</button>
                             <button class="btn-reject" onclick="updateItemStatus(${item.sheetRow}, 'Rejected', this)">Reject</button>
-                        </div>
-                      `;
-
-                tr.innerHTML = `
-                    <td style="text-align: left; padding-left: 15px;">${fileDisplayHtml}</td>
-                    <td style="font-weight: 600; text-align: left;">👤 ${item.uploadedBy || 'N/A'}</td>
-                    <td>${item.uploadDate || 'N/A'}</td>
-                    <td>${statusBadge}</td>
-                    <td>${actionHtml}</td>
-                    <td>${remarksHtml}</td>
-                `;
+                        </div>`;
+                    tr.innerHTML = `
+                        <td style="text-align:left; padding-left:12px; white-space:normal; min-width:160px;">${fileDisplayHtml}</td>
+                        <td>${catHtml}</td>
+                        <td style="font-weight:600; text-align:left;">👤 ${escapeHtmlLocal(item.uploadedBy || "N/A")}</td>
+                        <td>${rtoPerson}</td>
+                        <td>${sepcoPerson}</td>
+                        <td style="white-space:nowrap;">${formatWhen(item.uploadDate)}</td>
+                        <td>${statusBadge}</td>
+                        <td>${noteHtml}</td>
+                        <td>${rtoHtml}</td>
+                        <td>${actionHtml}</td>
+                        <td>${remarksHtml}</td>
+                    `;
+                } else {
+                    let sepcoHtml = sepcoRem
+                        ? `<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:200px;">${escapeHtmlLocal(sepcoRem)}</span>`
+                        : `<span style="color:var(--text-muted);">No remarks</span>`;
+                    tr.innerHTML = `
+                        <td style="text-align:left; padding-left:12px; white-space:normal; min-width:160px;">${fileDisplayHtml}</td>
+                        <td>${catHtml}</td>
+                        <td style="font-weight:600; text-align:left;">👤 ${escapeHtmlLocal(item.uploadedBy || "N/A")}</td>
+                        <td>${rtoPerson}</td>
+                        <td>${sepcoPerson}</td>
+                        <td style="white-space:nowrap;">${formatWhen(item.uploadDate)}</td>
+                        <td>${statusBadge}</td>
+                        <td>${rtoHtml}</td>
+                        <td>${sepcoHtml}</td>
+                    `;
+                }
                 tbody.appendChild(tr);
             });
         }
 
         function updateItemStatus(sheetRow, newStatus, btnElement) {
             let remarksInput = document.getElementById(`remarks_${sheetRow}`);
-            let remarksText = remarksInput ? remarksInput.value : "";
+            let remarksText = remarksInput ? remarksInput.value.trim() : "";
+
+            // Reject requires remarks (same rule as the email reject form in Apps Script)
+            if (String(newStatus).toLowerCase() === "rejected" && !remarksText) {
+                alert("Please enter a reason in SEPCO Remarks before rejecting.");
+                if (remarksInput) remarksInput.focus();
+                return;
+            }
 
             btnElement.innerText = "Saving...";
+            btnElement.disabled = true;
+            let sibling = btnElement.parentElement ? btnElement.parentElement.querySelectorAll("button") : [];
+            sibling.forEach(function (b) { b.disabled = true; });
             
             const cbName = 'jsonp_update_' + Math.round(100000 * Math.random());
             window[cbName] = function(data) {
