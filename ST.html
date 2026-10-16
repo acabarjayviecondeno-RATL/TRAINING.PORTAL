@@ -809,6 +809,57 @@ body #notifDropdown {
 .login-card button { padding: 12px !important; font-size: 14px !important; border-radius: 10px !important; margin-top: 10px !important; }
 .modal-overlay { background: rgba(5, 8, 18, 0.72) !important; backdrop-filter: blur(8px) !important; }
 
+/* ---- No Monthly Plan popup ---- */
+.mp-empty-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(5, 8, 18, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: auraFade 0.25s ease both;
+}
+.mp-empty-card {
+    width: 100%; max-width: 420px;
+    background: linear-gradient(180deg, rgba(20, 30, 50, 0.98), rgba(14, 22, 38, 0.98));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    padding: 28px 26px 22px;
+    text-align: center;
+    color: #e6ebf5;
+}
+.mp-empty-icon {
+    width: 56px; height: 56px; margin: 0 auto 14px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(239, 68, 68, 0.2));
+    border: 1px solid rgba(249, 115, 22, 0.35);
+}
+.mp-empty-card h4 {
+    margin: 0 0 8px; font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.01em;
+}
+.mp-empty-card p {
+    margin: 0 0 18px; font-size: 13px; line-height: 1.5; color: #9aa8c4;
+}
+.mp-empty-card .mp-empty-actions {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+.mp-empty-card button {
+    border: none; cursor: pointer; font-size: 13px; font-weight: 600;
+    padding: 10px 18px; border-radius: 10px; transition: opacity 0.15s, transform 0.15s;
+}
+.mp-empty-card button:hover { opacity: 0.92; transform: translateY(-1px); }
+.mp-empty-btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+}
+.mp-empty-btn-secondary {
+    background: rgba(148, 163, 184, 0.12); color: #c4cee0;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
 /* Gantt: continuous bars, full-width table */
 .gantt-cal-table { width: 100% !important; }
 .gantt-cal-table td, .gantt-cal-table th { padding-left: 0 !important; padding-right: 0 !important; }
@@ -3811,6 +3862,11 @@ html[data-theme="light"] .btn-download-min:hover {
             document.querySelectorAll('.sidebar-menu > li').forEach(li => li.classList.remove('active'));
             document.getElementById('overviewMenuLi').classList.remove('active');
             document.getElementById('dailyTaskMenuParent').classList.add('active');
+            if (sectionId === 'monthlyPlanSection') {
+                var mp = (allLoadedTasks.monthlyPlan || []).filter(function (t) { return matchesUser(t); });
+                if (monthlyPlanDataLoaded && mp.length === 0) showNoMonthlyPlanPopup(true);
+                else if (mp.length > 0) { closeNoMonthlyPlanPopup(); _mpEmptyPopupShown = false; }
+            }
         }
 
         function switchTab(evt, tabId) {
@@ -4506,8 +4562,9 @@ html[data-theme="light"] .btn-download-min:hover {
             try {
                 let response = await fetch(WEB_APP_URL + "?action=getMonthlyPlan");
                 let result = await response.json();
-                if (result.success && result.monthlyPlan) {
-                    allLoadedTasks.monthlyPlan = result.monthlyPlan;
+                if (result.success) {
+                    allLoadedTasks.monthlyPlan = Array.isArray(result.monthlyPlan) ? result.monthlyPlan : [];
+                    monthlyPlanDataLoaded = true;
                     renderMonthlyPlanView();
                 }
             } catch (e) {
@@ -4658,6 +4715,38 @@ html[data-theme="light"] .btn-download-min:hover {
             renderMonthlyPlanView();
         }
 
+
+        // ---- Popup when user has no Monthly Plan yet (only after data has loaded) ----
+        var _mpEmptyPopupShown = false;
+        var monthlyPlanDataLoaded = false;
+        function closeNoMonthlyPlanPopup() {
+            var el = document.getElementById('mpEmptyPopup');
+            if (el) el.remove();
+        }
+        function showNoMonthlyPlanPopup(force) {
+            // Never show until Monthly Plan fetch has completed at least once
+            if (!monthlyPlanDataLoaded) return;
+            if (!force && _mpEmptyPopupShown) return;
+            if (document.getElementById('mpEmptyPopup')) return;
+            _mpEmptyPopupShown = true;
+            var overlay = document.createElement('div');
+            overlay.id = 'mpEmptyPopup';
+            overlay.className = 'mp-empty-overlay';
+            overlay.innerHTML =
+                '<div class="mp-empty-card" role="dialog" aria-modal="true" aria-labelledby="mpEmptyTitle">' +
+                '<div class="mp-empty-icon">📅</div>' +
+                '<h4 id="mpEmptyTitle">No Monthly Plan Yet</h4>' +
+                '<p>You don\'t have a <strong>Monthly Plan</strong> on record yet. Please submit your Monthly Plan so your KPI, Progress, and Productivity can be computed.<br><br><strong>Add your plan to Tarkie Digital Form → Monthly Plan.</strong></p>' +
+                '<div class="mp-empty-actions">' +
+                '<button type="button" class="mp-empty-btn-primary" onclick="closeNoMonthlyPlanPopup(); try{document.getElementById(\'subMonthlyPlan\').click();}catch(e){}">Go to Monthly Plan</button>' +
+                '<button type="button" class="mp-empty-btn-secondary" onclick="closeNoMonthlyPlanPopup()">OK, got it</button>' +
+                '</div></div>';
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) closeNoMonthlyPlanPopup();
+            });
+            document.body.appendChild(overlay);
+        }
+
         function renderMonthlyPlanView() {
             let tableBody = document.getElementById('monthlyPlanTableBody');
             let summaryGrid = document.getElementById('monthlyPlanSummaryGrid');
@@ -4669,8 +4758,13 @@ html[data-theme="light"] .btn-download-min:hover {
                 if (bar) bar.style.display = 'none';
                 tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 20px; color:var(--text-muted);">No monthly plan data available.</td></tr>`;
                 if (summaryGrid) summaryGrid.innerHTML = `<div class="summary-card"><h4>No Data</h4><p class="val">-</p><p>No recorded monthly plan data.</p></div>`;
+                // Only pop after the sheet has been fetched (avoids flash while still loading)
+                if (monthlyPlanDataLoaded) showNoMonthlyPlanPopup();
                 return;
             }
+            // Has plan data → make sure popup is closed
+            closeNoMonthlyPlanPopup();
+            _mpEmptyPopupShown = false;
             if (bar) bar.style.display = '';
 
             let catOf = (row) => String(getRowVal(row, ["CATEGORY", "CATEGORY 2"]) || '').trim().toUpperCase();
@@ -5070,9 +5164,19 @@ html[data-theme="light"] .btn-download-min:hover {
                 }
 
                 let when = item.uploadDate || '';
-                let d = new Date(when);
-                if (when && !isNaN(d.getTime())) {
-                    when = d.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+                // Date-only (yyyy-MM-dd) from old rows → show date only (no fake 8:00 AM)
+                if (/^\d{4}-\d{2}-\d{2}$/.test(String(when).trim())) {
+                    let d0 = new Date(when + 'T12:00:00+08:00');
+                    when = isNaN(d0.getTime()) ? when : d0.toLocaleString('en-US', { timeZone: 'Asia/Manila', year: 'numeric', month: 'short', day: 'numeric' });
+                } else {
+                    let d = new Date(when);
+                    if (when && !isNaN(d.getTime())) {
+                        when = d.toLocaleString('en-US', {
+                            timeZone: 'Asia/Manila',
+                            year: 'numeric', month: 'short', day: 'numeric',
+                            hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
+                        });
+                    }
                 }
 
                 let catHtml = item.category ? escHtml(item.category) : '<span style="color:var(--text-muted);">&mdash;</span>';
@@ -5287,7 +5391,18 @@ html[data-theme="light"] .btn-download-min:hover {
                     isLink: isLink,
                     linkUrl: linkUrl,
                     user: loggedInUser,
-                    uploadDate: new Date().toISOString(),
+                    uploadDate: (function () {
+                        var d = new Date();
+                        var s = d.toLocaleString('en-US', {
+                            timeZone: 'Asia/Manila',
+                            year: 'numeric', month: '2-digit', day: '2-digit',
+                            hour: '2-digit', minute: '2-digit', second: '2-digit',
+                            hour12: false
+                        });
+                        var m = s.match(/(\d+)\/(\d+)\/(\d+),\s*(\d+):(\d+):(\d+)/);
+                        if (!m) return d.toISOString();
+                        return m[3]+'-'+m[1]+'-'+m[2]+'T'+m[4]+':'+m[5]+':'+m[6]+'+08:00';
+                    })(),
                     category: category,
                     rtoEmail: rtoEmail,
                     sepcoEmail: sepcoEmail,
@@ -5831,8 +5946,9 @@ function renderCategoryProgress(monthKey, targetId) {
         stats[b].planMins += mins;
     });
 
-    // Daily Actual → actual count (1 per record) + actual minutes
-    // CONTENT duration counts only when approved; TASK / OTHERS always count
+    // Daily Actual → actual count + actual minutes
+    // CONTENT: count + mins ONLY when approved (For Approval logic)
+    // TASK / OTHERS: always count
     var apprSet = kpiApprovedContentRows(monthKey);
     var dayMins = {}, hourMins = {}, dayCount = {};
     (allLoadedTasks.actual || []).filter(function (t) {
@@ -5841,8 +5957,10 @@ function renderCategoryProgress(monthKey, targetId) {
         var b = kpiRowBucket(t);
         var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
         if (isNaN(d) || d < 0) d = 0;
+        // CONTENT must be approved to count (same as SEPCO For Approval rule)
+        if (!kpiDurationCounts(t, apprSet)) return;
         stats[b].actualCount += 1;
-        if (kpiDurationCounts(t, apprSet)) stats[b].actualMins += d;
+        stats[b].actualMins += d;
 
         var ds = cleanDateDisplay(t['Date Submitted']) || String(t['Date Submitted'] || '').substring(0, 10);
         dayMins[ds] = (dayMins[ds] || 0) + d;
@@ -5914,7 +6032,8 @@ function renderCategoryProgress(monthKey, targetId) {
         '<li><strong>Count:</strong> Target Count comes from Monthly Plan Frequency per Month by category. Each Daily Actual record counts as 1 Actual Count.</li>' +
         '<li><strong>Minutes:</strong> Plan Minutes = Monthly Plan frequency × duration per minute. Actual Minutes uses the DURATION PER MIN value from Daily Actual.</li>' +
         '<li><strong>Achievement:</strong> Category Achievement = Actual Count ÷ Target Count × 100.</li>' +
-        '<li><strong>Productivity:</strong> Daily Actual mins ÷ (Monthly Plan mins − leave/absent × 480) × 100. CONTENT mins count only when approved; TASK / OTHERS always count.</li>' +
+        '<li><strong>CONTENT (For Approval):</strong> Actual Count and Minutes count <em>only when Approved</em> (APPROVAL DATE or matching Approved file). TASK / OTHERS always count.</li>' +
+        '<li><strong>Productivity:</strong> Daily Actual mins ÷ (Monthly Plan mins − leave/absent × 480) × 100. Same approval gate as above for CONTENT.</li>' +
         '<li><strong>Unplanned actual (no target):</strong> Rows with Target Count = 0 but Actual Count &gt; 0 were not in the Monthly Plan. They count as <strong>plus to productivity only if</strong> your Monthly Plan minutes meet or exceed <strong>Designated Minutes</strong> ((working days − leave) × 480). If the plan is <strong>Short</strong>, the remark becomes <em>Please add to Monthly Plan — enhance your plan first</em> so you fill the plan gap before unplanned work is treated as a plus.</li>' +
         '</ul></details>';
 
@@ -5965,9 +6084,11 @@ function ensureD(c, c2) {
         var pair = normalizeCatPair(t);
         var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
         if (isNaN(d) || d < 0) d = 0;
+        // CONTENT: count + mins only when approved; TASK / OTHERS always
+        if (!kpiDurationCounts(t, apprSet)) return;
         var row = ensureD(pair.cat, pair.cat2);
         row.actualCount += 1;
-        if (kpiDurationCounts(t, apprSet)) row.actualMins += d;
+        row.actualMins += d;
     });
     var detailKeys = Object.keys(detail).sort(function (a, b) {
         var A = detail[a], B = detail[b];
