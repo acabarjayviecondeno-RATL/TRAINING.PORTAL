@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>(function(){try{var r=String(localStorage.getItem("portal_role")||"").toLowerCase();if(!localStorage.getItem("portal_user")||r.indexOf("admin")===-1){document.documentElement.style.display="none";location.replace("index.html")}}catch(e){}})();</script>
 <script>try{if(localStorage.getItem("portal_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <title>Admin Control Center</title>
@@ -100,47 +100,101 @@ html[data-theme="light"] .box{background:#fff}
 .msg{font-size:12px;color:var(--muted)}
 .theme-toggle{background:rgba(148,163,184,.1);color:var(--soft);border:1px solid var(--line2);box-shadow:none}
 #toast{position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;border:1px solid var(--line2);padding:10px 16px;border-radius:10px;font-size:13px;display:none;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.4)}
-.menu-btn{display:none;padding:7px 11px;font-size:18px;line-height:1;flex:none}
+.menu-btn{display:none}
 .bar-left{display:flex;align-items:center;gap:10px;min-width:0}
 .bar-left>div{min-width:0}
 .bar h3,.bar p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar-actions{display:flex;gap:8px;flex:none}
 .scrim{display:none;position:fixed;inset:0;background:rgba(5,8,18,.6);backdrop-filter:blur(2px);z-index:9}
+.drawer-x{display:none}
+.ico{flex:none;vertical-align:-3px}
+button:has(>.ico):not(:has(.lbl:not([hidden]))){gap:0}
+.bar-actions .bad{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.t-btns{display:contents}
+.t-opts{display:contents}
+.t-filt{display:none}
+.t-opts input[type=number]{width:68px;padding:6px 8px}
+.dom{color:var(--muted)}
+body.nav-open{overflow:hidden}
+button,.item,.stat{-webkit-tap-highlight-color:transparent}
+
+/* light-mode fixes (header buttons + cards were barely visible) */
+html[data-theme="light"] button.bad{background:#fef2f2;color:#dc2626;border-color:#fecaca}
+html[data-theme="light"] button.bad:hover{background:#dc2626;color:#fff}
+html[data-theme="light"] .theme-toggle,html[data-theme="light"] button.ghost{background:#f1f5f9;color:#334155;border-color:#cbd5e1}
+html[data-theme="light"] .stat{background:linear-gradient(145deg,rgba(59,130,246,.12),#fff 70%);border-color:rgba(59,130,246,.35);box-shadow:0 4px 14px rgba(15,23,42,.06)}
+html[data-theme="light"] .stat:nth-child(4n+2){background:linear-gradient(145deg,rgba(249,115,22,.13),#fff 70%);border-color:rgba(249,115,22,.40)}
+html[data-theme="light"] .stat:nth-child(4n+3){background:linear-gradient(145deg,rgba(139,92,246,.13),#fff 70%);border-color:rgba(139,92,246,.40)}
+html[data-theme="light"] .stat:nth-child(4n+4){background:linear-gradient(145deg,rgba(16,185,129,.13),#fff 70%);border-color:rgba(16,185,129,.40)}
+html[data-theme="light"] .stat b{color:var(--text)}
+html[data-theme="light"] .stat span:first-child{color:var(--soft);opacity:1}
+html[data-theme="light"] .stat span:last-child{color:var(--muted)}
+
 @media(max-width:900px){
-  .menu-btn{display:block}
-  .sidebar{transform:translateX(-102%);transition:transform .25s ease;width:260px;max-width:82vw;z-index:40;box-shadow:none}
+  .menu-btn{display:grid;place-items:center;width:40px;height:40px;padding:0;font-size:20px;flex:none;border-radius:10px}
+  .sidebar{transform:translateX(-105%);transition:transform .25s ease;width:280px;max-width:84vw;z-index:40;box-shadow:none;padding-bottom:env(safe-area-inset-bottom)}
   body.nav-open .sidebar{transform:none;box-shadow:8px 0 40px rgba(0,0,0,.5)}
   body.nav-open .scrim{display:block;z-index:35}
+  .brand{position:relative;padding:16px 16px}
+  .drawer-x{display:grid;place-items:center;width:34px;height:34px;padding:0;margin-left:auto;font-size:15px;border-radius:10px}
+  .menu{overscroll-behavior:contain}
+  .item{padding:12px 12px;font-size:14px}
   .main{margin-left:0;height:auto;overflow:visible}
-  .bar{padding:10px 14px;gap:8px}
+  .bar{padding:10px 14px;gap:10px;padding-top:max(10px,env(safe-area-inset-top))}
   .bar h3{font-size:15px}.bar p{font-size:11px}
 }
 @media(max-width:760px){
+  /* header: three clear square icon buttons */
   .bar-actions{gap:6px}
-  .bar-actions button{padding:7px 9px;font-size:12px}
+  .bar-actions button{width:38px;height:38px;padding:0;display:grid;place-items:center;font-size:17px;border-radius:10px;line-height:1}
   .bar-actions .lbl{display:none}
+  .bar p{display:none}
+  .bar h3{font-size:16px}
+
   .sec{margin:10px;padding:14px;border-radius:14px}
+  h3.t{font-size:17px}
+  .sub{margin-bottom:14px}
+
+  /* sheet tiles: compact, label + big number */
   .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .stat{padding:12px}.stat b{font-size:20px}
+  .stat{padding:12px 13px;border-radius:12px;min-height:78px}
+  .stat span:first-child{font-size:10px;line-height:1.25}
+  .stat b{font-size:22px;margin:6px 0 0}
+  .stat span:last-child{display:none}
+
   .cc{padding:14px}
   .cbox{height:260px}.cbox.short{height:220px}
-  .tools{gap:6px}
-  .tools input[type=search]{min-width:0;width:100%;flex:1 1 100%}
-  .tools button{flex:1 1 auto}
-  .grid{max-height:60vh}
-  input,textarea,select{font-size:16px}
-  .frow select,.frow input,td input{font-size:12px}
-  .box{padding:20px;border-radius:16px}
-  #toast{left:12px;right:12px;bottom:12px;text-align:center}
-}
-@media(max-width:380px){.stats{grid-template-columns:1fr}}
 
+  /* sheet toolbar */
+  .tools{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin-bottom:12px}
+  .t-search{width:100%;min-width:0!important}
+  .t-btns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .t-btns button{padding:10px 4px;font-size:12px;width:100%;white-space:nowrap}
+  .t-btns .t-add{grid-column:1/-1;font-size:14px;padding:12px}
+  .t-btns .t-add .lbl{display:inline}
+  .t-btns .lbl{font-size:11px}
+  .t-btns .t-filt{display:block;grid-column:1/-1}
+  .t-opts{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .t-opts input[type=number]{font-size:14px;padding:5px 8px}
+  .frow{display:none}
+  body.show-filters .frow{display:table-row}
+  .grid{max-height:64vh}
+  th,td{padding:8px 9px;max-width:200px}
+  .dom{display:none}
+  #trendTopUsers th,#trendTopUsers td,#trendRoles th,#trendRoles td,#trendActivity th,#trendActivity td{padding:8px 8px;font-size:11.5px}
+
+  input,textarea,select{font-size:16px}
+  .frow select,.frow input,td input{font-size:13px}
+  .box{padding:20px;border-radius:16px}
+  #toast{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));text-align:center}
+}
+@media(max-width:380px){.stats{gap:8px}.stat b{font-size:20px}}
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <div class="brand"><div class="logo">AD</div>Admin Panel</div>
+  <div class="brand"><div class="logo">AD</div>Admin Panel<button class="ghost drawer-x" onclick="toggleNav(false)" aria-label="Close menu">✕</button></div>
   <div class="menu">
     <div class="cat">Management</div>
     <div class="item active" id="nav-dash" onclick="showDash()">📊 <span>Dashboard</span></div>
@@ -164,8 +218,8 @@ html[data-theme="light"] .box{background:#fff}
     </div>
     <div class="bar-actions">
       <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">☀️<span class="lbl"> Light mode</span></button>
-      <button class="ghost" onclick="refreshAll()">⟳<span class="lbl"> Refresh</span></button>
-      <button class="bad" onclick="handleLogout()">⏻<span class="lbl"> Log out</span></button>
+      <button class="ghost" onclick="refreshAll()">🔄<span class="lbl"> Refresh</span></button>
+      <button class="bad" onclick="handleLogout()" aria-label="Log out" title="Log out"><svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="lbl"> Log out</span></button>
     </div>
   </div>
 
@@ -200,7 +254,7 @@ html[data-theme="light"] .box{background:#fff}
           <table id="trendRoles"><thead><tr><th>Role (Position)</th><th>Users</th><th>%</th></tr></thead><tbody></tbody></table>
         </div>
         <div class="grid" style="max-height:280px">
-          <table id="trendTopUsers"><thead><tr><th>User</th><th>Monthly Plan (min)</th><th>Task Plan (min)</th><th>Task Actual (min)</th><th>Actual / Plan</th></tr></thead><tbody></tbody></table>
+          <table id="trendTopUsers"><thead><tr><th>User</th><th>Monthly Plan</th><th>Task Plan</th><th>Task Actual</th><th>Actual / Plan</th></tr></thead><tbody></tbody></table>
         </div>
         <div class="grid" style="max-height:280px">
           <table id="trendActivity"><thead><tr><th>Date</th><th>Logs / Activity</th></tr></thead><tbody></tbody></table>
@@ -224,13 +278,18 @@ html[data-theme="light"] .box{background:#fff}
     <h3 class="t" id="sheetTitle">Sheet</h3>
     <p class="sub" id="sheetSub"></p>
     <div class="tools">
-            <input type="search" id="q" placeholder="Search all columns…" oninput="renderGrid()">
-      <button class="ghost" onclick="clearFilters()">✕ Clear</button>
-      <button onclick="openAdd()">＋ Add row</button>
-      <button class="ghost" onclick="loadSheet(curSheet)">⟳ Reload</button>
-      <button class="ghost" onclick="exportXlsx()">⬇ Export Excel</button>
-      <label class="msg">Header row <input type="number" id="hdrRow" min="1" style="width:68px;padding:6px 8px" onchange="setHdr()"></label>
-      <label class="msg"><input type="checkbox" id="showSens" onchange="renderGrid()"> Show passwords</label>
+      <input type="search" id="q" class="t-search" placeholder="Search all columns…" oninput="renderGrid()">
+      <div class="t-btns">
+        <button class="t-add" onclick="openAdd()">＋<span class="lbl"> Add row</span></button>
+        <button class="ghost" onclick="loadSheet(curSheet)">⟳<span class="lbl"> Reload</span></button>
+        <button class="ghost" onclick="clearFilters()">✕<span class="lbl"> Clear</span></button>
+        <button class="ghost" onclick="exportXlsx()">⬇<span class="lbl"> Export</span></button>
+        <button class="ghost t-filt" onclick="document.body.classList.toggle('show-filters')">⚲ Filters</button>
+      </div>
+      <div class="t-opts">
+        <label class="msg">Header row <input type="number" id="hdrRow" min="1" onchange="setHdr()"></label>
+        <label class="msg"><input type="checkbox" id="showSens" onchange="renderGrid()"> Show passwords</label>
+      </div>
     </div>
     <div class="grid"><table id="tbl"></table></div>
     <p class="msg" id="gridNote"></p>
@@ -673,7 +732,7 @@ async function loadTrendSummary(){
     const topTbody = $("trendTopUsers") && $("trendTopUsers").querySelector("tbody");
     const n0 = v => Math.round(v).toLocaleString();
     if(topTbody) topTbody.innerHTML = topUsers.length
-      ? topUsers.map(([u,v])=>`<tr><td>${esc(u)}</td><td>${n0(v.monthly)}</td><td>${n0(v.plan)}</td><td>${n0(v.actual)}</td><td>${v.plan?Math.round(v.actual/v.plan*100)+"%":"–"}</td></tr>`).join("")
+      ? topUsers.map(([u,v])=>`<tr><td title="${esc(u)}">${esc(u.split("@")[0])}<span class="dom">${u.indexOf("@")>-1?esc("@"+u.split("@")[1]):""}</span></td><td>${n0(v.monthly)}</td><td>${n0(v.plan)}</td><td>${n0(v.actual)}</td><td>${v.plan?Math.round(v.actual/v.plan*100)+"%":"–"}</td></tr>`).join("")
       : `<tr><td colspan="5">No task data for this month</td></tr>`;
 
     const days = Object.keys(dailyLogs).sort();
