@@ -1,290 +1,934 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Tarkie UI Style</title>
-    <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        :root {
-            --tarkie-bg: #f4f6f9;
-            --tarkie-sidebar-bg: #ffffff;
-            --tarkie-sidebar-border: #e2e8f0;
-            --tarkie-sidebar-text: #475569;
-            --tarkie-sidebar-hover: #f1f5f9;
-            --tarkie-sidebar-active-bg: #eff6ff;
-            --tarkie-sidebar-active-text: #2563eb;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --success: #059669;
-            --border-color: #e2e8f0;
-            --radius-sm: 6px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>(function(){try{var r=String(localStorage.getItem("portal_role")||"").toLowerCase();if(!localStorage.getItem("portal_user")||r.indexOf("admin")===-1){document.documentElement.style.display="none";location.replace("index.html")}}catch(e){}})();</script>
+<script>try{if(localStorage.getItem("portal_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<title>Admin Control Center</title>
+<LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#090e1c;--side:#0b1121;--card:#101828;--line:rgba(148,163,184,.13);--line2:rgba(148,163,184,.24);--text:#e6ebf5;--soft:#c4cee0;--muted:#8795b1;--primary:#3b82f6;--blue-soft:#8ab8ff;--field:rgba(8,13,25,.75);--hover:rgba(148,163,184,.08);--head:rgba(255,255,255,.035);--glow1:rgba(59,130,246,.14);--glow2:rgba(139,92,246,.12);--shadow:rgba(0,0,0,.28)}
+html[data-theme="light"]{color-scheme:light;--bg:#f4f6f9;--side:#fff;--card:#fff;--line:#e2e8f0;--line2:#cbd5e1;--text:#1e293b;--soft:#475569;--muted:#64748b;--primary:#2563eb;--blue-soft:#2563eb;--field:#fff;--hover:#f1f5f9;--head:#f8fafc;--glow1:transparent;--glow2:transparent;--shadow:rgba(15,23,42,.06)}
+*{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:rgba(148,163,184,.3) transparent}
+body{margin:0;font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;
+background:radial-gradient(1100px 560px at 85% -10%,var(--glow1),transparent 60%),radial-gradient(900px 520px at -10% 105%,var(--glow2),transparent 60%),var(--bg);background-attachment:fixed}
+::selection{background:rgba(59,130,246,.45);color:#fff}
+button{padding:8px 14px;background:linear-gradient(135deg,#3b82f6,#2563eb);border:0;color:#fff;border-radius:8px;font:600 13px inherit;font-family:inherit;cursor:pointer;box-shadow:0 6px 18px rgba(37,99,235,.3);transition:transform .15s,filter .2s}
+button:hover{transform:translateY(-1px);filter:brightness(1.08)}
+button.ghost{background:rgba(148,163,184,.1);color:var(--soft);border:1px solid var(--line2);box-shadow:none}
+button.ok{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 6px 18px rgba(16,185,129,.3)}
+button.bad{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.3);box-shadow:none}
+button.bad:hover{background:#ef4444;color:#fff}
+button.ok.sm{box-shadow:none}
+button.sm{padding:3px 9px;font-size:11px;border-radius:6px}
+input,textarea,select{font:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--field);color:var(--text);transition:border-color .2s,box-shadow .2s}
+input::placeholder,textarea::placeholder{color:#5d6b88}
+input:focus,textarea:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.22)}
+.sidebar{position:fixed;inset:0 auto 0 0;width:240px;background:linear-gradient(180deg,#0d1426 0%,var(--side) 100%);border-right:1px solid var(--line);box-shadow:4px 0 32px rgba(0,0,0,.2);display:flex;flex-direction:column;z-index:10}
+html[data-theme="light"] .sidebar{background:var(--side);box-shadow:none}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line);font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--text)}
+.logo{width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border-radius:10px;display:grid;place-items:center;font-size:14px;box-shadow:0 6px 18px rgba(59,130,246,.45)}
+.menu{overflow-y:auto;flex:1;padding:12px 10px}
+.cat{font-size:10px;font-weight:700;color:#5d6b88;text-transform:uppercase;letter-spacing:.1em;padding:12px 10px 4px}
+.item{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;color:#9aa8c4;cursor:pointer;transition:background .18s,color .18s}
+html[data-theme="light"] .item{color:#475569}
+.item:hover{background:var(--hover);color:var(--text)}
+.item.active{background:linear-gradient(90deg,rgba(59,130,246,.22),rgba(59,130,246,.06));color:#9cc3ff;font-weight:600;box-shadow:inset 3px 0 0 #3b82f6}
+html[data-theme="light"] .item.active{color:#2563eb}
+.item small{margin-left:auto;color:#5d6b88;font-size:11px}
+.main{margin-left:240px;height:100vh;overflow-y:auto}
+.bar{background:rgba(16,24,40,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:14px 24px;border-bottom:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.18);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:30}
+html[data-theme="light"] .bar{background:rgba(255,255,255,.85);box-shadow:none}
+.bar h3{margin:0;font-size:17px;letter-spacing:-.01em}.bar p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.sec{display:none;margin:24px;background:linear-gradient(180deg,rgba(20,30,50,.85),rgba(14,22,38,.9));border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 34px var(--shadow);padding:22px}
+html[data-theme="light"] .sec{background:var(--card)}
+.sec.active{display:block;animation:fade .28s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h3.t{margin:0 0 4px;font-size:16px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:12px;margin:0 0 18px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px}
+.stat{position:relative;overflow:hidden;border-radius:14px;padding:18px;cursor:pointer;border:1px solid rgba(59,130,246,.32);background:radial-gradient(260px 120px at 100% 0%,rgba(59,130,246,.30),transparent 70%),linear-gradient(145deg,rgba(37,99,235,.22),rgba(12,19,34,.95));box-shadow:0 10px 28px rgba(0,0,0,.3);transition:transform .2s,box-shadow .2s}
+.stat:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(0,0,0,.4)}
+.stat:nth-child(4n+2){border-color:rgba(249,115,22,.34);background:radial-gradient(260px 120px at 100% 0%,rgba(249,115,22,.28),transparent 70%),linear-gradient(145deg,rgba(194,65,12,.24),rgba(12,19,34,.95))}
+.stat:nth-child(4n+3){border-color:rgba(139,92,246,.36);background:radial-gradient(260px 120px at 100% 0%,rgba(139,92,246,.30),transparent 70%),linear-gradient(145deg,rgba(109,40,217,.24),rgba(12,19,34,.95))}
+.stat:nth-child(4n+4){border-color:rgba(16,185,129,.34);background:radial-gradient(260px 120px at 100% 0%,rgba(16,185,129,.26),transparent 70%),linear-gradient(145deg,rgba(4,120,87,.26),rgba(12,19,34,.95))}
+.stat span:first-child{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--soft);opacity:.85}
+.stat b{display:block;font-size:26px;letter-spacing:-.02em;color:#fff;margin:8px 0 4px}
+.stat span:last-child{font-size:10px;color:var(--muted)}
+.cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+.cc{background:linear-gradient(180deg,rgba(20,30,50,.85),rgba(14,22,38,.9));border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 34px var(--shadow);padding:20px;min-width:0}
+html[data-theme="light"] .cc{background:#fff}
+.cc.wide{grid-column:1/-1}
+.cc h4{margin:0 0 12px;font-size:13px;color:var(--text);font-weight:700}
+.cbox{position:relative;height:300px}
+.cbox.short{height:240px}
+@media(max-width:1000px){.cgrid{grid-template-columns:1fr}}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.tools input[type=search]{min-width:230px}
+.grid{overflow:auto;max-height:68vh;border:1px solid var(--line);border-radius:12px;background:rgba(8,13,25,.55)}
+html[data-theme="light"] .grid{background:#fff}
+table{border-collapse:collapse;font-size:12px;width:100%;background:transparent}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+th{background:var(--head);backdrop-filter:blur(6px);position:sticky;top:0;z-index:2;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+html[data-theme="dark"] th,:root:not([data-theme="light"]) th{background:#141c2e}
+tbody tr:hover td{background:rgba(59,130,246,.07)}
+td.n,th.n{color:var(--muted);text-align:center;position:sticky;left:0;z-index:1;background:var(--head)}
+:root:not([data-theme="light"]) td.n{background:#0f1729}
+td.c{cursor:cell}td.c:hover{background:rgba(59,130,246,.14)!important}
+.frow th{top:34px;padding:4px 6px;z-index:2}
+select option{background:#0f1729;color:#e6ebf5}
+html[data-theme="light"] select option{background:#fff;color:#1e293b}
+.frow select{width:100%;min-width:110px;max-width:220px;padding:4px 6px;font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;border-radius:8px}
+.frow input{width:100%;min-width:90px;padding:4px 7px;font-size:11px;font-weight:400;text-transform:none;letter-spacing:0}
+td input{width:100%;min-width:140px;padding:4px 7px}
+.pill{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(148,163,184,.14);color:var(--soft)}
+.pill.a{background:rgba(16,185,129,.16);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.pill.r{background:rgba(239,68,68,.16);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.pill.p{background:rgba(245,158,11,.16);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+.modal{position:fixed;inset:0;background:rgba(5,8,18,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal.show{display:flex}
+.box{background:linear-gradient(180deg,rgba(22,33,56,.96),rgba(13,21,38,.98));border:1px solid var(--line2);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.55);padding:28px;width:100%;max-width:440px;max-height:88vh;overflow:auto;animation:fade .3s ease both}
+html[data-theme="light"] .box{background:#fff}
+.box.wide{max-width:560px}
+.box h3{font-size:20px;letter-spacing:-.02em}
+.box label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 5px}
+.box input,.box textarea{width:100%}
+.err{color:#f87171;font-size:12px;font-weight:600;min-height:16px;margin-top:8px}
+.msg{font-size:12px;color:var(--muted)}
+.theme-toggle{background:rgba(148,163,184,.1);color:var(--soft);border:1px solid var(--line2);box-shadow:none}
+#toast{position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;border:1px solid var(--line2);padding:10px 16px;border-radius:10px;font-size:13px;display:none;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.menu-btn{display:none;padding:7px 11px;font-size:18px;line-height:1;flex:none}
+.bar-left{display:flex;align-items:center;gap:10px;min-width:0}
+.bar-left>div{min-width:0}
+.bar h3,.bar p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-actions{display:flex;gap:8px;flex:none}
+.scrim{display:none;position:fixed;inset:0;background:rgba(5,8,18,.6);backdrop-filter:blur(2px);z-index:9}
+@media(max-width:900px){
+  .menu-btn{display:block}
+  .sidebar{transform:translateX(-102%);transition:transform .25s ease;width:260px;max-width:82vw;z-index:40;box-shadow:none}
+  body.nav-open .sidebar{transform:none;box-shadow:8px 0 40px rgba(0,0,0,.5)}
+  body.nav-open .scrim{display:block;z-index:35}
+  .main{margin-left:0;height:auto;overflow:visible}
+  .bar{padding:10px 14px;gap:8px}
+  .bar h3{font-size:15px}.bar p{font-size:11px}
+}
+@media(max-width:760px){
+  .bar-actions{gap:6px}
+  .bar-actions button{padding:7px 9px;font-size:12px}
+  .bar-actions .lbl{display:none}
+  .sec{margin:10px;padding:14px;border-radius:14px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat{padding:12px}.stat b{font-size:20px}
+  .cc{padding:14px}
+  .cbox{height:260px}.cbox.short{height:220px}
+  .tools{gap:6px}
+  .tools input[type=search]{min-width:0;width:100%;flex:1 1 100%}
+  .tools button{flex:1 1 auto}
+  .grid{max-height:60vh}
+  input,textarea,select{font-size:16px}
+  .frow select,.frow input,td input{font-size:12px}
+  .box{padding:20px;border-radius:16px}
+  #toast{left:12px;right:12px;bottom:12px;text-align:center}
+}
+@media(max-width:380px){.stats{grid-template-columns:1fr}}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tarkie-bg);
-            margin: 0;
-            padding: 0;
-            color: var(--text-main);
-            -webkit-font-smoothing: antialiased;
-        }
-
-        h2, h3, h4 { color: var(--text-main); font-weight: 700; }
-        
-        button {
-            padding: 9px 16px;
-            background-color: var(--primary);
-            border: none;
-            color: white;
-            border-radius: var(--radius-sm);
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        button:hover { background-color: var(--primary-hover); }
-
-        .dashboard-layout {
-            display: block;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 240px;
-            background: var(--tarkie-sidebar-bg);
-            border-right: 1px solid var(--tarkie-sidebar-border);
-            position: fixed;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .sidebar-header {
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--tarkie-sidebar-border);
-        }
-
-        .sidebar-brand-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-
-        .sidebar-brand {
-            width: 32px;
-            height: 32px;
-            background: var(--primary);
-            color: #ffffff;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .sidebar-brand-text {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .sidebar-menu-scroll {
-            overflow-y: auto;
-            flex-grow: 1;
-            padding: 12px 10px;
-        }
-
-        .sidebar-category-title {
-            font-size: 10px;
-            font-weight: 700;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 8px 10px 4px 10px;
-            margin-top: 8px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .sidebar-menu li {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 9px 12px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            color: var(--tarkie-sidebar-text);
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.15s ease;
-        }
-
-        .sidebar-menu li:hover {
-            background: var(--tarkie-sidebar-hover);
-            color: var(--text-main);
-        }
-
-        .sidebar-menu li.active {
-            background: var(--tarkie-sidebar-active-bg);
-            color: var(--tarkie-sidebar-active-text);
-            font-weight: 600;
-        }
-
-        .sidebar-icon { font-size: 15px; display: flex; align-items: center; justify-content: center; width: 20px; }
-
-        .main-content {
-            margin-left: 240px;
-            padding: 24px;
-            height: 100vh;
-            overflow-y: auto;
-            box-sizing: border-box;
-        }
-
-        .header-bar {
-            background: var(--card-bg);
-            padding: 14px 20px;
-            border-radius: var(--radius-md);
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .content-section {
-            display: none;
-            background: var(--card-bg);
-            padding: 24px;
-            border-radius: var(--radius-md);
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-        }
-        .content-section.active { display: block; }
-
-        .logout-btn {
-            background-color: #ffeeee;
-            color: #dc2626;
-            padding: 7px 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .logout-btn:hover { background-color: #dc2626; color: white; }
-
-        .task-table-container { overflow-x: auto; margin-top: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
-        .task-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-            text-align: center;
-            background: #fff;
-        }
-        .task-table th, .task-table td {
-            border-bottom: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            padding: 10px;
-            vertical-align: middle;
-        }
-        .task-table th:last-child, .task-table td:last-child { border-right: none; }
-        .task-table th { background-color: #f8fafc; color: var(--text-main); font-weight: 600; }
-    </style>
+</style>
 </head>
 <body>
 
-    <!-- Dashboard Layout -->
-    <div class="dashboard-layout" id="dashboardLayout">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-brand-container">
-                    <div class="sidebar-brand">AD</div>
-                    <div class="sidebar-brand-text">Admin Panel</div>
-                </div>
-            </div>
-            <div class="sidebar-menu-scroll">
-                <div class="sidebar-category-title">Management</div>
-                <ul class="sidebar-menu">
-                    <li class="active" onclick="switchTab(event, 'dashboardTab')">
-                        <span class="sidebar-icon">📊</span>
-                        <span>Overview & Users</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
+<div class="sidebar">
+  <div class="brand"><div class="logo">AD</div>Admin Panel</div>
+  <div class="menu">
+    <div class="cat">Management</div>
+    <div class="item active" id="nav-dash" onclick="showDash()">📊 <span>Dashboard</span></div>
+    <div class="item" id="nav-ann" onclick="showAnn()">📣 <span>Announcements</span></div>
+    <div class="cat">All Sheets (Database)</div>
+    <div style="padding:2px 4px 8px"><input id="navQ" type="search" placeholder="Find sheet…" oninput="filterNav()" style="width:100%;padding:7px 10px"></div>
+    <div id="sheetNav"><div class="msg" style="padding:6px 12px">Locked…</div></div>
+  </div>
+</div>
 
-        <div class="main-content">
-            <div class="header-bar">
-                <div>
-                    <h3 id="dashTitle" style="margin:0; font-size: 16px;">Welcome, Admin</h3>
-                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Role: <span id="dashRole" style="font-weight:600; color:var(--text-main);">Admin / Report Analyst Team Lead</span></p>
-                </div>
-                <button class="logout-btn" onclick="handleLogout()">Log out</button>
-            </div>
+<div class="scrim" id="scrim" onclick="toggleNav(false)"></div>
 
-            <!-- DASHBOARD TAB -->
-            <div id="dashboardTab" class="content-section active">
-                <h3 style="margin-top:0; font-size: 15px;">Admin Control Center</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Dito mo makikita ang pangkalahatang ulat at sistema.</p>
-                
-                <div class="task-table-container">
-                    <table class="task-table">
-                        <thead>
-                            <tr>
-                                <th>Pangalan ng User</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Jayvie A. Condeno</td>
-                                <td>Admin / Report Analyst Team Lead</td>
-                                <td><span style="color: var(--success); font-weight: 600;">Active</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+<div class="main">
+  <div class="bar">
+    <div class="bar-left">
+      <button class="ghost menu-btn" onclick="toggleNav()" aria-label="Menu">☰</button>
+      <div>
+        <h3 id="who">Welcome, Admin</h3>
+        <p>Role: <b>Admin / Report Analyst Team Lead</b></p>
+      </div>
     </div>
+    <div class="bar-actions">
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">☀️<span class="lbl"> Light mode</span></button>
+      <button class="ghost" onclick="refreshAll()">⟳<span class="lbl"> Refresh</span></button>
+      <button class="bad" onclick="handleLogout()">⏻<span class="lbl"> Log out</span></button>
+    </div>
+  </div>
 
-    <script>
-        window.onload = function() {
-            // Diretso nang nagloload ang dashboard nang walang login check
-        };
+  <div class="sec active" id="secDash">
+    <h3 class="t">Admin Control Center</h3>
+    <p class="sub">Every tab of your Google Sheet database. Click a card to open it, then edit, add or delete rows.</p>
+    <div class="stats" id="stats"></div>
 
-        function handleLogout() {
-            localStorage.clear();
-            // Pagka-log out, direktang lilipat sa ST.html
-            window.location.href = 'ST.html';
+    <!-- User Trend Summary -->
+    <div style="margin-top:28px">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:14px">
+        <h3 class="t" style="margin:0">User Trend Summary</h3>
+        <label class="msg" style="display:flex;align-items:center;gap:6px">
+          Month
+          <input type="month" id="trendMonth" style="width:auto;padding:6px 10px" onchange="loadTrendSummary()">
+        </label>
+        <button class="ghost sm" onclick="loadTrendSummary()">⟳ Refresh trends</button>
+        <span class="msg" id="trendStatus"></span>
+      </div>
+      <!-- Charts -->
+      <div class="cgrid">
+        <div class="cc"><h4>👥 Role Breakdown (by Position)</h4><div class="cbox"><canvas id="chartRoles"></canvas></div></div>
+        <div class="cc"><h4>🗂️ Users by Job Group</h4><div class="cbox"><canvas id="chartJob"></canvas></div></div>
+        <div class="cc"><h4>📍 Users by Region</h4><div class="cbox"><canvas id="chartRegion"></canvas></div></div>
+        <div class="cc"><h4>⏱️ Task Actual Duration per User (min)</h4><div class="cbox"><canvas id="chartTopUsers"></canvas></div></div>
+        <div class="cc wide"><h4>📈 Daily Activity (LOGS)</h4><div class="cbox short"><canvas id="chartActivity"></canvas></div></div>
+      </div>
+
+      <!-- Tables -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:16px;margin-top:16px">
+        <div class="grid" style="max-height:280px">
+          <table id="trendRoles"><thead><tr><th>Role (Position)</th><th>Users</th><th>%</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="grid" style="max-height:280px">
+          <table id="trendTopUsers"><thead><tr><th>User</th><th>Monthly Plan (min)</th><th>Task Plan (min)</th><th>Task Actual (min)</th><th>Actual / Plan</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="grid" style="max-height:280px">
+          <table id="trendActivity"><thead><tr><th>Date</th><th>Logs / Activity</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <p class="msg" id="trendNote" style="margin-top:10px"></p>
+    </div>
+  </div>
+
+  <div class="sec" id="secAnn">
+    <h3 class="t">Post Announcement</h3>
+    <p class="sub">Shows up in every user's notification bell.</p>
+    <div style="max-width:560px">
+      <input id="annTitle" placeholder="Title" style="width:100%;margin-bottom:8px">
+      <textarea id="annMsg" rows="5" placeholder="Message" style="width:100%"></textarea>
+      <div style="margin-top:10px"><button onclick="postAnn()">Publish Announcement</button></div>
+    </div>
+  </div>
+
+  <div class="sec" id="secData">
+    <h3 class="t" id="sheetTitle">Sheet</h3>
+    <p class="sub" id="sheetSub"></p>
+    <div class="tools">
+            <input type="search" id="q" placeholder="Search all columns…" oninput="renderGrid()">
+      <button class="ghost" onclick="clearFilters()">✕ Clear</button>
+      <button onclick="openAdd()">＋ Add row</button>
+      <button class="ghost" onclick="loadSheet(curSheet)">⟳ Reload</button>
+      <button class="ghost" onclick="exportXlsx()">⬇ Export Excel</button>
+      <label class="msg">Header row <input type="number" id="hdrRow" min="1" style="width:68px;padding:6px 8px" onchange="setHdr()"></label>
+      <label class="msg"><input type="checkbox" id="showSens" onchange="renderGrid()"> Show passwords</label>
+    </div>
+    <div class="grid"><table id="tbl"></table></div>
+    <p class="msg" id="gridNote"></p>
+  </div>
+</div>
+
+<!-- Unlock -->
+<div class="modal show" id="lock">
+  <div class="box">
+    <h3 style="margin:0 0 4px">Admin sign-in</h3>
+    <p class="sub">Enter your password again to verify that you are an admin.</p>
+    <label>Email / User ID</label><input id="lkUser" autocomplete="username">
+    <label>Password</label><input id="lkPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')unlock()">
+    <div class="err" id="lkErr"></div>
+    <div style="margin-top:10px"><button style="width:100%" onclick="unlock()">Unlock</button></div>
+  </div>
+</div>
+
+<!-- Add row -->
+<div class="modal" id="addM">
+  <div class="box wide">
+    <h3 style="margin:0">Add new row</h3>
+    <div id="addFields"></div>
+    <div class="err" id="addErr"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button onclick="saveAdd()">Save row</button>
+      <button class="ghost" onclick="closeAdd()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* Aura theme: Chart.js look (smooth gradient area lines, rounded bars, themed text) — visual only */
+(function () {
+    if (!window.Chart) return;
+
+    function rgba(c, a) {
+        if (typeof c !== 'string') return 'rgba(59,130,246,' + a + ')';
+        var m = c.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+        if (m) {
+            var h = m[1];
+            if (h.length === 3) h = h.split('').map(function (x) { return x + x; }).join('');
+            return 'rgba(' + parseInt(h.slice(0, 2), 16) + ',' + parseInt(h.slice(2, 4), 16) + ',' + parseInt(h.slice(4, 6), 16) + ',' + a + ')';
         }
-
-        function switchTab(evt, tabId) {
-            let sections = document.getElementsByClassName('content-section');
-            for (let sec of sections) sec.classList.remove('active');
-            document.getElementById(tabId).classList.add('active');
+        var r = c.match(/rgba?\(([^)]+)\)/i);
+        if (r) {
+            var p = r[1].split(',').map(function (x) { return x.trim(); });
+            return 'rgba(' + p[0] + ',' + p[1] + ',' + p[2] + ',' + a + ')';
         }
-    </script>
+        return c;
+    }
+    window.auraRgba = rgba;
+
+    // Theme-dependent colours (dark = default, light = when <html data-theme="light">)
+    function setChartTheme(light) {
+        try {
+            var D = Chart.defaults;
+            D.color = light ? '#64748b' : '#8795b1';
+            D.borderColor = light ? 'rgba(15,23,42,0.08)' : 'rgba(148,163,184,0.10)';
+            D.scale.grid.color = light ? 'rgba(15,23,42,0.07)' : 'rgba(148,163,184,0.10)';
+            Object.assign(D.plugins.tooltip, light ? {
+                backgroundColor: 'rgba(255,255,255,0.98)',
+                borderColor: 'rgba(15,23,42,0.14)',
+                titleColor: '#0f172a',
+                bodyColor: '#475569'
+            } : {
+                backgroundColor: 'rgba(8,13,25,0.96)',
+                borderColor: 'rgba(148,163,184,0.24)',
+                titleColor: '#ffffff',
+                bodyColor: '#c4cee0'
+            });
+        } catch (e) {}
+    }
+    window.auraSetChartTheme = function (light) {
+        setChartTheme(light);
+        try {
+            Object.keys(Chart.instances || {}).forEach(function (k) {
+                try { Chart.instances[k].update(); } catch (e) {}
+            });
+        } catch (e) {}
+    };
+
+    try {
+        var D = Chart.defaults;
+        D.font.family = '"Inter", -apple-system, "Segoe UI", sans-serif';
+        D.font.size = 11;
+        D.responsive = true;
+        D.maintainAspectRatio = false;
+    } catch (e) {}
+
+    try {
+        var L = Chart.defaults.plugins.legend.labels;
+        L.usePointStyle = true; L.pointStyle = 'circle'; L.boxWidth = 8; L.boxHeight = 8; L.padding = 16;
+    } catch (e) {}
+
+    try {
+        Object.assign(Chart.defaults.plugins.tooltip, {
+            borderWidth: 1, padding: 10, cornerRadius: 10, boxPadding: 4
+        });
+    } catch (e) {}
+
+    try {
+        var E = Chart.defaults.elements;
+        E.line.tension = 0.4; E.line.borderWidth = 2.5;
+        E.point.radius = 0; E.point.hoverRadius = 5; E.point.hitRadius = 14;
+        E.bar.borderRadius = 8; E.bar.borderSkipped = false;
+    } catch (e) {}
+
+    try {
+        Chart.defaults.scale.grid.drawTicks = false;
+        Chart.defaults.scale.border.display = false;
+        Chart.defaults.scale.ticks.padding = 8;
+    } catch (e) {}
+
+    setChartTheme(document.documentElement.getAttribute('data-theme') === 'light');
+
+    Chart.register({
+        id: 'auraStyle',
+        beforeUpdate: function (chart) {
+            var type = chart.config.type;
+            (chart.data.datasets || []).forEach(function (ds) {
+                if (ds.__aura) return;
+                if (type === 'line') {
+                    var base = typeof ds.borderColor === 'string' ? ds.borderColor : null;
+                    if (!base) return;
+                    ds.__aura = true;
+                    ds.fill = true;
+                    ds.tension = ds.tension || 0.4;
+                    ds.borderWidth = 2.5;
+                    ds.pointRadius = 0;
+                    ds.pointHoverRadius = 5;
+                    ds.pointHoverBackgroundColor = base;
+                    ds.backgroundColor = function (ctx) {
+                        var a = ctx.chart.chartArea;
+                        if (!a) return rgba(base, 0.2);
+                        var g = ctx.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom);
+                        g.addColorStop(0, rgba(base, 0.42));
+                        g.addColorStop(1, rgba(base, 0));
+                        return g;
+                    };
+                } else if (type === 'bar') {
+                    ds.__aura = true;
+                    if (ds.borderRadius === undefined) ds.borderRadius = 8;
+                    ds.borderSkipped = false;
+                    if (ds.maxBarThickness === undefined) ds.maxBarThickness = 44;
+                }
+            });
+        }
+    });
+})();
+</script>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbyRvkqZdaAAwWtl59hu4qOvQ-6u-QIgVRMM47h_HJ5wLVPIezlFfoI7Kcoung-tWxg5/exec";
+const DEFAULT_PASS = "TRAINER1234"; // password users are reset to (they must change it at next login)
+let hdr = 0, creds = null, sheets = [], curSheet = "", data = [], formulas = {};
+
+const esc = s => String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const $ = id => document.getElementById(id);
+function toast(t){const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2600)}
+
+async function api(action, extra){
+  const body = Object.assign({action, adminUser:creds.user, adminPass:creds.pass}, extra||{});
+  const r = await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
+  const j = await r.json();
+  if(j && j.code==="auth"){ creds=null; try{sessionStorage.removeItem("portal_admin_pass")}catch(x){} $("lock").classList.add("show"); throw new Error("Session expired. Sign in again."); }
+  if(!j || !j.success) throw new Error((j&&j.message)||"Request failed");
+  return j;
+}
+
+window.onload = () => {
+  syncThemeBtn();
+  $("lkUser").value = localStorage.getItem("portal_user") || "";
+  const sp = sessionStorage.getItem("portal_admin_pass");
+  if (sp && $("lkUser").value) { $("lkPass").value = sp; unlock(true); }
+  else (($("lkUser").value)?$("lkPass"):$("lkUser")).focus();
+};
+
+async function unlock(auto){
+  const user=$("lkUser").value.trim().toLowerCase(), pass=$("lkPass").value;
+  $("lkErr").textContent="Checking…";
+  creds={user,pass};
+  try{
+    await api("adminVerify");
+    $("lock").classList.remove("show"); $("lkErr").textContent=""; $("lkPass").value=""; try{sessionStorage.setItem("portal_admin_pass",pass)}catch(e){}
+    $("who").textContent="Welcome, "+(localStorage.getItem("portal_name")||user);
+    await loadSheets();
+  }catch(e){
+    creds=null; if(auto){ $("lkPass").value=""; try{sessionStorage.removeItem("portal_admin_pass")}catch(x){} }
+    $("lkErr").textContent = e.message==="Failed to fetch" ? "Can't reach the server. Did you deploy the latest script version?" : "Not authorized. Check your email/password (must be an ADMIN account).";
+  }
+}
+
+async function loadSheets(){
+  const j = await api("adminListSheets");
+  sheets = j.sheets;
+  $("sheetNav").innerHTML = sheets.map((s,i)=>`<div class="item" data-i="${i}" onclick="openSheet(${i})">🗂 <span>${esc(s.name)}</span><small>${Math.max(0,s.rows-1)}</small></div>`).join(""); filterNav();
+  $("stats").innerHTML = sheets.map((s,i)=>`<div class="stat" onclick="openSheet(${i})"><span>${esc(s.name)}</span><b>${Math.max(0,s.rows-1)}</b><span>rows · ${s.cols} cols</span></div>`).join("");
+  const tm = $("trendMonth");
+  if(tm && !tm.value){
+    const d = new Date();
+    tm.value = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+  }
+  loadTrendSummary();
+}
+
+function toggleNav(force){
+  const open = typeof force==="boolean" ? force : !document.body.classList.contains("nav-open");
+  document.body.classList.toggle("nav-open", open);
+}
+// close the drawer after picking something from the sidebar
+document.addEventListener("click", e => { if(e.target.closest && e.target.closest(".sidebar .item")) toggleNav(false); });
+
+function filterNav(){
+  const q=$("navQ").value.toLowerCase().trim();
+  document.querySelectorAll("#sheetNav .item").forEach(el=>{el.style.display=(!q||el.textContent.toLowerCase().indexOf(q)>-1)?"":"none"});
+}
+function setActive(sel){document.querySelectorAll(".item").forEach(x=>x.classList.remove("active"));if(sel)sel.classList.add("active")}
+function showSec(id){document.querySelectorAll(".sec").forEach(x=>x.classList.remove("active"));$(id).classList.add("active")}
+function showDash(){setActive($("nav-dash"));showSec("secDash"); if(creds) loadTrendSummary();}
+function showAnn(){setActive($("nav-ann"));showSec("secAnn")}
+function refreshAll(){ if(!creds) return; loadSheets(); if($("secData").classList.contains("active")) loadSheet(curSheet); }
+
+function openSheet(i){
+  setActive(document.querySelector(`#sheetNav .item[data-i="${i}"]`));
+  showSec("secData"); loadSheet(sheets[i].name);
+}
+
+async function loadSheet(name){
+  curSheet=name; $("sheetTitle").textContent=name; $("sheetSub").textContent="Loading…"; $("tbl").innerHTML="";
+  try{
+    const j=await api("adminGetSheet",{sheet:name});
+    data=j.values||[]; formulas=j.formulas||{};
+    // Task Plan & Task Actual have title/meta rows — real headers are always on row 3
+    const forceHdr3 = /^(task plan|task actual)$/i.test(String(name).trim());
+    hdr = forceHdr3 ? 2 : detectHeader(data);
+    $("hdrRow").value=hdr+1; $("q").value=""; resetFilters();
+    $("sheetSub").textContent=`${Math.max(0,data.length-hdr-1)} rows · header on row ${hdr+1} · click a cell to edit it (Enter = save, Esc = cancel).`;
+    renderGrid();
+  }catch(e){$("sheetSub").textContent="Error: "+e.message}
+}
+
+// ========== User Trend Summary + Charts ==========
+let chartRoles=null, chartTopUsers=null, chartActivity=null, chartRegion=null, chartJob=null;
+
+async function getSheetData(name){
+  try{
+    const j = await api("adminGetSheet",{sheet:name});
+    return j.values || [];
+  }catch(e){ return []; }
+}
+
+function findCol(head, patterns){
+  for(let i=0;i<head.length;i++){
+    const h = String(head[i]||"").toLowerCase().trim();
+    if(patterns.some(p => typeof p==="string" ? h===p || h.includes(p) : p.test(h))) return i;
+  }
+  return -1;
+}
+
+function parseMonth(ym){
+  const [y,m] = (ym||"").split("-").map(Number);
+  if(!y||!m) return null;
+  return {y, m, start: new Date(y,m-1,1), end: new Date(y,m,0,23,59,59)};
+}
+
+function inMonth(val, range){
+  if(!range || val==null || val==="") return false;
+  let d = null;
+  if(val instanceof Date) d = val;
+  else {
+    const s = String(val).trim();
+    d = new Date(s);
+    if(isNaN(d)) {
+      const parts = s.split(/[\/\-\.]/);
+      if(parts.length>=3){
+        const a=+parts[0], b=+parts[1], c=+parts[2];
+        if(c>31) d = new Date(c, b-1, a);
+        else if(a>12) d = new Date(c, b-1, a);
+        else d = new Date(c, a-1, b);
+      }
+    }
+  }
+  if(!d || isNaN(d.getTime())) return false;
+  return d >= range.start && d <= range.end;
+}
+
+function destroyChart(c){ if(c){ try{c.destroy()}catch(e){} } return null; }
+
+function chartColors(n){
+  const base = ["#3b82f6","#db2777","#06b6d4","#10b981","#f59e0b","#8b5cf6","#ef4444","#84cc16","#f97316","#6366f1"];
+  const out=[]; for(let i=0;i<n;i++) out.push(base[i%base.length]); return out;
+}
+
+async function loadTrendSummary(){
+  if(!creds) return;
+  const status = $("trendStatus");
+  const note = $("trendNote");
+  if(!status) return;
+  status.textContent = "Loading trends…";
+  if(note) note.textContent = "";
+  const ym = $("trendMonth") ? $("trendMonth").value : "";
+  const range = parseMonth(ym);
+  if(!range){ status.textContent = "Select a month"; return; }
+
+  try{
+    const [usersRaw, logsRaw, planRaw, actualRaw, monthlyRaw] = await Promise.all([
+      getSheetData("user account"),
+      getSheetData("LOGS"),
+      getSheetData("Task Plan"),
+      getSheetData("Task Actual"),
+      getSheetData("Monthly Plan")
+    ]);
+
+    // ---- Users ----
+    // The "user account" sheet has a "DEFAULT PASSWORD" note above the real header,
+    // so look for the row that actually contains the POSITION / PASSWORD headers.
+    let uHdr = -1;
+    for(let r=0;r<Math.min(10,usersRaw.length);r++){
+      const cells = (usersRaw[r]||[]).map(x=>String(x||"").toLowerCase().trim());
+      if(cells.includes("position") || (cells.includes("password") && cells.some(c=>/user\s*id|email/.test(c)))){ uHdr=r; break; }
+    }
+    if(uHdr<0) uHdr = detectHeader(usersRaw);
+    const uHead = usersRaw[uHdr] || [];
+    // ROLE = POSITION column (fallback to role/access/team if missing)
+    let roleCol = findCol(uHead, [/^position$/i]);
+    if(roleCol<0) roleCol = findCol(uHead, ["position","role","access","team"]);
+    const regionCol = findCol(uHead, [/^region$/i]);
+    const jobCol = findCol(uHead, [/job\s*group/i]);
+    const nameCol = findCol(uHead, ["name","full name","username"]);
+    const emailCol = findCol(uHead, [/user\s*id|ns\+|email|userid/i]);
+    const statusCol = findCol(uHead, ["status","active","enabled"]);
+    const createdCol = findCol(uHead, [/creat|join|regist|date added|signup/i]);
+
+    const roleCount = {}, regionCount = {}, jobCount = {};
+    const bump = (obj,key,def) => { key = String(key||"").trim().toUpperCase() || def; obj[key]=(obj[key]||0)+1; };
+    let activeUsers = 0, newUsers = 0, totalUsers = 0;
+    for(let r=uHdr+1; r<usersRaw.length; r++){
+      const row = usersRaw[r] || [];
+      if(!row.some(c=>String(c||"").trim())) continue;
+      totalUsers++;
+      const role = roleCol>-1 ? String(row[roleCol]||"").trim().toUpperCase() || "NO POSITION" : "NO POSITION";
+      if(regionCol>-1) bump(regionCount, row[regionCol], "NO REGION");
+      if(jobCol>-1) bump(jobCount, row[jobCol], "NO JOB GROUP");
+      const st = statusCol>-1 ? String(row[statusCol]||"").toLowerCase() : "";
+      const isActive = !st || st.includes("active") || st==="1" || st==="yes" || st==="true";
+      if(isActive) activeUsers++;
+      roleCount[role] = (roleCount[role]||0)+1;
+      if(createdCol>-1 && inMonth(row[createdCol], range)) newUsers++;
+    }
+
+    // ---- LOGS ----
+    let lHdr = 0;
+    if(logsRaw.length){
+      for(let r=0;r<Math.min(5,logsRaw.length);r++){
+        const f=(logsRaw[r]||[]).filter(x=>String(x||"").trim());
+        if(f.length>=2){lHdr=r;break;}
+      }
+    }
+    const lHead = logsRaw[lHdr]||[];
+    const logDateCol = findCol(lHead, [/date|time|timestamp|when|logged/i]);
+    const dailyLogs = {};
+    let monthLogs = 0;
+    for(let r=lHdr+1;r<logsRaw.length;r++){
+      const row = logsRaw[r]||[];
+      if(logDateCol>-1 && inMonth(row[logDateCol], range)){
+        monthLogs++;
+        const d = new Date(row[logDateCol]);
+        const key = isNaN(d) ? String(row[logDateCol]).slice(0,10) : d.toISOString().slice(0,10);
+        dailyLogs[key] = (dailyLogs[key]||0)+1;
+      }
+    }
+
+    // ---- Tasks / Monthly Plan ----
+    // month match that also understands "October", "Oct 2026", "2026-10" etc.
+    const MN=["january","february","march","april","may","june","july","august","september","october","november","december"];
+    function inMonthLoose(val){
+      if(inMonth(val, range)) return true;
+      const t = String(val==null?"":val).toLowerCase().trim(); if(!t) return false;
+      const mi = MN.findIndex(m => t.indexOf(m)>-1 || new RegExp("\\b"+m.slice(0,3)+"\\b").test(t));
+      if(mi!==range.m-1) return false;
+      const y = t.match(/\b(20\d\d)\b/);
+      return !y || +y[1]===range.y;
+    }
+    // generic per-user minutes reader. hdrIdx = fixed header row (or null to auto-detect)
+    function processSheet(raw, hdrIdx, durPatterns, loose){
+      const hdr = hdrIdx!=null ? hdrIdx : detectHeader(raw);
+      const head = raw[hdr] || [];
+      const userC = findCol(head, [/ns\+|user\s*id|email|userid/i]);
+      let durC = -1;
+      for(const p of durPatterns){ durC = findCol(head, [p]); if(durC>-1) break; }
+      const dateC = findCol(head, [/date|day|when|period|month/i]);
+      const byUser = {};
+      let monthDur=0, monthTasks=0;
+      for(let r=hdr+1;r<raw.length;r++){
+        const row = raw[r]||[];
+        if(!row.some(c=>String(c||"").trim())) continue;
+        const u = userC>-1 ? String(row[userC]||"").trim().toLowerCase() : "";
+        const dur = durC>-1 ? (parseFloat(String(row[durC]).replace(/,/g,""))||0) : 0;
+        const inM = dateC>-1 ? (loose ? inMonthLoose(row[dateC]) : inMonth(row[dateC], range)) : true;
+        if(inM){
+          monthTasks++; monthDur += dur;
+          if(u){
+            if(!byUser[u]) byUser[u]={tasks:0,dur:0};
+            byUser[u].tasks++;
+            byUser[u].dur += dur;
+          }
+        }
+      }
+      return {monthTasks,monthDur,byUser,hasDate:dateC>-1,durHead:durC>-1?String(head[durC]):"",userHead:userC>-1};
+    }
+    const TASK_DUR = [/duration/i, /minutes|\bmin\b/i, /time/i];
+    const plan    = processSheet(planRaw, 2, TASK_DUR, false);   // Task Plan   (header row 3)
+    const actual  = processSheet(actualRaw, 2, TASK_DUR, false); // Task Actual (header row 3)
+    const monthly = processSheet(monthlyRaw, null, [/duration/i, /minutes|\bmin\b/i, /plan|target|total|hours|time/i], true); // Monthly Plan
+
+    // per-user comparison: Monthly Plan vs Task Plan vs Task Actual (minutes), biggest actual first
+    const cmp = {};
+    [["monthly",monthly],["plan",plan],["actual",actual]].forEach(([k,src])=>{
+      Object.keys(src.byUser).forEach(u=>{
+        if(!cmp[u]) cmp[u]={monthly:0,plan:0,actual:0,tasks:0};
+        cmp[u][k] = src.byUser[u].dur;
+        if(k==="actual") cmp[u].tasks = src.byUser[u].tasks;
+      });
+    });
+    const topUsers = Object.entries(cmp)
+      .sort((a,b)=>b[1].actual - a[1].actual || b[1].plan - a[1].plan)
+      .slice(0,15);
+
+    // ---- Cards ----
+    const completion = plan.monthTasks ? Math.round((actual.monthTasks / plan.monthTasks)*100) : 0;
+    // ---- Tables ----
+    const roleRows = Object.entries(roleCount).sort((a,b)=>b[1]-a[1]);
+    const rolesTbody = $("trendRoles") && $("trendRoles").querySelector("tbody");
+    if(rolesTbody) rolesTbody.innerHTML = roleRows.length
+      ? roleRows.map(([r,n])=>`<tr><td>${esc(r)}</td><td>${n}</td><td>${totalUsers?Math.round(n/totalUsers*100):0}%</td></tr>`).join("")
+      : `<tr><td colspan="3">No role data</td></tr>`;
+
+    const topTbody = $("trendTopUsers") && $("trendTopUsers").querySelector("tbody");
+    const n0 = v => Math.round(v).toLocaleString();
+    if(topTbody) topTbody.innerHTML = topUsers.length
+      ? topUsers.map(([u,v])=>`<tr><td>${esc(u)}</td><td>${n0(v.monthly)}</td><td>${n0(v.plan)}</td><td>${n0(v.actual)}</td><td>${v.plan?Math.round(v.actual/v.plan*100)+"%":"–"}</td></tr>`).join("")
+      : `<tr><td colspan="5">No task data for this month</td></tr>`;
+
+    const days = Object.keys(dailyLogs).sort();
+    const actTbody = $("trendActivity") && $("trendActivity").querySelector("tbody");
+    if(actTbody) actTbody.innerHTML = days.length
+      ? days.map(d=>`<tr><td>${esc(d)}</td><td>${dailyLogs[d]}</td></tr>`).join("")
+      : `<tr><td colspan="2">No LOGS activity for this month</td></tr>`;
+
+    // ---- Charts (styling comes from the shared "Aura" chart theme, same as ST.html) ----
+    const fmtNum = v => v>=1000 ? (Math.round(v/100)/10).toString().replace(/\.0$/,"")+"k" : String(v);
+    const wrapLabel = (str, n) => {
+      const words = String(str).split(/\s+/), lines = []; let cur = "";
+      words.forEach(w => { if(cur && (cur+" "+w).length>n){ lines.push(cur); cur=w; } else cur = cur ? cur+" "+w : w; });
+      if(cur) lines.push(cur);
+      return lines.length>1 ? lines : lines[0]||"";
+    };
+    // value at the end of each horizontal bar
+    const valuePlugin = { id:"valueLabels", afterDatasetsDraw(chart){
+      const c = chart.ctx; c.save(); c.fillStyle = Chart.defaults.color; c.font = "600 11px Inter,sans-serif"; c.textBaseline = "middle";
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{ c.fillText(fmtNum(chart.data.datasets[0].data[i]), bar.x+8, bar.y); });
+      c.restore();
+    }};
+    const mkBar = (canvasId, rows, color, wrapAt) => {
+      const el = $(canvasId);
+      if(!el || typeof Chart==="undefined") return null;
+      return new Chart(el.getContext("2d"), {
+        type: "bar",
+        data: { labels: rows.map(r=>wrapLabel(r[0], wrapAt)), datasets: [{ label: "Count", data: rows.map(r=>r[1]), backgroundColor: color }] },
+        options: {
+          indexAxis: "y",
+          layout: { padding: { right: 32 } },
+          plugins: { legend: { display: false }, tooltip: { callbacks: { title: it => rows[it[0].dataIndex][0] } } },
+          scales: {
+            x: { beginAtZero: true, grace: "8%", ticks: { callback: v => fmtNum(v), precision: 0 } },
+            y: { grid: { display: false }, ticks: { autoSkip: false } }
+          }
+        },
+        plugins: [valuePlugin]
+      });
+    };
+
+    // Role doughnut
+    chartRoles = destroyChart(chartRoles);
+    const ctxR = $("chartRoles");
+    if(ctxR && typeof Chart!=="undefined"){
+      chartRoles = new Chart(ctxR.getContext("2d"), {
+        type: "doughnut",
+        data: { labels: roleRows.map(r=>r[0]+"  ("+r[1]+")"), datasets: [{ data: roleRows.map(r=>r[1]), backgroundColor: chartColors(roleRows.length), borderWidth: 0 }] },
+        options: { cutout: "62%", plugins: { legend: { position: window.innerWidth<600 ? "bottom" : "right" } } }
+      });
+    }
+
+    // Job group / Region bars
+    chartJob = destroyChart(chartJob);
+    chartJob = mkBar("chartJob", Object.entries(jobCount).sort((a,b)=>b[1]-a[1]), "#06b6d4", 26);
+    chartRegion = destroyChart(chartRegion);
+    chartRegion = mkBar("chartRegion", Object.entries(regionCount).sort((a,b)=>b[1]-a[1]), "#db2777", 26);
+
+    // Task Actual duration per user (top 10, biggest on top)
+    chartTopUsers = destroyChart(chartTopUsers);
+    const top10 = topUsers.slice(0,10).map(t=>[t[0].split("@")[0], Math.round(t[1].actual)]);
+    chartTopUsers = mkBar("chartTopUsers", top10, "#3b82f6", 24);
+
+    // Daily activity line (gradient area comes from the Aura theme)
+    chartActivity = destroyChart(chartActivity);
+    const ctxA = $("chartActivity");
+    if(ctxA && typeof Chart!=="undefined"){
+      chartActivity = new Chart(ctxA.getContext("2d"), {
+        type: "line",
+        data: { labels: days, datasets: [{ label: "Logs", data: days.map(d=>dailyLogs[d]), borderColor: "#10b981" }] },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { callback: function(v){ return String(this.getLabelForValue(v)).slice(5); } } },
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+
+    status.textContent = `Showing ${ym}`;
+    const notes = [];
+    if(!plan.hasDate && !actual.hasDate) notes.push("Task Plan/Actual have no clear date column — showing all rows.");
+    if(logDateCol<0) notes.push("LOGS has no clear date column.");
+    if(!monthlyRaw.length) notes.push("Monthly Plan sheet not found or empty.");
+    else notes.push("Monthly Plan: using column \""+(monthly.durHead||"none found — counting rows")+"\"; Task Plan: \""+(plan.durHead||"none")+"\"; Task Actual: \""+(actual.durHead||"none")+"\".");
+    if(roleCol<0) notes.push("user account has no POSITION column — roles show as NO POSITION.");
+    if(createdCol<0) notes.push("user account has no clear created-date column (New Users may stay 0).");
+    if(note) note.textContent = notes.join(" ");
+  }catch(e){
+    status.textContent = "Error loading trends";
+    if(note) note.textContent = e.message || String(e);
+  }
+}
+
+const isSens = h => /pass/i.test(h||"");
+const colLetter = n => { let s=""; n++; while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)} return s };
+
+function pill(v){
+  const l=String(v).toLowerCase();
+  if(l==="approved")return `<span class="pill a">${esc(v)}</span>`;
+  if(l==="rejected")return `<span class="pill r">${esc(v)}</span>`;
+  if(l.indexOf("pending")===0)return `<span class="pill p">${esc(v)}</span>`;
+  return esc(v);
+}
+
+// Finds the real header row: the first of the top 10 rows with 3+ filled, mostly non-numeric, non-link cells
+function detectHeader(d){
+  for(let r=0;r<Math.min(10,d.length);r++){
+    const f=d[r].map(x=>String(x==null?"":x).trim()).filter(Boolean);
+    if(f.length>=3 && f.filter(x=>isNaN(Number(x)) && !/^https?:\/\//i.test(x)).length>=f.length*0.7) return r;
+  }
+  return 0;
+}
+function setHdr(){ const n=parseInt($("hdrRow").value,10); if(n>=1 && n<=data.length){ hdr=n-1; resetFilters(); $("sheetSub").textContent=`${Math.max(0,data.length-hdr-1)} rows · header on row ${hdr+1} · click a cell to edit it (Enter = save, Esc = cancel).`; renderGrid(); } }
+
+let colF = {};   // col index -> {t:"eq", v:"exact value"} (dropdown)  or  {t:"has", v:"text"} (search, for columns with many values)
+const ALL = "\u0001all";
+function resetFilters(){ colF = {}; }
+function setColSel(c,v){ if(v===ALL) delete colF[c]; else colF[c]={t:"eq",v}; renderGrid(); }
+function setColFilter(c,v){
+  v=v.toLowerCase().trim(); if(v) colF[c]={t:"has",v}; else delete colF[c];
+  renderGrid();
+  const el=document.querySelector(`#tbl input[data-c="${c}"]`);
+  if(el){ el.focus(); const n=el.value.length; el.setSelectionRange(n,n); }
+}
+function colOptions(c){
+  const set={}; for(let r=hdr+1;r<data.length;r++){ const v=String(data[r][c]==null?"":data[r][c]); set[v]=(set[v]||0)+1; }
+  const keys=Object.keys(set); if(keys.length>150) return null;   // too many distinct values: use a text box
+  keys.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  return keys.map(k=>({k,n:set[k]}));
+}
+function clearFilters(){ $("q").value=""; colF={}; renderGrid(); }
+
+function renderGrid(){
+  if(!data.length){$("tbl").innerHTML="<tr><td>Empty sheet — use “Add row”.</td></tr>";$("gridNote").textContent="";return}
+  const head=data[hdr]||[], cols=head.length, q=$("q").value.toLowerCase().trim(), show=$("showSens").checked;
+  const isAppr = curSheet.toLowerCase()==="approvals", stCol=head.findIndex(x=>/^status$/i.test(String(x).trim())), isUsers=curSheet.toLowerCase()==="user account", pwCol=head.findIndex(x=>/^password$/i.test(String(x).trim()));
+  let h=`<tr><th class="n">#</th>`+head.map((x,c)=>`<th>${esc(x||colLetter(c))}</th>`).join("")+(isAppr?"<th>Decision</th>":"")+(isUsers&&pwCol>-1?"<th>Password</th>":"")+"<th></th></tr>";
+  const frow=`<tr class="frow"><th class="n"></th>`+head.map((x,c)=>{
+    const opts=colOptions(c), cur=colF[c];
+    if(!opts) return `<th><input data-c="${c}" placeholder="Filter" value="${esc(cur&&cur.t==="has"?cur.v:"")}" oninput="setColFilter(${c},this.value)"></th>`;
+    return `<th><select onchange="setColSel(${c},this.value)"><option value="${ALL}">All</option>`+opts.map(o=>`<option value="${esc(o.k)}"${cur&&cur.t==="eq"&&cur.v===o.k?" selected":""}>${esc((o.k||"(blank)").slice(0,40))} (${o.n})</option>`).join("")+`</select></th>`;
+  }).join("")+(isAppr?"<th></th>":"")+(isUsers&&pwCol>-1?"<th></th>":"")+"<th></th></tr>";
+  h+=frow; const fkeys=Object.keys(colF).filter(c=>c<cols);
+  let shown=0,total=0;
+  for(let r=hdr+1;r<data.length;r++){
+    const row=data[r];
+    if(fkeys.some(c=>{const f=colF[c],cell=String(row[+c]==null?"":row[+c]);return f.t==="eq"?cell!==f.v:cell.toLowerCase().indexOf(f.v)===-1})) continue;
+    if(q && row.join(" ").toLowerCase().indexOf(q)===-1) continue;
+    total++; if(shown>=300) continue; shown++;
+    h+=`<tr><td class="n">${r+1}</td>`;
+    for(let c=0;c<cols;c++){
+      let v=row[c]==null?"":row[c];
+      const disp = (isSens(head[c]) && v && !show) ? "••••••" : (String(head[c]).toLowerCase()==="status"?pill(v):esc(v));
+      h+=`<td class="c" title="${esc(isSens(head[c])&&!show?"":v)}" onclick="editCell(this,${r},${c})">${disp}</td>`;
+    }
+    if(isAppr){
+      const st=String(row[stCol]==null?"":row[stCol]).toLowerCase();
+      h+=`<td>${st.indexOf("pending")!==-1?`<button class="sm ok" onclick="decide(${r+1},'Approved')">Approve</button> <button class="sm bad" onclick="decide(${r+1},'Rejected')">Reject</button>`:""}</td>`;
+    }
+    if(isUsers&&pwCol>-1) h+=`<td><button class="sm ok" onclick="resetPw(${r})">Reset</button></td>`;
+    h+=`<td><button class="sm bad" onclick="delRow(${r+1})">Delete</button></td></tr>`;
+  }
+  $("tbl").innerHTML=h;
+  $("gridNote").textContent = total>300 ? `Showing first 300 of ${total} matches — use the search box to narrow it down.` : `${total} row(s)`;
+}
+
+function editCell(td,r,c){
+  if(td.querySelector("input")) return;
+  const key=(r+1)+","+(c+1);
+  const old = formulas[key] || (data[r][c]==null?"":data[r][c]);
+  td.classList.remove("c");
+  td.innerHTML=`<input value="${esc(old)}">`;
+  const inp=td.firstChild; inp.focus(); inp.select();
+  let done=false;
+  const finish=async save=>{
+    if(done) return; done=true;
+    const val=inp.value;
+    if(!save || val===String(old)){ renderGrid(); return; }
+    try{
+      await api("adminUpdateCell",{sheet:curSheet,row:r+1,col:c+1,value:val});
+      data[r][c]=val; delete formulas[key]; toast("Saved ✔");
+    }catch(e){toast("Error: "+e.message)}
+    renderGrid();
+  };
+  inp.onkeydown=e=>{if(e.key==="Enter")finish(true);if(e.key==="Escape")finish(false)};
+  inp.onblur=()=>finish(true);
+}
+
+async function resetPw(r){
+  const head=data[hdr], row=data[r];
+  const pc=head.findIndex(x=>/^password$/i.test(String(x).trim()));
+  const nc=head.findIndex(x=>/^name$/i.test(String(x).trim()));
+  const ec=head.findIndex(x=>/userid|user id|ns\+|email/i.test(String(x)));
+  const who=(nc>-1&&row[nc])||(ec>-1&&row[ec])||("row "+(r+1));
+  if(!confirm(`Reset the password of ${who} to the default (${DEFAULT_PASS})?\nThey will be asked to change it at their next login.`)) return;
+  try{
+    await api("adminUpdateCell",{sheet:curSheet,row:r+1,col:pc+1,value:DEFAULT_PASS});
+    row[pc]=DEFAULT_PASS; delete formulas[(r+1)+","+(pc+1)];
+    toast("Password reset for "+who+" ✔"); renderGrid();
+  }catch(e){toast("Error: "+e.message)}
+}
+
+async function delRow(row){
+  if(!confirm(`Delete row ${row} in "${curSheet}"? This cannot be undone.`)) return;
+  try{ await api("adminDeleteRow",{sheet:curSheet,row}); toast("Row deleted"); await loadSheet(curSheet); loadSheets(); }
+  catch(e){toast("Error: "+e.message)}
+}
+
+function openAdd(){
+  if(!data.length){toast("This sheet has no header row.");return}
+  $("addFields").innerHTML=(data[hdr]||[]).map((h,c)=>`<label>${esc(h||colLetter(c))}</label><input data-c="${c}">`).join("");
+  $("addErr").textContent=""; $("addM").classList.add("show");
+}
+function closeAdd(){$("addM").classList.remove("show")}
+async function saveAdd(){
+  const vals=[...document.querySelectorAll("#addFields input")].map(i=>i.value);
+  if(!vals.some(v=>v.trim())){$("addErr").textContent="Fill at least one field.";return}
+  try{ await api("adminAppendRow",{sheet:curSheet,values:vals}); closeAdd(); toast("Row added ✔"); await loadSheet(curSheet); loadSheets(); }
+  catch(e){$("addErr").textContent=e.message}
+}
+
+// Uses the existing approval flow so requester notifications / emails / Telegram still fire
+async function decide(row,status){
+  let remarks="";
+  if(status==="Rejected"){ remarks=prompt("Reason for rejection (required):")||""; if(!remarks.trim())return; }
+  else remarks=prompt("Feedback (optional):")||"";
+  try{
+    const qs=new URLSearchParams({action:"updateApprovalStatus",row,status,remarks}).toString();
+    const j=await (await fetch(API+"?"+qs)).json();
+    if(!j.success) throw new Error(j.message||"Failed");
+    toast(status+" ✔"); loadSheet(curSheet);
+  }catch(e){toast("Error: "+e.message)}
+}
+
+function exportXlsx(){
+  if(!data.length) return;
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(data),curSheet.slice(0,31));
+  XLSX.writeFile(wb,curSheet.replace(/[^\w]+/g,"_")+".xlsx");
+}
+
+function postAnn(){
+  const title=$("annTitle").value.trim(), message=$("annMsg").value.trim();
+  if(!title||!message){toast("Please enter a title and a message.");return}
+  fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify({action:"postAnnouncement",title,message,user:localStorage.getItem("portal_name")||"Admin"})})
+  .then(()=>{toast("Announcement posted ✔");$("annTitle").value="";$("annMsg").value="";if(creds)loadSheets()})
+  .catch(e=>toast("Error: "+e));
+}
+
+function syncThemeBtn(){const l=document.documentElement.getAttribute("data-theme")==="light";$("themeBtn").innerHTML=l?'🌙<span class="lbl"> Dark mode</span>':'☀️<span class="lbl"> Light mode</span>'}
+function toggleTheme(){const d=document.documentElement,l=d.getAttribute("data-theme")==="light";if(l)d.removeAttribute("data-theme");else d.setAttribute("data-theme","light");try{localStorage.setItem("portal_theme",l?"dark":"light")}catch(e){}if(window.auraSetChartTheme)auraSetChartTheme(!l);syncThemeBtn()}
+function handleLogout(){ creds=null; try{sessionStorage.removeItem("portal_admin_pass")}catch(e){} {const t=localStorage.getItem("portal_theme");localStorage.clear();if(t)localStorage.setItem("portal_theme",t)} window.location.href="index.html"; }
+</script>
 </body>
 </html>
