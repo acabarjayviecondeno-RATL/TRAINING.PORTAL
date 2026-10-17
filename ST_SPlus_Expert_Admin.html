@@ -5868,7 +5868,7 @@ html[data-theme="light"] button.sec-action-btn:hover {
                             if (a.trim()) list.push({ value: a.trim(), label: a.trim() });
                         } else if (a) {
                             let value = a.email || a.user || a.userId || a.id || a.name || '';
-                            let label = a.name || a.email || a.user || value;
+                            let label = a.tg || a.name || a.email || a.user || value;
                             if (String(value).trim()) list.push({ value: String(value).trim(), label: String(label).trim() });
                         }
                     });
@@ -6099,7 +6099,7 @@ html[data-theme="light"] button.sec-action-btn:hover {
                 }
 
                 if (confirmed) {
-                    alert((isLink ? 'Link submitted!' : 'File uploaded!') + ' Sent to RTO (' + rtoLabel + ') first. SEPCO (' + sepcoLabel + ') will receive it only after RTO approves.');
+                    alert((isLink ? 'Link submitted!' : 'File uploaded!') + ' Sent to RTO (' + rtoLabel + ') first. SEPCO (' + sepcoLabel + ') will receive it only after RTO approves. Approvers are notified in the Telegram approval group.');
                     fileInput.value = '';
                     resetCategoryCombo(); let _li = document.getElementById('approvalLinkInput'); if (_li) _li.value = ''; let _lt = document.getElementById('approvalLinkTitle'); if (_lt) _lt.value = ''; let _note = document.getElementById('approvalNote'); if (_note) _note.value = '';
                     if (rtoSel) rtoSel.value = '';
