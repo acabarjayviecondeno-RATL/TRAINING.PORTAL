@@ -320,6 +320,24 @@ html[data-theme="light"] .stat span:last-child{color:var(--muted)}
     </div>
   </div>
 </div>
+<!-- Resubmit (re-upload) a rejected request -->
+<div class="modal" id="resM">
+  <div class="box wide">
+    <h3 style="margin:0">Reupload / Resubmit</h3>
+    <p class="sub" id="resInfo" style="margin-top:6px"></p>
+    <label id="resRtoLbl">RTO approver</label>
+    <select id="resRto" style="width:100%"><option value="">Loading approvers…</option></select>
+    <label>SEPCO approver</label>
+    <select id="resSepco" style="width:100%"><option value="">Loading approvers…</option></select>
+    <p class="msg" id="resHint" style="margin-top:6px"></p>
+    <p class="msg" style="margin-top:8px">The same file is resubmitted — only the approver(s) can be changed. The request is re-posted in the Telegram group (email only as fallback) for the selected approver, and the status goes back to Pending.</p>
+    <div class="err" id="resErr"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button id="resBtn" onclick="saveResub()">Resubmit</button>
+      <button class="ghost" onclick="closeResub()">Cancel</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -871,12 +889,12 @@ function renderGrid(){
   if(!data.length){$("tbl").innerHTML="<tr><td>Empty sheet — use “Add row”.</td></tr>";$("gridNote").textContent="";return}
   const head=data[hdr]||[], cols=head.length, q=$("q").value.toLowerCase().trim(), show=$("showSens").checked;
   const isAppr = curSheet.toLowerCase()==="approvals", stCol=head.findIndex(x=>/^status$/i.test(String(x).trim())), isUsers=curSheet.toLowerCase()==="user account", pwCol=head.findIndex(x=>/^password$/i.test(String(x).trim()));
-  let h=`<tr><th class="n">#</th>`+head.map((x,c)=>`<th>${esc(x||colLetter(c))}</th>`).join("")+(isAppr?"<th>Decision</th>":"")+(isUsers&&pwCol>-1?"<th>Password</th>":"")+"<th></th></tr>";
+  let h=`<tr><th class="n">#</th>`+head.map((x,c)=>`<th>${esc(x||colLetter(c))}</th>`).join("")+(isAppr?"<th>Decision</th><th>Resubmit</th>":"")+(isUsers&&pwCol>-1?"<th>Password</th>":"")+"<th></th></tr>";
   const frow=`<tr class="frow"><th class="n"></th>`+head.map((x,c)=>{
     const opts=colOptions(c), cur=colF[c];
     if(!opts) return `<th><input data-c="${c}" placeholder="Filter" value="${esc(cur&&cur.t==="has"?cur.v:"")}" oninput="setColFilter(${c},this.value)"></th>`;
     return `<th><select onchange="setColSel(${c},this.value)"><option value="${ALL}">All</option>`+opts.map(o=>`<option value="${esc(o.k)}"${cur&&cur.t==="eq"&&cur.v===o.k?" selected":""}>${esc((o.k||"(blank)").slice(0,40))} (${o.n})</option>`).join("")+`</select></th>`;
-  }).join("")+(isAppr?"<th></th>":"")+(isUsers&&pwCol>-1?"<th></th>":"")+"<th></th></tr>";
+  }).join("")+(isAppr?"<th></th><th></th>":"")+(isUsers&&pwCol>-1?"<th></th>":"")+"<th></th></tr>";
   h+=frow; const fkeys=Object.keys(colF).filter(c=>c<cols);
   let shown=0,total=0;
   for(let r=hdr+1;r<data.length;r++){
@@ -893,6 +911,7 @@ function renderGrid(){
     if(isAppr){
       const st=String(row[stCol]==null?"":row[stCol]).toLowerCase();
       h+=`<td>${st.indexOf("pending")!==-1?`<button class="sm ok" onclick="decide(${r+1},'Approved')">Approve</button> <button class="sm bad" onclick="decide(${r+1},'Rejected')">Reject</button>`:""}</td>`;
+      h+=`<td>${(String(row[1]||"").trim()||String(row[2]||"").trim())?`<button class="sm" onclick="openResub(${r+1})">⟳ Resubmit</button>`:""}</td>`;
     }
     if(isUsers&&pwCol>-1) h+=`<td><button class="sm ok" onclick="resetPw(${r})">Reset</button></td>`;
     h+=`<td><button class="sm bad" onclick="delRow(${r+1})">Delete</button></td></tr>`;
@@ -967,6 +986,72 @@ async function decide(row,status){
     if(!j.success) throw new Error(j.message||"Failed");
     toast(status+" ✔"); loadSheet(curSheet);
   }catch(e){toast("Error: "+e.message)}
+}
+
+// ===== Reupload / Resubmit a rejected request =====
+let resRow = 0, apprCache = null;
+async function loadApprovers(){
+  if(apprCache) return apprCache;
+  const get = async pos => {
+    const j = await (await fetch(API+"?"+new URLSearchParams({action:"getApproversByPosition",position:pos}))).json();
+    return (j && j.approvers) || [];
+  };
+  const [rto, sepco] = await Promise.all([get("RTO"), get("SEPCO")]);
+  apprCache = {rto, sepco};
+  return apprCache;
+}
+let resStart = "RTO";
+async function openResub(row){
+  resRow = row;
+  const r = data[row-1] || [];
+  const head = data[hdr] || [];
+  const col = re => head.findIndex(x=>re.test(String(x).trim()));
+  const fc=col(/file\s*name/i), uc=col(/request\s*user/i), sc=col(/^status$/i), ac=col(/^approver\s*email/i), rc=col(/^rto\s*email/i), pc=col(/^sepco\s*email/i);
+  const g = c => String(c>-1&&r[c]!=null?r[c]:"").trim();
+  const status=g(sc), curAppr=g(ac).toLowerCase(), curRto=g(rc), curSepco=g(pc);
+  // RTO already approved? -> Pending SEPCO, or Approved/Rejected while the current approver was SEPCO
+  const rtoDone = /sepco/i.test(status) || (!/pending/i.test(status) && curSepco && curAppr===curSepco.toLowerCase());
+  resStart = (rtoDone && curSepco) ? "SEPCO" : "RTO";
+  $("resInfo").textContent = "Row "+row+(g(fc)?" · "+g(fc):"")+(g(uc)?" · "+g(uc):"")+(status?" · Status: "+status:"");
+  $("resErr").textContent="";
+  const sR=$("resRto"), sS=$("resSepco");
+  sR.innerHTML=sS.innerHTML='<option value="">Loading approvers…</option>';
+  $("resM").classList.add("show");
+  try{
+    const a = await loadApprovers();
+    const opts = (list,cur)=>'<option value="">— Select approver —</option>'+list.map(x=>`<option value="${esc(x.email)}"${String(x.email).toLowerCase().trim()===cur.toLowerCase()?" selected":""}>${esc(x.name)}${x.tg?" "+esc(x.tg):""}${x.region?" · "+esc(x.region):""}</option>`).join("");
+    sR.innerHTML = opts(a.rto, curRto);
+    sS.innerHTML = opts(a.sepco, curSepco);
+    if(resStart==="SEPCO"){
+      // RTO already approved: keep the RTO as is (not editable), only SEPCO can change
+      if(curRto && ![...sR.options].some(o=>o.value.toLowerCase()===curRto.toLowerCase())) sR.insertAdjacentHTML("beforeend",`<option value="${esc(curRto)}" selected>${esc(curRto)}</option>`);
+      sR.disabled=true;
+      $("resHint").textContent="RTO already approved — only the SEPCO approver can be changed. It goes straight to SEPCO.";
+    } else {
+      sR.disabled=false;
+      $("resHint").textContent="Goes back to the RTO first, then SEPCO.";
+    }
+  }catch(e){ sR.innerHTML=sS.innerHTML='<option value="">Could not load approvers</option>'; $("resErr").textContent="Could not load approvers: "+e.message; }
+}
+function closeResub(){ $("resM").classList.remove("show"); }
+function readB64(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(String(fr.result).split(",")[1]||"");
+    fr.onerror=()=>rej(new Error("Cannot read the file."));
+    fr.readAsDataURL(file);
+  });
+}
+async function saveResub(){
+  const rto=$("resRto").value, sepco=$("resSepco").value;
+  if(resStart==="SEPCO"){ if(!sepco){ $("resErr").textContent="Please select the SEPCO approver."; return; } }
+  else if(!rto){ $("resErr").textContent="Please select the RTO approver."; return; }
+  const btn=$("resBtn"); btn.disabled=true; btn.textContent="Resubmitting…"; $("resErr").textContent="";
+  try{
+    await api("adminResubmit",{sheet:"approvals",row:resRow,startStage:resStart,rtoEmail:resStart==="RTO"?rto:"",sepcoEmail:sepco});
+    closeResub(); toast("Resubmitted ✔ — sent to "+(resStart==="SEPCO"?sepco:rto)+" via Telegram"); await loadSheet(curSheet); loadSheets();
+  }catch(e){ $("resErr").textContent=e.message; }
+  finally{ btn.disabled=false; btn.textContent="Resubmit"; }
 }
 
 function exportXlsx(){
