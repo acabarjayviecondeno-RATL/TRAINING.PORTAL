@@ -1499,6 +1499,16 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     </li>
                 </ul>
 
+                <div class="sidebar-category-title" style="margin-top: 16px;">SNS</div>
+                <ul class="sidebar-menu">
+                    <li class="has-sub-menu" id="snsBoostingMenuParent">
+                        <div class="main-menu-item" onclick="switchSubTab(event, 'snsBoostingSection', 'snsBoostingMenuParent'); loadSnsBoostingSepco();">
+                            <span class="sidebar-icon">🚀</span>
+                            <span>SNS Boosting</span>
+                        </div>
+                    </li>
+                </ul>
+
             </div>
         </div>
 
@@ -1874,7 +1884,50 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     </div>
                 </details>
             </div>
-        </div>
+
+                                                <!-- SNS BOOSTING SECTION -->
+            <div id="snsBoostingSection" class="content-section">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+                    <div>
+                        <h3 style="margin:0 0 4px 0; font-size:17px;">🚀 SNS Boosting · TikTok Engagement</h3>
+                        <p style="margin:0; font-size:12px; color:var(--text-muted); max-width:640px; line-height:1.45;">
+                            ST sets Heart / Share / Views targets on submit. Boost window = submit date → month end. Update pulls Apify stats and scores ACH%.
+                        </p>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" onclick="loadSnsBoostingSepco()" style="background:#334155;">↻ Refresh</button>
+                        <button type="button" id="snsUpdateAllBtn" onclick="updateSnsEngagementAll()" style="background:var(--primary);">⚡ Update All</button>
+                    </div>
+                </div>
+                <div class="section-container" style="margin-bottom:0;">
+                    <div class="task-table-container" style="overflow-x:auto;">
+                        <table class="task-table" id="snsBoostingTable" style="min-width:1100px; width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>ST User</th>
+                                    <th>Name</th>
+                                    <th>Mode</th>
+                                    <th>TikTok</th>
+                                    <th>Target H/S/V</th>
+                                    <th>Plays</th>
+                                    <th>Diggs</th>
+                                    <th>Shares</th>
+                                    <th>TTL</th>
+                                    <th>ACH%</th>
+                                    <th>Score</th>
+                                    <th>Boost period</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="snsBoostingTableBody">
+                                <tr><td colspan="14" style="padding:20px; color:var(--text-muted); text-align:center;">Click SNS Boosting to load data.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+</div>
     </div>
 
     <script>
@@ -2094,6 +2147,8 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                     monthlyPlanDataGlobal = data.monthlyPlan;
                     renderMonthlyPlanTableFromJson(monthlyPlanDataGlobal);
                     checkAndComputeOverview();
+                    // Monthly Target (Content) depends on the Monthly Plan -> refresh Approval Summary now that it is loaded
+                    try { filterSummaryData(); } catch (e) { console.error(e); }
                 } else {
                     document.getElementById('monthlyPlanTableBody').innerHTML = `<tr><td colspan="8" style="color: var(--text-muted); padding: 20px;">No records found in Monthly Plan.</td></tr>`;
                 }
@@ -4045,24 +4100,27 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             if (y && y[1] !== kp[0]) return false;
             return (idx + 1) === parseInt(kp[1], 10);
         }
+        function sepcoPlanUser(plan) {
+            return plan["NS+ USER ID"] || plan["NS+ USER ID / Email"] || plan["USER ID"] || plan["EMAIL"] || plan["Email"] || plan["User"] || "";
+        }
         function getContentMonthlyTarget(userId) {
             const plans = Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : [];
-            const norm = value => String(value || "").trim().toLowerCase();
+            const norm = value => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
             let monthKey = "";
             try {
                 const el = document.getElementById("monthYearFilter");
                 if (el && el.value) monthKey = el.value;
             } catch (e) {}
+            const uid = norm(userId);
             return plans.reduce((total, plan) => {
-                const planUser = plan["NS+ USER ID"] || plan["NS+ USER ID / Email"] || plan["USER ID"] || plan["EMAIL"] || "";
-                if (norm(planUser) !== norm(userId)) return total;
-                // ST rule: only CONTENT bucket rows (CATEGORY / CATEGORY 2), not title/type includes
-                if (!sepcoPlanIsContent(plan)) return total;
-                if (!sepcoPlanMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"] || "", monthKey)) return total;
-                // ST computeKpi: parseInt(freq) || 1
+                if (norm(sepcoPlanUser(plan)) !== uid) return total;
+                // Same bucket + month rules as the Overview tab
+                const bucket = ovBucket(plan["CATEGORY"] || plan["Category"], plan["CATEGORY 2"] || plan["Category 2"] || plan["CATEGORY2"]);
+                if (bucket !== "CONTENT") return total;
+                if (!ovMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"] || "", monthKey)) return total;
                 const rawFreq = plan["FREQUENCY PER MONTH"] || plan["Frequency per Month"] || plan["FREQUENCY"] || "";
-                const freq = parseInt(String(rawFreq).replace(/[^0-9\-]/g, ""), 10);
-                return total + (Number.isFinite(freq) && freq > 0 ? freq : 1);
+                const freq = parseFloat(String(rawFreq).replace(/[^0-9.\-]/g, ""));
+                return total + (Number.isFinite(freq) && freq > 0 ? freq : 0);
             }, 0);
         }
 
@@ -4079,10 +4137,11 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
                 if (_mel && _mel.value) _sumMonthKey = _mel.value;
             } catch (e) {}
             (Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : []).forEach(plan => {
-                const id = plan["NS+ USER ID"] || plan["NS+ USER ID / Email"] || plan["USER ID"] || plan["EMAIL"] || "";
-                if (!id || userStats[id]) return;
-                if (!sepcoPlanIsContent(plan)) return;
-                if (!sepcoPlanMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"] || "", _sumMonthKey)) return;
+                const id = String(sepcoPlanUser(plan) || "").trim();
+                if (!id) return;
+                if (Object.keys(userStats).some(k => k.trim().toLowerCase() === id.toLowerCase())) return;
+                if (ovBucket(plan["CATEGORY"] || plan["Category"], plan["CATEGORY 2"] || plan["Category 2"] || plan["CATEGORY2"]) !== "CONTENT") return;
+                if (!ovMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"] || "", _sumMonthKey)) return;
                 userStats[id] = { approved: 0, rejected: 0, revised: 0 };
             });
             let keys = Object.keys(userStats);
@@ -4273,6 +4332,116 @@ html[data-theme="light"] .theme-toggle:hover { background: rgba(37, 99, 235, 0.1
             };
             document.body.appendChild(sTag);
         }
+
+        
+        
+        // ========== SNS BOOSTING (SEPCO) ==========
+        function snsFmtNumSepco(v) {
+            if (v === null || v === undefined || v === '') return '—';
+            var n = Number(v);
+            if (isNaN(n)) return escapeSns(v);
+            return n.toLocaleString();
+        }
+        function snsStatusBadgeSepco(st) {
+            var s = String(st || 'Pending');
+            var bg = s === 'Updated' ? 'rgba(16,185,129,0.2);color:#34d399' : (String(s).indexOf('Error') === 0 ? 'rgba(239,68,68,0.2);color:#f87171' : 'rgba(245,158,11,0.2);color:#fbbf24');
+            return '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:' + bg + ';">' + escapeSns(s) + '</span>';
+        }
+        function loadSnsBoostingSepco() {
+            var tbody = document.getElementById('snsBoostingTableBody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="14" style="padding:20px;color:var(--text-muted);text-align:center;">Loading...</td></tr>';
+            var cb = 'jsonp_sns_' + Math.round(Math.random() * 1e6);
+            var done = false;
+            window[cb] = function (data) {
+                if (done) return; done = true;
+                delete window[cb];
+                try { document.body.removeChild(tag); } catch (e) {}
+                renderSnsBoostingSepco((data && data.rows) ? data.rows : []);
+            };
+            var tag = document.createElement('script');
+            tag.src = GA_WEB_APP_URL + '?action=getTikTokLinks&callback=' + cb + '&t=' + Date.now();
+            tag.onerror = function () {
+                if (done) return; done = true;
+                delete window[cb];
+                try { document.body.removeChild(tag); } catch (e) {}
+                if (tbody) tbody.innerHTML = '<tr><td colspan="14" style="padding:20px;color:#ef4444;text-align:center;">Failed to load.</td></tr>';
+            };
+            document.body.appendChild(tag);
+        }
+        function escapeSns(v) {
+            return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function renderSnsBoostingSepco(rows) {
+            var tbody = document.getElementById('snsBoostingTableBody');
+            if (!tbody) return;
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="14" style="padding:20px;color:var(--text-muted);text-align:center;">No TikTok links submitted yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = rows.map(function (r) {
+                var url = String(r.tiktokUrl || '').trim();
+                var href = url;
+                if (href && !/^https?:\/\//i.test(href)) href = 'https://' + href;
+                var shortUrl = url.length > 40 ? url.substring(0, 38) + '…' : url;
+                var linkHtml = href
+                    ? '<a href="' + escapeSns(href) + '" target="_blank" rel="noopener noreferrer" title="' + escapeSns(url) + '" class="file-link" style="word-break:break-all;">' + escapeSns(shortUrl) + '</a>'
+                    : '—';
+                var tgt = snsFmtNumSepco(r.targetHeart) + ' / ' + snsFmtNumSepco(r.targetShare) + ' / ' + snsFmtNumSepco(r.targetViews);
+                var period = (r.boostStart || '—') + ' → ' + (r.boostEnd || '—');
+                var mode = String(r.mode || '');
+                if (mode && mode.indexOf('Creation') === -1 && mode.indexOf('Boosting') === -1) mode = '—';
+                return '<tr>' +
+                    '<td style="text-align:left;font-weight:600;font-size:12px;">' + escapeSns(r.stUser) + '</td>' +
+                    '<td style="text-align:left;">' + escapeSns(r.stName) + '</td>' +
+                    '<td style="font-size:11px;white-space:nowrap;">' + escapeSns(mode) + '</td>' +
+                    '<td style="text-align:left;max-width:150px;white-space:normal;">' + linkHtml + '</td>' +
+                    '<td style="font-size:11px;white-space:nowrap;">' + tgt + '</td>' +
+                    '<td>' + snsFmtNumSepco(r.plays) + '</td>' +
+                    '<td>' + snsFmtNumSepco(r.diggs) + '</td>' +
+                    '<td>' + snsFmtNumSepco(r.shares) + '</td>' +
+                    '<td>' + snsFmtNumSepco(r.actualTtl) + '</td>' +
+                    '<td>' + (r.achPct === '' || r.achPct == null ? '—' : escapeSns(r.achPct) + '%') + '</td>' +
+                    '<td><strong>' + (r.scorePct === '' || r.scorePct == null ? '—' : escapeSns(r.scorePct) + '%') + '</strong></td>' +
+                    '<td style="white-space:nowrap;font-size:11px;">' + escapeSns(period) + '</td>' +
+                    '<td>' + snsStatusBadgeSepco(r.status) + '</td>' +
+                    '<td><button type="button" style="background:var(--primary);padding:5px 10px;" onclick="updateSnsEngagementRow(' + Number(r.sheetRow) + ', this)">Update</button></td>' +
+                    '</tr>';
+            }).join('');
+        }
+        function updateSnsEngagementRow(sheetRow, btn) {
+            if (btn) { btn.disabled = true; btn.innerText = '…'; }
+            fetch(GA_WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'updateTikTokEngagement', row: sheetRow })
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                alert(data.message || (data.success ? 'Updated.' : 'Failed.'));
+                loadSnsBoostingSepco();
+            }).catch(function () {
+                alert('Request sent. Refresh in 1–2 min if needed.');
+                setTimeout(loadSnsBoostingSepco, 3000);
+            }).finally(function () {
+                if (btn) { btn.disabled = false; btn.innerText = 'Update'; }
+            });
+        }
+        function updateSnsEngagementAll() {
+            var btn = document.getElementById('snsUpdateAllBtn');
+            if (btn) { btn.disabled = true; btn.innerText = 'Updating…'; }
+            fetch(GA_WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'updateTikTokEngagement', updateAll: true })
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                alert(data.message || (data.success ? 'Done.' : 'Failed.'));
+                loadSnsBoostingSepco();
+            }).catch(function () {
+                alert('Request sent. Wait 1–2 min then Refresh.');
+                setTimeout(loadSnsBoostingSepco, 5000);
+            }).finally(function () {
+                if (btn) { btn.disabled = false; btn.innerText = '⚡ Update All'; }
+            });
+        }
+
     </script>
 </body>
 </html>
