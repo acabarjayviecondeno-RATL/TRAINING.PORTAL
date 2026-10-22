@@ -244,7 +244,7 @@ html[data-theme="light"] .stat span:last-child{color:var(--muted)}
         <div class="cc"><h4>👥 Role Breakdown (by Position)</h4><div class="cbox"><canvas id="chartRoles"></canvas></div></div>
         <div class="cc"><h4>🗂️ Users by Job Group</h4><div class="cbox"><canvas id="chartJob"></canvas></div></div>
         <div class="cc"><h4>📍 Users by Region</h4><div class="cbox"><canvas id="chartRegion"></canvas></div></div>
-        <div class="cc"><h4>⏱️ Task Actual Duration per User (min)</h4><div class="cbox"><canvas id="chartTopUsers"></canvas></div></div>
+        <div class="cc"><h4>⏱️ Task Actual per User (min, approved content only)</h4><div class="cbox"><canvas id="chartTopUsers"></canvas></div></div>
         <div class="cc wide"><h4>📈 Daily Activity (LOGS)</h4><div class="cbox short"><canvas id="chartActivity"></canvas></div></div>
       </div>
 
@@ -254,7 +254,7 @@ html[data-theme="light"] .stat span:last-child{color:var(--muted)}
           <table id="trendRoles"><thead><tr><th>Role (Position)</th><th>Users</th><th>%</th></tr></thead><tbody></tbody></table>
         </div>
         <div class="grid" style="max-height:280px">
-          <table id="trendTopUsers"><thead><tr><th>User</th><th>Monthly Plan</th><th>Task Plan</th><th>Task Actual</th><th>Actual / Plan</th></tr></thead><tbody></tbody></table>
+          <table id="trendTopUsers"><thead><tr><th>User</th><th>Monthly Plan (adj.)</th><th>Task Plan</th><th>Task Actual (KPI)</th><th>Productivity</th></tr></thead><tbody></tbody></table>
         </div>
         <div class="grid" style="max-height:280px">
           <table id="trendActivity"><thead><tr><th>Date</th><th>Logs / Activity</th></tr></thead><tbody></tbody></table>
@@ -502,17 +502,41 @@ async function unlock(auto){
   }
 }
 
-async function loadSheets(){
+async function loadSheets(opts){
+  // opts: { trends: true/false } — default: only load trends when dashboard is visible
   const j = await api("adminListSheets");
   sheets = j.sheets;
   $("sheetNav").innerHTML = sheets.map((s,i)=>`<div class="item" data-i="${i}" onclick="openSheet(${i})">🗂 <span>${esc(s.name)}</span><small>${Math.max(0,s.rows-1)}</small></div>`).join(""); filterNav();
   $("stats").innerHTML = sheets.map((s,i)=>`<div class="stat" onclick="openSheet(${i})"><span>${esc(s.name)}</span><b>${Math.max(0,s.rows-1)}</b><span>rows · ${s.cols} cols</span></div>`).join("");
+  // keep the currently open sheet highlighted in the nav
+  if(curSheet){
+    const idx = sheets.findIndex(s => s.name === curSheet);
+    if(idx >= 0) setActive(document.querySelector(`#sheetNav .item[data-i="${idx}"]`));
+  }
   const tm = $("trendMonth");
   if(tm && !tm.value){
     const d = new Date();
     tm.value = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
   }
-  loadTrendSummary();
+  const wantTrends = opts && typeof opts.trends === "boolean"
+    ? opts.trends
+    : ($("secDash") && $("secDash").classList.contains("active"));
+  if(wantTrends) loadTrendSummary();
+}
+
+/** Soft-update sidebar/stat counts for one sheet without a full reload */
+function bumpSheetCount(name, delta){
+  const s = sheets.find(x => x.name === name);
+  if(s) s.rows = Math.max(1, (s.rows || 1) + delta);
+  const idx = sheets.findIndex(x => x.name === name);
+  if(idx < 0) return;
+  const nav = document.querySelector(`#sheetNav .item[data-i="${idx}"] small`);
+  if(nav) nav.textContent = Math.max(0, (s ? s.rows : 1) - 1);
+  const stat = document.querySelectorAll("#stats .stat")[idx];
+  if(stat){
+    const b = stat.querySelector("b");
+    if(b) b.textContent = Math.max(0, (s ? s.rows : 1) - 1);
+  }
 }
 
 function toggleNav(force){
@@ -530,7 +554,7 @@ function setActive(sel){document.querySelectorAll(".item").forEach(x=>x.classLis
 function showSec(id){document.querySelectorAll(".sec").forEach(x=>x.classList.remove("active"));$(id).classList.add("active")}
 function showDash(){setActive($("nav-dash"));showSec("secDash"); if(creds) loadTrendSummary();}
 function showAnn(){setActive($("nav-ann"));showSec("secAnn")}
-function refreshAll(){ if(!creds) return; loadSheets(); if($("secData").classList.contains("active")) loadSheet(curSheet); }
+function refreshAll(){ if(!creds) return; loadSheets({trends:true}); if($("secData").classList.contains("active")) loadSheet(curSheet); }
 
 function openSheet(i){
   setActive(document.querySelector(`#sheetNav .item[data-i="${i}"]`));
@@ -603,6 +627,121 @@ function chartColors(n){
   const out=[]; for(let i=0;i<n;i++) out.push(base[i%base.length]); return out;
 }
 
+
+/* ===== KPI-consistent minutes (same rules as ST computeKpi / SEPCO skComputeKpi) =====
+   Monthly Plan  = sum(DURATION x FREQUENCY) - approved leave days x 480
+   Task Actual   = CONTENT rows only when approved (APPROVAL DATE or an Approved file), TASK/OTHERS always
+   Productivity  = Task Actual / Monthly Plan (uncapped here; ST/SEPCO cap each KPI at 100% in the total) */
+function adNorm(v){ return String(v==null?"":v).trim().toLowerCase(); }
+function adCleanDate(raw){
+  if(raw==null||raw==="") return "";
+  if(raw instanceof Date) return isNaN(raw)?"":raw.getFullYear()+"-"+String(raw.getMonth()+1).padStart(2,"0")+"-"+String(raw.getDate()).padStart(2,"0");
+  const str=String(raw).trim();
+  if(str.includes("T")) return str.split("T")[0];
+  const p=str.split(" ")[0].split("/");
+  if(p.length===3){ let y=p[2]; if(y.length===2) y="20"+y; return y+"-"+String(p[0]).padStart(2,"0")+"-"+String(p[1]).padStart(2,"0"); }
+  const dt=new Date(str);
+  if(!isNaN(dt.getTime())) return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+  return str;
+}
+function adMonthKey(raw){ const c=adCleanDate(raw); return /^\d{4}-\d{2}/.test(c)?c.slice(0,7):""; }
+function adMonthMatches(cell,key){
+  if(!key) return true;
+  const c=String(cell==null?"":cell).trim(); if(c==="") return true;
+  const m=/^(\d{4})-(\d{2})/.exec(c); if(m) return (m[1]+"-"+m[2])===key;
+  const names=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+  const idx=names.indexOf(c.toLowerCase().substring(0,3)); if(idx===-1) return true;
+  const y=/(\d{4})/.exec(c), kp=key.split("-");
+  if(y && y[1]!==kp[0]) return false;
+  return (idx+1)===parseInt(kp[1],10);
+}
+function adNormTitle(s){ return String(s||"").toLowerCase().replace(/\.[a-z0-9]{2,5}$/,"").replace(/[^a-z0-9]+/g," ").trim(); }
+function adTitlesMatch(a,b){
+  const ta=adNormTitle(a), tb=adNormTitle(b); if(!ta||!tb) return false;
+  if(ta===tb||ta.indexOf(tb)!==-1||tb.indexOf(ta)!==-1) return true;
+  const aa=ta.split(/\s+/).filter(t=>t.length>2), bb=tb.split(/\s+/).filter(t=>t.length>2);
+  if(!aa.length||!bb.length) return false;
+  const ov=aa.filter(t=>bb.indexOf(t)!==-1).length;
+  return ov>=Math.min(2,aa.length,bb.length)||(aa.length===1&&bb.indexOf(aa[0])!==-1);
+}
+function adBucket(cat,cat2){
+  const c=String(cat||"").trim().toUpperCase(), c2=String(cat2||"").trim().toUpperCase(), B=["CONTENT","TASK","OTHERS"];
+  if(B.indexOf(c2)!==-1) return c2; if(B.indexOf(c)!==-1) return c;
+  const probe=c2||c;
+  if(probe==="CONTENT"||(probe.indexOf("CONTENT")===0&&probe.indexOf("-")===-1)) return "CONTENT";
+  if(probe.indexOf("TASK")!==-1&&probe.indexOf("CONTENT")===-1) return "TASK";
+  return "OTHERS";
+}
+function adKpiMinutes(range, monthlyRaw, actualRaw, approvals, leaves){
+  const key=range.y+"-"+String(range.m).padStart(2,"0");
+  const out={};
+  const get=u=>out[u]||(out[u]={planMins:0,leaveDays:0,adjPlan:0,actMins:0});
+  const mh=detectHeader(monthlyRaw), mHead=monthlyRaw[mh]||[];
+  const mU=findCol(mHead,[/ns\+|user\s*id|email|userid/i]), mM=findCol(mHead,[/^month$/i]);
+  let mD=findCol(mHead,[/duration per min/i]); if(mD<0) mD=findCol(mHead,[/duration/i]);
+  const mF=findCol(mHead,[/frequency/i]);
+  for(let r=mh+1;r<monthlyRaw.length;r++){
+    const row=monthlyRaw[r]||[]; const u=mU>-1?adNorm(row[mU]):""; if(!u) continue;
+    if(mM>-1 && !adMonthMatches(row[mM],key)) continue;
+    const d=parseFloat(String(mD>-1?row[mD]:"").replace(/,/g,"")), f=parseInt(mF>-1?row[mF]:"",10)||1;
+    get(u).planMins += (!isNaN(d)&&d>0)?d*f:480*f;
+  }
+  (leaves||[]).forEach(l=>{
+    if(String((l&&l.status)||"Approved").toLowerCase()!=="approved") return;
+    if(adMonthKey(l.date)!==key) return;
+    const u=adNorm(l.user); if(u) get(u).leaveDays++;
+  });
+  const apprBy={};
+  (approvals||[]).forEach(a=>{
+    if(!/approve/i.test(String(a.status||""))) return;
+    const by=adNorm(a.uploadedBy), nt=adNormTitle(a.fileName); if(!by||!nt) return;
+    (apprBy[by]=apprBy[by]||[]).push(nt);
+  });
+  const aHead=actualRaw[2]||[];
+  const aU=findCol(aHead,[/ns\+|user\s*id|email|userid/i]);
+  let aDt=findCol(aHead,[/^date submitted$/i,/submitted d/i,/submitted date/i]); if(aDt<0) aDt=findCol(aHead,[/^date$/i]);
+  let aT=findCol(aHead,[/actual\s*\[title\]/i]); if(aT<0) aT=findCol(aHead,[/^title$/i,/title/i]);
+  let aDur=findCol(aHead,[/duration per min/i]); if(aDur<0) aDur=findCol(aHead,[/duration/i]);
+  const aC=findCol(aHead,[/^category$/i]), aC2=findCol(aHead,[/category 2/i]);
+  const aApr=findCol(aHead,[/approval date/i]), aSt=findCol(aHead,[/is this the start date/i]);
+  const byUser={};
+  for(let r=3;r<actualRaw.length;r++){
+    const row=actualRaw[r]||[]; const u=aU>-1?adNorm(row[aU]):""; if(!u) continue;
+    if(aDt>-1 && adMonthKey(row[aDt])!==key) continue;
+    const title=String(aT>-1?row[aT]:"").trim(); if(!title) continue;
+    const d=parseFloat(String(aDur>-1?row[aDur]:"").replace(/,/g,""));
+    const o={title, dur:(!isNaN(d)&&d>0)?d:0, date:adCleanDate(aDt>-1?row[aDt]:""),
+      bucket:adBucket(aC>-1?row[aC]:"", aC2>-1?row[aC2]:""),
+      apr:String(aApr>-1?row[aApr]:"").trim(), start:aSt>-1&&/^(y|yes|true|1)/i.test(String(row[aSt]||"").trim())};
+    (byUser[u]=byUser[u]||[]).push(o);
+  }
+  Object.keys(byUser).forEach(u=>{
+    const rows=byUser[u].slice(), k=get(u);
+    let act=0;
+    rows.filter(x=>x.bucket!=="CONTENT").forEach(x=>{ act+=x.dur; });
+    const content=rows.filter(x=>x.bucket==="CONTENT").sort((a,b)=>a.date<b.date?-1:1);
+    const units=[];
+    if(content.some(x=>x.start)){
+      content.forEach(x=>{
+        if(x.start) units.push({title:x.title,rows:[x]});
+        else for(let i=units.length-1;i>=0;i--){ if(units[i].title.toLowerCase()===x.title.toLowerCase()){ units[i].rows.push(x); break; } }
+      });
+    } else {
+      const map={}; content.forEach(x=>{ const kk=x.title.toLowerCase(); if(!map[kk]){ map[kk]={title:x.title,rows:[]}; units.push(map[kk]); } map[kk].rows.push(x); });
+    }
+    const files=[]; Object.keys(apprBy).forEach(by=>{ if(by===u||(by.length>2&&u.includes(by))||(u.length>2&&by.includes(u))) apprBy[by].forEach(f=>files.push(f)); });
+    units.forEach(un=>{
+      let apr=""; un.rows.forEach(x=>{ if(x.apr) apr=x.apr; });
+      const aprOk=apr!==""&&!/^n\/?a$/i.test(apr)&&apr!=="0"&&(/^\d{4}-\d{2}-\d{2}$/.test(adCleanDate(apr))||/\d{4}/.test(apr));
+      const tn=adNormTitle(un.title);
+      if(aprOk||(tn!==""&&files.some(f=>adTitlesMatch(tn,f)))) un.rows.forEach(x=>{ act+=x.dur; });
+    });
+    k.actMins=act;
+  });
+  Object.keys(out).forEach(u=>{ const k=out[u]; k.adjPlan=Math.max(0,k.planMins-k.leaveDays*480); });
+  return out;
+}
+
 async function loadTrendSummary(){
   if(!creds) return;
   const status = $("trendStatus");
@@ -615,12 +754,15 @@ async function loadTrendSummary(){
   if(!range){ status.textContent = "Select a month"; return; }
 
   try{
-    const [usersRaw, logsRaw, planRaw, actualRaw, monthlyRaw] = await Promise.all([
+    const adGet = async a => { try{ const r = await fetch(API+"?"+new URLSearchParams({action:a,t:Date.now()})); return await r.json(); }catch(e){ return null; } };
+    const [usersRaw, logsRaw, planRaw, actualRaw, monthlyRaw, apprJ, leaveJ] = await Promise.all([
       getSheetData("user account"),
       getSheetData("LOGS"),
       getSheetData("Task Plan"),
       getSheetData("Task Actual"),
-      getSheetData("Monthly Plan")
+      getSheetData("Monthly Plan"),
+      adGet("getApprovals"),
+      adGet("getLeaves")
     ]);
 
     // ---- Users ----
@@ -700,7 +842,7 @@ async function loadTrendSummary(){
       const userC = findCol(head, [/ns\+|user\s*id|email|userid/i]);
       let durC = -1;
       for(const p of durPatterns){ durC = findCol(head, [p]); if(durC>-1) break; }
-      const dateC = findCol(head, [/date|day|when|period|month/i]);
+      const dateC = findCol(head, [/date|day|when|period|month|submitted/i]);
       const byUser = {};
       let monthDur=0, monthTasks=0;
       for(let r=hdr+1;r<raw.length;r++){
@@ -734,6 +876,17 @@ async function loadTrendSummary(){
         if(k==="actual") cmp[u].tasks = src.byUser[u].tasks;
       });
     });
+    const kpiOk = !!(apprJ && apprJ.success && Array.isArray(apprJ.approvals) && leaveJ && leaveJ.success && Array.isArray(leaveJ.leaves));
+    let kpiMap = {};
+    if(kpiOk){
+      try{
+        kpiMap = adKpiMinutes(range, monthlyRaw, actualRaw, apprJ.approvals, leaveJ.leaves);
+        Object.keys(kpiMap).forEach(u=>{
+          if(!cmp[u]) cmp[u]={monthly:0,plan:0,actual:0,tasks:0};
+          cmp[u].monthly = kpiMap[u].adjPlan; cmp[u].actual = kpiMap[u].actMins; cmp[u].kpi = true;
+        });
+      }catch(e){ kpiMap = {}; console.error("KPI minutes failed", e); }
+    }
     const topUsers = Object.entries(cmp)
       .sort((a,b)=>b[1].actual - a[1].actual || b[1].plan - a[1].plan)
       .slice(0,15);
@@ -750,7 +903,7 @@ async function loadTrendSummary(){
     const topTbody = $("trendTopUsers") && $("trendTopUsers").querySelector("tbody");
     const n0 = v => Math.round(v).toLocaleString();
     if(topTbody) topTbody.innerHTML = topUsers.length
-      ? topUsers.map(([u,v])=>`<tr><td title="${esc(u)}">${esc(u.split("@")[0])}<span class="dom">${u.indexOf("@")>-1?esc("@"+u.split("@")[1]):""}</span></td><td>${n0(v.monthly)}</td><td>${n0(v.plan)}</td><td>${n0(v.actual)}</td><td>${v.plan?Math.round(v.actual/v.plan*100)+"%":"–"}</td></tr>`).join("")
+      ? topUsers.map(([u,v])=>`<tr><td title="${esc(u)}">${esc(u.split("@")[0])}<span class="dom">${u.indexOf("@")>-1?esc("@"+u.split("@")[1]):""}</span></td><td>${n0(v.monthly)}</td><td>${n0(v.plan)}</td><td>${n0(v.actual)}</td><td>${v.monthly?Math.round(v.actual/v.monthly*100)+"%":""}</td></tr>`).join("")
       : `<tr><td colspan="5">No task data for this month</td></tr>`;
 
     const days = Object.keys(dailyLogs).sort();
@@ -839,6 +992,7 @@ async function loadTrendSummary(){
     else notes.push("Monthly Plan: using column \""+(monthly.durHead||"none found — counting rows")+"\"; Task Plan: \""+(plan.durHead||"none")+"\"; Task Actual: \""+(actual.durHead||"none")+"\".");
     if(roleCol<0) notes.push("user account has no POSITION column — roles show as NO POSITION.");
     if(createdCol<0) notes.push("user account has no clear created-date column (New Users may stay 0).");
+    notes.push(kpiOk ? "Monthly Plan = duration x frequency less approved leave (x480); Task Actual counts approved CONTENT + TASK/OTHERS; Productivity = Actual / Monthly Plan (uncapped) - same rules as ST & SEPCO." : "Could not load Approvals/Leaves - showing raw sheet minutes (not KPI-consistent).");
     if(note) note.textContent = notes.join(" ");
   }catch(e){
     status.textContent = "Error loading trends";
@@ -886,6 +1040,11 @@ function colOptions(c){
 function clearFilters(){ $("q").value=""; colF={}; renderGrid(); }
 
 function renderGrid(){
+  // preserve scroll position so the view doesn't jump after every action
+  const gridEl = document.querySelector(".grid");
+  const scrollTop = gridEl ? gridEl.scrollTop : 0;
+  const scrollLeft = gridEl ? gridEl.scrollLeft : 0;
+
   if(!data.length){$("tbl").innerHTML="<tr><td>Empty sheet — use “Add row”.</td></tr>";$("gridNote").textContent="";return}
   const head=data[hdr]||[], cols=head.length, q=$("q").value.toLowerCase().trim(), show=$("showSens").checked;
   const isAppr = curSheet.toLowerCase()==="approvals", stCol=head.findIndex(x=>/^status$/i.test(String(x).trim())), isUsers=curSheet.toLowerCase()==="user account", pwCol=head.findIndex(x=>/^password$/i.test(String(x).trim()));
@@ -918,6 +1077,8 @@ function renderGrid(){
   }
   $("tbl").innerHTML=h;
   $("gridNote").textContent = total>300 ? `Showing first 300 of ${total} matches — use the search box to narrow it down.` : `${total} row(s)`;
+  // restore scroll
+  if(gridEl){ gridEl.scrollTop = scrollTop; gridEl.scrollLeft = scrollLeft; }
 }
 
 function editCell(td,r,c){
@@ -958,8 +1119,24 @@ async function resetPw(r){
 
 async function delRow(row){
   if(!confirm(`Delete row ${row} in "${curSheet}"? This cannot be undone.`)) return;
-  try{ await api("adminDeleteRow",{sheet:curSheet,row}); toast("Row deleted"); await loadSheet(curSheet); loadSheets(); }
-  catch(e){toast("Error: "+e.message)}
+  try{
+    await api("adminDeleteRow",{sheet:curSheet,row});
+    // local update — no full page/sheet refresh
+    const idx = row - 1;
+    if(idx >= 0 && idx < data.length) data.splice(idx, 1);
+    // shift formula keys after the deleted row
+    const next = {};
+    Object.keys(formulas).forEach(k => {
+      const [r,c] = k.split(",").map(Number);
+      if(r < row) next[k] = formulas[k];
+      else if(r > row) next[(r-1)+","+c] = formulas[k];
+    });
+    formulas = next;
+    bumpSheetCount(curSheet, -1);
+    $("sheetSub").textContent = `${Math.max(0,data.length-hdr-1)} rows · header on row ${hdr+1} · click a cell to edit it (Enter = save, Esc = cancel).`;
+    renderGrid();
+    toast("Row deleted ✔");
+  }catch(e){toast("Error: "+e.message)}
 }
 
 function openAdd(){
@@ -971,8 +1148,16 @@ function closeAdd(){$("addM").classList.remove("show")}
 async function saveAdd(){
   const vals=[...document.querySelectorAll("#addFields input")].map(i=>i.value);
   if(!vals.some(v=>v.trim())){$("addErr").textContent="Fill at least one field.";return}
-  try{ await api("adminAppendRow",{sheet:curSheet,values:vals}); closeAdd(); toast("Row added ✔"); await loadSheet(curSheet); loadSheets(); }
-  catch(e){$("addErr").textContent=e.message}
+  try{
+    await api("adminAppendRow",{sheet:curSheet,values:vals});
+    // local append — keep current filters/scroll/view
+    data.push(vals);
+    bumpSheetCount(curSheet, 1);
+    $("sheetSub").textContent = `${Math.max(0,data.length-hdr-1)} rows · header on row ${hdr+1} · click a cell to edit it (Enter = save, Esc = cancel).`;
+    closeAdd();
+    renderGrid();
+    toast("Row added ✔");
+  }catch(e){$("addErr").textContent=e.message}
 }
 
 // Uses the existing approval flow so requester notifications / emails / Telegram still fire
@@ -984,7 +1169,19 @@ async function decide(row,status){
     const qs=new URLSearchParams({action:"updateApprovalStatus",row,status,remarks}).toString();
     const j=await (await fetch(API+"?"+qs)).json();
     if(!j.success) throw new Error(j.message||"Failed");
-    toast(status+" ✔"); loadSheet(curSheet);
+    // local status update — no full sheet reload
+    const head = data[hdr] || [];
+    const stCol = head.findIndex(x => /^status$/i.test(String(x).trim()));
+    const rmCol = head.findIndex(x => /remark|reason|feedback|comment/i.test(String(x).trim()));
+    const idx = row - 1;
+    if(idx >= 0 && idx < data.length){
+      if(stCol > -1) data[idx][stCol] = status;
+      if(rmCol > -1 && remarks) data[idx][rmCol] = remarks;
+      delete formulas[row+","+(stCol+1)];
+      if(rmCol > -1) delete formulas[row+","+(rmCol+1)];
+    }
+    renderGrid();
+    toast(status+" ✔");
   }catch(e){toast("Error: "+e.message)}
 }
 
@@ -1049,7 +1246,22 @@ async function saveResub(){
   const btn=$("resBtn"); btn.disabled=true; btn.textContent="Resubmitting…"; $("resErr").textContent="";
   try{
     await api("adminResubmit",{sheet:"approvals",row:resRow,startStage:resStart,rtoEmail:resStart==="RTO"?rto:"",sepcoEmail:sepco});
-    closeResub(); toast("Resubmitted ✔ — sent to "+(resStart==="SEPCO"?sepco:rto)+" via Telegram"); await loadSheet(curSheet); loadSheets();
+    // local update only — keep filters, scroll, and open view
+    const head = data[hdr] || [];
+    const col = re => head.findIndex(x => re.test(String(x).trim()));
+    const stCol = col(/^status$/i), ac = col(/^approver\s*email/i), rc = col(/^rto\s*email/i), pc = col(/^sepco\s*email/i);
+    const idx = resRow - 1;
+    if(idx >= 0 && idx < data.length){
+      const newStatus = resStart === "SEPCO" ? "Pending SEPCO" : "Pending";
+      if(stCol > -1) data[idx][stCol] = newStatus;
+      if(rc > -1 && rto) data[idx][rc] = rto;
+      if(pc > -1 && sepco) data[idx][pc] = sepco;
+      if(ac > -1) data[idx][ac] = resStart === "SEPCO" ? sepco : rto;
+      [stCol, ac, rc, pc].forEach(c => { if(c > -1) delete formulas[resRow+","+(c+1)]; });
+    }
+    closeResub();
+    renderGrid();
+    toast("Resubmitted ✔ — sent to "+(resStart==="SEPCO"?sepco:rto)+" via Telegram");
   }catch(e){ $("resErr").textContent=e.message; }
   finally{ btn.disabled=false; btn.textContent="Resubmit"; }
 }
@@ -1066,7 +1278,7 @@ function postAnn(){
   if(!title||!message){toast("Please enter a title and a message.");return}
   fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
     body:JSON.stringify({action:"postAnnouncement",title,message,user:localStorage.getItem("portal_name")||"Admin"})})
-  .then(()=>{toast("Announcement posted ✔");$("annTitle").value="";$("annMsg").value="";if(creds)loadSheets()})
+  .then(()=>{toast("Announcement posted ✔");$("annTitle").value="";$("annMsg").value="";})
   .catch(e=>toast("Error: "+e));
 }
 
