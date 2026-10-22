@@ -5137,10 +5137,13 @@ html[data-theme="light"] button.sec-action-btn:hover {
             if (!rows || rows.length === 0) return [];
 
             var headerRowIndex = 0;
-            var maxScan = Math.min(rows.length, 5);
+            var maxScan = Math.min(rows.length, 8);
             for (var i = 0; i < maxScan; i++) {
                 var rowStr = rows[i].join(" ").toLowerCase();
-                if (rowStr.indexOf('ns+') !== -1 || rowStr.indexOf('date') !== -1 || rowStr.indexOf('type') !== -1) {
+                // Revised Task Plan/Actual headers use "NS+ user id", "Submitted D", "Category 2", "Duration", "Title"
+                if (rowStr.indexOf('ns+') !== -1 || rowStr.indexOf('category 2') !== -1 ||
+                    rowStr.indexOf('submitted') !== -1 || rowStr.indexOf('date') !== -1 ||
+                    rowStr.indexOf('type') !== -1) {
                     headerRowIndex = i;
                     break;
                 }
@@ -5148,8 +5151,39 @@ html[data-theme="light"] button.sec-action-btn:hover {
 
             var headers = rows[headerRowIndex].map(function (h) { return String(h || "").trim(); });
             var headerLen = headers.length;
+            // Map revised sheet headers -> canonical names used across KPI / Daily Task / Gantt
+            var HEADER_ALIAS = {
+                'ns+ user id': 'NS+ USER ID', 'ns+ userid': 'NS+ USER ID', 'ns+ user id (email)': 'NS+ USER ID',
+                'userid': 'NS+ USER ID', 'user id': 'NS+ USER ID', 'email': 'NS+ USER ID',
+                'submitted d': 'Date Submitted', 'submitted date': 'Date Submitted', 'date submitted': 'Date Submitted',
+                'date': 'Date Submitted', 'submission date': 'Date Submitted',
+                'time submitted': 'Time Submitted',
+                'start time': 'START TIME', 'time start': 'START TIME',
+                'end time': 'TIME ENDED', 'time ended': 'TIME ENDED', 'time end': 'TIME ENDED',
+                'duration': 'DURATION PER MIN', 'duration per min': 'DURATION PER MIN',
+                'duration per minute': 'DURATION PER MIN', 'duration (min)': 'DURATION PER MIN', 'mins': 'DURATION PER MIN',
+                'title': 'TITLE', 'plan [title]': 'PLAN [Title]', 'actual [title]': 'ACTUAL [Title]',
+                'content name': 'TITLE', 'plan title': 'PLAN [Title]', 'actual title': 'ACTUAL [Title]',
+                'category': 'CATEGORY', 'category 2': 'CATEGORY 2', 'category2': 'CATEGORY 2',
+                'remarks': 'REMARKS', 'remarks for actual': 'REMARKS',
+                'dropdown': 'FORMAT', 'format': 'FORMAT',
+                'location': 'LOCATION',
+                'submission': 'Submission', 'series no.': 'Series No.', 'series no': 'Series No.',
+                'submitted by': 'Submitted By', 'employee num': 'Employee Num', 'employee number': 'Employee Num'
+            };
+            function canonHeader(h) {
+                var key = String(h || '').toLowerCase().trim().replace(/\s+/g, ' ');
+                return HEADER_ALIAS[key] || null;
+            }
             var dataObjects = [];
             var userFilter = (typeof loggedInUser === 'string' && loggedInUser) ? loggedInUser : '';
+
+            // Prefer NS+ user id column index when present (not always col 0 after sheet redesign)
+            var userColIdx = 0;
+            for (var ui = 0; ui < headerLen; ui++) {
+                var uh = String(headers[ui] || '').toLowerCase();
+                if (uh.indexOf('ns+') !== -1 || uh.indexOf('user id') !== -1 || uh === 'email') { userColIdx = ui; break; }
+            }
 
             for (var ri = headerRowIndex + 1; ri < rows.length; ri++) {
                 var r = rows[ri];
@@ -5160,18 +5194,32 @@ html[data-theme="light"] button.sec-action-btn:hover {
                 }
                 if (!hasVal) continue;
 
-                // Early user filter when possible (col 0 = NS+ user id) — huge speedup on shared sheets
-                var nsId = r[0] !== undefined ? String(r[0]).toLowerCase().trim() : '';
+                var nsId = r[userColIdx] !== undefined ? String(r[userColIdx]).toLowerCase().trim() : '';
+                if (!nsId && r[0] !== undefined) nsId = String(r[0]).toLowerCase().trim();
                 if (userFilter && nsId) {
                     if (nsId !== userFilter && nsId.indexOf(userFilter) === -1 && userFilter.indexOf(nsId) === -1) {
-                        // still allow name-based match later only if no email-like id — skip obvious others
                         if (nsId.indexOf('@') !== -1 || userFilter.indexOf('@') !== -1) continue;
                     }
                 }
 
                 var obj = {};
                 for (var j = 0; j < headerLen; j++) {
-                    if (headers[j]) obj[headers[j]] = r[j] !== undefined ? r[j] : "";
+                    if (!headers[j]) continue;
+                    var val = r[j] !== undefined ? r[j] : "";
+                    obj[headers[j]] = val;
+                    var canon = canonHeader(headers[j]);
+                    if (canon) obj[canon] = val;
+                }
+                // Title also fills PLAN [Title] / ACTUAL [Title] so legacy readers keep working
+                var titleVal = obj['TITLE'] || obj['Title'] || obj['PLAN [Title]'] || obj['ACTUAL [Title]'] || '';
+                if (titleVal !== '' && titleVal != null) {
+                    if (!obj['PLAN [Title]']) obj['PLAN [Title]'] = titleVal;
+                    if (!obj['ACTUAL [Title]']) obj['ACTUAL [Title]'] = titleVal;
+                    if (!obj['TITLE']) obj['TITLE'] = titleVal;
+                }
+                // Ensure duration canonical
+                if ((obj['DURATION PER MIN'] === undefined || obj['DURATION PER MIN'] === '') && obj['Duration'] != null && obj['Duration'] !== '') {
+                    obj['DURATION PER MIN'] = obj['Duration'];
                 }
                 obj["_nsUserId"] = nsId;
                 dataObjects.push(obj);
@@ -5225,7 +5273,7 @@ html[data-theme="light"] button.sec-action-btn:hover {
             }
             (allLoadedTasks.plan || []).concat(allLoadedTasks.actual || []).forEach(t => {
                 if (!matchesUser(t)) return;
-                let k = getRowMonthKey(t["Date Submitted"]);
+                let k = getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]);
                 if (k) months.add(k);
             });
             localLeaveRecords.forEach(l => { let k = getRowMonthKey(l.date); if (k) months.add(k); });
@@ -5261,38 +5309,38 @@ html[data-theme="light"] button.sec-action-btn:hover {
 
         function renderViewTables(tasks) {
             let selectedMonth = document.getElementById('selectedMonthFilter').value;
-            let planRows = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === selectedMonth);
-            let actualRows = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === selectedMonth);
+            let planRows = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === selectedMonth);
+            let actualRows = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === selectedMonth);
 
             let planTbody = document.getElementById('viewPlanTableBody');
             planTbody.innerHTML = planRows.length > 0 ? planRows.map(row => `
                 <tr>
-                    <td>${row["Date Submitted"] || ''}</td>
-                    <td>${row["Time Submitted"] || ''}</td>
-                    <td>${row["START TIME"] || ''}</td>
-                    <td>${row["TIME ENDED"] || ''}</td>
-                    <td>${getRowVal(row, ["DURATION PER MIN", "DURATION"])}</td>
-                    <td>${row["LOCATION"] || ''}</td>
-                    <td>${row["PLAN [Title]"] || ''}</td>
-                    <td>${row["CATEGORY"] || ''}</td>
-                    <td>${getRowVal(row, ["CATEGORY 2"])}</td>
-                    <td>${row["REMARKS"] || ''}</td>
+                    <td>${getRowVal(row, ["Date Submitted", "Submitted D", "Submitted Date"]) || ''}</td>
+                    <td>${getRowVal(row, ["Time Submitted"]) || ''}</td>
+                    <td>${getRowVal(row, ["START TIME", "Start Time"]) || ''}</td>
+                    <td>${getRowVal(row, ["TIME ENDED", "End Time"]) || ''}</td>
+                    <td>${getRowVal(row, ["DURATION PER MIN", "DURATION", "Duration"])}</td>
+                    <td>${getRowVal(row, ["LOCATION", "Location"]) || ''}</td>
+                    <td>${getRowVal(row, ["PLAN [Title]", "TITLE", "Title"]) || ''}</td>
+                    <td>${getRowVal(row, ["CATEGORY", "Category"]) || ''}</td>
+                    <td>${getRowVal(row, ["CATEGORY 2", "Category 2"])}</td>
+                    <td>${getRowVal(row, ["REMARKS", "Remarks"]) || ''}</td>
                 </tr>
             `).join('') : `<tr><td colspan="10" style="text-align:center; padding: 20px; color:var(--text-muted);">No plans found.</td></tr>`;
 
             let actualTbody = document.getElementById('viewActualTableBody');
             actualTbody.innerHTML = actualRows.length > 0 ? actualRows.map(row => `
                 <tr>
-                    <td>${row["Date Submitted"] || ''}</td>
-                    <td>${row["Time Submitted"] || ''}</td>
-                    <td>${row["START TIME"] || ''}</td>
-                    <td>${row["TIME ENDED"] || ''}</td>
-                    <td>${getRowVal(row, ["DURATION PER MIN", "DURATION"])}</td>
-                    <td>${row["LOCATION"] || ''}</td>
-                    <td>${row["CATEGORY"] || ''}</td>
-                    <td>${getRowVal(row, ["CATEGORY 2"])}</td>
-                    <td>${row["ACTUAL [Title]"] || ''}</td>
-                    <td>${row["FORMAT"] || ''}</td>
+                    <td>${getRowVal(row, ["Date Submitted", "Submitted D", "Submitted Date"]) || ''}</td>
+                    <td>${getRowVal(row, ["Time Submitted"]) || ''}</td>
+                    <td>${getRowVal(row, ["START TIME", "Start Time"]) || ''}</td>
+                    <td>${getRowVal(row, ["TIME ENDED", "End Time"]) || ''}</td>
+                    <td>${getRowVal(row, ["DURATION PER MIN", "DURATION", "Duration"])}</td>
+                    <td>${getRowVal(row, ["LOCATION", "Location"]) || ''}</td>
+                    <td>${getRowVal(row, ["CATEGORY", "Category"]) || ''}</td>
+                    <td>${getRowVal(row, ["CATEGORY 2", "Category 2"])}</td>
+                    <td>${getRowVal(row, ["ACTUAL [Title]", "TITLE", "Title"]) || ''}</td>
+                    <td>${getRowVal(row, ["FORMAT", "Dropdown", "Format"]) || ''}</td>
                     <td>${row["Is this the start date?"] || ''}</td>
                     <td>${row["TARGET DATE"] || ''}</td>
                     <td>${row["APPROVAL DATE"] || ''}</td>
@@ -5443,8 +5491,8 @@ html[data-theme="light"] button.sec-action-btn:hover {
                 monthIndex = parseInt(parts[1], 10) - 1;
             }
 
-            let planTasks = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === selectedMonth);
-            let actualTasks = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === selectedMonth);
+            let planTasks = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === selectedMonth);
+            let actualTasks = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === selectedMonth);
 
             let filteredLeaves = localLeaveRecords.filter(l => !selectedMonth || getRowMonthKey(l.date) === selectedMonth);
             let leaveAbsentCount = filteredLeaves.length;
@@ -6307,7 +6355,7 @@ html[data-theme="light"] button.sec-action-btn:hover {
             let sel = document.getElementById('selectedMonthFilter');
             let month = sel ? sel.value : '';
             let label = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text.replace(' (Current)', '') : month;
-            let inMonth = t => matchesUser(t) && getRowMonthKey(t["Date Submitted"]) === month;
+            let inMonth = t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === month;
             let planRows = (allLoadedTasks.plan || []).filter(inMonth);
             let actualRows = (allLoadedTasks.actual || []).filter(inMonth);
             let leaves = localLeaveRecords.filter(l => getRowMonthKey(l.date) === month);
@@ -6424,13 +6472,14 @@ function kpiCat(r) { return (getRowVal(r, ['CATEGORY']) + ' ' + getRowVal(r, ['C
 function kpiRowBucket(r) {
     var c = String(getRowVal(r, ['CATEGORY']) || '').trim().toUpperCase();
     var c2 = String(getRowVal(r, ['CATEGORY 2']) || '').trim().toUpperCase();
-    var buckets = ['CONTENT', 'TASK', 'OTHERS'];
+    var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
     if (buckets.indexOf(c2) !== -1) return c2;
     if (buckets.indexOf(c) !== -1) return c;
     // detailed type names like "CONTENT - One-Pager Templated" — do NOT treat as CONTENT
     // unless CATEGORY 2 already said so; use keyword only on a short field
     var probe = c2 || c;
     if (probe === 'CONTENT' || probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1) return 'CONTENT';
+    if (probe.indexOf('TRAINING') !== -1 && probe.indexOf('CONTENT') === -1) return 'TRAINING';
     if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) return 'TASK';
     return 'OTHERS';
 }
@@ -6514,7 +6563,7 @@ function kpiIsContentApproved(title, approvalDate, approvedFiles) {
 function kpiApprovalIsContent(cat, cat2) {
     var c = String(cat || '').trim().toUpperCase(), c2 = String(cat2 || '').trim().toUpperCase();
     if (!c && !c2) return true;
-    if (c2 === 'TASK' || c2 === 'OTHERS') return false;
+    if (c2 === 'TASK' || c2 === 'OTHERS' || c2 === 'TRAINING') return false;
     return c.indexOf('CONTENT') === 0 || c2.indexOf('CONTENT') === 0;
 }
 function kpiApprovedContentRows(monthKey) {
@@ -6528,7 +6577,7 @@ function kpiApprovedContentRows(monthKey) {
         if (nt && allApprovedFiles.indexOf(nt) === -1) allApprovedFiles.push(nt);
     });
     var rows = (allLoadedTasks.actual || []).filter(function (r) {
-        return matchesUser(r) && getRowMonthKey(r['Date Submitted']) === monthKey && kpiIsContentRow(r) && kpiTitle(r) !== '';
+        return matchesUser(r) && getRowMonthKey(getRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date']) || r['Date Submitted']) === monthKey && kpiIsContentRow(r) && kpiTitle(r) !== '';
     }).sort(function (a, b) { return kpiDate(a['Date Submitted']) < kpiDate(b['Date Submitted']) ? -1 : 1; });
     var flagged = rows.some(function (r) { return kpiIsYes(getRowVal(r, ['Is this the start date?'])); });
     var units = [];
@@ -6601,7 +6650,7 @@ function computeKpi(monthKey) {
 
     // Also keep Daily Actual units for on-time / mins when available
     var rows = (allLoadedTasks.actual || []).filter(function (r) {
-        return matchesUser(r) && getRowMonthKey(r['Date Submitted']) === monthKey && kpiIsContentRow(r) && kpiTitle(r) !== '';
+        return matchesUser(r) && getRowMonthKey(getRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date']) || r['Date Submitted']) === monthKey && kpiIsContentRow(r) && kpiTitle(r) !== '';
     }).sort(function (a, b) { return kpiDate(a['Date Submitted']) < kpiDate(b['Date Submitted']) ? -1 : 1; });
     var daByTitle = {};
     rows.forEach(function (r) {
@@ -6703,7 +6752,7 @@ function computeKpi(monthKey) {
     var planContentMins = 0;
     plan.forEach(function (r) {
         if (!kpiIsContentRow(r)) return;
-        var d = parseFloat(getRowVal(r, ['DURATION PER MIN', 'DURATION']));
+        var d = parseFloat(String(getRowVal(r, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, ''));
         var f = parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
         if (!isNaN(d) && d > 0) planContentMins += d * f;
         else planContentMins += 480 * f;
@@ -6720,14 +6769,27 @@ function computeKpi(monthKey) {
     var eff = planContentMins > 0 ? totalMins / planContentMins : (totalMins > 0 ? 1 : null);
 
     // Timeliness = Daily Actual total duration / Daily Plan total duration (same month)
+    // Revised Task Plan/Actual: Title, Submitted D, Duration, Start/End Time
+    function kpiRowDate(t) {
+        return getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']);
+    }
+    function kpiRowTitle(t) {
+        return String(getRowVal(t, ['ACTUAL [Title]', 'PLAN [Title]', 'TITLE', 'Title']) || '').trim();
+    }
+    function kpiRowDur(t) {
+        var d = parseFloat(String(getRowVal(t, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, ''));
+        return (!isNaN(d) && d > 0) ? d : NaN;
+    }
     var dailyPlanMins = 0, dailyActMins = 0;
-    (allLoadedTasks.plan || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey; }).forEach(function (t) {
-        if (t['PLAN [Title]']) dailyPlanMins += parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION'])) || 480;
+    (allLoadedTasks.plan || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(kpiRowDate(t)) === monthKey; }).forEach(function (t) {
+        if (!kpiRowTitle(t)) return;
+        var d = kpiRowDur(t);
+        dailyPlanMins += !isNaN(d) ? d : 480;
     });
-    (allLoadedTasks.actual || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey; }).forEach(function (t) {
-        if (String(t['ACTUAL [Title]'] || '').trim() === '') return;
-        var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
-        if (!isNaN(d) && d > 0) dailyActMins += d;
+    (allLoadedTasks.actual || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(kpiRowDate(t)) === monthKey; }).forEach(function (t) {
+        if (!kpiRowTitle(t)) return;
+        var d = kpiRowDur(t);
+        if (!isNaN(d)) dailyActMins += d;
     });
     var timeliness = dailyPlanMins > 0 ? dailyActMins / dailyPlanMins : (dailyActMins > 0 ? 1 : null);
 
@@ -6750,24 +6812,25 @@ function computeKpi(monthKey) {
     var invParts = [inv, dis].filter(function (x) { return x.has; });
     var invdis = invParts.length ? invParts.reduce(function (s, x) { return s + x.ratio; }, 0) / invParts.length : null;
 
-    // Productivity (15% weight, cap 100%): Daily Actual mins ÷ (Monthly Plan mins − leave/absent×480)
+    // Productivity (weight, cap 100%): Daily Actual mins ÷ (Monthly Plan mins − leave/absent×480)
+    // Same formula as SEPCO skComputeKpi so ST & SEPCO dashboards match.
     var leaveDays = (localLeaveRecords || []).filter(function (l) { return getRowMonthKey(l.date) === monthKey; }).length;
     var planMins = 0;
     (allLoadedTasks.monthlyPlan || []).filter(function (r) {
         return matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), monthKey);
     }).forEach(function (r) {
-        var d = parseFloat(getRowVal(r, ['DURATION PER MIN', 'DURATION']));
+        var d = parseFloat(String(getRowVal(r, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, ''));
         var f = parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
         planMins += (!isNaN(d) && d > 0) ? d * f : 480 * f;
     });
     var adjPlan = Math.max(0, planMins - leaveDays * 480), actMins = 0;
     var apprRowsProd = kpiApprovedContentRows(monthKey);
-    (allLoadedTasks.actual || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey; }).forEach(function (t) {
-        if (String(t['ACTUAL [Title]'] || '').trim() === '') return;
-        // CONTENT: approved only; TASK / OTHERS: always count
+    (allLoadedTasks.actual || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(kpiRowDate(t)) === monthKey; }).forEach(function (t) {
+        if (!kpiRowTitle(t)) return;
+        // CONTENT: approved only; TASK / OTHERS: always count (identical to SEPCO)
         if (!kpiDurationCounts(t, apprRowsProd)) return;
-        var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
-        if (!isNaN(d) && d > 0) actMins += d;
+        var d = kpiRowDur(t);
+        if (!isNaN(d)) actMins += d;
     });
     var productivity = adjPlan > 0 ? actMins / adjPlan : (actMins > 0 ? 1 : null);
 
@@ -6817,7 +6880,7 @@ function xlTable(title, band, heads, cells) {
 // ---------- ST Monthly Plan Progress vs Actual + Daily Plan vs Actual (SEPCO logic) ----------
 function stNormCat2(s) {
     var t = String(s || '').toLowerCase().replace(/#n\/?a/g, '').trim();
-    t = t.replace(/^(content|task|others)\s*[-–—:]\s*/i, '');
+    t = t.replace(/^(content|task|others|training)\s*[-–—:]\s*/i, '');
     return t.replace(/[^a-z0-9]+/g, ' ').trim();
 }
 function stCatEq(a, b) { return !!a && !!b && a === b; }
@@ -6869,13 +6932,14 @@ function stNormalizeCatPair(row) {
     var c = stField(row, ['CATEGORY', 'Category']);
     var c2 = stField(row, ['CATEGORY 2', 'Category 2', 'CATEGORY2']);
     var title = stField(row, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'ACTUAL [Title]', 'ACTUAL [TITLE]']);
-    var buckets = ['CONTENT', 'TASK', 'OTHERS'];
+    var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
     var cUp = c.toUpperCase(), c2Up = c2.toUpperCase();
     if (buckets.indexOf(c2Up) !== -1) return { cat: c2Up, cat2: c || title || '—' };
     if (buckets.indexOf(cUp) !== -1) return { cat: cUp, cat2: c2 || title || '—' };
     var probe = c2Up || cUp;
     var b = 'OTHERS';
     if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) b = 'CONTENT';
+    else if (probe.indexOf('TRAINING') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TRAINING';
     else if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TASK';
     return { cat: b, cat2: (c2 || c || title || '—') };
 }
@@ -6958,8 +7022,13 @@ function renderStMonthlyProgress() {
             if (nt && countedTitles.some(function (x) { return x === nt || stTitleMatch(x, nt); })) return;
             if (nt) countedTitles.push(nt);
         }
-        line.actual += 1;
         line.actualMins += mins || 0;
+        if (pair.cat === 'CONTENT') { line.actual += 1; return; }
+        // TASK / OTHERS / TRAINING: unique unit (title + day), capped at the plan line's target
+        var _dk = cleanDateDisplay(t['Date Submitted']) || String(t['Date Submitted'] || '').substring(0, 10);
+        var _uk2 = nt + '|' + _dk;
+        line.seen = line.seen || {};
+        if (!line.seen[_uk2] && line.actual < line.target) { line.seen[_uk2] = 1; line.actual += 1; }
     });
 
     (typeof allApprovals !== 'undefined' ? allApprovals : []).forEach(function (a) {
@@ -7000,7 +7069,7 @@ function renderStMonthlyProgress() {
         if (l.actual > l.target) return '<span class="cat-remark plus">Done — ' + (l.actual - l.target) + ' over target</span>';
         return '<span class="cat-remark plus">Done</span>';
     };
-    var bucketColor = { CONTENT: '#4f8f46', TASK: '#d8ad24', OTHERS: '#397d89' };
+    var bucketColor = { CONTENT: '#4f8f46', TASK: '#d8ad24', OTHERS: '#397d89', TRAINING: '#7c3aed' };
 
     var gLines = 0, gDone = 0, gNot = 0, gTarget = 0, gCredit = 0, gAppr = 0;
     lines.forEach(function (l) {
@@ -7255,21 +7324,83 @@ function kpiCatLabel(row) {
 function kpiBucketCat(raw) {
     var c = String(raw || '').trim().toUpperCase();
     if (!c) return 'OTHERS';
-    if (c === 'CONTENT' || c === 'TASK' || c === 'OTHERS') return c;
+    if (c === 'CONTENT' || c === 'TASK' || c === 'OTHERS' || c === 'TRAINING') return c;
     // detailed type e.g. "CONTENT - One-Pager Templated" — not a bucket by itself
     if (/^CONTENT\b/.test(c) && c.indexOf('-') !== -1) return 'OTHERS'; // caller should pass CATEGORY 2
+    if (c.indexOf('TRAINING') !== -1 && c.indexOf('CONTENT') === -1) return 'TRAINING';
     if (c.indexOf('TASK') !== -1 && c.indexOf('CONTENT') === -1) return 'TASK';
     if (c === 'CONTENT') return 'CONTENT';
     return 'OTHERS';
+}
+
+// ---------- TASK / OTHERS / TRAINING: count UNIQUE units, not submissions ----------
+// A unit = same title on the same day (several Daily Actual rows / time blocks of one task = 1).
+// Each unit is matched to a Monthly Plan line of the same bucket: Category 2 (exact -> loose), then plan title,
+// then a blank-Category-2 plan line. Count per plan line is capped at its target, so Achievement % cannot exceed
+// 100% just because the task was logged many times. Minutes are NOT affected (they still count toward Productivity).
+// SEPCO uses the identical rule (sepcoClaimUnit) so both portals show the same numbers.
+var KPI_BUCKET_WORDS = ['content', 'task', 'others', 'training'];
+function kpiPairOf(row) { // same output as SEPCO sepcoNormalizeCatPair
+    var c = String(getRowVal(row, ['CATEGORY']) || '').trim();
+    var c2 = String(getRowVal(row, ['CATEGORY 2']) || '').trim();
+    if (!c2 || /^#?n\/?a$/i.test(c2) || c2 === '-') c2 = '';
+    var title = String(getRowVal(row, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'ACTUAL [Title]', 'ACTUAL [TITLE]']) || '').trim();
+    var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'], cUp = c.toUpperCase(), c2Up = c2.toUpperCase();
+    if (buckets.indexOf(c2Up) !== -1) return { cat: c2Up, cat2: c || title || '' };
+    if (buckets.indexOf(cUp) !== -1) return { cat: cUp, cat2: c2 || title || '' };
+    var probe = c2Up || cUp, b = 'OTHERS';
+    if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) b = 'CONTENT';
+    else if (probe.indexOf('TRAINING') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TRAINING';
+    else if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TASK';
+    return { cat: b, cat2: (c2 || c || title || '') };
+}
+function kpiPlanLineNorm(pair) { return stNormCat2(pair.cat2) || String(pair.cat2 || '').toLowerCase(); }
+function kpiBuildPlanLines(monthKey) {
+    var lines = [];
+    (allLoadedTasks.monthlyPlan || []).filter(function (r) {
+        return matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), monthKey);
+    }).forEach(function (r) {
+        var pair = kpiPairOf(r);
+        if (pair.cat === 'CONTENT') return;
+        var f = parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
+        var nc = kpiPlanLineNorm(pair);
+        var ln = lines.filter(function (x) { return x.bucket === pair.cat && x.norm === nc; })[0];
+        if (!ln) { ln = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, mins: 0, titles: [], seen: {} }; lines.push(ln); }
+        ln.target += f;
+        var pt = kpiNormTitle(getRowVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']));
+        if (pt) ln.titles.push(pt);
+    });
+    return lines;
+}
+function kpiClaimUnit(lines, bucket, cands, title, day, mins) {
+    var norms = (cands || []).map(function (c) { return stNormCat2(c); }).filter(function (n) { return n && KPI_BUCKET_WORDS.indexOf(n) === -1; });
+    var same = (lines || []).filter(function (l) { return l.bucket === bucket; });
+    var line = null;
+    if (norms.length) {
+        line = same.filter(function (l) { return l.norm && norms.some(function (n) { return n === l.norm; }); })[0] ||
+               same.filter(function (l) { return l.norm && norms.some(function (n) { return n.indexOf(l.norm) !== -1 || l.norm.indexOf(n) !== -1; }); })[0] || null;
+    }
+    if (!line) line = same.filter(function (l) { return (l.titles || []).some(function (t) { return kpiTitlesMatch(title, t); }); })[0] || null;
+    if (!line) line = same.filter(function (l) { return !l.norm; })[0] || null;
+    var key = kpiNormTitle(title) + '|' + day;
+    if (line) {
+        line.mins = (line.mins || 0) + (mins || 0);
+        line.seen = line.seen || {};
+        if (!line.seen[key] && line.actual < line.target) { line.seen[key] = 1; line.actual += 1; return { line: line, counted: true, key: key }; }
+        return { line: line, counted: false, key: key };
+    }
+    return { line: null, counted: false, key: key };
 }
 function renderCategoryProgress(monthKey, targetId) {
     var el = document.getElementById(targetId || 'summaryCategoryProgress') || document.getElementById('kpiCategoryProgress');
     if (!el) return;
     var monthLabel = monthKey ? new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' }) : '';
 
-    var buckets = ['CONTENT', 'TASK', 'OTHERS'];
+    var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
     var stats = {};
     buckets.forEach(function (b) { stats[b] = { targetCount: 0, actualCount: 0, planMins: 0, actualMins: 0 }; });
+    var planLines = kpiBuildPlanLines(monthKey);   // non-content plan lines (unique-unit counting)
+    var unplannedUnits = {};
 
     // Monthly Plan → target count (frequency) + plan minutes (freq × duration)
     (allLoadedTasks.monthlyPlan || []).filter(function (r) {
@@ -7303,7 +7434,20 @@ function renderCategoryProgress(monthKey, targetId) {
             var nt0 = kpiNormTitle(title);
             if (nt0) countedContentTitles.push(nt0);
         }
-        stats[b].actualCount += 1;
+        if (b === 'CONTENT') stats[b].actualCount += 1;
+        else {
+            // TASK / OTHERS / TRAINING: unique units matched to the Monthly Plan, capped at target
+            var _dayK = cleanDateDisplay(t['Date Submitted']) || String(t['Date Submitted'] || '').substring(0, 10);
+            var _pr = kpiPairOf(t);
+            var _cr = kpiClaimUnit(planLines, b, [_pr.cat2, getRowVal(t, ['CATEGORY 2']), getRowVal(t, ['CATEGORY'])], title, _dayK, d);
+            if (_cr.counted) stats[b].actualCount += 1;
+            else if (!_cr.line) {
+                var _uk = b + '||' + stNormCat2(_pr.cat2 || title);
+                var _u = unplannedUnits[_uk] || (unplannedUnits[_uk] = { cat: b, cat2: _pr.cat2 || title, seen: {}, count: 0, mins: 0 });
+                _u.mins += d;
+                if (!_u.seen[_cr.key]) { _u.seen[_cr.key] = 1; _u.count += 1; }
+            }
+        }
         stats[b].actualMins += d;
 
         var ds = cleanDateDisplay(t['Date Submitted']) || String(t['Date Submitted'] || '').substring(0, 10);
@@ -7392,11 +7536,11 @@ function renderCategoryProgress(monthKey, targetId) {
     // Notes (same rules as admin overview)
     var notes =
         '<details class="cat-notes"><summary>📘 Computation Guide &amp; Notes</summary><ul>' +
-        '<li><strong>Category targets:</strong> Monthly Plan frequency per month is counted by category (Content, Task, Others).</li>' +
-        '<li><strong>Count:</strong> Target Count comes from Monthly Plan Frequency per Month by category. Each Daily Actual record counts as 1 Actual Count.</li>' +
+        '<li><strong>Category targets:</strong> Monthly Plan frequency per month is counted by category (Content, Task, Others, Training).</li>' +
+        '<li><strong>Count:</strong> Target Count comes from Monthly Plan Frequency per Month by category. CONTENT = approved items; TASK / OTHERS / TRAINING = <strong>unique units</strong> (same title on the same day counts once, not per submission), matched to a Monthly Plan line (Category 2, then title) and capped at the Target Count of that plan line, so Achievement % cannot exceed 100%.</li>' +
         '<li><strong>Minutes:</strong> Plan Minutes = Monthly Plan frequency × duration per minute. Actual Minutes uses the DURATION PER MIN value from Daily Actual.</li>' +
         '<li><strong>Achievement:</strong> Category Achievement = Actual Count ÷ Target Count × 100.</li>' +
-        '<li><strong>CONTENT (For Approval):</strong> Actual Count and Minutes count <em>only when Approved</em> (APPROVAL DATE or matching Approved file). TASK / OTHERS always count.</li>' +
+        '<li><strong>CONTENT (For Approval):</strong> Actual Count and Minutes count <em>only when Approved</em> (APPROVAL DATE or matching Approved file). TASK / OTHERS / TRAINING always count.</li>' +
         '<li><strong>Productivity:</strong> Daily Actual mins ÷ (Monthly Plan mins − leave/absent × 480) × 100. Same approval gate as above for CONTENT.</li>' +
         '<li><strong>Unplanned actual (no target):</strong> Rows with Target Count = 0 but Actual Count &gt; 0 were not in the Monthly Plan. They count as <strong>plus to productivity only if</strong> your Monthly Plan minutes meet or exceed <strong>Designated Minutes</strong> ((working days − leave) × 480). If the plan is <strong>Short</strong>, the remark becomes <em>Please add to Monthly Plan — enhance your plan first</em> so you fill the plan gap before unplanned work is treated as a plus.</li>' +
         '</ul></details>';
@@ -7414,7 +7558,7 @@ function renderCategoryProgress(monthKey, targetId) {
 function normalizeCatPair(row) {
     var c = String(getRowVal(row, ['CATEGORY']) || '').trim();
     var c2 = String(getRowVal(row, ['CATEGORY 2']) || '').trim();
-    var buckets = ['CONTENT', 'TASK', 'OTHERS'];
+    var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
     var cUp = c.toUpperCase();
     var c2Up = c2.toUpperCase();
     // Monthly Plan style: CATEGORY is CONTENT/TASK/OTHERS
@@ -7438,6 +7582,10 @@ function ensureD(c, c2) {
         var f = parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
         var d = parseFloat(getRowVal(r, ['DURATION PER MIN', 'DURATION']));
         var mins = (!isNaN(d) && d > 0) ? d * f : 480 * f;
+        if (pair.cat !== 'CONTENT') {
+            var _ln = planLines.filter(function (x) { return x.bucket === pair.cat && x.norm === kpiPlanLineNorm(pair); })[0];
+            if (_ln) pair = { cat: _ln.bucket, cat2: _ln.cat2 };
+        }
         var row = ensureD(pair.cat, pair.cat2);
         row.targetCount += f;
         row.planMins += mins;
@@ -7456,10 +7604,13 @@ function ensureD(c, c2) {
             var nt = kpiNormTitle(title);
             if (nt) countedDetailTitles.push(nt);
         }
+        if (pair.cat !== 'CONTENT') return;   // TASK / OTHERS / TRAINING come from planLines / unplannedUnits (unique units)
         var row = ensureD(pair.cat, pair.cat2);
         row.actualCount += 1;
         row.actualMins += d;
     });
+    planLines.forEach(function (l) { var r0 = ensureD(l.bucket, l.cat2); r0.actualCount += l.actual; r0.actualMins += (l.mins || 0); });
+    Object.keys(unplannedUnits).forEach(function (k) { var u0 = unplannedUnits[k]; var r1 = ensureD(u0.cat, u0.cat2); r1.actualCount += u0.count; r1.actualMins += u0.mins; });
     // SEPCO: Approved CONTENT from Approvals also counts (even without Daily Actual), matched to plan Category when possible
     var apprSeenD = {};
     (allApprovals || []).forEach(function (a) {
@@ -7480,12 +7631,12 @@ function ensureD(c, c2) {
         countedDetailTitles.push(nt);
         // Prefer matching an existing plan line by category
         var bestKey = null, bestCat2 = cat2 || cat || 'Approved Content';
-        var nc = String(bestCat2 || '').toLowerCase().replace(/^(content|task|others)\s*[-–—:]\s*/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+        var nc = String(bestCat2 || '').toLowerCase().replace(/^(content|task|others|training)\s*[-–—:]\s*/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
         Object.keys(detail).forEach(function (dk) {
             if (bestKey) return;
             var s = detail[dk];
             if (s.cat !== 'CONTENT') return;
-            var sn = String(s.cat2 || '').toLowerCase().replace(/^(content|task|others)\s*[-–—:]\s*/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+            var sn = String(s.cat2 || '').toLowerCase().replace(/^(content|task|others|training)\s*[-–—:]\s*/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
             if (sn && nc && (sn === nc || sn.indexOf(nc) !== -1 || nc.indexOf(sn) !== -1)) bestKey = dk;
         });
         var row;
@@ -7601,10 +7752,11 @@ function ensureD(c, c2) {
         '<div class="cat-progress-scroll"><table class="cat-progress-table cat-progress-table--grouped">' +
         '<thead>' +
         '<tr class="cat-group-row">' +
-        '<th colspan="3">CONTENT</th><th colspan="3">TASK</th><th colspan="3">OTHERS</th>' +
+        '<th colspan="3">CONTENT</th><th colspan="3">TASK</th><th colspan="3">OTHERS</th><th colspan="3">TRAINING</th>' +
         '<th rowspan="2" class="num">PLAN MINUTES</th><th rowspan="2" class="num">ACTUAL MINUTES</th><th rowspan="2" class="num">PRODUCTIVITY</th>' +
         '</tr>' +
         '<tr class="cat-subhead">' +
+        '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
         '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
         '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
         '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
