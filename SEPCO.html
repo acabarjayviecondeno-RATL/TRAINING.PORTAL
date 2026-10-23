@@ -1850,7 +1850,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             <!-- MONTHLY PLAN SECTION -->
             <div id="monthlyPlanSection" class="content-section">
                 <h3 style="margin-top:0; font-size: 15px;">🗓️ Monthly Plan Data</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Progress of each Specialized Trainer's Monthly Plan vs their Daily Actual, per Category 2 &mdash; including planned items they have not done yet.</p>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Progress of each Specialized Trainer's Monthly Plan vs their Daily Actual, per Category &mdash; including planned items they have not done yet.</p>
                 <div class="filter-container" style="flex-wrap:wrap;">
                     <label for="monthlyPlanMonthFilter">Month:</label>
                     <input type="month" id="monthlyPlanMonthFilter" class="filter-input" onchange="onMonthlyPlanMonthChange()">
@@ -1859,7 +1859,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     <select id="monthlyPlanTrainerFilter" class="filter-input" onchange="onMonthlyPlanViewChange()"><option value="all">All trainers</option></select>
                     <label for="monthlyPlanStatusFilter">Show:</label>
                     <select id="monthlyPlanStatusFilter" class="filter-input" onchange="onMonthlyPlanViewChange()">
-                        <option value="all">All plan lines</option>
+                        <option value="all">All categories</option>
                         <option value="incomplete">Not finished (not done + in progress)</option>
                         <option value="notdone">Not done only (0 actual)</option>
                         <option value="partial">In progress only</option>
@@ -2985,7 +2985,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             const gPct = gTarget > 0 ? gCredit / gTarget * 100 : null;
             const cards = '<div class="summary-grid" style="margin-bottom:16px;">' +
                 '<div class="summary-card"><h4>Overall Plan Completion</h4><p class="val">' + (gPct == null ? '—' : (Math.round(gPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">' + gCredit + ' of ' + gTarget + ' planned items done</p></div>' +
-                '<div class="summary-card"><h4>Plan Lines Done</h4><p class="val">' + gDone + ' / ' + gLines + '</p><p style="font-size:10px;margin:4px 0 0 0;">Category 2 targets met</p></div>' +
+                '<div class="summary-card"><h4>Categories Done</h4><p class="val">' + gDone + ' / ' + gLines + '</p><p style="font-size:10px;margin:4px 0 0 0;">Category 2 targets met</p></div>' +
                 '<div class="summary-card"><h4>Approved Content</h4><p class="val">' + gAppr + '</p><p style="font-size:10px;margin:4px 0 0 0;">Approved requests in Monthly Plan</p></div>' +
                 '<div class="summary-card"><h4>Not Started</h4><p class="val">' + gNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but 0 actual</p></div>' +
                 '<div class="summary-card"><h4>No Monthly Plan</h4><p class="val">' + gNoPlan + '</p><p style="font-size:10px;margin:4px 0 0 0;">Trainers without a plan</p></div>' +
@@ -3006,8 +3006,8 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 lines.forEach(l => { tT += l.target; tCredit += Math.min(l.actual, l.target); tPM += l.planMins; tAM += l.actualMins; if (l.actual >= l.target) nDone++; });
                 const hdrPct = tT > 0 ? tCredit / tT * 100 : null;
                 const badge = !lines.length ? ' <span style="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.15);padding:2px 6px;border-radius:4px;margin-left:6px;">No Monthly Plan</span>' : '';
-                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="10" style="text-align:left;padding:12px 14px;font-weight:800;">👤 ' + sepcoEsc(labelFor(u)) + badge +
-                    (lines.length ? ' <span style="font-weight:600;font-size:12px;color:var(--text-muted);margin-left:10px;">' + nDone + '/' + lines.length + ' plan lines done · ' + tCredit + '/' + tT + ' items · ' + Math.round(tAM).toLocaleString() + '/' + Math.round(tPM).toLocaleString() + ' mins · </span>' + pctHtml(tCredit, tT) : '') +
+                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="9" style="text-align:left;padding:12px 14px;font-weight:800;">👤 ' + sepcoEsc(labelFor(u)) + badge +
+                    (lines.length ? ' <span style="font-weight:600;font-size:12px;color:var(--text-muted);margin-left:10px;">' + nDone + '/' + lines.length + ' categories done · ' + tCredit + '/' + tT + ' items · ' + Math.round(tAM).toLocaleString() + '/' + Math.round(tPM).toLocaleString() + ' mins · </span>' + pctHtml(tCredit, tT) : '') +
                     (lines.length ? ' <span style="font-weight:700;font-size:12px;margin-left:10px;color:#34d399;">Approved content: ' + apprInPlan + '</span>' : '') +
                     '</td></tr>';
                 visible.forEach(l => {
@@ -3015,8 +3015,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     const barCls = p >= 100 ? 'over' : (p < 40 ? 'low' : '');
                     const diff = l.actualMins - l.planMins;
                     body += '<tr>' +
-                        '<td class="cat-name" style="text-align:left;padding-left:26px;"><span style="color:' + (bucketColor[l.bucket] || '#94a3b8') + ';">●</span> ' + sepcoEsc(l.bucket) + '</td>' +
-                        '<td style="text-align:left;white-space:normal;min-width:200px;">' + sepcoEsc(l.cat2) + '</td>' +
+                        '<td class="cat-name" style="text-align:left;padding-left:26px;white-space:normal;min-width:200px;"><span style="color:' + (bucketColor[l.bucket] || '#94a3b8') + ';">●</span> ' + sepcoEsc((l.cat2 && l.cat2 !== l.bucket && l.cat2 !== '—') ? l.cat2 : l.bucket) + '</td>' +
                         '<td class="num">' + l.target + '</td>' +
                         '<td class="num"' + (l.actual === 0 ? ' style="color:#fff;"' : '') + '>' + l.actual + '</td>' +
                         '<td class="num">' + pctHtml(l.actual, l.target) + '</td>' +
@@ -3029,8 +3028,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 if (statusFilter === 'all' && lines.length && unplanned.length) {
                     unplanned.forEach(x => {
                         body += '<tr style="opacity:.8;">' +
-                            '<td class="cat-name" style="text-align:left;padding-left:26px;"><span style="color:' + (bucketColor[x.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc(x.bucket) + '</td>' +
-                            '<td style="text-align:left;white-space:normal;min-width:200px;">' + sepcoEsc(x.label) + '</td>' +
+                            '<td class="cat-name" style="text-align:left;padding-left:26px;white-space:normal;min-width:200px;"><span style="color:' + (bucketColor[x.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc((x.label && x.label !== x.bucket && x.label !== '—') ? x.label : x.bucket) + '</td>' +
                             '<td class="num cat-muted">—</td><td class="num">' + x.count + '</td><td class="num cat-muted">—</td>' +
                             (x.bucket === 'CONTENT' ? '<td class="num cat-strong" style="color:#34d399;">' + x.count + '</td>' : '<td class="num cat-muted">—</td>') +
                             '<td class="num">— / ' + Math.round(x.mins).toLocaleString() + '</td><td></td>' +
@@ -3038,7 +3036,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     });
                 }
                 if (statusFilter === 'all' && !lines.length) {
-                    body += '<tr><td colspan="10" class="cat-muted" style="text-align:left;padding:10px 26px;">No Monthly Plan for this month — no approved or actual content is shown.</td></tr>';
+                    body += '<tr><td colspan="9" class="cat-muted" style="text-align:left;padding:10px 26px;">No Monthly Plan for this month — no approved or actual content is shown.</td></tr>';
                 }
             });
 
@@ -3048,9 +3046,9 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             }
             mpEl.innerHTML = cards +
                 '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + sepcoEsc(monthLabel) + '</h5></div>' +
-                '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category 2 the trainer put in their Monthly Plan, matched against their Actual. CONTENT counts only when <strong>Approved</strong> and the Category 2 is in the plan. Planned items with 0 actual are shown as <span class="cat-remark miss">Not done</span>. Approved Content = Approved requests from the List of Requests that match a plan line. Trainers without a Monthly Plan show nothing. Rows marked ○ are TASK / OTHERS actuals that are <em>not</em> in the trainer\'s Monthly Plan.</div>' +
+                '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category from the trainer\'s Monthly Plan (plan titles are combined), matched against their Actual. CONTENT counts only when <strong>Approved</strong> and the Category 2 is in the plan. Planned items with 0 actual are shown as <span class="cat-remark miss">Not done</span>. Approved Content = Approved requests from the List of Requests that match a plan line. Trainers without a Monthly Plan show nothing. Rows marked ○ are TASK / OTHERS actuals that are <em>not</em> in the trainer\'s Monthly Plan.</div>' +
                 '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
-                '<th>Category</th><th>Category 2 (Monthly Plan)</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Achievement %</th><th class="num">Approved Content</th><th class="num">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h" colspan="2">Status</th>' +
+                '<th>Category</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Achievement %</th><th class="num">Approved Content</th><th class="num">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h" colspan="2">Status</th>' +
                 '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
         }
 
