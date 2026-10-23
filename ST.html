@@ -3345,8 +3345,8 @@ html[data-theme="light"] button.sec-action-btn:hover {
                             <div class="kpi-notes-card">
                                 <h6>⚡ Productivity Rate (15% weight)</h6>
                                 <ul>
-                                    <li><strong>Productivity</strong> = Daily Actual duration ÷ (Monthly Plan duration − leave/absent × 480), cap 100%. Included in Total KPI.</li>
-                                    <li><strong>Actual Duration</strong> = sum of <code>DURATION PER MIN</code> from Daily Actual. <em>CONTENT</em> counts only when approved; <em>TASK / OTHERS</em> always count.</li>
+                                    <li><strong>Productivity</strong> = counted Actual duration ÷ (Monthly Plan duration − leave/absent × 480). Included in Total KPI (weight capped at 100%). <strong>Only actuals in your Monthly Plan count</strong> and each row is counted once. If your Monthly Plan is below <em>Designated Minutes</em> ((working days − leave) × 480), unplanned actuals are excluded and Productivity cannot exceed 100%; once the plan meets Designated Minutes, unplanned actuals are added on top (over-achievement allowed).</li>
+                                    <li><strong>Actual Duration</strong> = sum of <code>DURATION PER MIN</code> from unique Daily Actual rows that are in the Monthly Plan. <em>CONTENT</em> counts only when approved and its Category 2 is in the plan; <em>TASK / OTHERS / TRAINING</em> count when they match a plan line within its Target Count.</li>
                                     <li><strong>Adjusted Planned Duration</strong> = Monthly Plan minutes (frequency × duration) less leave / absent days (480 mins each).</li>
                                 </ul>
                             </div>
@@ -3429,7 +3429,7 @@ html[data-theme="light"] button.sec-action-btn:hover {
                             <div class="summary-card">
                                 <h4>PRODUCTIVITY RATE <span style="font-size: 14px;">⚡</span></h4>
                                 <p class="val" id="sumProductivityRate">0%</p>
-                                <p>Computed as: Daily Actual mins ÷ (Monthly Plan mins − leave/absent × 480) × 100</p>
+                                <p>Computed as: counted Actual mins (unique, in Monthly Plan; unplanned added only when plan ≥ Designated Minutes) ÷ (Monthly Plan mins − leave/absent × 480) × 100</p>
                             </div>
                         </div>
 
@@ -5536,7 +5536,8 @@ html[data-theme="light"] button.sec-action-btn:hover {
             let totalDaysWorked = uniqueDays.size;
             let actualDays = (allActualMins / 480).toFixed(1);
             let avgActualMins = durationCount > 0 ? Math.round(sumDurationPerMin / durationCount) : 0;
-            let productivityRate = adjustedPlanMins > 0 ? Math.round((allActualMins / adjustedPlanMins) * 1000) / 10 : (allActualMins > 0 ? 100 : 0);
+            let _peSum = kpiProdEff(selectedMonth);   // unique + Monthly-Plan-only, gated by Designated Minutes
+            let productivityRate = _peSum.productivity == null ? 0 : Math.round(_peSum.productivity * 1000) / 10;
 
             let targetMinsPerTask = 60;
             let avgActualPercent = targetMinsPerTask > 0 ? Math.round((avgActualMins / targetMinsPerTask) * 100) : 0;
@@ -6608,6 +6609,112 @@ function kpiDurationCounts(row, approvedSet) {
     return approvedSet.has(row);
 }
 
+// ======== PRODUCTIVITY / EFFICIENCY / ON-TIME  (UNIQUE + Monthly-Plan-only) — identical rule to SEPCO skProdEff ========
+//  • UNIQUE: exact duplicate Daily Actual rows are ignored; each Daily Plan item (date + title) is matched ONCE
+//    (several time blocks of the same task add up to a single Actual vs a single Plan).
+//  • MONTHLY PLAN ONLY: only actuals that belong to the Monthly Plan count — CONTENT = Approved + its Category 2 is in the plan,
+//    TASK / OTHERS / TRAINING = unique unit inside the plan line's Target Count.
+//  • DESIGNATED MINUTES GATE: Designated = (working days − leave) × 480.
+//      Monthly Plan mins < Designated  →  actuals NOT in the plan are excluded; Productivity / Efficiency are capped at 100% (no "over").
+//      Monthly Plan mins ≥ Designated  →  actuals NOT in the plan are added on top (plus to productivity), so over-achievement is possible.
+function kpiProdEff(monthKey) {
+    var rowDate = function (t) { return getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || t['Date Submitted']; };
+    var inMonth = function (t) { return !monthKey || getRowMonthKey(rowDate(t)) === monthKey; };
+    var durOf = function (t) { var d = parseFloat(String(getRowVal(t, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, '')); return (!isNaN(d) && d > 0) ? d : NaN; };
+
+    // ---- Monthly Plan: plan minutes, non-content plan lines, content Category 2 list ----
+    var plan = (allLoadedTasks.monthlyPlan || []).filter(function (r) { return matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), monthKey); });
+    var lines = [], contentNorms = [], planMins = 0;
+    plan.forEach(function (r) {
+        var rawF = String(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, '');
+        var f = rawF === '' ? 1 : (parseFloat(rawF) || 0);
+        if (f <= 0) return;
+        var d = durOf(r); if (isNaN(d)) d = 480;
+        planMins += d * f;
+        var pair = kpiPairOf(r), nc = kpiPlanLineNorm(pair);
+        if (pair.cat === 'CONTENT') { if (nc) contentNorms.push(nc); return; }
+        var ln = lines.filter(function (x) { return x.bucket === pair.cat && x.norm === nc; })[0];
+        if (!ln) { ln = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, mins: 0, titles: [], seen: {} }; lines.push(ln); }
+        ln.target += f;
+        var pt = kpiNormTitle(getRowVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']));
+        if (pt) ln.titles.push(pt);
+    });
+    var contentInPlan = function (cands) {
+        return (cands || []).some(function (c) {
+            var n = stNormCat2(c);
+            return !!n && contentNorms.some(function (p) { return p === n || p.indexOf(n) !== -1 || n.indexOf(p) !== -1; });
+        });
+    };
+
+    // ---- Leave + Designated Minutes ----
+    var leaveDays = (localLeaveRecords || []).filter(function (l) { return getRowMonthKey(l.date) === monthKey; }).length;
+    var mkp = String(monthKey || '').split('-');
+    var yr = parseInt(mkp[0], 10) || new Date().getFullYear(), mi = (parseInt(mkp[1], 10) || (new Date().getMonth() + 1)) - 1;
+    var workingDays = (typeof calculateTargetDays === 'function') ? calculateTargetDays(yr, mi, 0) : 22;
+    var designated = Math.max(0, workingDays - leaveDays) * 480;
+    var planHit = planMins > 0 && planMins >= designated - 0.5;
+    var adjPlan = Math.max(0, planMins - leaveDays * 480);
+
+    // ---- Daily Plan index: ONE entry per (date + title) ----
+    var planByKey = {};
+    (allLoadedTasks.plan || []).filter(function (t) { return matchesUser(t) && inMonth(t) && kpiTitle(t); }).forEach(function (t) {
+        var d = durOf(t); if (isNaN(d)) return;
+        var k = (kpiDate(rowDate(t)) || '') + '|' + kpiNormTitle(kpiTitle(t));
+        planByKey[k] = (planByKey[k] || 0) + d;
+    });
+
+    // ---- Daily Actual: approved content set, unique rows, plan membership ----
+    var apprSet = kpiApprovedContentRows(monthKey);
+    var ordered = (allLoadedTasks.actual || []).filter(function (t) { return matchesUser(t) && inMonth(t) && kpiTitle(t); })
+        .map(function (r, i) { return { r: r, i: i, d: kpiDate(rowDate(r)) || '' }; })
+        .sort(function (a, b) { return a.d < b.d ? -1 : (a.d > b.d ? 1 : a.i - b.i); });
+    var seenRow = {}, eff = {}, inMins = 0, extraMins = 0;
+    ordered.forEach(function (o) {
+        var r = o.r, bucket = kpiRowBucket(r);
+        if (bucket === 'CONTENT' && !apprSet.has(r)) return;                     // CONTENT counts only once approved
+        var title = kpiTitle(r);
+        var st = String(getRowVal(r, ['START TIME', 'Start Time']) || '').trim(), en = String(getRowVal(r, ['TIME ENDED', 'End Time']) || '').trim();
+        var d = durOf(r); if (isNaN(d)) d = 0;
+        if (st || en) {                                                            // exact duplicate row (same time block) = 1
+            var rk = o.d + '|' + kpiNormTitle(title) + '|' + st + '|' + en + '|' + d;
+            if (seenRow[rk]) return;
+            seenRow[rk] = 1;
+        }
+        var cat = getRowVal(r, ['CATEGORY']), cat2 = getRowVal(r, ['CATEGORY 2']);
+        var inPlan;
+        if (bucket === 'CONTENT') {
+            inPlan = contentInPlan([cat2, cat]);
+        } else {
+            var pr = kpiPairOf(r);
+            var cr = kpiClaimUnit(lines, bucket, [pr.cat2, cat2, cat], title, o.d, d);
+            inPlan = !!cr.line && !!(cr.line.seen && cr.line.seen[cr.key]);   // unit counted inside the plan line's target
+        }
+        if (inPlan) inMins += d; else extraMins += d;
+        var k = o.d + '|' + kpiNormTitle(title);
+        var e = eff[k] || (eff[k] = { plan: planByKey[k] || 0, act: 0, inPlan: inPlan });
+        e.act += d;
+    });
+
+    // ---- Efficiency + On Time / Late: one result per unique Daily Plan item ----
+    var onTime = 0, late = 0, pAll = 0, aAll = 0, pUse = 0, aUse = 0;
+    Object.keys(eff).forEach(function (k) {
+        var e = eff[k];
+        if (!(e.plan > 0) || !(e.act > 0)) return;
+        if (e.act < e.plan) onTime++; else if (e.act > e.plan) late++;
+        pAll += e.plan; aAll += e.act;
+        if (planHit || e.inPlan) { pUse += e.plan; aUse += e.act; }
+    });
+    var efficiency = aUse > 0 ? pUse / aUse : null;
+    if (efficiency != null && !planHit) efficiency = Math.min(1, efficiency);
+
+    // ---- Productivity ----
+    var usedMins = planHit ? (inMins + extraMins) : Math.min(inMins, adjPlan);
+    var productivity = adjPlan > 0 ? usedMins / adjPlan : (usedMins > 0 ? 1 : null);
+    return { planMins: planMins, adjPlan: adjPlan, leaveDays: leaveDays, designated: designated, planHit: planHit, inMins: inMins, extraMins: extraMins,
+             loggedMins: inMins + extraMins, usedMins: usedMins, productivity: productivity, efficiency: efficiency, onTime: onTime, late: late,
+             planMinsMatched: pAll, matchedActualMins: aAll };
+}
+
 function computeKpi(monthKey) {
     var gk = kpiGroupKey(kpiProfile.jobGroup);
 
@@ -6812,27 +6919,12 @@ function computeKpi(monthKey) {
     var invParts = [inv, dis].filter(function (x) { return x.has; });
     var invdis = invParts.length ? invParts.reduce(function (s, x) { return s + x.ratio; }, 0) / invParts.length : null;
 
-    // Productivity (weight, cap 100%): Daily Actual mins ÷ (Monthly Plan mins − leave/absent×480)
-    // Same formula as SEPCO skComputeKpi so ST & SEPCO dashboards match.
-    var leaveDays = (localLeaveRecords || []).filter(function (l) { return getRowMonthKey(l.date) === monthKey; }).length;
-    var planMins = 0;
-    (allLoadedTasks.monthlyPlan || []).filter(function (r) {
-        return matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), monthKey);
-    }).forEach(function (r) {
-        var d = parseFloat(String(getRowVal(r, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, ''));
-        var f = parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
-        planMins += (!isNaN(d) && d > 0) ? d * f : 480 * f;
-    });
-    var adjPlan = Math.max(0, planMins - leaveDays * 480), actMins = 0;
-    var apprRowsProd = kpiApprovedContentRows(monthKey);
-    (allLoadedTasks.actual || []).filter(function (t) { return matchesUser(t) && getRowMonthKey(kpiRowDate(t)) === monthKey; }).forEach(function (t) {
-        if (!kpiRowTitle(t)) return;
-        // CONTENT: approved only; TASK / OTHERS: always count (identical to SEPCO)
-        if (!kpiDurationCounts(t, apprRowsProd)) return;
-        var d = kpiRowDur(t);
-        if (!isNaN(d)) actMins += d;
-    });
-    var productivity = adjPlan > 0 ? actMins / adjPlan : (actMins > 0 ? 1 : null);
+    // Productivity = counted Actual mins ÷ (Monthly Plan mins − leave/absent×480)   (weight is capped by the KPI profile)
+    // UNIQUE + Monthly-Plan-only. Monthly Plan below Designated Minutes → actuals not in the plan are excluded and Productivity ≤ 100%;
+    // Monthly Plan meets Designated Minutes → unplanned actuals add on top (over-achievement allowed). Same as SEPCO skProdEff.
+    var _pe = kpiProdEff(monthKey);
+    var leaveDays = _pe.leaveDays, planMins = _pe.planMins, adjPlan = _pe.adjPlan, actMins = _pe.usedMins;
+    var productivity = _pe.productivity;
 
     var values = { SO: so.ratio, TC: ach, ACC: quality, EFF: eff, TIM: timeliness, SOC: soc, POSTS: posts.ratio, ENG: eng.ratio,
                    TRAIN: train, ACTIVE: active.ratio, UPL: upl.ratio, INVDIS: invdis, PROD: productivity };
@@ -7525,7 +7617,8 @@ function renderCategoryProgress(monthKey, targetId) {
     // Reuse category actual mins (already approval-filtered for CONTENT)
     var kpiActMins = 0;
     buckets.forEach(function (b) { kpiActMins += stats[b].actualMins; });
-    var prod = adjPlan > 0 ? (kpiActMins / adjPlan) * 100 : (kpiActMins > 0 ? 100 : null);
+    var _peCat = kpiProdEff(monthKey);   // unique + Monthly-Plan-only, gated by Designated Minutes
+    var prod = _peCat.productivity == null ? null : _peCat.productivity * 100;
     if (prod == null) body += '<td class="num cat-muted">—</td>';
     else {
         var pcls = prod >= 100 ? 'good' : (prod >= 80 ? 'warn' : 'bad');
@@ -7541,7 +7634,7 @@ function renderCategoryProgress(monthKey, targetId) {
         '<li><strong>Minutes:</strong> Plan Minutes = Monthly Plan frequency × duration per minute. Actual Minutes uses the DURATION PER MIN value from Daily Actual.</li>' +
         '<li><strong>Achievement:</strong> Category Achievement = Actual Count ÷ Target Count × 100.</li>' +
         '<li><strong>CONTENT (For Approval):</strong> Actual Count and Minutes count <em>only when Approved</em> (APPROVAL DATE or matching Approved file). TASK / OTHERS / TRAINING always count.</li>' +
-        '<li><strong>Productivity:</strong> Daily Actual mins ÷ (Monthly Plan mins − leave/absent × 480) × 100. Same approval gate as above for CONTENT.</li>' +
+        '<li><strong>Productivity:</strong> Counted Actual mins ÷ (Monthly Plan mins − leave/absent × 480) × 100. <strong>Only actuals in the Monthly Plan count</strong> (unique rows; CONTENT must be Approved). If your Monthly Plan is <em>below</em> Designated Minutes, unplanned actuals are excluded and Productivity cannot go over 100%. Once the plan <em>meets</em> Designated Minutes, unplanned actuals are added on top (plus to productivity), so over-achievement is possible.</li>' +
         '<li><strong>Unplanned actual (no target):</strong> Rows with Target Count = 0 but Actual Count &gt; 0 were not in the Monthly Plan. They count as <strong>plus to productivity only if</strong> your Monthly Plan minutes meet or exceed <strong>Designated Minutes</strong> ((working days − leave) × 480). If the plan is <strong>Short</strong>, the remark becomes <em>Please add to Monthly Plan — enhance your plan first</em> so you fill the plan gap before unplanned work is treated as a plus.</li>' +
         '</ul></details>';
 
@@ -7656,8 +7749,9 @@ function ensureD(c, c2) {
     var miP = (parseInt(mkParts[1], 10) || 1) - 1;
     var workingDaysP = (typeof calculateTargetDays === 'function') ? calculateTargetDays(yrP, miP, 0) : 22;
     var designatedMinsP = Math.max(0, workingDaysP - leaveDays) * 480;
-    var planIsShort = monthlyPlanMins < (designatedMinsP - 0.5);
-    var planShortGap = Math.max(0, designatedMinsP - monthlyPlanMins);
+    designatedMinsP = _peCat.designated;
+    var planIsShort = !_peCat.planHit;
+    var planShortGap = Math.max(0, designatedMinsP - _peCat.planMins);
 
     var detailRows = '';
     var dTotTC = 0, dTotAC = 0, dTotPlan = 0, dTotAct = 0;
@@ -7868,7 +7962,7 @@ function renderKpiLanding() {
 
             li('Productivity', k.productivity != null ? pct(k.productivity) : '—') + li('Awaiting approval', k.pendingApproval + ' content') + '</div>' +
 
-            '<p class="kpi-live-status">Accuracy = (Target − Revisions) ÷ Target (Revisions = Rejected files matched to Monthly Plan by file name or category). Efficiency = Approved content mins ÷ Monthly Plan content mins. Timeliness = Daily Actual mins ÷ Daily Plan mins. Productivity = Daily Actual ÷ (Monthly Plan − leave×480). Weights by Job Group — Content Developer: TC 20% · ACC 20% · EFF 10% · TIM 20% · PROD 30%. SES/NSO/CX: TC 20% · ACC 15% · EFF 15% · TIM 20% · PROD 30%. S+ Expert and Admin: TC 20% · ACC 15% · EFF 15% · TIM 15% · PROD 35%.</p>';
+            '<p class="kpi-live-status">Accuracy = (Target − Revisions) ÷ Target (Revisions = Rejected files matched to Monthly Plan by file name or category). Efficiency = Approved content mins ÷ Monthly Plan content mins. Timeliness = Daily Actual mins ÷ Daily Plan mins. Productivity = counted Actual (unique, Monthly-Plan-only) ÷ (Monthly Plan − leave×480). Weights by Job Group — Content Developer: TC 20% · ACC 20% · EFF 10% · TIM 20% · PROD 30%. SES/NSO/CX: TC 20% · ACC 15% · EFF 15% · TIM 20% · PROD 30%. S+ Expert and Admin: TC 20% · ACC 15% · EFF 15% · TIM 15% · PROD 35%.</p>';
 
     }
 
