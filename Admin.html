@@ -836,13 +836,15 @@ async function loadTrendSummary(){
       return !y || +y[1]===range.y;
     }
     // generic per-user minutes reader. hdrIdx = fixed header row (or null to auto-detect)
-    function processSheet(raw, hdrIdx, durPatterns, loose){
+    function processSheet(raw, hdrIdx, durPatterns, loose, datePats){
       const hdr = hdrIdx!=null ? hdrIdx : detectHeader(raw);
       const head = raw[hdr] || [];
       const userC = findCol(head, [/ns\+|user\s*id|email|userid/i]);
       let durC = -1;
       for(const p of durPatterns){ durC = findCol(head, [p]); if(durC>-1) break; }
-      const dateC = findCol(head, [/date|day|when|period|month|submitted/i]);
+      let dateC = -1;
+      if(datePats){ for(const p of datePats){ dateC = findCol(head, [p]); if(dateC>-1) break; } }
+      if(dateC<0) dateC = findCol(head, [/date|day|when|period|month|submitted/i]);
       const byUser = {};
       let monthDur=0, monthTasks=0;
       for(let r=hdr+1;r<raw.length;r++){
@@ -863,8 +865,9 @@ async function loadTrendSummary(){
       return {monthTasks,monthDur,byUser,hasDate:dateC>-1,durHead:durC>-1?String(head[durC]):"",userHead:userC>-1};
     }
     const TASK_DUR = [/duration/i, /minutes|\bmin\b/i, /time/i];
-    const plan    = processSheet(planRaw, 2, TASK_DUR, false);   // Task Plan   (header row 3)
-    const actual  = processSheet(actualRaw, 2, TASK_DUR, false); // Task Actual (header row 3)
+    const DATE_PATS = [/^date submitted$/i, /^submitted date$/i, /submitted d/i, /^date$/i];
+    const plan    = processSheet(planRaw, 2, TASK_DUR, false, DATE_PATS);   // Task Plan   (header row 3)
+    const actual  = processSheet(actualRaw, 2, TASK_DUR, false, DATE_PATS); // Task Actual (header row 3)
     const monthly = processSheet(monthlyRaw, null, [/duration/i, /minutes|\bmin\b/i, /plan|target|total|hours|time/i], true); // Monthly Plan
 
     // per-user comparison: Monthly Plan vs Task Plan vs Task Actual (minutes), biggest actual first
