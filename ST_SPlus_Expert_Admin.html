@@ -3541,7 +3541,7 @@ html[data-theme="light"] button.sec-action-btn:hover {
                         <div class="filter-container sec-filters">
                             <label for="mpStatusFilter">Show</label>
                             <select id="mpStatusFilter" class="filter-input" onchange="renderStMonthlyProgress()">
-                                <option value="all">All plan lines</option>
+                                <option value="all">All categories</option>
                                 <option value="incomplete">Not finished (not done + in progress)</option>
                                 <option value="notdone">Not done only (0 actual)</option>
                                 <option value="partial">In progress only</option>
@@ -7149,6 +7149,26 @@ function renderStMonthlyProgress() {
         }
     });
 
+    // Group per CATEGORY (Category 2) only: plan titles are merged so each category row is unique
+    (function () {
+        var groups = [];
+        lines.forEach(function (l) {
+            var gk = l.bucket + '||' + (l.norm || stNormCat2(l.cat2) || String(l.cat2 || l.title || '').toLowerCase());
+            var g = groups.find(function (x) { return x.key === gk; });
+            if (!g) {
+                g = { key: gk, bucket: l.bucket, cat2: l.cat2, title: '', nt: '', norm: l.norm, target: 0, actual: 0, over: 0, approved: 0, planMins: 0, actualMins: 0 };
+                groups.push(g);
+            }
+            g.target += l.target;
+            g.actual += Math.min(l.actual, l.target);   // each plan line is capped so one line cannot hide another's gap
+            g.over += Math.max(0, l.actual - l.target);
+            g.approved += l.approved;
+            g.planMins += l.planMins;
+            g.actualMins += l.actualMins;
+        });
+        lines = groups;
+    })();
+
     var statusFilter = 'all';
     try {
         var sf = document.getElementById('mpStatusFilter');
@@ -7158,7 +7178,7 @@ function renderStMonthlyProgress() {
     var statusHtml = function (l) {
         if (l.actual <= 0) return '<span class="cat-remark miss">Not done — 0 of ' + l.target + '</span>';
         if (l.actual < l.target) return '<span class="cat-remark partial">In progress — ' + (l.target - l.actual) + ' remaining</span>';
-        if (l.actual > l.target) return '<span class="cat-remark plus">Done — ' + (l.actual - l.target) + ' over target</span>';
+        if (l.over > 0) return '<span class="cat-remark plus">Done — ' + l.over + ' over target</span>';
         return '<span class="cat-remark plus">Done</span>';
     };
     var bucketColor = { CONTENT: '#4f8f46', TASK: '#d8ad24', OTHERS: '#397d89', TRAINING: '#7c3aed' };
@@ -7173,7 +7193,7 @@ function renderStMonthlyProgress() {
     var gPct = gTarget > 0 ? gCredit / gTarget * 100 : null;
     var cards = '<div class="summary-grid" style="margin-bottom:16px;">' +
         '<div class="summary-card"><h4>Overall Plan Completion</h4><p class="val">' + (gPct == null ? '—' : (Math.round(gPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">' + gCredit + ' of ' + gTarget + ' planned items done</p></div>' +
-        '<div class="summary-card"><h4>Plan Lines Done</h4><p class="val">' + gDone + ' / ' + gLines + '</p><p style="font-size:10px;margin:4px 0 0 0;">Targets met</p></div>' +
+        '<div class="summary-card"><h4>Categories Done</h4><p class="val">' + gDone + ' / ' + gLines + '</p><p style="font-size:10px;margin:4px 0 0 0;">Category 2 targets met</p></div>' +
         '<div class="summary-card"><h4>Approved Content</h4><p class="val">' + gAppr + '</p><p style="font-size:10px;margin:4px 0 0 0;">Approved requests in Monthly Plan</p></div>' +
         '<div class="summary-card"><h4>Not Started</h4><p class="val">' + gNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but 0 actual</p></div>' +
         '</div>';
@@ -7185,7 +7205,7 @@ function renderStMonthlyProgress() {
 
     var visible = lines.slice().sort(function (a, b) {
         if (a.bucket !== b.bucket) return a.bucket < b.bucket ? -1 : 1;
-        return (a.title || '').localeCompare(b.title || '');
+        return (a.cat2 || '').localeCompare(b.cat2 || '');
     }).filter(function (l) {
         if (statusFilter === 'all') return true;
         if (statusFilter === 'incomplete') return lineStatus(l) !== 'done';
@@ -7194,7 +7214,7 @@ function renderStMonthlyProgress() {
 
     var body = '';
     if (!visible.length) {
-        body = '<tr><td colspan="6" class="cat-muted" style="text-align:center;padding:16px;">Nothing matches this filter.</td></tr>';
+        body = '<tr><td colspan="5" class="cat-muted" style="text-align:center;padding:16px;">Nothing matches this filter.</td></tr>';
     } else {
         visible.forEach(function (l) {
             var pct = l.target > 0 ? (l.actual / l.target) * 100 : null;
@@ -7204,7 +7224,6 @@ function renderStMonthlyProgress() {
             var catLabel = (l.cat2 && l.cat2 !== l.bucket && l.cat2 !== '—') ? l.cat2 : l.bucket;
             body += '<tr>' +
                 '<td class="cat-name" style="text-align:left;"><span style="color:' + bc + ';">●</span> ' + escHtml(catLabel) + '</td>' +
-                '<td style="text-align:left;white-space:normal;min-width:180px;">' + escHtml(l.title || '—') + '</td>' +
                 '<td class="num">' + l.target + '</td>' +
                 '<td class="num">' + l.actual + '</td>' +
                 '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + barW + '%"></div></div></td>' +
@@ -7215,9 +7234,9 @@ function renderStMonthlyProgress() {
 
     el.innerHTML = cards +
         '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + escHtml(monthLabel) + '</h5></div>' +
-        '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a plan line (title) from your Monthly Plan, matched against your Actual by title or Category 2. CONTENT counts only when <strong>Approved</strong>. Planned items with 0 actual are <span class="cat-remark miss">Not done</span>.</div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category from your Monthly Plan (plan titles are combined), matched against your Actual. CONTENT counts only when <strong>Approved</strong>. Planned items with 0 actual are <span class="cat-remark miss">Not done</span>.</div>' +
         '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
-        '<th>Category</th><th>Plan [Title]</th><th class="num">Target</th><th class="num">Actual</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
+        '<th>Category</th><th class="num">Target</th><th class="num">Actual</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
         '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
 }
 
