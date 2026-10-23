@@ -6471,15 +6471,19 @@ function kpiCat(r) { return (getRowVal(r, ['CATEGORY']) + ' ' + getRowVal(r, ['C
  * Prefer CATEGORY 2 when it is a clean bucket; otherwise fall back to keywords.
  */
 function kpiRowBucket(r) {
-    var c = String(getRowVal(r, ['CATEGORY']) || '').trim().toUpperCase();
-    var c2 = String(getRowVal(r, ['CATEGORY 2']) || '').trim().toUpperCase();
+    var c = String(getRowVal(r, ['CATEGORY', 'Category', 'Catergory']) || '').trim();
+    var c2 = String(getRowVal(r, ['CATEGORY 2', 'Category 2']) || '').trim();
     var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
-    if (buckets.indexOf(c2) !== -1) return c2;
-    if (buckets.indexOf(c) !== -1) return c;
-    // detailed type names like "CONTENT - One-Pager Templated" — do NOT treat as CONTENT
-    // unless CATEGORY 2 already said so; use keyword only on a short field
-    var probe = c2 || c;
-    if (probe === 'CONTENT' || probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1) return 'CONTENT';
+    var cUp = c.toUpperCase(), c2Up = c2.toUpperCase();
+    if (buckets.indexOf(c2Up) !== -1) return c2Up;
+    if (buckets.indexOf(cUp) !== -1) return cUp;
+    // "TASK - Task Plan And Actual" → TASK
+    var m = cUp.match(/^(CONTENT|TASK|OTHERS|TRAINING)\s*[-–—:]/);
+    if (m) return m[1];
+    var m2 = c2Up.match(/^(CONTENT|TASK|OTHERS|TRAINING)\s*[-–—:]/);
+    if (m2) return m2[1];
+    var probe = c2Up || cUp;
+    if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) return 'CONTENT';
     if (probe.indexOf('TRAINING') !== -1 && probe.indexOf('CONTENT') === -1) return 'TRAINING';
     if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) return 'TASK';
     return 'OTHERS';
@@ -7021,18 +7025,41 @@ function stIsContentApproved(title, approvalDateCell, approvedFiles) {
     return (approvedFiles || []).some(function (f) { return stTitleMatch(f, nt); });
 }
 function stNormalizeCatPair(row) {
-    var c = stField(row, ['CATEGORY', 'Category']);
-    var c2 = stField(row, ['CATEGORY 2', 'Category 2', 'CATEGORY2']);
-    var title = stField(row, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'ACTUAL [Title]', 'ACTUAL [TITLE]']);
+    var c = stField(row, ['CATEGORY', 'Category', 'Catergory']);
+    var c2 = stField(row, ['CATEGORY 2', 'Category 2', 'CATEGORY2', 'Catergory 2']);
+    var title = stField(row, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'ACTUAL [Title]', 'ACTUAL [TITLE]', 'Title']);
     var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
-    var cUp = c.toUpperCase(), c2Up = c2.toUpperCase();
-    if (buckets.indexOf(c2Up) !== -1) return { cat: c2Up, cat2: c || title || '—' };
-    if (buckets.indexOf(cUp) !== -1) return { cat: cUp, cat2: c2 || title || '—' };
+    // Parse "TASK - Task Plan And Actual" style (common in Task Actual sheet)
+    function splitBucketDetail(s) {
+        var m = String(s || '').match(/^(CONTENT|TASK|OTHERS|TRAINING)\s*[-–—:]\s*(.+)$/i);
+        if (m) return { cat: m[1].toUpperCase(), cat2: m[2].trim() };
+        return null;
+    }
+    var fromC = splitBucketDetail(c);
+    var fromC2 = splitBucketDetail(c2);
+    if (fromC) return fromC;                          // Category already has "BUCKET - detail"
+    if (fromC2) return fromC2;
+    var cUp = String(c || '').toUpperCase().trim();
+    var c2Up = String(c2 || '').toUpperCase().trim();
+    // Category 2 is pure bucket (e.g. "TASK") → detail is Category (or title)
+    if (buckets.indexOf(c2Up) !== -1) {
+        var detail = c;
+        if (!detail || String(detail).toUpperCase().trim() === c2Up) detail = title || '—';
+        // strip leading "TASK - " if still present
+        var sd = splitBucketDetail(detail);
+        return { cat: c2Up, cat2: sd ? sd.cat2 : (detail || '—') };
+    }
+    if (buckets.indexOf(cUp) !== -1) {
+        var detail2 = c2 || title || '—';
+        var sd2 = splitBucketDetail(detail2);
+        return { cat: cUp, cat2: sd2 ? sd2.cat2 : detail2 };
+    }
     var probe = c2Up || cUp;
     var b = 'OTHERS';
     if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) b = 'CONTENT';
     else if (probe.indexOf('TRAINING') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TRAINING';
     else if (probe.indexOf('TASK') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TASK';
+    else if (probe.indexOf('OTHERS') !== -1) b = 'OTHERS';
     return { cat: b, cat2: (c2 || c || title || '—') };
 }
 function stApprovedFiles() {
@@ -7058,71 +7085,139 @@ function renderStMonthlyProgress() {
             .toLocaleString('en-US', { month: 'long', year: 'numeric' })
         : 'All months';
 
-    var lines = [];
+var lines = [];
+    // --- Monthly Plan → one row per CATEGORY (Category 2). Target = sum of FREQUENCY. ---
     (allLoadedTasks.monthlyPlan || []).filter(function (r) {
         return matchesUser(r) && kpiMonthMatches(stField(r, ['MONTH']) || (typeof getRowVal === 'function' ? getRowVal(r, ['MONTH']) : ''), monthKey);
     }).forEach(function (r) {
         var f = parseInt(String(stField(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
         if (!(f > 0)) f = 1;
         var pair = stNormalizeCatPair(r);
-        var title = stField(r, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'Plan [Title]']);
-        if (!title) title = pair.cat2 || '—';
-        var nt = stNormTitle(title);
         var nc = stNormCat2(pair.cat2);
+        var planTitle = stField(r, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'Plan [Title]']);
         var d = stParseMins(r);
         var mins = d > 0 ? d * f : 480 * f;
-        var key = pair.cat + '||' + (nt || nc || title.toLowerCase());
-        var line = lines.find(function (l) { return l.key === key; });
+        var gk = pair.cat + '||' + (nc || String(pair.cat2 || '').toLowerCase());
+        var line = lines.find(function (l) { return l.key === gk; });
         if (!line) {
-            line = { key: key, bucket: pair.cat, cat2: pair.cat2, title: title, nt: nt, norm: nc, target: 0, actual: 0, approved: 0, planMins: 0, actualMins: 0 };
+            line = { key: gk, bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, over: 0, approved: 0, planMins: 0, actualMins: 0, seen: {}, titles: [] };
             lines.push(line);
         }
         line.target += f;
         line.planMins += mins;
+        if (planTitle) {
+            var pnt = stNormTitle(planTitle);
+            if (pnt && line.titles.indexOf(pnt) === -1) line.titles.push(pnt);
+        }
     });
 
     var approvedFiles = stApprovedFiles();
-    var countedTitles = [];
+
+    // --- Actual rule (per category):
+    //     unique key = normalizedTitle + '|' + date
+    //     • same title, same day     → count 1
+    //     • different titles, same day → each counts (2, 3, …)
+    //     • same title, different days → each day counts
+    //     CONTENT only when Approved.
+    function findCatLine(pair, nt) {
+        var nc = stNormCat2(pair.cat2);
+        var i, line = null;
+        // 1) same bucket + category-2 exact / fuzzy
+        for (i = 0; i < lines.length; i++) {
+            if (lines[i].bucket !== pair.cat) continue;
+            if (lines[i].norm && nc && (stCatEq(lines[i].norm, nc) || stCatFuzzy(lines[i].norm, nc))) { line = lines[i]; break; }
+        }
+        // 2) same bucket + raw cat2 text
+        if (!line) {
+            var want = String(pair.cat2 || '').toLowerCase().trim();
+            if (want) {
+                for (i = 0; i < lines.length; i++) {
+                    if (lines[i].bucket === pair.cat && String(lines[i].cat2 || '').toLowerCase().trim() === want) { line = lines[i]; break; }
+                }
+            }
+        }
+        // 3) title matches a Monthly Plan title under this bucket
+        if (!line && nt) {
+            for (i = 0; i < lines.length; i++) {
+                if (lines[i].bucket !== pair.cat) continue;
+                if ((lines[i].titles || []).some(function (t) { return t === nt || stTitleMatch(t, nt); })) { line = lines[i]; break; }
+            }
+        }
+        // 4) title fuzzy-matches the category label itself (e.g. title "S+ Admin report" → TASK - S+ Admin)
+        if (!line && nt) {
+            for (i = 0; i < lines.length; i++) {
+                if (lines[i].bucket !== pair.cat) continue;
+                if (lines[i].norm && (stCatFuzzy(lines[i].norm, nt) || stTitleMatch(lines[i].norm, nt))) { line = lines[i]; break; }
+            }
+        }
+        return line;
+    }
+
+    function actualDateKey(t) {
+        var raw = stField(t, ['Date Submitted', 'DATE SUBMITTED', 'Submitted Date', 'Submitted D', 'DATE']) || t['Date Submitted'] || '';
+        var dk = '';
+        try {
+            if (typeof cleanDateDisplay === 'function') dk = cleanDateDisplay(raw) || '';
+        } catch (e1) {}
+        if (!dk && typeof getRowMonthKey === 'function') {
+            // fall through — still need full yyyy-mm-dd
+        }
+        if (!dk) {
+            try {
+                if (raw instanceof Date && !isNaN(raw.getTime())) {
+                    var y = raw.getFullYear(), m = String(raw.getMonth() + 1).padStart(2, '0'), day = String(raw.getDate()).padStart(2, '0');
+                    dk = y + '-' + m + '-' + day;
+                } else {
+                    dk = String(raw || '').substring(0, 10);
+                }
+            } catch (e2) { dk = String(raw || '').substring(0, 10); }
+        }
+        return dk;
+    }
+
+    function actualInMonth(t) {
+        if (!monthKey) return true;
+        var raw = stField(t, ['Date Submitted', 'DATE SUBMITTED', 'Submitted Date', 'Submitted D', 'DATE']) || t['Date Submitted'] || '';
+        try {
+            if (typeof getRowMonthKey === 'function') {
+                var mk = getRowMonthKey(raw);
+                if (mk) return mk === monthKey;
+            }
+        } catch (e) {}
+        var s = String(raw || '');
+        if (raw instanceof Date && !isNaN(raw.getTime())) {
+            s = raw.getFullYear() + '-' + String(raw.getMonth() + 1).padStart(2, '0');
+        }
+        return s.indexOf(monthKey) === 0 || s.substring(0, 7) === monthKey;
+    }
 
     (allLoadedTasks.actual || []).filter(function (t) {
-        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey;
+        return matchesUser(t) && actualInMonth(t);
     }).forEach(function (t) {
-        var title = stField(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Actual [Title]']);
-        if (!title) return;
+        var title = stField(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Actual [Title]', 'PLAN [Title]']);
         var pair = stNormalizeCatPair(t);
+        // Also accept misspelled sheet header "Catergory"
+        if (!pair.cat2 || pair.cat2 === '—') {
+            var alt = stField(t, ['Catergory', 'Catergory 2', 'CATEGORY', 'Category']);
+            if (alt) pair = stNormalizeCatPair({ CATEGORY: alt, 'CATEGORY 2': stField(t, ['CATEGORY 2', 'Category 2', 'Catergory 2']), TITLE: title });
+        }
         var mins = stParseMins(t);
         var nt = stNormTitle(title);
-        if (pair.cat === 'CONTENT' && !stIsContentApproved(title, stField(t, ['APPROVAL DATE', 'Approval Date']), approvedFiles)) return;
+        if (pair.cat === 'CONTENT' && !stIsContentApproved(title || '', stField(t, ['APPROVAL DATE', 'Approval Date']), approvedFiles)) return;
 
-        var line = null, i;
-        for (i = 0; i < lines.length; i++) {
-            if (lines[i].bucket === pair.cat && lines[i].nt && nt && lines[i].nt === nt) { line = lines[i]; break; }
-        }
-        if (!line) {
-            for (i = 0; i < lines.length; i++) {
-                if (lines[i].bucket === pair.cat && lines[i].nt && nt && stTitleMatch(lines[i].nt, nt)) { line = lines[i]; break; }
-            }
-        }
-        if (!line) {
-            var nc = stNormCat2(pair.cat2);
-            for (i = 0; i < lines.length; i++) {
-                if (lines[i].bucket === pair.cat && lines[i].norm && nc && (stCatEq(lines[i].norm, nc) || stCatFuzzy(lines[i].norm, nc))) { line = lines[i]; break; }
-            }
-        }
+        var line = findCatLine(pair, nt);
         if (!line) return;
-        if (pair.cat === 'CONTENT') {
-            if (nt && countedTitles.some(function (x) { return x === nt || stTitleMatch(x, nt); })) return;
-            if (nt) countedTitles.push(nt);
-        }
+
+        var _dk = actualDateKey(t);
+        // unique = title + date (empty title still unique per day)
+        var uk = (nt || '_notitle_') + '|' + _dk;
+        if (line.seen[uk]) return;
+        line.seen[uk] = 1;
+        line.actual += 1;
         line.actualMins += mins || 0;
-        if (pair.cat === 'CONTENT') { line.actual += 1; return; }
-        // TASK / OTHERS / TRAINING: unique unit (title + day), capped at the plan line's target
-        var _dk = cleanDateDisplay(t['Date Submitted']) || String(t['Date Submitted'] || '').substring(0, 10);
-        var _uk2 = nt + '|' + _dk;
-        line.seen = line.seen || {};
-        if (!line.seen[_uk2] && line.actual < line.target) { line.seen[_uk2] = 1; line.actual += 1; }
     });
 
+    // Approved CONTENT from Approvals: bump approved; add to actual only if title not already counted
     (typeof allApprovals !== 'undefined' ? allApprovals : []).forEach(function (a) {
         if (!/approve/i.test(String(a.status || ''))) return;
         var fileName = a.fileName || a.title || '';
@@ -7131,43 +7226,27 @@ function renderStMonthlyProgress() {
         var cat = String(a.category || '').trim();
         var pair = stNormalizeCatPair({ CATEGORY: cat, 'CATEGORY 2': a.category2 || '', TITLE: fileName });
         if (pair.cat !== 'CONTENT') return;
-        var line = null, i;
-        for (i = 0; i < lines.length; i++) {
-            if (lines[i].bucket === 'CONTENT' && lines[i].nt && stTitleMatch(lines[i].nt, nt)) { line = lines[i]; break; }
-        }
-        if (!line) {
-            var nc = stNormCat2(pair.cat2);
-            for (i = 0; i < lines.length; i++) {
-                if (lines[i].bucket === 'CONTENT' && lines[i].norm && nc && (stCatEq(lines[i].norm, nc) || stCatFuzzy(lines[i].norm, nc))) { line = lines[i]; break; }
-            }
-        }
+        var line = findCatLine(pair, nt);
         if (!line) return;
         line.approved += 1;
-        if (!countedTitles.some(function (x) { return x === nt || stTitleMatch(x, nt); })) {
-            countedTitles.push(nt);
+        var already = Object.keys(line.seen).some(function (k) {
+            var t = k.split('|')[0];
+            return t === nt || (typeof stTitleMatch === 'function' && stTitleMatch(t, nt));
+        });
+        if (!already) {
+            var _dk = '';
+            try {
+                _dk = (typeof cleanDateDisplay === 'function' ? cleanDateDisplay(a.uploadDate || a.approvalDate || a.date) : '') || String(a.uploadDate || a.approvalDate || a.date || '').substring(0, 10);
+            } catch (e) {}
+            if (!_dk) _dk = 'approved';
+            line.seen[nt + '|' + _dk] = 1;
             line.actual += 1;
         }
     });
 
-    // Group per CATEGORY (Category 2) only: plan titles are merged so each category row is unique
-    (function () {
-        var groups = [];
-        lines.forEach(function (l) {
-            var gk = l.bucket + '||' + (l.norm || stNormCat2(l.cat2) || String(l.cat2 || l.title || '').toLowerCase());
-            var g = groups.find(function (x) { return x.key === gk; });
-            if (!g) {
-                g = { key: gk, bucket: l.bucket, cat2: l.cat2, title: '', nt: '', norm: l.norm, target: 0, actual: 0, over: 0, approved: 0, planMins: 0, actualMins: 0 };
-                groups.push(g);
-            }
-            g.target += l.target;
-            g.actual += Math.min(l.actual, l.target);   // each plan line is capped so one line cannot hide another's gap
-            g.over += Math.max(0, l.actual - l.target);
-            g.approved += l.approved;
-            g.planMins += l.planMins;
-            g.actualMins += l.actualMins;
-        });
-        lines = groups;
-    })();
+    lines.forEach(function (l) {
+        l.over = Math.max(0, l.actual - l.target);
+    });
 
     var statusFilter = 'all';
     try {
@@ -7234,7 +7313,7 @@ function renderStMonthlyProgress() {
 
     el.innerHTML = cards +
         '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + escHtml(monthLabel) + '</h5></div>' +
-        '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category from your Monthly Plan (plan titles are combined), matched against your Actual. CONTENT counts only when <strong>Approved</strong>. Planned items with 0 actual are <span class="cat-remark miss">Not done</span>.</div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category from your Monthly Plan. <strong>Actual</strong> counts unique <em>title + date</em> under that category: same title on the same day = 1; different titles on the same day = each counts; same title on different days = each day counts. CONTENT only when <strong>Approved</strong>. 0 actual = <span class="cat-remark miss">Not done</span>.</div>' +
         '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
         '<th>Category</th><th class="num">Target</th><th class="num">Actual</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
         '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
@@ -7451,14 +7530,30 @@ function kpiBucketCat(raw) {
 // 100% just because the task was logged many times. Minutes are NOT affected (they still count toward Productivity).
 // SEPCO uses the identical rule (sepcoClaimUnit) so both portals show the same numbers.
 var KPI_BUCKET_WORDS = ['content', 'task', 'others', 'training'];
-function kpiPairOf(row) { // same output as SEPCO sepcoNormalizeCatPair
-    var c = String(getRowVal(row, ['CATEGORY']) || '').trim();
-    var c2 = String(getRowVal(row, ['CATEGORY 2']) || '').trim();
-    if (!c2 || /^#?n\/?a$/i.test(c2) || c2 === '-') c2 = '';
-    var title = String(getRowVal(row, ['TITLE', 'PLAN [Title]', 'PLAN [TITLE]', 'ACTUAL [Title]', 'ACTUAL [TITLE]']) || '').trim();
-    var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'], cUp = c.toUpperCase(), c2Up = c2.toUpperCase();
-    if (buckets.indexOf(c2Up) !== -1) return { cat: c2Up, cat2: c || title || '' };
-    if (buckets.indexOf(cUp) !== -1) return { cat: cUp, cat2: c2 || title || '' };
+function kpiPairOf(row) { // aligned with stNormalizeCatPair (Task Actual: Category2=TASK, Category="TASK - detail")
+    var c = String(getRowVal(row, ['CATEGORY', 'Category', 'Catergory']) || '').trim();
+    var c2 = String(getRowVal(row, ['CATEGORY 2', 'Category 2', 'CATEGORY2']) || '').trim();
+    if (!c2 || /^#?n\/?a$/i.test(c2) || c2 === '-' || c2 === '—') c2 = '';
+    var title = String(getRowVal(row, ['TITLE', 'Title', 'PLAN [Title]', 'PLAN [TITLE]', 'ACTUAL [Title]', 'ACTUAL [TITLE]']) || '').trim();
+    var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
+    function splitBD(s) {
+        var m = String(s || '').match(/^(CONTENT|TASK|OTHERS|TRAINING)\s*[-–—:]\s*(.+)$/i);
+        return m ? { cat: m[1].toUpperCase(), cat2: m[2].trim() } : null;
+    }
+    var fromC = splitBD(c); if (fromC) return fromC;
+    var fromC2 = splitBD(c2); if (fromC2) return fromC2;
+    var cUp = c.toUpperCase(), c2Up = c2.toUpperCase();
+    if (buckets.indexOf(c2Up) !== -1) {
+        var detail = c;
+        if (!detail || detail.toUpperCase().trim() === c2Up) detail = title || '';
+        var sd = splitBD(detail);
+        return { cat: c2Up, cat2: sd ? sd.cat2 : detail };
+    }
+    if (buckets.indexOf(cUp) !== -1) {
+        var d2 = c2 || title || '';
+        var sd2 = splitBD(d2);
+        return { cat: cUp, cat2: sd2 ? sd2.cat2 : d2 };
+    }
     var probe = c2Up || cUp, b = 'OTHERS';
     if (probe === 'CONTENT' || (probe.indexOf('CONTENT') === 0 && probe.indexOf('-') === -1)) b = 'CONTENT';
     else if (probe.indexOf('TRAINING') !== -1 && probe.indexOf('CONTENT') === -1) b = 'TRAINING';
@@ -7497,7 +7592,8 @@ function kpiClaimUnit(lines, bucket, cands, title, day, mins) {
     if (line) {
         line.mins = (line.mins || 0) + (mins || 0);
         line.seen = line.seen || {};
-        if (!line.seen[key] && line.actual < line.target) { line.seen[key] = 1; line.actual += 1; return { line: line, counted: true, key: key }; }
+        // unique title+date: same title same day=1; different titles=each; no target cap (matches Monthly Plan Progress)
+        if (!line.seen[key]) { line.seen[key] = 1; line.actual += 1; return { line: line, counted: true, key: key }; }
         return { line: line, counted: false, key: key };
     }
     return { line: null, counted: false, key: key };
@@ -7533,24 +7629,30 @@ function renderCategoryProgress(monthKey, targetId) {
     var dayMins = {}, hourMins = {}, dayCount = {};
     var countedContentTitles = [];
     (allLoadedTasks.actual || []).filter(function (t) {
-        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey && String(t['ACTUAL [Title]'] || t['ACTUAL [TITLE]'] || '').trim() !== '';
+        var _dt = getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || t['Date Submitted'] || t['Submitted D'] || '';
+        var _ti = String(getRowVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Title']) || t['ACTUAL [Title]'] || t['Title'] || '').trim();
+        return matchesUser(t) && getRowMonthKey(_dt) === monthKey && _ti !== '';
     }).forEach(function (t) {
         var b = kpiRowBucket(t);
         var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
         if (isNaN(d) || d < 0) d = 0;
-        var title = String(getRowVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE']) || t['ACTUAL [Title]'] || '').trim();
+        var title = String(getRowVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Title']) || t['ACTUAL [Title]'] || t['Title'] || '').trim();
         // CONTENT must be approved to count (same as SEPCO)
+        var _dayK = cleanDateDisplay(getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || t['Date Submitted'] || t['Submitted D'] || '') || String(getRowVal(t, ['Date Submitted', 'Submitted D']) || t['Date Submitted'] || t['Submitted D'] || '').substring(0, 10);
         if (b === 'CONTENT') {
             if (!kpiDurationCounts(t, apprSet)) return;
             var nt0 = kpiNormTitle(title);
-            if (nt0) countedContentTitles.push(nt0);
-        }
-        if (b === 'CONTENT') stats[b].actualCount += 1;
-        else {
-            // TASK / OTHERS / TRAINING: unique units matched to the Monthly Plan, capped at target
-            var _dayK = cleanDateDisplay(t['Date Submitted']) || String(t['Date Submitted'] || '').substring(0, 10);
+            var cuk = (nt0 || '_notitle_') + '|' + _dayK;
+            stats[b]._seen = stats[b]._seen || {};
+            if (!stats[b]._seen[cuk]) {
+                stats[b]._seen[cuk] = 1;
+                stats[b].actualCount += 1;
+                if (nt0) countedContentTitles.push(nt0);
+            }
+        } else {
+            // TASK / OTHERS / TRAINING: unique title+date matched to Monthly Plan (same rule as Monthly Plan Progress)
             var _pr = kpiPairOf(t);
-            var _cr = kpiClaimUnit(planLines, b, [_pr.cat2, getRowVal(t, ['CATEGORY 2']), getRowVal(t, ['CATEGORY'])], title, _dayK, d);
+            var _cr = kpiClaimUnit(planLines, b, [_pr.cat2, getRowVal(t, ['CATEGORY 2', 'Category 2']), getRowVal(t, ['CATEGORY', 'Category'])], title, _dayK, d);
             if (_cr.counted) stats[b].actualCount += 1;
             else if (!_cr.line) {
                 var _uk = b + '||' + stNormCat2(_pr.cat2 || title);
@@ -7561,7 +7663,7 @@ function renderCategoryProgress(monthKey, targetId) {
         }
         stats[b].actualMins += d;
 
-        var ds = cleanDateDisplay(t['Date Submitted']) || String(t['Date Submitted'] || '').substring(0, 10);
+        var ds = cleanDateDisplay(getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || t['Date Submitted'] || t['Submitted D'] || '') || String(getRowVal(t, ['Date Submitted', 'Submitted D']) || '').substring(0, 10);
         dayMins[ds] = (dayMins[ds] || 0) + d;
         dayCount[ds] = (dayCount[ds] || 0) + 1;
 
@@ -7668,18 +7770,9 @@ function renderCategoryProgress(monthKey, targetId) {
     function dKey(c, c2) { return String(c || '') + '||' + String(c2 || ''); }
     
 function normalizeCatPair(row) {
-    var c = String(getRowVal(row, ['CATEGORY']) || '').trim();
-    var c2 = String(getRowVal(row, ['CATEGORY 2']) || '').trim();
-    var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
-    var cUp = c.toUpperCase();
-    var c2Up = c2.toUpperCase();
-    // Monthly Plan style: CATEGORY is CONTENT/TASK/OTHERS
-    if (buckets.indexOf(cUp) !== -1) return { cat: cUp, cat2: c2 || '—' };
-    // Daily Actual style (often inverted): CATEGORY 2 is the bucket
-    if (buckets.indexOf(c2Up) !== -1) return { cat: c2Up, cat2: c || '—' };
-    // Fallback — derive bucket from either field
-    var b = kpiBucketCat(c || c2);
-    return { cat: b, cat2: (c2 || c || '—') };
+    // Use kpiPairOf so Task Actual "Category2=TASK, Category=TASK - detail" matches Monthly Plan
+    var p = kpiPairOf(row);
+    return { cat: p.cat || 'OTHERS', cat2: p.cat2 || '—' };
 }
 
 function ensureD(c, c2) {
@@ -7704,22 +7797,31 @@ function ensureD(c, c2) {
     });
     var countedDetailTitles = [];
     (allLoadedTasks.actual || []).filter(function (t) {
-        return matchesUser(t) && getRowMonthKey(t['Date Submitted']) === monthKey && String(t['ACTUAL [Title]'] || t['ACTUAL [TITLE]'] || '').trim() !== '';
+        var _dt = getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || t['Date Submitted'] || t['Submitted D'] || '';
+        var _ti = String(getRowVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Title']) || t['ACTUAL [Title]'] || t['Title'] || '').trim();
+        return matchesUser(t) && getRowMonthKey(_dt) === monthKey && _ti !== '';
     }).forEach(function (t) {
         var pair = normalizeCatPair(t);
         var d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
         if (isNaN(d) || d < 0) d = 0;
-        var title = String(getRowVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE']) || t['ACTUAL [Title]'] || '').trim();
+        var title = String(getRowVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Title']) || t['ACTUAL [Title]'] || t['Title'] || '').trim();
         // CONTENT: count + mins only when approved; TASK / OTHERS always (SEPCO)
         if (pair.cat === 'CONTENT') {
             if (!kpiDurationCounts(t, apprSet)) return;
             var nt = kpiNormTitle(title);
-            if (nt) countedDetailTitles.push(nt);
+            var _dDay = cleanDateDisplay(getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || t['Submitted D'] || '') || String(getRowVal(t, ['Submitted D', 'Date Submitted']) || '').substring(0, 10);
+            var row = ensureD(pair.cat, pair.cat2);
+            row.seen = row.seen || {};
+            var duk = (nt || '_notitle_') + '|' + _dDay;
+            if (!row.seen[duk]) {
+                row.seen[duk] = 1;
+                row.actualCount += 1;
+                if (nt) countedDetailTitles.push(nt);
+            }
+            row.actualMins += d;
+            return;
         }
-        if (pair.cat !== 'CONTENT') return;   // TASK / OTHERS / TRAINING come from planLines / unplannedUnits (unique units)
-        var row = ensureD(pair.cat, pair.cat2);
-        row.actualCount += 1;
-        row.actualMins += d;
+        // TASK / OTHERS / TRAINING come from planLines / unplannedUnits (unique units)
     });
     planLines.forEach(function (l) { var r0 = ensureD(l.bucket, l.cat2); r0.actualCount += l.actual; r0.actualMins += (l.mins || 0); });
     Object.keys(unplannedUnits).forEach(function (k) { var u0 = unplannedUnits[k]; var r1 = ensureD(u0.cat, u0.cat2); r1.actualCount += u0.count; r1.actualMins += u0.mins; });
@@ -8296,6 +8398,415 @@ function submitSnsTikTokLink() {
 }
 
 </script>
+
+<!-- ===================== TRAINING PORTAL CHAT BOT (hybrid: topic-based + Gemini via Apps Script) ===================== -->
+<style>
+#kpiBotFab{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:26px;box-shadow:0 8px 24px rgba(37,99,235,.45);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+#kpiBotFab:hover{transform:scale(1.07)}
+#kpiBotPanel{--kb-bg:#0f172a;--kb-card:#1e293b;--kb-text:#e2e8f0;--kb-muted:#94a3b8;--kb-line:rgba(148,163,184,.25);--kb-user:#2563eb;position:fixed;right:20px;bottom:88px;z-index:2147483000;width:410px;max-width:calc(100vw - 24px);height:620px;max-height:calc(100vh - 110px);display:none;flex-direction:column;background:var(--kb-bg);color:var(--kb-text);border:1px solid var(--kb-line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;font:13px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html[data-theme="light"] #kpiBotPanel{--kb-bg:#fff;--kb-card:#f1f5f9;--kb-text:#1e293b;--kb-muted:#64748b;--kb-line:#e2e8f0}
+#kpiBotPanel.open{display:flex}
+#kpiBotHead{padding:12px 14px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;display:flex;align-items:center;gap:8px}
+#kpiBotHead b{flex:1;font-size:14px}
+#kpiBotHead small{display:block;font-weight:400;opacity:.85;font-size:11px}
+#kpiBotHead button{background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:6px;padding:4px 9px;cursor:pointer;font-size:14px}
+#kpiBotMsgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px}
+.kb-m{max-width:92%;padding:8px 11px;border-radius:12px;word-wrap:break-word;overflow-wrap:anywhere}
+.kb-m.bot{background:var(--kb-card);align-self:flex-start;border-bottom-left-radius:3px}
+.kb-m.me{background:var(--kb-user);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.kb-m ul{margin:4px 0 4px 16px;padding:0}.kb-m code{background:rgba(148,163,184,.22);padding:0 4px;border-radius:4px;font-size:12px}
+.kb-m table{border-collapse:collapse;margin:5px 0;font-size:12px}.kb-m td,.kb-m th{border:1px solid var(--kb-line);padding:2px 7px;text-align:left}
+.kb-tag{display:inline-block;font-size:10px;opacity:.7;margin-top:4px}
+.kb-fu{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.kb-fu button{background:transparent;color:#60a5fa;border:1px solid rgba(96,165,250,.55);border-radius:999px;padding:2px 9px;font-size:11.5px;cursor:pointer}
+.kb-fu button:hover{background:rgba(37,99,235,.18)}
+.kb-dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--kb-muted);animation:kbdot 1s infinite ease-in-out}
+.kb-dots span:nth-child(2){animation-delay:.15s}.kb-dots span:nth-child(3){animation-delay:.3s}
+@keyframes kbdot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+#kpiBotChips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-top:1px solid var(--kb-line);max-height:96px;overflow-y:auto}
+#kpiBotChips button{background:var(--kb-card);color:var(--kb-text);border:1px solid var(--kb-line);border-radius:999px;padding:3px 10px;font-size:11.5px;cursor:pointer}
+#kpiBotChips button:hover{border-color:#2563eb;color:#60a5fa}
+#kpiBotForm{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--kb-line)}
+#kpiBotInput{flex:1;background:var(--kb-card);color:var(--kb-text);border:1px solid var(--kb-line);border-radius:8px;padding:8px 10px;font:inherit;outline:none}
+#kpiBotInput:focus{border-color:#2563eb}
+#kpiBotSend{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:0 14px;cursor:pointer;font-weight:600}
+#kpiBotSend:disabled{opacity:.5;cursor:default}
+@media(max-width:520px){#kpiBotPanel{right:8px;left:8px;width:auto;bottom:84px}}
+</style>
+
+<button id="kpiBotFab" type="button" aria-label="Buksan ang Training Portal chat bot" title="Training Portal chat bot">💬</button>
+<div id="kpiBotPanel" role="dialog" aria-label="Training Portal chat bot">
+    <div id="kpiBotHead"><b>Training Portal chat bot<small>KPI, approvals, plans at iba pa — tanungin mo ako</small></b><button type="button" id="kpiBotClear" title="Burahin ang chat">🗑</button><button type="button" id="kpiBotClose" aria-label="Isara">✕</button></div>
+    <div id="kpiBotMsgs"></div>
+    <div id="kpiBotChips"></div>
+    <form id="kpiBotForm" autocomplete="off"><input id="kpiBotInput" type="text" placeholder="Itanong mo, hal. 'bakit mababa ang productivity ko?'" maxlength="400"><button id="kpiBotSend" type="submit">Send</button></form>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* ------------------------------------------------------------------
+   CONFIG — WALA nang API key dito. Ang Gemini key ay nasa Apps Script
+   (Script Properties → GEMINI_API_KEY); ang bot ay tumatawag sa Apps Script
+   gamit ang action "chatbot". Para i-off ang AI: AI_ENABLED:false
+   (window.KPI_BOT_CONFIG = {...} para i-override).
+------------------------------------------------------------------- */
+var CFG = Object.assign({
+    BOT_NAME: 'Training Portal chat bot',
+    ENDPOINT: (function () {
+        try { if (typeof WEB_APP_URL !== 'undefined' && WEB_APP_URL) return WEB_APP_URL; } catch (e) {}
+        try { if (typeof GA_WEB_APP_URL !== 'undefined' && GA_WEB_APP_URL) return GA_WEB_APP_URL; } catch (e) {}
+        return 'https://script.google.com/macros/s/AKfycbyRvkqZdaAAwWtl59hu4qOvQ-6u-QIgVRMM47h_HJ5wLVPIezlFfoI7Kcoung-tWxg5/exec';
+    })(),
+    AI_ENABLED: true,
+    LOCAL_MIN_SCORE: 4,         // mas mababa dito = ipapasa sa AI
+    TIMEOUT_MS: 35000
+}, window.KPI_BOT_CONFIG || {});
+
+/* ------------------------------------------------------------------
+   KNOWLEDGE BASE — hango sa mismong code ng ST / SEPCO / Apps Script
+------------------------------------------------------------------- */
+var KB = [
+{ id:'target', title:'Target / Own Content / Ach %',
+  kw:['target','own content','own','ach','achievement','achievement %','ach %','content count','target count','tc','proofread','proof','approved count','frequency'],
+  a:'**Target Count / Own Content / Ach %**\n'+
+    '- **Target** = total ng *FREQUENCY PER MONTH* ng lahat ng Monthly Plan rows na CONTENT ang bucket (blank = 1).\n'+
+    '- Bucket: *CATEGORY 2* muna ang tinitingnan kung CONTENT/TASK/OTHERS/TRAINING; kung hindi, *CATEGORY*. Ang "CONTENT - One-Pager Templated" ay detalye lang, hindi bucket.\n'+
+    '- **Actual (approved)**: bawat Approved na file sa Approval Requests ay itinutugma sa Monthly Plan slot — **(1)** file name vs plan TITLE, **(2)** kung wala, approval category vs plan CATEGORY. Walang match = hindi bibilangin.\n'+
+    '- Ang file na may "proofread" sa pangalan/category ay bilang **Proof**, hindi **Own**. Total = Own + Proof.\n'+
+    '- **Ach %** = Own Content ÷ Target × 100 (— kapag Target = 0).\n'+
+    'Halimbawa: Target 10, Own 8 → Ach 80%.' },
+{ id:'accuracy', title:'Accuracy',
+  kw:['accuracy','accurate','quality','revision','revisions','rejected','reject','error','errors','deduction','content errors','mali','ayos'],
+  a:'**Accuracy** = (Target − Revisions) ÷ Target − error deduction\n'+
+    '- **Revisions** = bilang ng *Rejected* Approval Requests sa buwan na tumutugma sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY). Hindi lahat ng reject ay binibilang.\n'+
+    '- **Error deduction** (galing sa *KPI Inputs* → CONTENT ERRORS): `ceil(errors ÷ 2) × 1%` → 1–2 errors = −1%, 3–4 = −2%, 5–6 = −3% …\n'+
+    '- Hindi bababa sa 0%. Kapag **walang Target**, "—" (walang data) ang lalabas, hindi 100%.\n'+
+    'Halimbawa: Target 10, Revisions 2, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
+{ id:'efficiency', title:'Efficiency',
+  kw:['efficiency','efficient','eff','approved content mins','plan mins','minutes','mins','efficiency %'],
+  a:'**Efficiency** (KPI Landing Page) = Approved content mins ÷ Monthly Plan content mins\n'+
+    '- **Approved content mins** = total *DURATION PER MIN* ng mga approved na content (galing sa Daily Actual na tugma sa approved file; kung wala, duration ng plan slot).\n'+
+    '- **Monthly Plan content mins** = Σ (DURATION PER MIN × FREQUENCY) ng CONTENT rows. Kapag walang duration → 480 × frequency.\n'+
+    '\n**Sa SEPCO Overview table**, ibang sukat ang Efficiency: *Daily Plan mins ÷ Daily Actual mins* (bawat unique Daily Plan item ay isang beses lang itinutugma).\n'+
+    '- Kung ang Monthly Plan ay **mababa sa Designated Minutes** → ang plano lang ang bibilangin at **hanggang 100%** lang.\n'+
+    '- Kung **abot na** ang Designated Minutes → lahat ng matched items ang bibilangin at puwedeng lumampas sa 100%.' },
+{ id:'timeliness', title:'Timeliness',
+  kw:['timeliness','timely','on time','ontime','late','daily plan','daily actual','tim','daily','huli','oras','on-time'],
+  a:'**Timeliness** = Daily Actual mins ÷ Daily Plan mins (parehong buwan)\n'+
+    '- Daily Plan: bawat row na may Title ay kasama; kung walang duration → 480 mins.\n'+
+    '- Daily Actual: rows na may Title at may duration. CONTENT rows ay kasama **lang kapag approved na**; TASK/OTHERS ay laging kasama.\n'+
+    '- Hiwalay na bilang ang **On Time / Late**: bawat unique Daily Plan item (user + petsa + title; magkakadagdag ang maraming time blocks). Actual < Plan = On Time; Actual > Plan = Late.\n'+
+    'Halimbawa: Plan 9,600 mins, Actual 9,120 mins → 95%.' },
+{ id:'productivity', title:'Productivity',
+  kw:['productivity','productive','prod','designated','designated minutes','unique','plan only','monthly plan only','adjusted plan','adj plan','over achievement','capped','100%'],
+  a:'**Productivity** = Counted Actual mins ÷ (Monthly Plan mins − leave × 480)\n'+
+    '- **Unique**: eksaktong duplicate na Daily Actual row (parehong petsa, title, start/end, duration) = 1 lang.\n'+
+    '- **Monthly Plan only**: CONTENT = approved **at** ang Category 2 ay nasa plan; TASK/OTHERS/TRAINING = unique unit na nasa target count ng plan line.\n'+
+    '- **Designated Minutes** = (working days − leave) × 480.\n'+
+    '  - Plan mins **< Designated** → actuals na wala sa plan ay hindi bibilangin, Productivity ≤ 100%.\n'+
+    '  - Plan mins **≥ Designated** → actuals na wala sa plan ay idadagdag, puwedeng lumampas sa 100%.\n'+
+    'Halimbawa: Plan 10,560 mins, 1 leave day → adjusted 10,080; counted actual 9,072 → **90%**.' },
+{ id:'weights', title:'Weights (Content Developer / SES-NSO-CX / S+ Expert)',
+  kw:['weight','weights','weighted','content developer','cd','ses','nso','cx','customer experience','s+','splus','expert','admin','score','total score','incentive','cap','capped','kpi score','percent weight'],
+  a:'**Weights ng KPI** (bawat component ay naka-cap sa 100% bago i-multiply sa weight):\n'+
+    '<table><tr><th>Component</th><th>Content Dev</th><th>SES/NSO/CX</th><th>S+ Expert/Admin</th></tr>'+
+    '<tr><td>Target Count</td><td>20%</td><td>20%</td><td>20%</td></tr>'+
+    '<tr><td>Accuracy</td><td>20%</td><td>15%</td><td>15%</td></tr>'+
+    '<tr><td>Efficiency</td><td>10%</td><td>15%</td><td>15%</td></tr>'+
+    '<tr><td>Timeliness</td><td>20%</td><td>20%</td><td>15%</td></tr>'+
+    '<tr><td>Productivity</td><td>30%</td><td>30%</td><td>35%</td></tr></table>'+
+    '- Ang Job Group ay galing sa *JOB GROUP* column ng user account sheet (may sariling page ang bawat group).\n'+
+    '- **Total** = Σ (min(value, 100%) × weight). Kapag walang data ang isang component, 0 ang ginagamit.' },
+{ id:'catplan', title:'Category Plan vs Actual',
+  kw:['category','category plan','plan vs actual','plan days','actual days','target days','days worked','working days','category 2','progress','overall plan completion','not started','plan completion','rendered'],
+  a:'**Category Plan vs Actual**\n'+
+    '- Isang row bawat Category 2 ng Monthly Plan. **Target** = Σ FREQUENCY. **Actual** = bilang ng unique *title + petsa* sa category na iyon (parehong title sa parehong araw = 1; magkaibang title o magkaibang araw = tig-isa). CONTENT ay bibilangin lang kapag Approved.\n'+
+    '- Status: 0 actual = *Not done*; mas mababa sa target = *In progress*; abot/lampas = *Done* (may "over target").\n'+
+    '- **Overall Plan Completion** = Σ min(actual, target) ÷ Σ target.\n'+
+    '\n**Days** (Task summary cards):\n'+
+    '- **Target days** = working days (Lun–Sab, hindi kasama ang Linggo at PH holidays) − leave/absent.\n'+
+    '- **Plan/Days worked** = bilang ng unique petsa na may Actual.\n'+
+    '- **Actual days** = total Actual mins ÷ 480 (approved lang ang CONTENT).' },
+{ id:'sepco', title:'SEPCO summary',
+  kw:['sepco','summary','net approved','netapproved','net','approved','rejected','revised','pending sepco','pending rto','user summary','specialized trainer','approval summary'],
+  a:'**SEPCO User Summary**\n'+
+    '- **Approved / Rejected** = bilang ng requests ng user na may status na approve / reject sa napiling buwan.\n'+
+    '- **Revised** = Approved na file na may naunang *Rejected* na parehong file name (petsa ≤ approved) — ibig sabihin dumaan sa revision.\n'+
+    '- **netApproved** = max(0, Approved − Revised).\n'+
+    '- **Target** = Σ FREQUENCY ng CONTENT rows sa Monthly Plan ng user (buwan na napili).\n'+
+    '- **Achievement %** = netApproved ÷ Target × 100 (— kapag Target = 0). Berde kapag ≥ 100%.\n'+
+    'Halimbawa: Approved 9, Revised 2, Target 10 → net 7 → **70%**.' },
+{ id:'sns', title:'SNS Boosting (ACH% at SCORE%)',
+  kw:['sns','boost','boosting','tiktok','score','score%','ach%','creation','creation+boosting','heart','share','views','plays','diggs','engagement'],
+  a:'**SNS Boosting**\n'+
+    '- **Target TTL** = Heart + Share + Views (inilagay mo). **Actual TTL** = diggs + shares + plays. **ACH%** = Actual ÷ Target × 100.\n'+
+    '- Isang TikTok video ay isang beses lang puwedeng i-submit kada buwan. Boost period: araw ng submit → katapusan ng buwan.\n\n'+
+    '**Boosting only** (ACH% → SCORE%):\n'+
+    '<table><tr><th>ACH%</th><th>SCORE%</th></tr><tr><td>≥2001</td><td>180</td></tr><tr><td>501–2000</td><td>150</td></tr><tr><td>101–500</td><td>100</td></tr><tr><td>85–100</td><td>95</td></tr><tr><td>75–84</td><td>90</td></tr><tr><td>50–74</td><td>80</td></tr><tr><td>31–49</td><td>70</td></tr><tr><td>21–30</td><td>60</td></tr><tr><td>11–20</td><td>50</td></tr><tr><td>1–10</td><td>25</td></tr></table>'+
+    '- Special: Actual TTL ≥ 100,000 (o lamang ng ≥100,000 sa target) = **200**.\n\n'+
+    '**Creation + boosting**:\n'+
+    '<table><tr><th>ACH%</th><th>SCORE%</th></tr><tr><td>≥500</td><td>200</td></tr><tr><td>400–499</td><td>180</td></tr><tr><td>300–399</td><td>150</td></tr><tr><td>200–299</td><td>120</td></tr><tr><td>100–199</td><td>100</td></tr><tr><td>90–99</td><td>90</td></tr><tr><td>80–89</td><td>80</td></tr><tr><td>70–79</td><td>70</td></tr><tr><td>60–69</td><td>60</td></tr><tr><td>50–59</td><td>50</td></tr><tr><td>&gt;0–49</td><td>25</td></tr></table>' },
+{ id:'leave', title:'Leave / Absent (480 mins)',
+  kw:['leave','absent','absence','vacation','sick','480','holiday','holidays','sunday','leave days','wfh','day off','liban','absent etc'],
+  a:'**Leave / Absent**\n'+
+    '- Bawat leave/absent day = **480 mins** (isang araw).\n'+
+    '- **Productivity**: ibinabawas sa plan → *Monthly Plan mins − leave × 480*.\n'+
+    '- **Designated Minutes**: *(working days − leave) × 480*.\n'+
+    '- **Target days**: working days − leave.\n'+
+    '- **Working days** = lahat ng araw ng buwan maliban Linggo at PH holidays sa listahan (01-01, 04-09, 05-01, 06-12, 08-21, 08-26, 11-01, 11-02, 11-30, 12-08, 12-24, 12-25, 12-30, 12-31).\n'+
+    '- Sa SEPCO, **Approved** na leave lang ang binibilang.' },
+{ id:'approved-rule', title:'Kailan bibilangin ang content?',
+  kw:['approval','approval date','not counted','hindi nabilang','missing','hindi counted','counted','duplicate','unique','nabilang'],
+  a:'**Bakit hindi nabilang ang isang content/task?**\n'+
+    '- **CONTENT** ay binibilang (count at minutes) **lang kapag Approved** — may *APPROVAL DATE* sa Daily Actual row, o may Approved na file sa Approvals na tugma ang pangalan.\n'+
+    '- Dapat nasa **Monthly Plan** ang Category 2 niyon; kung wala, hindi counted (at sa Productivity, "extra" lang).\n'+
+    '- Exact duplicate rows = 1 lang. Parehong title sa parehong araw = 1 sa category progress.\n'+
+    '- Ang Monthly Plan row na walang FREQUENCY ay 1; walang DURATION ay 480 mins.' },
+{ id:'approval', title:'Approval flow (RTO → SEPCO)',
+  kw:['approval flow','approval','approve','approver','pending','pending rto','pending sepco','rto','resubmit','resubmission','rejected by rto','rejected by sepco','status','stage','upload','file approval','paano ma approve','telegram'],
+  a:'**Approval flow ng uploaded file**\n'+
+    '- Bagong upload → **Pending RTO** (kung may RTO approver) o diretso **Pending SEPCO** kung wala.\n'+
+    '- RTO approve → **Pending SEPCO**. SEPCO approve → **Approved** (final).\n'+
+    '- Kapag nag-reject ang approver: **Rejected by RTO / Rejected by SEPCO**, at kailangan ng *remarks*.\n'+
+    '- **Resubmit**: bumabalik sa Pending RTO (o Pending SEPCO kung walang RTO) at nabubura ang lumang remarks.\n'+
+    '- Ang approval/reject ay puwedeng gawin sa email o Telegram — ang *kasalukuyang assigned approver* lang ang may karapatan.\n'+
+    '- Ang **Rejected** na tumutugma sa CONTENT ng Monthly Plan ay bilang **Revision** sa Accuracy; ang **Approved** lang ang bilang sa Own Content.' },
+{ id:'about', title:'Ano ang kaya ng bot na ito?',
+  kw:['help','tulong','ano kaya mo','ano ang kaya mo','sino ka','who are you','what can you do','commands','menu','hello','hi','kumusta','gamit'],
+  a:'**Ako ang Training Portal chat bot.** Kaya kong:\n'+
+    '- Ipaliwanag kung **paano na-compute** ang Target, Accuracy, Efficiency, Timeliness, Productivity, Weights, SEPCO summary, SNS Boosting at Leave.\n'+
+    '- Ipaliwanag ang **approval flow** ng mga file (RTO → SEPCO).\n'+
+    '- Gamitin ang **live numbers mo** sa page para sagutin ang *"bakit ganito ang numero ko?"* (pindutin ang **Numbers ko ngayon**).\n'+
+    'Hindi ako nagbabago ng data sa portal — nagpapaliwanag lang ako.' }
+];
+
+var CHIPS = [
+  ['Target / Own / Ach %','target'],['Accuracy','accuracy'],['Efficiency','efficiency'],['Timeliness','timeliness'],
+  ['Productivity','productivity'],['Weights','weights'],['Category Plan vs Actual','catplan'],['SEPCO summary','sepco'],
+  ['SNS Boosting','sns'],['Leave / Absent','leave'],['Approval flow','approval'],['Bakit hindi counted?','approved-rule'],['Numbers ko ngayon','mine']
+];
+var REL = {
+  target:['accuracy','productivity','approved-rule'], accuracy:['target','approval','weights'],
+  efficiency:['timeliness','productivity'], timeliness:['productivity','efficiency','approved-rule'],
+  productivity:['leave','efficiency','weights'], weights:['target','accuracy','productivity'],
+  catplan:['approved-rule','leave'], sepco:['approval','target'], sns:['weights'],
+  leave:['productivity','catplan'], 'approved-rule':['approval','target','productivity'],
+  approval:['accuracy','approved-rule'], about:['target','productivity','approval']
+};
+
+/* ------------------------------------------------------------------ helpers */
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function norm(s) { return String(s||'').toLowerCase().replace(/[^a-z0-9%+\s]/g,' ').replace(/\s+/g,' ').trim(); }
+function plain(s) { return String(s||'').replace(/<\/tr>/g,' ; ').replace(/<[^>]+>/g,' ').replace(/\*\*/g,'').replace(/\s+/g,' ').trim(); }
+function pct(v) { return (v == null || isNaN(v)) ? '—' : (Math.round(v * 1000) / 10) + '%'; }
+function byId(id) { return KB.filter(function (e) { return e.id === id; })[0]; }
+
+// mini markdown: **bold**, *italic*, `code`, "- " bullets; <table> HTML from KB is allowed through
+function render(text) {
+    var parts = String(text).split(/(<table>[\s\S]*?<\/table>)/);
+    return parts.map(function (p) {
+        if (/^<table>/.test(p)) return p;
+        var lines = esc(p).split('\n'), out = '', inList = false;
+        lines.forEach(function (ln) {
+            var m = /^\s*(?:-|\*)\s+(.*)$/.exec(ln);
+            if (m) { if (!inList) { out += '<ul>'; inList = true; } out += '<li>' + inline(m[1]) + '</li>'; }
+            else { if (inList) { out += '</ul>'; inList = false; } out += inline(ln) + (ln ? '<br>' : ''); }
+        });
+        if (inList) out += '</ul>';
+        return out.replace(/(<br>)+$/,'');
+    }).join('');
+}
+function inline(s) {
+    return s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`(.+?)`/g,'<code>$1</code>').replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,:;]|$)/g,'$1<i>$2</i>');
+}
+function add(role, html, tag) {
+    var box = $('kpiBotMsgs'), d = document.createElement('div');
+    d.className = 'kb-m ' + (role === 'me' ? 'me' : 'bot');
+    d.innerHTML = html + (tag ? '<div class="kb-tag">' + tag + '</div>' : '');
+    box.appendChild(d); box.scrollTop = box.scrollHeight;
+    return d;
+}
+// follow-up chips sa ilalim ng sagot: items = [{label, id?}]
+function addFollowups(el, items) {
+    if (!el || !items || !items.length) return;
+    var w = document.createElement('div'); w.className = 'kb-fu';
+    items.slice(0, 3).forEach(function (it) {
+        var b = document.createElement('button'); b.type = 'button'; b.textContent = it.label;
+        b.addEventListener('click', function () { handle(it.label, it.id); });
+        w.appendChild(b);
+    });
+    el.appendChild(w); $('kpiBotMsgs').scrollTop = $('kpiBotMsgs').scrollHeight;
+}
+function relItems(id) { return (REL[id] || []).map(function (r) { var e = byId(r); return e ? { label: e.title, id: r } : null; }).filter(Boolean); }
+
+/* ------------------------------------------------------------------ live data (ST pages only) */
+function monthKey() {
+    try { var el = $('selectedMonthFilter') || $('overviewMonthFilter') || $('monthYearFilter'); if (el && el.value) return el.value; } catch (e) {}
+    var n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+}
+function liveSnapshot() {
+    try {
+        if (typeof computeKpi !== 'function' || typeof kpiProfile === 'undefined') return null;
+        var mk = monthKey(), k = computeKpi(mk), pe = (typeof kpiProdEff === 'function') ? kpiProdEff(mk) : {};
+        return { month: mk, group: k.gk, profile: k.profileKey, target: k.target, ownContent: k.own, proof: k.proof, revisions: k.revisions,
+            contentErrors: k.errCount, accuracyDeduction: k.deduction, achievement: k.ach, accuracy: k.quality, efficiency: k.eff, timeliness: k.timeliness,
+            productivity: k.productivity, monthlyPlanMins: pe.planMins, leaveDays: pe.leaveDays, adjustedPlanMins: pe.adjPlan, designatedMins: pe.designated,
+            planMeetsDesignated: pe.planHit, countedActualMins: pe.usedMins, approvedContentMins: k.totalMins, planContentMins: k.planContentMins,
+            dailyPlanMins: k.dailyPlanMins, dailyActualMins: k.dailyActMins, onTime: pe.onTime, late: pe.late,
+            weights: (k.lines || []).map(function (l) { return { component: l.label, weight: l.w, value: l.v, contribution: l.contrib }; }), totalScore: k.capped };
+    } catch (e) { return null; }
+}
+function mineAnswer() {
+    var s = liveSnapshot();
+    if (!s) return 'Wala akong makuhang live na numbers sa page na ito (o hindi pa tapos mag-load ang data / hindi ito ST page). Buksan ang KPI Landing Page, piliin ang buwan, tapos subukan ulit.';
+    return '**Numbers mo para sa ' + s.month + '**\n' +
+      '- Target ' + s.target + ' · Own ' + s.ownContent + ' (+' + s.proof + ' proof) → **Ach ' + pct(s.achievement) + '**\n' +
+      '- Revisions ' + s.revisions + ', content errors ' + s.contentErrors + ' (deduction ' + pct(s.accuracyDeduction) + ') → **Accuracy ' + pct(s.accuracy) + '**\n' +
+      '- Approved content ' + Math.round(s.approvedContentMins) + ' ÷ plan content ' + Math.round(s.planContentMins) + ' mins → **Efficiency ' + pct(s.efficiency) + '**\n' +
+      '- Daily actual ' + Math.round(s.dailyActualMins) + ' ÷ daily plan ' + Math.round(s.dailyPlanMins) + ' mins → **Timeliness ' + pct(s.timeliness) + '**\n' +
+      '- Counted ' + Math.round(s.countedActualMins) + ' ÷ (plan ' + Math.round(s.monthlyPlanMins) + ' − leave ' + s.leaveDays + '×480 = ' + Math.round(s.adjustedPlanMins) + ') → **Productivity ' + pct(s.productivity) + '**' +
+        (s.planMeetsDesignated ? ' (abot ang Designated Minutes, puwedeng >100%)' : ' (kulang ang plan sa Designated ' + Math.round(s.designatedMins) + ' mins → naka-cap sa 100%)') + '\n' +
+      '- Total weighted score: **' + pct(s.totalScore) + '**';
+}
+
+/* ------------------------------------------------------------------ topic matching (may typo tolerance) */
+function lev1(a, b) { // True kung ≤1 ang edit distance
+    if (a === b) return true;
+    var la = a.length, lb = b.length; if (Math.abs(la - lb) > 1) return false;
+    var i = 0, j = 0, d = 0;
+    while (i < la && j < lb) {
+        if (a[i] === b[j]) { i++; j++; continue; }
+        if (++d > 1) return false;
+        if (la > lb) i++; else if (lb > la) j++; else { i++; j++; }
+    }
+    return d + (la - i) + (lb - j) <= 1;
+}
+function scoreEntry(q, qTokens, e) {
+    var s = 0, qs = ' ' + q + ' ';
+    e.kw.forEach(function (k) {
+        var nk = norm(k); if (!nk) return;
+        if (qs.indexOf(' ' + nk + ' ') !== -1) s += nk.indexOf(' ') !== -1 ? 3 : 2;
+        else if (nk.length > 4 && qs.indexOf(nk) !== -1) s += 1;
+        else if (nk.length >= 6 && nk.indexOf(' ') === -1 && qTokens.some(function (t) { return t.length >= 5 && lev1(t, nk); })) s += 1.5;   // typo, hal. "acuracy"
+    });
+    if (qs.indexOf(' ' + norm(e.title) + ' ') !== -1) s += 3;
+    return s;
+}
+function rankTopics(text) {
+    var q = norm(text), toks = q.split(' ').filter(Boolean);
+    return KB.map(function (e) { return { entry: e, score: scoreEntry(q, toks, e) }; })
+             .filter(function (x) { return x.score > 0; })
+             .sort(function (a, b) { return b.score - a.score; });
+}
+
+/* ------------------------------------------------------------------ AI (Gemini via Apps Script) */
+var history = [], lastTopic = null, aiFailStreak = 0;
+var KB_TEXT = KB.map(function (e) { return '### ' + e.title + '\n' + plain(e.a); }).join('\n\n');
+function pushHist(role, text) { history.push({ role: role, text: String(text).slice(0, 900) }); history = history.slice(-10); }
+function who() { try { if (typeof loggedInUser !== 'undefined' && loggedInUser) return String(loggedInUser); } catch (e) {} return ''; }
+
+function askAI(text) {
+    var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, CFG.TIMEOUT_MS) : null;
+    return fetch(CFG.ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },     // walang CORS preflight
+        body: JSON.stringify({
+            action: 'chatbot', message: text, history: history,       // kasama na ang kasalukuyang tanong sa dulo
+            kb: KB_TEXT, snapshot: liveSnapshot(), page: document.title, user: who(),
+            lastTopic: lastTopic ? lastTopic.title : ''
+        }),
+        signal: ctl ? ctl.signal : undefined
+    }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (j) {
+          if (timer) clearTimeout(timer);
+          if (!j || !j.success || !j.answer) throw new Error((j && j.message) || 'empty');
+          return j;
+      }, function (e) { if (timer) clearTimeout(timer); throw e; });
+}
+
+/* ------------------------------------------------------------------ chat flow */
+function fallbackHtml() {
+    return 'Hindi ko pa sigurado ang topic na iyan. Subukan ang isa sa mga button sa ibaba (Accuracy, Productivity, Weights, Approval flow, atbp.) o i-rephrase ang tanong.';
+}
+var busy = false;
+function showTopic(entry, tag) {
+    var el = add('bot', render(entry.a), tag || ('Topic: ' + esc(entry.title)));
+    addFollowups(el, relItems(entry.id));
+    pushHist('user', entry.title); pushHist('model', plain(entry.a));
+    lastTopic = entry;
+}
+function handle(text, forcedId) {
+    text = String(text || '').trim(); if (!text || busy) return;
+    add('me', esc(text));
+    if (forcedId === 'mine' || (/\b(numbers? ko|kpi ko|score ko|my (numbers|kpi|score))\b/i.test(text))) {
+        var el0 = add('bot', render(mineAnswer()), 'Live data mula sa page');
+        if (liveSnapshot()) addFollowups(el0, [{ label: 'Bakit ganito ang productivity ko?' }, { label: 'Ano ang pinakamababa kong component?' }, { label: 'Paano ko tataasan ang score ko?' }]);
+        return;
+    }
+    var ranked = forcedId ? [{ entry: byId(forcedId), score: 99 }] : rankTopics(text);
+    var top = ranked[0], second = ranked[1];
+    var wantsAI = CFG.AI_ENABLED && aiFailStreak < 3 && !forcedId;
+    var personal = /\b(bakit|why|paano ko|ano ang dahilan|mali|mababa|mataas|zero|0%|ko|ako|my|compare|kumpara|dapat|taasan|improve|pinakamababa|halimbawa|example|ulit|simple)\b/i.test(text);
+    var multi = top && second && !forcedId && second.score >= top.score * 0.75 && second.score >= CFG.LOCAL_MIN_SCORE;
+    var clear = top && top.score >= CFG.LOCAL_MIN_SCORE && !multi;
+    var shortFollow = !top && lastTopic && norm(text).split(' ').length <= 4;
+
+    if (clear && !(personal && wantsAI)) { showTopic(top.entry); return; }
+
+    if (!wantsAI) {   // topic-based lang
+        if (top) showTopic(top.entry, 'Pinakamalapit na topic: ' + esc(top.entry.title));
+        else add('bot', fallbackHtml());
+        return;
+    }
+    busy = true; $('kpiBotSend').disabled = true;
+    var wait = add('bot', '<span class="kb-dots"><span></span><span></span><span></span></span>');
+    pushHist('user', text);
+    askAI(text).then(function (j) {
+        aiFailStreak = 0;
+        wait.innerHTML = render(j.answer) + '<div class="kb-tag">AI · ' + esc(CFG.BOT_NAME) + '</div>';
+        pushHist('model', j.answer);
+        var fu = (j.followups || []).filter(Boolean).map(function (x) { return { label: String(x).slice(0, 70) }; });
+        addFollowups(wait, fu.length ? fu : (top ? relItems(top.entry.id) : []));
+        if (top) lastTopic = top.entry;
+    }).catch(function () {
+        aiFailStreak++;
+        history.pop();
+        var fb = top ? top.entry : (shortFollow ? lastTopic : null);
+        if (fb) {
+            wait.innerHTML = render(fb.a) + '<div class="kb-tag">Hindi maabot ang AI ngayon — pinakamalapit na topic: ' + esc(fb.title) + '</div>';
+            addFollowups(wait, relItems(fb.id)); lastTopic = fb;
+        } else wait.innerHTML = fallbackHtml() + '<div class="kb-tag">Hindi maabot ang AI ngayon.</div>';
+    }).then(function () { busy = false; $('kpiBotSend').disabled = false; $('kpiBotMsgs').scrollTop = $('kpiBotMsgs').scrollHeight; });
+}
+
+function greet() {
+    var el = add('bot', render('Hi! Ako ang **Training Portal chat bot**. Tanungin mo ako kung paano na-compute ang Target, Accuracy, Efficiency, Timeliness, Productivity, Weights, SEPCO summary, SNS Boosting at Leave, o kung paano ang approval flow.\n' +
+        'Pumili ng topic sa ibaba o mag-type ng tanong' + (CFG.AI_ENABLED ? ' — kaya ko ring sagutin ang *"bakit ganito ang numero ko?"* gamit ang live data mo.' : '.')));
+    addFollowups(el, [{ label: 'Numbers ko ngayon', id: 'mine' }, { label: 'Ano ang kaya mo?', id: 'about' }]);
+}
+function init() {
+    var chips = $('kpiBotChips');
+    CHIPS.forEach(function (c) {
+        var b = document.createElement('button'); b.type = 'button'; b.textContent = c[0];
+        b.addEventListener('click', function () { handle(c[0], c[1]); });
+        chips.appendChild(b);
+    });
+    $('kpiBotFab').addEventListener('click', function () {
+        var p = $('kpiBotPanel'); p.classList.toggle('open');
+        if (p.classList.contains('open')) { if (!$('kpiBotMsgs').children.length) greet(); setTimeout(function () { $('kpiBotInput').focus(); }, 50); }
+    });
+    $('kpiBotClose').addEventListener('click', function () { $('kpiBotPanel').classList.remove('open'); });
+    $('kpiBotClear').addEventListener('click', function () { $('kpiBotMsgs').innerHTML = ''; history = []; lastTopic = null; aiFailStreak = 0; greet(); });
+    $('kpiBotForm').addEventListener('submit', function (ev) { ev.preventDefault(); var i = $('kpiBotInput'), v = i.value; i.value = ''; handle(v); });
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+<!-- =================== END KPI HELPER CHATBOT =================== -->
 
 </body>
 </html>
