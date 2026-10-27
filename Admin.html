@@ -7,13 +7,15 @@
 <script>try{if(localStorage.getItem("portal_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <title>Admin Control Center</title>
 <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
+    <link href="https://fonts.cdnfonts.com/css/samsung-sharp-sans" rel="stylesheet">
+    <link href="https://db.onlinewebfonts.com/c/05c77f210065b750f9ad9d606be229d2?family=SamsungOne+600C" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{color-scheme:dark;--bg:#090e1c;--side:#0b1121;--card:#101828;--line:rgba(148,163,184,.13);--line2:rgba(148,163,184,.24);--text:#e6ebf5;--soft:#c4cee0;--muted:#8795b1;--primary:#3b82f6;--blue-soft:#8ab8ff;--field:rgba(8,13,25,.75);--hover:rgba(148,163,184,.08);--head:rgba(255,255,255,.035);--glow1:rgba(59,130,246,.14);--glow2:rgba(139,92,246,.12);--shadow:rgba(0,0,0,.28)}
 html[data-theme="light"]{color-scheme:light;--bg:#f4f6f9;--side:#fff;--card:#fff;--line:#e2e8f0;--line2:#cbd5e1;--text:#1e293b;--soft:#475569;--muted:#64748b;--primary:#2563eb;--blue-soft:#2563eb;--field:#fff;--hover:#f1f5f9;--head:#f8fafc;--glow1:transparent;--glow2:transparent;--shadow:rgba(15,23,42,.06)}
 *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:rgba(148,163,184,.3) transparent}
-body{margin:0;font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;
+body{margin:0;font-family: "SamsungOne 600C", "Samsung Sharp Sans", "SamsungOne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;
 background:radial-gradient(1100px 560px at 85% -10%,var(--glow1),transparent 60%),radial-gradient(900px 520px at -10% 105%,var(--glow2),transparent 60%),var(--bg);background-attachment:fixed}
 ::selection{background:rgba(59,130,246,.45);color:#fff}
 button{padding:8px 14px;background:linear-gradient(135deg,#3b82f6,#2563eb);border:0;color:#fff;border-radius:8px;font:600 13px inherit;font-family:inherit;cursor:pointer;box-shadow:0 6px 18px rgba(37,99,235,.3);transition:transform .15s,filter .2s}
@@ -29,14 +31,14 @@ input::placeholder,textarea::placeholder{color:#5d6b88}
 input:focus,textarea:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.22)}
 .sidebar{position:fixed;inset:0 auto 0 0;width:240px;background:linear-gradient(180deg,#0d1426 0%,var(--side) 100%);border-right:1px solid var(--line);box-shadow:4px 0 32px rgba(0,0,0,.2);display:flex;flex-direction:column;z-index:10}
 html[data-theme="light"] .sidebar{background:var(--side);box-shadow:none}
-.brand{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line);font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--text)}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line);font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--text);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .logo{width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border-radius:10px;display:grid;place-items:center;font-size:14px;box-shadow:0 6px 18px rgba(59,130,246,.45)}
 .menu{overflow-y:auto;flex:1;padding:12px 10px}
-.cat{font-size:10px;font-weight:700;color:#5d6b88;text-transform:uppercase;letter-spacing:.1em;padding:12px 10px 4px}
+.cat{font-size:10px;font-weight:700;color:#5d6b88;text-transform:uppercase;letter-spacing:.1em;padding:12px 10px 4px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .item{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;color:#9aa8c4;cursor:pointer;transition:background .18s,color .18s}
 html[data-theme="light"] .item{color:#475569}
 .item:hover{background:var(--hover);color:var(--text)}
-.item.active{background:linear-gradient(90deg,rgba(59,130,246,.22),rgba(59,130,246,.06));color:#9cc3ff;font-weight:600;box-shadow:inset 3px 0 0 #3b82f6}
+.item.active{background:linear-gradient(90deg,rgba(59,130,246,.22),rgba(59,130,246,.06));color:#9cc3ff;font-weight:600;box-shadow:inset 3px 0 0 #3b82f6;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 html[data-theme="light"] .item.active{color:#2563eb}
 .item small{margin-left:auto;color:#5d6b88;font-size:11px}
 .main{margin-left:240px;height:100vh;overflow-y:auto}
@@ -55,14 +57,14 @@ h3.t{margin:0 0 4px;font-size:16px;letter-spacing:-.01em}
 .stat:nth-child(4n+2){border-color:rgba(249,115,22,.34);background:radial-gradient(260px 120px at 100% 0%,rgba(249,115,22,.28),transparent 70%),linear-gradient(145deg,rgba(194,65,12,.24),rgba(12,19,34,.95))}
 .stat:nth-child(4n+3){border-color:rgba(139,92,246,.36);background:radial-gradient(260px 120px at 100% 0%,rgba(139,92,246,.30),transparent 70%),linear-gradient(145deg,rgba(109,40,217,.24),rgba(12,19,34,.95))}
 .stat:nth-child(4n+4){border-color:rgba(16,185,129,.34);background:radial-gradient(260px 120px at 100% 0%,rgba(16,185,129,.26),transparent 70%),linear-gradient(145deg,rgba(4,120,87,.26),rgba(12,19,34,.95))}
-.stat span:first-child{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--soft);opacity:.85}
+.stat span:first-child{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--soft);opacity:.85;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .stat b{display:block;font-size:26px;letter-spacing:-.02em;color:#fff;margin:8px 0 4px}
 .stat span:last-child{font-size:10px;color:var(--muted)}
 .cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
 .cc{background:linear-gradient(180deg,rgba(20,30,50,.85),rgba(14,22,38,.9));border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 34px var(--shadow);padding:20px;min-width:0}
 html[data-theme="light"] .cc{background:#fff}
 .cc.wide{grid-column:1/-1}
-.cc h4{margin:0 0 12px;font-size:13px;color:var(--text);font-weight:700}
+.cc h4{margin:0 0 12px;font-size:13px;color:var(--text);font-weight:700;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .cbox{position:relative;height:300px}
 .cbox.short{height:240px}
 @media(max-width:1000px){.cgrid{grid-template-columns:1fr}}
@@ -72,7 +74,7 @@ html[data-theme="light"] .cc{background:#fff}
 html[data-theme="light"] .grid{background:#fff}
 table{border-collapse:collapse;font-size:12px;width:100%;background:transparent}
 th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
-th{background:var(--head);backdrop-filter:blur(6px);position:sticky;top:0;z-index:2;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+th{background:var(--head);backdrop-filter:blur(6px);position:sticky;top:0;z-index:2;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 html[data-theme="dark"] th,:root:not([data-theme="light"]) th{background:#141c2e}
 tbody tr:hover td{background:rgba(59,130,246,.07)}
 td.n,th.n{color:var(--muted);text-align:center;position:sticky;left:0;z-index:1;background:var(--head)}
@@ -84,7 +86,7 @@ html[data-theme="light"] select option{background:#fff;color:#1e293b}
 .frow select{width:100%;min-width:110px;max-width:220px;padding:4px 6px;font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;border-radius:8px}
 .frow input{width:100%;min-width:90px;padding:4px 7px;font-size:11px;font-weight:400;text-transform:none;letter-spacing:0}
 td input{width:100%;min-width:140px;padding:4px 7px}
-.pill{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(148,163,184,.14);color:var(--soft)}
+.pill{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(148,163,184,.14);color:var(--soft);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .pill.a{background:rgba(16,185,129,.16);color:#34d399;border:1px solid rgba(16,185,129,.3)}
 .pill.r{background:rgba(239,68,68,.16);color:#f87171;border:1px solid rgba(239,68,68,.3)}
 .pill.p{background:rgba(245,158,11,.16);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
@@ -94,9 +96,9 @@ td input{width:100%;min-width:140px;padding:4px 7px}
 html[data-theme="light"] .box{background:#fff}
 .box.wide{max-width:560px}
 .box h3{font-size:20px;letter-spacing:-.02em}
-.box label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 5px}
+.box label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 5px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .box input,.box textarea{width:100%}
-.err{color:#f87171;font-size:12px;font-weight:600;min-height:16px;margin-top:8px}
+.err{color:#f87171;font-size:12px;font-weight:600;min-height:16px;margin-top:8px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .msg{font-size:12px;color:var(--muted)}
 .theme-toggle{background:rgba(148,163,184,.1);color:var(--soft);border:1px solid var(--line2);box-shadow:none}
 #toast{position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;border:1px solid var(--line2);padding:10px 16px;border-radius:10px;font-size:13px;display:none;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.4)}
@@ -190,6 +192,11 @@ html[data-theme="light"] .stat span:last-child{color:var(--muted)}
 }
 @media(max-width:380px){.stats{gap:8px}.stat b{font-size:20px}}
 </style>
+<style id="font-roles">
+/* Bold/Heading = Samsung Sharp Sans Bold ; Regular text = SamsungOne 600C */
+h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.font-black{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important}
+.brand-name,.logo,.sidebar-brand-text,.ld-title,.ld-role,.summary-card .val,.summary-card h4,.kpi-score-big,.kpi-live-item strong,.stat b,.pct-big,.plan-name,.sec-title,.section-title,.cat-progress-head h5,#kpiBotHead b,summary,[class*="title"],[class*="heading"],.login-card button,.logout-btn,.btn-primary,button[type="submit"],.kb-tag{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;font-weight:700 !important}
+</style>
 </head>
 <body>
 
@@ -226,6 +233,16 @@ html[data-theme="light"] .stat span:last-child{color:var(--muted)}
   <div class="sec active" id="secDash">
     <h3 class="t">Admin Control Center</h3>
     <p class="sub">Every tab of your Google Sheet database. Click a card to open it, then edit, add or delete rows.</p>
+    <div class="cc" id="leaveSettingCard" style="margin:0 0 18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;justify-content:space-between">
+      <div style="min-width:240px;flex:1">
+        <h4 style="margin:0 0 4px">📝 Leave / Absent editing</h4>
+        <p class="msg" style="margin:0">When ON, STs can edit Leave / Absent records that are already <b>Approved</b> (Edit button in their Leave / Absent Log) and the changes save without going back to the approver. When OFF, approved records are locked.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="msg" id="leaveSettingState">Loading…</span>
+        <button id="leaveSettingBtn" class="ghost" onclick="toggleLeaveEditSetting()" disabled>…</button>
+      </div>
+    </div>
     <div class="stats" id="stats"></div>
 
     <!-- User Trend Summary -->
@@ -393,7 +410,7 @@ html[data-theme="light"] .stat span:last-child{color:var(--muted)}
 
     try {
         var D = Chart.defaults;
-        D.font.family = '"Inter", -apple-system, "Segoe UI", sans-serif';
+        D.font.family = '"SamsungOne 600C", "Samsung Sharp Sans", -apple-system, "Segoe UI", sans-serif';
         D.font.size = 11;
         D.responsive = true;
         D.maintainAspectRatio = false;
@@ -496,10 +513,30 @@ async function unlock(auto){
     $("lock").classList.remove("show"); $("lkErr").textContent=""; $("lkPass").value=""; try{sessionStorage.setItem("portal_admin_pass",pass)}catch(e){}
     $("who").textContent="Welcome, "+(localStorage.getItem("portal_name")||user);
     await loadSheets();
+    loadLeaveEditSetting();
   }catch(e){
     creds=null; if(auto){ $("lkPass").value=""; try{sessionStorage.removeItem("portal_admin_pass")}catch(x){} }
     $("lkErr").textContent = e.message==="Failed to fetch" ? "Can't reach the server. Did you deploy the latest script version?" : "Not authorized. Check your email/password (must be an ADMIN account).";
   }
+}
+
+// ---- Switch: allow STs to edit Approved Leave / Absent (no re-approval) ----
+let leaveEditOn = false;
+function paintLeaveSetting(){
+  const b=$("leaveSettingBtn"), s=$("leaveSettingState"); if(!b||!s) return;
+  b.disabled=false;
+  b.className = leaveEditOn ? "bad" : "ghost";
+  b.textContent = leaveEditOn ? "Turn OFF editing" : "Turn ON editing";
+  s.innerHTML = leaveEditOn ? "🟢 <b>ON</b> — STs can edit approved records" : "🔒 <b>OFF</b> — approved records are locked";
+}
+async function loadLeaveEditSetting(){
+  try{ const j=await api("adminGetLeaveSetting"); leaveEditOn=!!j.allowEditApproved; paintLeaveSetting(); }
+  catch(e){ const s=$("leaveSettingState"); if(s) s.textContent="Could not load (deploy the latest Apps Script)."; }
+}
+async function toggleLeaveEditSetting(){
+  const b=$("leaveSettingBtn"); if(b) b.disabled=true;
+  try{ const j=await api("adminSetLeaveSetting",{value:!leaveEditOn}); leaveEditOn=!!j.allowEditApproved; paintLeaveSetting(); toast(leaveEditOn?"Editing approved Leave / Absent: ON":"Editing approved Leave / Absent: OFF"); }
+  catch(e){ toast(e.message||"Failed"); paintLeaveSetting(); }
 }
 
 async function loadSheets(opts){
@@ -631,6 +668,7 @@ function chartColors(n){
 /* ===== KPI-consistent minutes (same rules as ST computeKpi / SEPCO skComputeKpi) =====
    Monthly Plan  = sum(DURATION x FREQUENCY) - approved leave days x 480
    Task Actual   = CONTENT rows only when approved (APPROVAL DATE or an Approved file), TASK/OTHERS always
+   Approved CONTENT that is NOT in the Monthly Plan = plus points (always counted). Rejected content that is not in the Monthly Plan is not counted as a revision.
    Productivity  = Task Actual / Monthly Plan (uncapped here; ST/SEPCO cap each KPI at 100% in the total) */
 function adNorm(v){ return String(v==null?"":v).trim().toLowerCase(); }
 function adCleanDate(raw){
@@ -925,7 +963,7 @@ async function loadTrendSummary(){
     };
     // value at the end of each horizontal bar
     const valuePlugin = { id:"valueLabels", afterDatasetsDraw(chart){
-      const c = chart.ctx; c.save(); c.fillStyle = Chart.defaults.color; c.font = "600 11px Inter,sans-serif"; c.textBaseline = "middle";
+      const c = chart.ctx; c.save(); c.fillStyle = Chart.defaults.color; c.font = "600 11px 'Samsung Sharp Sans Bold', 'SamsungOne 600C', sans-serif"; c.textBaseline = "middle";
       chart.getDatasetMeta(0).data.forEach((bar,i)=>{ c.fillText(fmtNum(chart.data.datasets[0].data[i]), bar.x+8, bar.y); });
       c.restore();
     }};
@@ -995,7 +1033,7 @@ async function loadTrendSummary(){
     else notes.push("Monthly Plan: using column \""+(monthly.durHead||"none found — counting rows")+"\"; Task Plan: \""+(plan.durHead||"none")+"\"; Task Actual: \""+(actual.durHead||"none")+"\".");
     if(roleCol<0) notes.push("user account has no POSITION column — roles show as NO POSITION.");
     if(createdCol<0) notes.push("user account has no clear created-date column (New Users may stay 0).");
-    notes.push(kpiOk ? "Monthly Plan = duration x frequency less approved leave (x480); Task Actual counts approved CONTENT + TASK/OTHERS; Productivity = Actual / Monthly Plan (uncapped) - same rules as ST & SEPCO." : "Could not load Approvals/Leaves - showing raw sheet minutes (not KPI-consistent).");
+    notes.push(kpiOk ? "Monthly Plan = duration x frequency less approved leave (x480); Task Actual counts approved CONTENT (including content not in the plan = plus points) + TASK/OTHERS; Productivity = Actual / Monthly Plan (uncapped) - same rules as ST & SEPCO." : "Could not load Approvals/Leaves - showing raw sheet minutes (not KPI-consistent).");
     if(note) note.textContent = notes.join(" ");
   }catch(e){
     status.textContent = "Error loading trends";
@@ -1289,5 +1327,6 @@ function syncThemeBtn(){const l=document.documentElement.getAttribute("data-them
 function toggleTheme(){const d=document.documentElement,l=d.getAttribute("data-theme")==="light";if(l)d.removeAttribute("data-theme");else d.setAttribute("data-theme","light");try{localStorage.setItem("portal_theme",l?"dark":"light")}catch(e){}if(window.auraSetChartTheme)auraSetChartTheme(!l);syncThemeBtn()}
 function handleLogout(){ creds=null; try{sessionStorage.removeItem("portal_admin_pass")}catch(e){} {const t=localStorage.getItem("portal_theme");localStorage.clear();if(t)localStorage.setItem("portal_theme",t)} window.location.href="index.html"; }
 </script>
+<script>(function(){try{if(!document.fonts||!document.fonts.load)return;var l=['600 14px "SamsungOne 600C"','700 14px "Samsung Sharp Sans Bold"','400 14px "Samsung Sharp Sans"'];try{Chart.defaults.plugins.title.font.family='Samsung Sharp Sans Bold, Samsung Sharp Sans, SamsungOne 600C, sans-serif'}catch(e){};var r=function(){try{if(window.Chart&&Chart.instances)Object.keys(Chart.instances).forEach(function(k){try{Chart.instances[k].update()}catch(e){}})}catch(e){}};Promise.all(l.map(function(x){return document.fonts.load(x)})).then(r,r);document.fonts.ready.then(r);}catch(e){}})();</script>
 </body>
 </html>
