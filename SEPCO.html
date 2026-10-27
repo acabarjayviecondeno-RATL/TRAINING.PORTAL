@@ -17,6 +17,8 @@
     </script>
     <title>SEPCO Portal - Dashboard & Overview</title>
     <LINk rel="icon" type="img/png" href="dashboard.png"> </LINk>
+    <link href="https://fonts.cdnfonts.com/css/samsung-sharp-sans" rel="stylesheet">
+    <link href="https://db.onlinewebfonts.com/c/05c77f210065b750f9ad9d606be229d2?family=SamsungOne+600C" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root {
@@ -41,7 +43,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: "SamsungOne 600C", "Samsung Sharp Sans", "SamsungOne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--tarkie-bg);
             margin: 0;
             padding: 0;
@@ -49,7 +51,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        h2, h3, h4 { color: var(--text-main); font-weight: 700; }
+        h2, h3, h4 { color: var(--text-main); font-weight: 700;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         
         button {
             padding: 7px 12px;
@@ -59,8 +61,7 @@
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
-        }
+            transition: background 0.2s;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .btn-approve { background-color: var(--success); }
         .btn-approve:hover { background-color: #047857; }
         .btn-reject { background-color: var(--danger); }
@@ -108,14 +109,12 @@
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            font-weight: bold;
-        }
+            font-weight: bold;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 
         .sidebar-brand-text {
             font-size: 15px;
             font-weight: 700;
-            color: var(--text-main);
-        }
+            color: var(--text-main);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 
         .sidebar-menu-scroll {
             overflow-y: auto;
@@ -130,8 +129,7 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             padding: 8px 10px 4px 10px;
-            margin-top: 8px;
-        }
+            margin-top: 8px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 
         .sidebar-menu {
             list-style: none;
@@ -170,8 +168,7 @@
         .main-menu-item.active {
             background: var(--tarkie-sidebar-active-bg);
             color: var(--tarkie-sidebar-active-text);
-            font-weight: 600;
-        }
+            font-weight: 600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .sub-menu {
             list-style: none;
             padding: 4px 0 6px 0;
@@ -202,8 +199,7 @@
         .sub-menu li.active {
             background: var(--tarkie-sidebar-active-bg) !important;
             color: var(--tarkie-sidebar-active-text) !important;
-            font-weight: 600;
-        }
+            font-weight: 600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .arrow-icon {
             margin-left: auto;
             font-size: 10px;
@@ -285,8 +281,7 @@
             padding: 7px 14px;
             font-size: 12px;
             font-weight: 600;
-            border-radius: var(--radius-sm);
-        }
+            border-radius: var(--radius-sm);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .logout-btn:hover { background-color: #dc2626; color: white; }
 
         .filter-container {
@@ -299,7 +294,7 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
         }
-        .filter-container label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .filter-container label { font-size: 12px; font-weight: 600; color: var(--text-muted);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .filter-input {
             padding: 6px 10px;
             border: 1px solid var(--border-color);
@@ -322,8 +317,8 @@
             border-radius: var(--radius-sm);
             text-align: center;
         }
-        .summary-card h4 { margin: 0 0 6px 0; font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
-        .summary-card .val { font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0; }
+        .summary-card h4 { margin: 0 0 6px 0; font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .summary-card .val { font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 
         .task-table-container { overflow-x: auto; margin-top: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
         .task-table {
@@ -341,11 +336,11 @@
             vertical-align: middle;
         }
         .task-table th:last-child, .task-table td:last-child { border-right: none; }
-        .task-table th { background-color: #f8fafc; color: var(--text-main); font-weight: 600; }
+        .task-table th { background-color: #f8fafc; color: var(--text-main); font-weight: 600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         
-        .badge-pending { background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
-        .badge-approved { background: #ecfdf5; color: #059669; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
-        .badge-rejected { background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+        .badge-pending { background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .badge-approved { background: #ecfdf5; color: #059669; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .badge-rejected { background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 
         .remarks-input {
             width: 90%;
@@ -363,8 +358,7 @@
             font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-        }
+            gap: 5px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .file-link:hover { text-decoration: underline; }
 
         /* Notes Box styling */
@@ -382,8 +376,7 @@
             font-weight: 700;
             cursor: pointer;
             color: var(--primary);
-            outline: none;
-        }
+            outline: none;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .computation-notes-box ul {
             margin: 8px 0 0 0;
             padding-left: 20px;
@@ -405,8 +398,7 @@
         .cat-progress-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
         .cat-progress-head h5 {
             margin: 0; font-size: 14px; font-weight: 700; color: var(--text-main);
-            display: flex; align-items: center; gap: 8px;
-        }
+            display: flex; align-items: center; gap: 8px;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .cat-progress-head h5::before {
             content: ''; width: 4px; height: 16px; border-radius: 4px;
             background: linear-gradient(180deg,#f97316,#8b5cf6);
@@ -416,25 +408,23 @@
         .cat-progress-table th {
             background: linear-gradient(180deg,#1e3a8a,#1d4ed8); color: #e8f0ff;
             font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-            padding: 11px 12px; text-align: left; white-space: nowrap;
-        }
+            padding: 11px 12px; text-align: left; white-space: nowrap;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .cat-progress-table th.num, .cat-progress-table td.num { text-align: center; }
         .cat-progress-table th.cat-remark-h, .cat-progress-table td.cat-remark-cell {
             text-align: left; font-weight: 500; font-size: 12px; max-width: 280px; white-space: normal; line-height: 1.35;
         }
-        .cat-remark.plus { color: #16a34a; font-weight: 700; }
-        .cat-remark.miss { color: #ef4444; font-weight: 600; }
-        .cat-remark.partial { color: #d97706; font-weight: 600; }
-        .cat-remark.ok { color: #2563eb; font-weight: 600; }
-        .cat-remark.enhance { color: #d97706; font-weight: 700; }
+        .cat-remark.plus { color: #16a34a; font-weight: 700;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .cat-remark.miss { color: #ef4444; font-weight: 600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .cat-remark.partial { color: #d97706; font-weight: 600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .cat-remark.ok { color: #2563eb; font-weight: 600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .cat-remark.enhance { color: #d97706; font-weight: 700;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .cat-progress-table td {
             padding: 12px; font-size: 13px; font-weight: 600; color: var(--text-main);
             border-bottom: 1px solid rgba(148,163,184,0.12); background: rgba(148,163,184,0.04);
-            font-variant-numeric: tabular-nums; vertical-align: middle;
-        }
+            font-variant-numeric: tabular-nums; vertical-align: middle;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .cat-progress-table tr:last-child td { border-bottom: none; }
         .cat-progress-table tbody tr:hover td { background: rgba(59,130,246,0.08); }
-        .cat-name { font-weight: 700; letter-spacing: 0.02em; }
+        .cat-name { font-weight: 700; letter-spacing: 0.02em;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .cat-bar-cell { min-width: 160px; }
         .cat-bar-track {
             height: 8px; border-radius: 999px; background: rgba(148,163,184,0.2); overflow: hidden;
@@ -442,11 +432,11 @@
         .cat-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#3b82f6,#22c55e); }
         .cat-bar-fill.low { background: linear-gradient(90deg,#ef4444,#f59e0b); }
         .cat-bar-fill.over { background: linear-gradient(90deg,#22c55e,#4ade80); }
-        .cat-pct.good { color: #22c55e; font-weight: 800; }
-        .cat-pct.warn { color: #f59e0b; font-weight: 800; }
-        .cat-pct.bad { color: #ef4444; font-weight: 800; }
+        .cat-pct.good { color: #22c55e; font-weight: 800;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .cat-pct.warn { color: #f59e0b; font-weight: 800;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .cat-pct.bad { color: #ef4444; font-weight: 800;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .cat-muted { color: var(--text-muted); }
-        .cat-strong { font-weight: 800; }
+        .cat-strong { font-weight: 800;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .cat-diff.pos { color: #22c55e; }
         .cat-diff.neg { color: #ef4444; }
         .cat-diff.zero { color: var(--text-muted); }
@@ -463,10 +453,39 @@
         html[data-theme="light"] .cat-progress-table td { background: #fff; }
         html[data-theme="light"] .cat-progress-table tbody tr:hover td { background: #f1f5f9; }
 
+
+        /* ===== Approval Section v2 ===== */
+        .appr-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px; }
+        .appr-search { flex:1 1 240px; min-width:180px; max-width:360px; }
+        .btn-ghost { background: transparent !important; color: var(--text-main) !important; border:1px solid var(--border-color) !important; padding:6px 12px; font-size:12px; border-radius:8px; cursor:pointer; box-shadow:none !important; }
+        .btn-ghost:hover { background: rgba(59,130,246,.12) !important; }
+        .tbl-status { font-size:12px; color:var(--text-muted); margin-left:auto; }
+        .live-status { font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; white-space:nowrap;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .live-status.ok { color:#34d399; background:rgba(16,185,129,.14); }
+        .live-status.bad { color:#f87171; background:rgba(239,68,68,.14); }
+        .bulk-bar { position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 12px; margin-bottom:10px; border-radius:10px; background:var(--card-bg); border:1px solid var(--primary); box-shadow:0 6px 20px rgba(0,0,0,.25); }
+        .bulk-bar .remarks-input { flex:1 1 260px; min-width:200px; }
+        .th-wrap { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+        .colf-btn { all:unset; cursor:pointer; font-size:9px; line-height:1; padding:3px 5px; border-radius:4px; color:var(--text-muted); border:1px solid transparent; }
+        .colf-btn:hover { background:rgba(59,130,246,.18); color:var(--primary); }
+        .colf-btn.active { background:var(--primary); color:#fff; }
+        .chk-col { width:34px; text-align:center !important; padding-left:6px !important; padding-right:6px !important; }
+        .chk-col input { width:16px; height:16px; cursor:pointer; accent-color: var(--primary); }
+        tr.row-selected td { background: rgba(37,99,235,.12) !important; }
+        .nav-badge { display:inline-block; min-width:18px; padding:1px 6px; margin-left:6px; border-radius:999px; background:#ef4444; color:#fff; font-size:10px; font-weight:800; text-align:center;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .col-pop { position:fixed; z-index:99999; width:268px; padding:10px; border-radius:10px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); box-shadow:0 14px 40px rgba(0,0,0,.45); font-size:12px; }
+        .col-pop-search { width:100%; box-sizing:border-box; padding:7px 9px; margin-bottom:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main); font-size:12px; }
+        .col-pop-actions { display:flex; gap:12px; margin-bottom:6px; }
+        .col-pop-actions a { color:var(--primary); font-weight:600; text-decoration:none; cursor:pointer;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .col-pop-list { max-height:260px; overflow:auto; }
+        .col-pop-list label { display:flex; align-items:center; gap:6px; padding:4px 2px; cursor:pointer; border-radius:4px; text-align:left; }
+        .col-pop-list label:hover { background:rgba(59,130,246,.12); }
+        .col-pop-list label span { flex:1; word-break:break-word; }
+        .col-pop-list label em { font-style:normal; color:var(--text-muted); font-size:11px; }
+        .appr-toast { position:fixed; left:50%; bottom:22px; z-index:100000; max-width:360px; padding:11px 16px; border-radius:10px; font-size:13px; font-weight:600; color:#fff; box-shadow:0 10px 30px rgba(0,0,0,.4); opacity:0; transform:translate(-50%,10px); pointer-events:none; transition:opacity .2s, transform .2s;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+        .appr-toast.show { opacity:1; transform:translate(-50%,0); }
+        .appr-toast.ok { background:#059669; } .appr-toast.err { background:#dc2626; } .appr-toast.info { background:#2563eb; }
     </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style id="aura-theme">
 /* ==========================================================
    AURA DARK THEME — presentation layer only (no logic changes)
@@ -516,7 +535,7 @@ html { scroll-behavior: smooth; }
 
 body,
 body.bg-gray-50 {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-family: "SamsungOne 600C", "Samsung Sharp Sans", "SamsungOne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background:
         radial-gradient(1100px 560px at 85% -10%, rgba(59, 130, 246, 0.14), transparent 60%),
         radial-gradient(900px 520px at -10% 105%, rgba(139, 92, 246, 0.12), transparent 60%),
@@ -667,8 +686,7 @@ h2, h3, h4 { color: var(--aura-text); letter-spacing: -0.01em; }
     font-size: 11px !important;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    font-weight: 700 !important;
-}
+    font-weight: 700 !important;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .task-table tbody tr { transition: background 0.15s ease; }
 .task-table tbody tr:hover { background: rgba(59, 130, 246, 0.07) !important; }
 .task-table tbody tr:last-child td { border-bottom: none !important; }
@@ -699,8 +717,7 @@ input[type="file"]::file-selector-button {
     padding: 5px 12px;
     margin-right: 10px;
     font-weight: 600;
-    cursor: pointer;
-}
+    cursor: pointer;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0 40px #0b1222 inset !important;
     -webkit-text-fill-color: var(--aura-text) !important;
@@ -838,8 +855,7 @@ body #notifDropdown {
     font-size: 16px;
     font-weight: 800;
     letter-spacing: 0.02em;
-    box-shadow: 0 10px 28px rgba(59, 130, 246, 0.5);
-}
+    box-shadow: 0 10px 28px rgba(59, 130, 246, 0.5);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .login-card input { padding: 12px 14px !important; font-size: 14px !important; }
 .login-card button { padding: 12px !important; font-size: 14px !important; border-radius: 10px !important; margin-top: 10px !important; }
 .modal-overlay { background: rgba(5, 8, 18, 0.72) !important; backdrop-filter: blur(8px) !important; }
@@ -869,8 +885,7 @@ body #notifDropdown {
     font-size: 12px !important;
     font-weight: 600 !important;
     cursor: pointer;
-    box-shadow: none !important;
-}
+    box-shadow: none !important;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .theme-toggle:hover { background: rgba(59, 130, 246, 0.16) !important; color: var(--aura-blue-soft) !important; }
 .theme-toggle .theme-ico { font-size: 14px; line-height: 1; }
 
@@ -1138,27 +1153,27 @@ html[data-theme="light"] .task-table.ov-table { --ov-sticky: #ffffff; --ov-row-a
 .ov-table th.ov-trainer-h, .ov-table td.ov-trainer { position: sticky; left: 0; z-index: 2; text-align: left !important; min-width: 250px; background: var(--ov-sticky) !important; box-shadow: 2px 0 0 var(--aura-line); }
 .ov-table th.ov-trainer-h { z-index: 3; vertical-align: middle; }
 .ov-table tbody tr:hover td.ov-trainer { background: var(--ov-sticky) !important; }
-.ov-name { font-weight: 700; font-size: 12.5px; line-height: 1.3; white-space: nowrap; color: var(--aura-text); }
+.ov-name { font-weight: 700; font-size: 12.5px; line-height: 1.3; white-space: nowrap; color: var(--aura-text);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .ov-email { font-size: 11px; color: var(--aura-muted); margin-top: 2px; white-space: nowrap; }
 .ov-remarks-h { text-align: left !important; min-width: 280px; }
 .ov-remarks { text-align: left; white-space: normal; min-width: 280px; font-size: 11px; line-height: 1.45; }
 .ov-rm { display: block; margin: 2px 0; padding-left: 8px; border-left: 3px solid var(--rc, #64748b); color: var(--text-main, inherit); }
 .ov-rm b { color: var(--rc, #64748b); }
-.ov-noplan { font-size: 10px; font-weight: 700; color: #f59e0b; background: rgba(245,158,11,.15); padding: 2px 7px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+.ov-noplan { font-size: 10px; font-weight: 700; color: #f59e0b; background: rgba(245,158,11,.15); padding: 2px 7px; border-radius: 999px; margin-left: 8px; vertical-align: middle;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 html[data-theme="light"] .ov-noplan { color: #b45309; background: #fef3c7; }
 /* values */
-.ov-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ov-val { font-weight: 700; font-variant-numeric: tabular-nums;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .ov-zero { color: var(--aura-muted); font-weight: 500; opacity: .75; }
 .ov-unit { font-size: 10px; color: var(--aura-muted); }
 /* achievement: % + mini bar */
 .ov-ach { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; min-width: 62px; }
-.ov-ach-txt { font-weight: 800; font-size: 12px; font-variant-numeric: tabular-nums; }
+.ov-ach-txt { font-weight: 800; font-size: 12px; font-variant-numeric: tabular-nums;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 .ov-ach-bar { width: 56px; height: 4px; border-radius: 4px; background: rgba(148,163,184,.25); overflow: hidden; }
 .ov-ach-bar i { display: block; height: 100%; border-radius: 4px; background: currentColor; }
 .ov-ach.good { color: #22c55e; } .ov-ach.warn { color: #f59e0b; } .ov-ach.bad { color: #ef4444; }
 html[data-theme="light"] .ov-ach.good { color: #15803d; } html[data-theme="light"] .ov-ach.warn { color: #b45309; } html[data-theme="light"] .ov-ach.bad { color: #dc2626; }
 /* productivity / efficiency pills */
-.ov-pill { display: inline-block; min-width: 54px; padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 11px; color: var(--pc); background: color-mix(in srgb, var(--pc) 15%, transparent); border: 1px solid color-mix(in srgb, var(--pc) 35%, transparent); }
+.ov-pill { display: inline-block; min-width: 54px; padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 11px; color: var(--pc); background: color-mix(in srgb, var(--pc) 15%, transparent); border: 1px solid color-mix(in srgb, var(--pc) 35%, transparent);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 html[data-theme="light"] .ov-pill[style*="#22c55e"] { --pc: #15803d !important; }
 html[data-theme="light"] .ov-pill[style*="#f59e0b"] { --pc: #b45309 !important; }
 html[data-theme="light"] .ov-pill[style*="#ef4444"] { --pc: #dc2626 !important; }
@@ -1538,6 +1553,20 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
     window.addEventListener('resize', function () { if (window.innerWidth > 900) closeSidebar(); });
 })();
 </script>
+<style id="font-roles">
+/* Bold/Heading = Samsung Sharp Sans Bold ; Regular text = SamsungOne 600C */
+h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.font-black{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important}
+.brand-name,.logo,.sidebar-brand-text,.ld-title,.ld-role,.summary-card .val,.summary-card h4,.kpi-score-big,.kpi-live-item strong,.stat b,.pct-big,.plan-name,.sec-title,.section-title,.cat-progress-head h5,#kpiBotHead b,summary,[class*="title"],[class*="heading"],.login-card button,.logout-btn,.btn-primary,button[type="submit"],.kb-tag{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;font-weight:700 !important}
+</style>
+<style id="sepco-icons">
+.sidebar-icon{color:#ffffff;flex-shrink:0}
+.sidebar-icon svg{width:17px;height:17px;stroke:currentColor;stroke-width:2}
+.sidebar-menu li.active .sidebar-icon,.main-menu-item.active .sidebar-icon,.has-sub-menu.active > .main-menu-item .sidebar-icon{color:#9cc3ff}
+html[data-theme="light"] .sidebar-icon{color:#0f172a !important}
+html[data-theme="light"] .sidebar-menu li.active .sidebar-icon,html[data-theme="light"] .main-menu-item.active .sidebar-icon,html[data-theme="light"] .has-sub-menu.active > .main-menu-item .sidebar-icon{color:#1d4ed8 !important}
+html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="light"] .main-menu-item:hover .sidebar-icon{color:#0f172a !important}
+</style>
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
@@ -1555,7 +1584,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 <ul class="sidebar-menu">
                     <li class="has-sub-menu" id="dashboardMenuParent">
                         <div class="main-menu-item active" onclick="switchSubTab(event, 'dashboardSection', 'dashboardMenuParent')">
-                            <span class="sidebar-icon">🏠</span>
+                            <span class="sidebar-icon"><i data-lucide="home"></i></span>
                             <span>Dashboard</span>
                         </div>
                     </li>
@@ -1565,7 +1594,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 <ul class="sidebar-menu">
                     <li class="has-sub-menu" id="reportsMenuParent">
                         <div class="main-menu-item" onclick="toggleSubMenu(event, 'reportsMenuParent', 'reportsSubMenu')">
-                            <span class="sidebar-icon">📊</span>
+                            <span class="sidebar-icon"><i data-lucide="bar-chart-2"></i></span>
                             <span>Daily Task Time</span>
                             <span class="arrow-icon">▶</span>
                         </div>
@@ -1577,7 +1606,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     </li>
                     <li class="has-sub-menu" id="snsBoostingMenuParent">
                         <div class="main-menu-item" onclick="switchSubTab(event, 'snsBoostingSection', 'snsBoostingMenuParent'); loadSnsBoostingSepco();">
-                            <span class="sidebar-icon">🚀</span>
+                            <span class="sidebar-icon"><i data-lucide="rocket"></i></span>
                             <span>SNS Boosting</span>
                         </div>
                     </li>
@@ -1588,7 +1617,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 <ul class="sidebar-menu">
                     <li class="has-sub-menu" id="approvalMenuParent">
                         <div class="main-menu-item" onclick="toggleSubMenu(event, 'approvalMenuParent', 'approvalSubMenu')">
-                            <span class="sidebar-icon">📝</span>
+                            <span class="sidebar-icon"><i data-lucide="file-text"></i></span>
                             <span>Approval Section</span>
                             <span class="arrow-icon">▶</span>
                         </div>
@@ -1609,7 +1638,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open menu" onclick="toggleSidebarMobile()">&#9776;</button>
                     <div>
                         <h3 id="dashTitle" style="margin:0; font-size: 16px;">Welcome, User</h3>
-                        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Role: <span id="dashRole" style="font-weight:600; color:var(--text-main);">SEPCO</span></p>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Role: <span id="dashRole" style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; color:var(--text-main);">SEPCO</span></p>
                     </div>
                 </div>
                 <div class="header-right">
@@ -1628,7 +1657,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                         <p style="color: var(--text-muted); font-size: 12px; margin:0;">Monthly KPI scorecard for <strong>all Specialized Trainers</strong> (from Monthly Plan, Daily Actual &amp; Approvals).</p>
                     </div>
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                        <span style="background:rgba(59,130,246,.18); color:#8ab8ff; padding:5px 12px; border-radius:999px; font-size:11px; font-weight:700;">All Job Groups</span>
+                        <span style="background:rgba(59,130,246,.18); color:#8ab8ff; padding:5px 12px; border-radius:999px; font-size:11px; font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">All Job Groups</span>
                         <input type="month" id="dashKpiMonth" class="filter-input" style="width:auto;" onchange="renderAllTrainersKpi()">
                         <button style="background:var(--primary); padding:7px 14px;" onclick="renderAllTrainersKpi()">↻ Refresh</button>
                     </div>
@@ -1716,32 +1745,38 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             <div id="forApprovalSection" class="content-section">
                 <h3 style="margin-top:0; font-size: 15px;">⏳ For Approval - Awaiting SEPCO</h3>
                 <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
-                    Two-stage flow (same as ST): <strong>RTO</strong> reviews first → after RTO approves, status becomes <strong>Pending SEPCO</strong> and appears here for your final decision.
+                    Two-stage flow (same as ST): <strong>RTO</strong> reviews first → after RTO approves, status becomes <strong>Pending SEPCO</strong> and appears here for your final decision. Auto-updating — hindi na kailangan mag-refresh.
                 </p>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">
-                    Only requests already cleared by RTO (status <em>Pending SEPCO</em>) are listed. Items still at RTO are hidden until they advance.
-                </p>
+
+                <div class="appr-toolbar">
+                    <input type="search" id="search_forApprovalTableBody" class="filter-input appr-search" placeholder="🔍 Search sa lahat ng column..." oninput="onApprSearch('forApprovalTableBody', this.value)">
+                    <button type="button" class="btn-ghost" onclick="clearAllFilters('forApprovalTableBody')">✖ Clear filters</button>
+                    <button type="button" class="btn-ghost" onclick="selectAllVisible(true)">☑ Select all visible</button>
+                    <button type="button" class="btn-ghost" onclick="refreshApprovals({force:true, immediate:true, showError:true})">⟳ Refresh</button>
+                    <span id="liveStatus" class="live-status">● Live</span>
+                    <span id="status_forApprovalTableBody" class="tbl-status"></span>
+                </div>
+                <div id="bulkBar" class="bulk-bar" style="display:none;">
+                    <strong id="bulkCount">0 selected</strong>
+                    <input type="text" id="bulkRemarks" class="remarks-input" list="quickRemarks" placeholder="Remarks para sa lahat ng napili (optional sa Approve · required sa Reject)">
+                    <button type="button" class="btn-approve" onclick="bulkDecision('Approved')">✔ Approve selected</button>
+                    <button type="button" class="btn-reject" onclick="bulkDecision('Rejected')">✖ Reject selected</button>
+                    <button type="button" class="btn-ghost" onclick="clearSelection()">Clear</button>
+                </div>
+                <datalist id="quickRemarks">
+                    <option value="Approved ✅"></option>
+                    <option value="Okay na, good job!"></option>
+                    <option value="Please revise and resubmit"></option>
+                    <option value="Incomplete details — please check"></option>
+                    <option value="Wrong file / link"></option>
+                </datalist>
 
                 <div class="task-table-container">
                     <table class="task-table">
-                        <thead>
-                            <tr>
-                                <th>File Name</th>
-                                <th>Category</th>
-                                <th>Request User</th>
-                                <th>RTO</th>
-                                <th>SEPCO</th>
-                                <th>Request Date</th>
-                                <th>Status</th>
-                                <th>Note from requester</th>
-                                <th>RTO Remarks</th>
-                                <th>Action</th>
-                                <th>SEPCO Remarks</th>
-                            </tr>
-                        </thead>
+                        <thead id="forApprovalThead"></thead>
                         <tbody id="forApprovalTableBody">
                             <tr>
-                                <td colspan="11" style="color: var(--text-muted); padding: 20px;">Fetching data...</td>
+                                <td colspan="12" style="color: var(--text-muted); padding: 20px;">Fetching data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1761,21 +1796,14 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     <button style="background: var(--primary);" onclick="resetRequestMonthFilter()">Current Month</button>
                 </div>
 
+                <div class="appr-toolbar">
+                    <input type="search" id="search_sepcoTableBody" class="filter-input appr-search" placeholder="🔍 Search sa lahat ng column..." oninput="onApprSearch('sepcoTableBody', this.value)">
+                    <button type="button" class="btn-ghost" onclick="clearAllFilters('sepcoTableBody')">✖ Clear filters</button>
+                    <span id="status_sepcoTableBody" class="tbl-status"></span>
+                </div>
                 <div class="task-table-container">
                     <table class="task-table">
-                        <thead>
-                            <tr>
-                                <th>File Name</th>
-                                <th>Category</th>
-                                <th>Request User</th>
-                                <th>RTO</th>
-                                <th>SEPCO</th>
-                                <th>Request Date</th>
-                                <th>Status</th>
-                                <th>RTO Remarks</th>
-                                <th>SEPCO Remarks</th>
-                            </tr>
-                        </thead>
+                        <thead id="requestsThead"></thead>
                         <tbody id="sepcoTableBody">
                             <tr>
                                 <td colspan="9" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td>
@@ -1868,7 +1896,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 </div>
                 <div id="monthlyPlanCategoryProgress" style="margin-bottom:20px;"></div>
                 <details class="computation-notes-box" style="margin-top:8px;">
-                    <summary style="cursor:pointer;font-weight:700;color:var(--primary);">📋 View raw Monthly Plan data</summary>
+                    <summary style="cursor:pointer;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:var(--primary);">📋 View raw Monthly Plan data</summary>
                     <div style="margin-top:12px;">
                     <div class="task-table-container">
                     <table class="task-table">
@@ -1918,7 +1946,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 </div>
                 <div id="dailyProgressContainer" style="margin-bottom:20px;"><div class="cat-empty">Loading Daily Plan and Daily Actual data...</div></div>
                 <details class="computation-notes-box" style="margin-top:8px;">
-                    <summary style="cursor:pointer;font-weight:700;color:var(--primary);">📋 View raw Daily Plan data</summary>
+                    <summary style="cursor:pointer;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:var(--primary);">📋 View raw Daily Plan data</summary>
                     <div style="margin-top:12px;">
                     <div class="task-table-container">
                     <table class="task-table">
@@ -1945,7 +1973,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     </div>
                 </details>
                 <details class="computation-notes-box" style="margin-top:8px;">
-                    <summary style="cursor:pointer;font-weight:700;color:var(--primary);">📋 View raw Daily Actual data</summary>
+                    <summary style="cursor:pointer;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:var(--primary);">📋 View raw Daily Actual data</summary>
                     <div style="margin-top:12px;">
                     <div class="task-table-container">
                     <table class="task-table">
@@ -2010,11 +2038,12 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                                     <th>Score</th>
                                     <th>Boost period</th>
                                     <th>Status</th>
+                                    <th>Proof</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="snsBoostingTableBody">
-                                <tr><td colspan="14" style="padding:20px; color:var(--text-muted); text-align:center;">Click SNS Boosting to load data.</td></tr>
+                                <tr><td colspan="15" style="padding:20px; color:var(--text-muted); text-align:center;">Click SNS Boosting to load data.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -2318,10 +2347,10 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="font-weight: 600; text-align: left; padding-left: 15px;">👤 ${item["NS+ USER ID"] || ''}</td>
+                    <td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align: left; padding-left: 15px;">👤 ${item["NS+ USER ID"] || ''}</td>
                     <td>${item["DURATION PER MIN"] || ''}</td>
                     <td>${item["CATEGORY"] || ''}</td>
-                    <td style="font-weight: 600; text-align: left;">${item["TITLE"] || ''}</td>
+                    <td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align: left;">${item["TITLE"] || ''}</td>
                     <td>${item["FORMAT"] || ''}</td>
                     <td>${avgTimeVal}</td>
                     <td>${item["FREQUENCY PER MONTH"] || ''}</td>
@@ -2405,13 +2434,13 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             dataRows.forEach(row => {
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="font-weight: 600; text-align: left; padding-left: 15px;">👤 ${iUser !== -1 ? (row[iUser] || '') : (row[0] || '')}</td>
+                    <td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align: left; padding-left: 15px;">👤 ${iUser !== -1 ? (row[iUser] || '') : (row[0] || '')}</td>
                     <td>${iDateSub !== -1 ? (row[iDateSub] || '') : (row[1] || '')}</td>
                     <td>${iTimeSub !== -1 ? (row[iTimeSub] || '') : (row[2] || '')}</td>
                     <td>${iStart !== -1 ? (row[iStart] || '') : (row[3] || '')}</td>
                     <td>${iEnd !== -1 ? (row[iEnd] || '') : (row[4] || '')}</td>
                     <td>${iLoc !== -1 ? (row[iLoc] || '') : (row[5] || '')}</td>
-                    <td style="font-weight: 600; text-align: left;">${iTitle !== -1 ? (row[iTitle] || '') : (row[6] || '')}</td>
+                    <td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align: left;">${iTitle !== -1 ? (row[iTitle] || '') : (row[6] || '')}</td>
                     <td>${iCat !== -1 ? (row[iCat] || '') : (row[7] || '')}</td>
                     <td>${durationFromSheet(iDuration !== -1 ? row[iDuration] : '', iStart !== -1 ? row[iStart] : row[3], iEnd !== -1 ? row[iEnd] : row[4])}</td>
                 `;
@@ -2472,14 +2501,14 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             dataRows.forEach(row => {
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="font-weight: 600; text-align: left; padding-left: 15px;">👤 ${iUser !== -1 ? (row[iUser] || '') : (row[0] || '')}</td>
+                    <td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align: left; padding-left: 15px;">👤 ${iUser !== -1 ? (row[iUser] || '') : (row[0] || '')}</td>
                     <td>${iDateSub !== -1 ? (row[iDateSub] || '') : (row[1] || '')}</td>
                     <td>${iTimeSub !== -1 ? (row[iTimeSub] || '') : (row[2] || '')}</td>
                     <td>${iStart !== -1 ? (row[iStart] || '') : (row[3] || '')}</td>
                     <td>${iEnd !== -1 ? (row[iEnd] || '') : (row[4] || '')}</td>
                     <td>${iLoc !== -1 ? (row[iLoc] || '') : (row[5] || '')}</td>
                     <td>${iCat !== -1 ? (row[iCat] || '') : (row[6] || '')}</td>
-                    <td style="font-weight: 600; text-align: left;">${iTitle !== -1 ? (row[iTitle] || '') : (row[7] || '')}</td>
+                    <td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align: left;">${iTitle !== -1 ? (row[iTitle] || '') : (row[7] || '')}</td>
                     <td>${iFormat !== -1 ? (row[iFormat] || '') : (row[8] || '')}</td>
                     <td>${iIsStart !== -1 ? (row[iIsStart] || '') : (row[9] || '')}</td>
                     <td>${iTarget !== -1 ? (row[iTarget] || '') : (row[10] || '')}</td>
@@ -2627,8 +2656,9 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 if (!user) return;
                 const pair = sepcoNormalizeCatPair(r);
                 if (pair.cat !== 'CONTENT') return;
-                const f = parseInt(String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
-                if (!(f > 0)) return;
+                const f0 = parseInt(String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
+                if (!(f0 > 0)) return;
+                if (!(Math.round(skEffFreq(r, f0, skPlanUserKey(r), monthKey)) > 0)) return;   // all frequency taken off by leave / absent
                 const c2 = sepcoNormCat2(pair.cat2);
                 if (!c2) return;
                 if (!idx[user]) idx[user] = [];
@@ -2737,6 +2767,62 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             }
             return n;
         }
+        // ======== LEAVE / ABSENT -> Monthly Plan title deduction (same rule as the ST pages: kpiLeavePlanDeduct) ========
+        // Each Approved Leave / Absent = 480 mins, taken off the Monthly Plan task (title) the ST picked on the Leave / Absent Log:
+        //   frequency left = frequency - (480 / DURATION PER MIN). Leaves without a title (old records) only reduce the adjusted plan mins.
+        var _skLeaveCache = {};
+        function skPlanUserKey(r) { return skNorm(sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'USER ID', 'EMAIL', 'User'])); }
+        function skPlanFreqNum(r) { const raw = String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, ''); return raw === '' ? 1 : (parseFloat(raw) || 0); }
+        function skPlanDurMins(r) { const d = parseFloat(String(sepcoGetVal(r, ['DURATION PER MIN', 'Duration per Min', 'DURATION']) || '').replace(/[^0-9.\-]/g, '')); return (!isNaN(d) && d > 0) ? d : 480; }
+        function skLeaveAllocs(planTitle) {   // PLAN TITLE = JSON [{t,q,m}] (several tasks, total <= 480 mins) or an old single title = 480 mins
+            const raw = String(planTitle || '').trim();
+            if (!raw) return { items: [], rest: 480 };
+            if (raw.charAt(0) === '[') {
+                try {
+                    const items = []; let tot = 0;
+                    JSON.parse(raw).forEach(a => { const m = Math.max(0, Number(a.m) || 0); if (a.t && m > 0) { items.push({ t: String(a.t), q: Number(a.q) || 0, m }); tot += m; } });
+                    return { items, rest: Math.max(0, 480 - tot) };
+                } catch (e) { return { items: [], rest: 480 }; }
+            }
+            return { items: [{ t: raw, q: 0, m: 480 }], rest: 0 };
+        }
+        function skLeavePlanDeduct(userKey, monthKey) {
+            const X = SK_EXTRA[userKey];
+            const mp = Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : [];
+            const leaves = ((X && X.leaves) || []).filter(l => String((l && l.status) || 'Approved').toLowerCase() === 'approved' && skMonthKey(l.date) === monthKey);
+            const sig = userKey + '|' + monthKey + '|' + mp.length + '|' + leaves.map(l => l.date + ':' + (l.planTitle || '')).join(',');
+            const c = _skLeaveCache[userKey + '|' + monthKey];
+            if (c && c.sig === sig && c.mp === mp) return c.res;
+            const red = new Map(), need = {};
+            let untitled = 0;
+            leaves.forEach(l => {
+                const al = skLeaveAllocs(l.planTitle);
+                untitled += al.rest;                       // part of the 480 mins not assigned to a plan task
+                al.items.forEach(i => { const t = skNormTitle(i.t); need[t] = (need[t] || 0) + i.m; });
+            });
+            const rows = Object.keys(need).length ? mp.filter(r => skPlanUserKey(r) === userKey && skMonthMatches(sepcoGetVal(r, ['MONTH', 'Month']), monthKey) && ['TASK', 'OTHERS'].indexOf(sepcoNormalizeCatPair(r).cat) !== -1) : [];   // TASK / OTHERS only, same as the ST Plan Task checklist
+            Object.keys(need).forEach(t => {
+                let left = need[t];
+                rows.forEach(r => {
+                    if (left <= 0) return;
+                    if (skNormTitle(sepcoGetVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]'])) !== t) return;
+                    const f = skPlanFreqNum(r); if (f <= 0) return;
+                    const d = skPlanDurMins(r), take = Math.min(f * d, left);
+                    red.set(r, (red.get(r) || 0) + take / d);
+                    left -= take;
+                });
+                if (left > 0) untitled += left;     // title not (or no longer) in the plan: still 480 off the adjusted plan mins
+            });
+            const res = { red, untitledMins: untitled };
+            _skLeaveCache[userKey + '|' + monthKey] = { sig, mp, res };
+            return res;
+        }
+        // effective frequency of a Monthly Plan row after the approved leave / absent deductions
+        function skEffFreq(r, f, userKey, monthKey) {
+            if (!userKey || !monthKey) return f;
+            const x = skLeavePlanDeduct(userKey, monthKey).red.get(r);
+            return x ? Math.max(0, f - x) : f;
+        }
         function skProdEff(userKey, monthKey, displayName) {
             const X = SK_EXTRA[userKey] || { loaded: false, name: '', leaves: [] };
             const D = skDailyObjects();
@@ -2748,7 +2834,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 skNorm(sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'USER ID', 'EMAIL', 'User'])) === userKey &&
                 skMonthMatches(sepcoGetVal(r, ['MONTH', 'Month']), monthKey));
             const lines = [], contentNorms = [];
-            let planMins = 0;
+            let planMins = 0, planMinsEff = 0;
             plan.forEach(r => {
                 const rawF = String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, '');
                 const f = rawF === '' ? 1 : (parseFloat(rawF) || 0);
@@ -2756,12 +2842,14 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 let d = parseFloat(String(sepcoGetVal(r, ['DURATION PER MIN', 'Duration per Min', 'DURATION']) || '').replace(/,/g, ''));
                 if (isNaN(d) || d <= 0) d = 480;
                 planMins += d * f;
+                const fe = skEffFreq(r, f, userKey, monthKey);          // frequency left after leave / absent (480 mins each)
+                planMinsEff += d * fe;
                 const pair = sepcoNormalizeCatPair(r);
                 const nc = sepcoNormCat2(pair.cat2) || String(pair.cat2 || '').toLowerCase();
-                if (pair.cat === 'CONTENT') { if (nc) contentNorms.push(nc); return; }
+                if (pair.cat === 'CONTENT') { if (nc && Math.round(fe) > 0) contentNorms.push(nc); return; }
                 let ln = lines.find(x => x.bucket === pair.cat && x.norm === nc);
                 if (!ln) { ln = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, actualMins: 0, titles: [], seen: {} }; lines.push(ln); }
-                ln.target += f;
+                ln.target += Math.round(fe);
                 const pt = skNormTitle(sepcoGetVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']));
                 if (pt) ln.titles.push(pt);
             });
@@ -2774,7 +2862,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             const leaveDays = (X.leaves || []).filter(l => String((l && l.status) || 'Approved').toLowerCase() === 'approved' && skMonthKey(l.date) === monthKey).length;
             const designated = Math.max(0, skWorkingDays(monthKey) - leaveDays) * 480;
             const planHit = planMins > 0 && planMins >= designated - 0.5;
-            const adjPlan = Math.max(0, planMins - leaveDays * 480);
+            const adjPlan = Math.max(0, planMinsEff - skLeavePlanDeduct(userKey, monthKey).untitledMins);   // = plan mins - leave x 480
 
             // ---- Daily Plan index: ONE entry per (date + title) ----
             const planByKey = {};
@@ -2791,7 +2879,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             const apprRows = skApprovedContentRows(monthKey, actRows, approvalsAll);
             const ordered = actRows.map((r, i) => ({ r, i, d: skDate(dateOf(r)) || '' })).sort((a, b) => a.d < b.d ? -1 : (a.d > b.d ? 1 : a.i - b.i));
             const seenRow = {}, eff = {};
-            let inMins = 0, extraMins = 0;
+            let inMins = 0, extraMins = 0, bonusMins = 0;
             ordered.forEach(o => {
                 const r = o.r;
                 const bucket = skBucket(r);
@@ -2813,7 +2901,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     const cr = sepcoClaimUnit(lines, bucket, [detail, cat2, cat], title, o.d, d);
                     inPlan = !!cr.line && !!(cr.line.seen && cr.line.seen[cr.key]);   // unit counted inside the plan line's target
                 }
-                if (inPlan) inMins += d; else extraMins += d;
+                if (inPlan) inMins += d; else { extraMins += d; if (bucket === 'CONTENT') bonusMins += d; }   // approved CONTENT not in the plan = plus
                 const k = o.d + '|' + skNormTitle(title);
                 const e = eff[k] || (eff[k] = { plan: planByKey[k] || 0, act: 0, inPlan: inPlan });
                 e.act += d;
@@ -2832,9 +2920,9 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             if (efficiency != null && !planHit) efficiency = Math.min(1, efficiency);
 
             // ---- Productivity ----
-            const usedMins = planHit ? (inMins + extraMins) : Math.min(inMins, adjPlan);
+            const usedMins = planHit ? (inMins + extraMins) : (Math.min(inMins, adjPlan) + bonusMins);   // approved content outside the plan is always plus points
             const productivity = adjPlan > 0 ? usedMins / adjPlan : (usedMins > 0 ? 1 : null);
-            return { planMins, adjPlan, leaveDays, designated, planHit, inMins, extraMins, loggedMins: inMins + extraMins,
+            return { planMins, adjPlan, leaveDays, designated, planHit, inMins, extraMins, bonusMins, loggedMins: inMins + extraMins,
                      usedMins, productivity, efficiency, onTime, late, planMinsMatched: pAll, matchedActualMins: aAll };
         }
         function onMonthlyPlanMonthChange() {
@@ -2881,12 +2969,14 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 const userRaw = sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'USER ID', 'EMAIL', 'User']);
                 const u = ensureU(userRaw);
                 if (!u) return;
-                const f = parseInt(String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
-                if (!(f > 0)) return;
+                const f0 = parseInt(String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
+                if (!(f0 > 0)) return;
+                const fe = skEffFreq(r, f0, skPlanUserKey(r), monthKey);   // less leave / absent (480 mins each)
+                const f = Math.round(fe);
                 const pair = sepcoNormalizeCatPair(r);
                 const nc = sepcoNormCat2(pair.cat2) || String(pair.cat2 || '').toLowerCase();
                 let d = parseFloat(String(sepcoGetVal(r, ['DURATION PER MIN', 'Duration per Min', 'DURATION']) || '').replace(/[^0-9.\-]/g, ''));
-                const mins = (!isNaN(d) && d > 0) ? d * f : 480 * f;
+                const mins = (!isNaN(d) && d > 0) ? d * fe : 480 * fe;
                 let line = u.lines.find(l => l.bucket === pair.cat && l.norm === nc);
                 if (!line) { line = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, approved: 0, planMins: 0, actualMins: 0, titles: [], seen: {} }; u.lines.push(line); }
                 line.target += f;
@@ -2943,6 +3033,8 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                         line.actual += 1;
                         (countedTitles[u.key] = countedTitles[u.key] || []).push(_ntC);
                     }
+                } else {   // approved CONTENT not in the Monthly Plan = plus points
+                    addUnplanned(u, 'CONTENT', 'Approved content (not in plan)', d, '➕ Plus points — approved, not in Monthly Plan', ovNormTitle(title));
                 }
             });
             // Approved CONTENT from the Approvals sheet (no Daily Actual row needed)
@@ -2958,7 +3050,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 const nt = ovNormTitle(a.fileName || a.title || '');
                 if (!nt) return;
                 const line = sepcoFindPlanLine(u.lines, 'CONTENT', [cat, cat2]);
-                if (!line) return; // no Monthly Plan line for this Category 2 = nothing shown
+                if (!line) { addUnplanned(u, 'CONTENT', 'Approved content (not in plan)', 0, '➕ Plus points — approved, not in Monthly Plan', nt); return; }   // not in the Monthly Plan = plus points
                 // Approved Content = Approved requests from the Approvals list (List of Requests), one per file
                 const seenA = apprSeen[u.key] || (apprSeen[u.key] = []);
                 if (!seenA.some(x => x === nt)) { seenA.push(nt); line.approved += 1; }
@@ -3004,6 +3096,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 const u = users[k];
                 if (!u.lines.length) gNoPlan++;
                 u.lines.forEach(l => { if (l.bucket === 'CONTENT') gAppr += l.approved; });
+                Object.keys(u.unplanned).forEach(x => { if (u.unplanned[x].bucket === 'CONTENT') gAppr += u.unplanned[x].count; });
                 u.lines.forEach(l => {
                     gLines++; gTarget += l.target; gCredit += Math.min(l.actual, l.target);
                     gPlanMins += l.planMins; gActMins += l.actualMins;
@@ -3034,11 +3127,21 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 const apprInPlan = lines.filter(l => l.bucket === 'CONTENT').reduce((t, l) => t + l.approved, 0);
                 lines.forEach(l => { tT += l.target; tCredit += Math.min(l.actual, l.target); tPM += l.planMins; tAM += l.actualMins; if (l.actual >= l.target) nDone++; });
                 const hdrPct = tT > 0 ? tCredit / tT * 100 : null;
-                const badge = !lines.length ? ' <span style="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.15);padding:2px 6px;border-radius:4px;margin-left:6px;">No Monthly Plan</span>' : '';
-                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="9" style="text-align:left;padding:12px 14px;font-weight:800;">👤 ' + sepcoEsc(labelFor(u)) + badge +
-                    (lines.length ? ' <span style="font-weight:600;font-size:12px;color:var(--text-muted);margin-left:10px;">' + nDone + '/' + lines.length + ' categories done · ' + tCredit + '/' + tT + ' items · ' + Math.round(tAM).toLocaleString() + '/' + Math.round(tPM).toLocaleString() + ' mins · </span>' + pctHtml(tCredit, tT) : '') +
-                    (lines.length ? ' <span style="font-weight:700;font-size:12px;margin-left:10px;color:#34d399;">Approved content: ' + apprInPlan + '</span>' : '') +
+                const badge = !lines.length ? ' <span style="font-size:10px;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:#f59e0b;background:rgba(245,158,11,.15);padding:2px 6px;border-radius:4px;margin-left:6px;">No Monthly Plan</span>' : '';
+                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="9" style="text-align:left;padding:12px 14px;font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">👤 ' + sepcoEsc(labelFor(u)) + badge +
+                    (lines.length ? ' <span style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;color:var(--text-muted);margin-left:10px;">' + nDone + '/' + lines.length + ' categories done · ' + tCredit + '/' + tT + ' items · ' + Math.round(tAM).toLocaleString() + '/' + Math.round(tPM).toLocaleString() + ' mins · </span>' + pctHtml(tCredit, tT) : '') +
+                    (lines.length ? ' <span style="font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;margin-left:10px;color:#34d399;">Approved content: ' + apprInPlan + '</span>' : '') +
                     '</td></tr>';
+                try {   // approved Leave / Absent: show what was taken off this trainer's targets (same rule as the ST page)
+                    if (monthKey && lines.length) {
+                        const _ld = skLeavePlanDeduct(skNorm(u.email || u.key), monthKey), _ln = [];
+                        _ld.red.forEach((v, row) => { if (v > 0) _ln.push(sepcoEsc(String(sepcoGetVal(row, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']) || '')) + ' −' + (Math.round(v * 100) / 100)); });
+                        let _m = '';
+                        if (_ln.length) _m += '<div style="color:#34d399;">✅ Taken off the Target (approved Leave / Absent): ' + _ln.join(' · ') + '</div>';
+                        if (_ld.untitledMins > 0.5) _m += '<div style="color:#fbbf24;">⚠️ ' + (Math.round(_ld.untitledMins / 480 * 100) / 100) + ' approved Leave / Absent day(s) (' + Math.round(_ld.untitledMins) + ' mins) have no Plan Task, so no Target was reduced. The trainer must Edit it in the Leave / Absent Log and pick the task(s).</div>';
+                        if (_m) body += '<tr><td colspan="9" style="text-align:left;padding:6px 26px;font-size:11px;line-height:1.6;">' + _m + '</td></tr>';
+                    }
+                } catch (e) {}
                 visible.forEach(l => {
                     const p = l.target > 0 ? l.actual / l.target * 100 : 0;
                     const barCls = p >= 100 ? 'over' : (p < 40 ? 'low' : '');
@@ -3270,15 +3373,15 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     if (!rows) return;
                     const dPct = dPlans > 0 ? dDone / dPlans * 100 : null;
                     const dLabel = new Date(dk + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-                    userRows += '<tr style="background:rgba(148,163,184,0.08);"><td colspan="7" style="text-align:left;padding:8px 14px 8px 20px;font-weight:700;font-size:12px;">📅 ' + sepcoEsc(dLabel) +
+                    userRows += '<tr style="background:rgba(148,163,184,0.08);"><td colspan="7" style="text-align:left;padding:8px 14px 8px 20px;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;">📅 ' + sepcoEsc(dLabel) +
                         '<span style="font-weight:500;color:var(--text-muted);margin-left:10px;">' + dDone + '/' + dPlans + ' planned done · ' + Math.round(dPM).toLocaleString() + ' plan mins / ' + Math.round(dAM).toLocaleString() + ' actual mins</span> ' +
                         (dPct == null ? '' : '<span class="cat-pct ' + (dPct >= 100 ? 'good' : (dPct >= 80 ? 'warn' : 'bad')) + '">' + (Math.round(dPct * 10) / 10) + '%</span>') + '</td></tr>' + rows;
                 });
                 if (!userRows) return;
                 shown++;
                 const uPct = uPlans > 0 ? uDone / uPlans * 100 : null;
-                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="7" style="text-align:left;padding:12px 14px;font-weight:800;">👤 ' + sepcoEsc(dpLabel(k, u.raw)) +
-                    ' <span style="font-weight:600;font-size:12px;color:var(--text-muted);margin-left:10px;">' + uDone + '/' + uPlans + ' planned items done · ' + Math.round(uAM).toLocaleString() + '/' + Math.round(uPM).toLocaleString() + ' mins · </span>' +
+                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="7" style="text-align:left;padding:12px 14px;font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">👤 ' + sepcoEsc(dpLabel(k, u.raw)) +
+                    ' <span style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;color:var(--text-muted);margin-left:10px;">' + uDone + '/' + uPlans + ' planned items done · ' + Math.round(uAM).toLocaleString() + '/' + Math.round(uPM).toLocaleString() + ' mins · </span>' +
                     (uPct == null ? '' : '<span class="cat-pct ' + (uPct >= 100 ? 'good' : (uPct >= 80 ? 'warn' : 'bad')) + '">' + (Math.round(uPct * 10) / 10) + '%</span>') + '</td></tr>' + userRows;
             });
 
@@ -3376,7 +3479,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             if (!(target > 0)) return '<span style="color:var(--text-muted);">—</span>';
             const p = (actual / target) * 100;
             const color = p >= 100 ? '#22c55e' : (p >= 80 ? '#f59e0b' : '#ef4444');
-            return '<span style="font-weight:700;color:' + color + ';">' + p.toFixed(1) + '%</span>';
+            return '<span style="font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:' + color + ';">' + p.toFixed(1) + '%</span>';
         }
         // ---- Overview table cell helpers (theme-aware; styles in .ov-table CSS) ----
         function esc2(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -3422,7 +3525,8 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             if (!pe.planHit) {
                 const gap = Math.max(0, pe.designated - pe.planMins);
                 out.push(rm(Y, 'Plan is short:', fm(gap) + ' min (≈ ' + (gap / 480).toFixed(1) + ' days) below Designated ' + fm(pe.designated) + ' min — add to your Monthly Plan. Capped at 100%.'));
-                if (pe.extraMins > 0) out.push(rm(M, 'Not counted:', fm(pe.extraMins) + ' min of actual not in the Monthly Plan.'));
+                if ((pe.bonusMins || 0) > 0) out.push(rm(B, 'Plus to productivity:', fm(pe.bonusMins) + ' min of approved content not in the Monthly Plan counted.'));
+                if (pe.extraMins - (pe.bonusMins || 0) > 0) out.push(rm(M, 'Not counted:', fm(pe.extraMins - (pe.bonusMins || 0)) + ' min of actual not in the Monthly Plan.'));
             } else {
                 out.push(rm(G, 'Plan meets Designated', '(' + fm(pe.planMins) + ' / ' + fm(pe.designated) + ' min).'));
                 if (pe.extraMins > 0) out.push(rm(B, 'Plus to productivity:', fm(pe.extraMins) + ' min of unplanned actual counted.'));
@@ -3495,18 +3599,19 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 if (!ovMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"], monthKey)) return;
 
                 const bucket = ovBucket(plan["CATEGORY"] || plan["Category"], plan["CATEGORY 2"] || plan["Category 2"]);
-                const freq = parseFloat(String(plan["FREQUENCY PER MONTH"] || plan["Frequency per Month"] || plan["FREQUENCY"] || "0").replace(/[^0-9.\-]/g, "")) || 0;
-                if (freq <= 0) return;
+                const freq0 = parseFloat(String(plan["FREQUENCY PER MONTH"] || plan["Frequency per Month"] || plan["FREQUENCY"] || "0").replace(/[^0-9.\-]/g, "")) || 0;
+                if (freq0 <= 0) return;
+                const freq = skEffFreq(plan, freq0, skNorm(userRaw), monthKey);   // less leave / absent (480 mins each)
                 let dur = parseFloat(String(plan["DURATION PER MIN"] || plan["Duration per Min"] || plan["DURATION"] || "").replace(/[^0-9.\-]/g, ""));
                 if (isNaN(dur) || dur <= 0) dur = 480;
                 const mins = dur * freq;
 
                 ensureUser(userKey, String(userRaw).trim());
                 const t = monthlyTargets[userKey];
-                if (bucket === 'CONTENT') t.content += freq;
-                else if (bucket === 'TASK') t.task += freq;
-                else if (bucket === 'TRAINING') t.training += freq;
-                else t.others += freq;
+                if (bucket === 'CONTENT') t.content += Math.round(freq);
+                else if (bucket === 'TASK') t.task += Math.round(freq);
+                else if (bucket === 'TRAINING') t.training += Math.round(freq);
+                else t.others += Math.round(freq);
                 t.targetMins += mins;
                 if (bucket !== 'CONTENT') {
                     const pr = sepcoNormalizeCatPair(plan);
@@ -3514,7 +3619,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     const lst = userLines[userKey] || (userLines[userKey] = []);
                     let ln = lst.find(x => x.bucket === bucket && x.norm === nc);
                     if (!ln) { ln = { bucket, cat2: pr.cat2, norm: nc, target: 0, actual: 0, actualMins: 0, titles: [], seen: {} }; lst.push(ln); }
-                    ln.target += freq;
+                    ln.target += Math.round(freq);
                     const pt = ovNormTitle(String(sepcoGetVal(plan, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']) || ''));
                     if (pt) ln.titles.push(pt);
                 }
@@ -3985,7 +4090,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 ]).then(([prof, inp, lv]) => {
                     if (prof && prof.success) { x.jobGroup = prof.jobGroup || ''; x.name = skNorm(prof.name); }
                     if (inp && inp.success && Array.isArray(inp.inputs)) x.inputs = inp.inputs;
-                    if (lv && lv.success && Array.isArray(lv.leaves)) x.leaves = lv.leaves.map(l => ({ date: l.date, type: l.type, status: l.status }));
+                    if (lv && lv.success && Array.isArray(lv.leaves)) x.leaves = lv.leaves.map(l => ({ date: l.date, type: l.type, status: l.status, planTitle: l.planTitle || '' }));
                     x.loaded = true;
                     skScheduleRender();
                     // leave days change Designated Minutes -> refresh the Overview table too
@@ -4039,13 +4144,13 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
 
             // 1) TARGET from Monthly Plan
             let target = 0;
-            plan.forEach(r => { if (!skIsContent(r)) return; target += parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1; });
+            plan.forEach(r => { if (!skIsContent(r)) return; target += Math.round(skEffFreq(r, parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1, userKey, monthKey)); });
 
             // 2) ACTUAL content: approved approvals matched to plan slots
             const planSlots = [];
             plan.forEach(r => {
                 if (!skIsContent(r)) return;
-                const f = parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
+                const f = Math.round(skEffFreq(r, parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1, userKey, monthKey));
                 const title = String(skRowVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']) || '').trim();
                 const cat = String(skRowVal(r, ['CATEGORY']) || '').trim();
                 const cat2 = String(skRowVal(r, ['CATEGORY 2']) || '').trim();
@@ -4055,7 +4160,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             const monthApprovals = approvalsAll.filter(a => skMonthKey(a.uploadDate) === monthKey);
             const approvedList = monthApprovals.filter(a => /approve/i.test(String(a.status || '')));
 
-            let own = 0, proof = 0, onTime = 0, totalMins = 0, ownMins = 0, onTimeMins = 0;
+            let own = 0, proof = 0, onTime = 0, totalMins = 0, ownMins = 0, onTimeMins = 0, extraCount = 0;
             const approvedUnits = [];
             const daByTitle = {};
             dailyActual.filter(r => skMonthKey(skRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date']) || r['Date Submitted']) === monthKey && skIsContent(r) && skTitle(r) !== '').forEach(r => {
@@ -4083,13 +4188,18 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             approvedList.forEach(a => {
                 const fn = skNormTitle(a.fileName);
                 const slot = claimByTitle(fn) || claimByCategory(a.category);
-                if (!slot) return;
+                let isExtra = false;
+                if (!slot) {   // approved CONTENT that is NOT in the Monthly Plan target = PLUS points (counts in all KPIs)
+                    if (!sepcoApprovalIsContent(a.category, a.category2 || '')) return;
+                    isExtra = true;
+                }
                 const isProof = /proof\s*read|proofread|prpofread/i.test(String(a.fileName || '') + ' ' + String(a.category || ''));
                 let da = fn ? daByTitle[fn] : null;
                 if (!da && fn) Object.keys(daByTitle).forEach(k => { if (!da && (fn.indexOf(k) !== -1 || k.indexOf(fn) !== -1)) da = daByTitle[k]; });
-                const mins = da ? da.mins : (slot.mins || 0);
+                const mins = da ? da.mins : ((slot && slot.mins) || 0);
                 if (da && da.tgt && da.apr && da.apr <= da.tgt) { onTime++; onTimeMins += mins; }
-                approvedUnits.push({ title: a.fileName || slot.title || '', mins });
+                approvedUnits.push({ title: a.fileName || (slot && slot.title) || '', mins, extra: isExtra });
+                if (isExtra) extraCount++;
                 totalMins += mins;
                 if (isProof) proof++; else { own++; ownMins += mins; }
             });
@@ -4110,8 +4220,10 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 }
                 return false;
             };
+            // A rejected file is a revision ONLY when it matches a Monthly Plan content item. A reject not in the Monthly Plan is NOT counted (even if the same content was approved as a plus).
+            const rejectInKpi = a => matchesPlanContent(a);
             const rejectedList = monthApprovals.filter(a => /reject/i.test(String(a.status || '')));
-            const revisions = rejectedList.filter(matchesPlanContent).length;
+            const revisions = rejectedList.filter(rejectInKpi).length;
             const woRev = Math.max(0, total - revisions);
             const ach = target > 0 ? own / target : null;
 
@@ -4122,13 +4234,13 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             let planContentMins = 0;
             plan.forEach(r => {
                 if (!skIsContent(r)) return;
-                const d = skDur(r), f = parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
+                const d = skDur(r), f = skEffFreq(r, parseInt(skRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1, userKey, monthKey);   // less leave / absent
                 planContentMins += (!isNaN(d)) ? d * f : 480 * f;
             });
             let revMins = 0;
             const avgMins = approvedUnits.length ? totalMins / approvedUnits.length : 0;
             rejectedList.forEach(a => {
-                if (!matchesPlanContent(a)) return;
+                if (!rejectInKpi(a)) return;
                 const fn = skNormTitle(a.fileName);
                 const m = approvedUnits.filter(u => { const tn = skNormTitle(u.title); return tn !== '' && fn.indexOf(tn) !== -1; })[0];
                 revMins += m ? m.mins : avgMins;
@@ -4168,9 +4280,9 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             let capped = 0, uncapped = 0;
             vals.forEach((v, i) => { const val = (v != null && !isNaN(v)) ? v : 0; capped += Math.min(val, 1) * weights[i]; uncapped += val * weights[i]; });
             return { gk, extrasLoaded: X.loaded, jobGroup: X.jobGroup, vals, weights, capped, uncapped,
-                target, own, proof, total, woRev, revisions, onTime, pendingApproval, errCount,
+                target, own, proof, total, extraCount, woRev, revisions, onTime, pendingApproval, errCount,
                 totalMins, woRevMins, revMins, onTimeMins, planContentMins, planMins, leaveDays, adjPlan, actMins, dailyPlanMins, dailyActMins,
-                designated: pe.designated, planHit: pe.planHit, extraMins: pe.extraMins, inPlanMins: pe.inMins };
+                designated: pe.designated, planHit: pe.planHit, extraMins: pe.extraMins, bonusMins: pe.bonusMins, inPlanMins: pe.inMins };
         }
 
         // Console helper: skDebugKpi('email@x.com') -> compare with ST computeKpi() fields
@@ -4218,7 +4330,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             const achCls = v => (v == null || isNaN(v)) ? 'color:var(--text-muted)' : (v >= 1 ? 'color:#22c55e' : (v >= 0.8 ? 'color:#f59e0b' : 'color:#ef4444'));
             const TD = 'padding:10px 8px; border-bottom:1px solid rgba(148,163,184,.12); text-align:center; white-space:nowrap;';
             const TH = 'padding:8px 8px; font-size:10px; letter-spacing:.03em; text-transform:uppercase; white-space:nowrap; text-align:center;';
-            const GRP = 'padding:8px 10px; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; text-align:center;';
+            const GRP = 'padding:8px 10px; font-size:11px; font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; letter-spacing:.06em; text-transform:uppercase; text-align:center;';
 
             let rows = '';
             const results = [];
@@ -4233,21 +4345,21 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     ? 'background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.4); color:#f87171;'
                     : 'background:rgba(16,185,129,.18); border:1px solid rgba(16,185,129,.4); color:#34d399;';
                 const jgText = !k.extrasLoaded ? 'Loading…' : (k.gk ? SK_GROUP_LABEL[k.gk] : 'Not set (CD weights)');
-                const pctCell = v => '<td style="' + TD + ' font-weight:700; ' + achCls(v) + ';">' + pctStr(v) + '</td>';
+                const pctCell = v => '<td style="' + TD + ' font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; ' + achCls(v) + ';">' + pctStr(v) + '</td>';
                 const numCell = v => {
                     const n = (v === '' || v == null) ? 0 : Number(v);
                     const isZero = !isNaN(n) && n === 0;
-                    const col = isZero ? 'color:#ffffff;' : 'font-weight:600;';
+                    const col = isZero ? 'color:#ffffff;' : 'font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;';
                     return '<td style="' + TD + ' ' + col + '">' + v + '</td>';
                 };
                 rows += '<tr>' +
-                    '<td style="' + TD + ' text-align:left; font-weight:700; position:sticky; left:0; background:var(--card-bg); z-index:1;">👤 ' + displayName + '</td>' +
+                    '<td style="' + TD + ' text-align:left; font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; position:sticky; left:0; background:var(--card-bg); z-index:1;">👤 ' + displayName + '</td>' +
                     '<td style="' + TD + ' font-size:11px; color:var(--text-muted);">' + jgText + '</td>' +
-                    '<td style="' + TD + ' font-weight:800; font-size:14px; ' + achCls(k.capped) + ';">' + capPct + '%</td>' +
+                    '<td style="' + TD + ' font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; font-size:14px; ' + achCls(k.capped) + ';">' + capPct + '%</td>' +
                     '<td style="' + TD + ' color:var(--text-muted);">' + uncPct + '%</td>' +
-                    '<td style="' + TD + '"><span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; ' + bandStyle + '">' + band + '</span></td>' +
+                    '<td style="' + TD + '"><span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; ' + bandStyle + '">' + band + '</span></td>' +
                     k.vals.map(pctCell).join('') +
-                    numCell(k.target) + numCell(k.own) + numCell(k.proof) + numCell(k.total) + numCell(k.woRev) + numCell(k.revisions) + numCell(k.onTime) + numCell(k.pendingApproval) +
+                    numCell(k.target) + numCell(k.own) + numCell(k.proof) + numCell(k.total) + numCell(k.extraCount || 0) + numCell(k.woRev) + numCell(k.revisions) + numCell(k.onTime) + numCell(k.pendingApproval) +
                     numCell(Math.round(k.totalMins)) + numCell(Math.round(k.woRevMins)) + numCell(Math.round(k.revMins)) + numCell(Math.round(k.onTimeMins)) +
                     '</tr>';
             });
@@ -4270,8 +4382,8 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             const pc = v => (v == null || isNaN(v)) ? '—' : (Math.round(v * 1000) / 10) + '%';
             const scoreColor = v => v >= 1 ? '#22c55e' : (v >= 0.8 ? '#f59e0b' : '#ef4444');
             const CARD = 'border-radius:14px; padding:14px 16px; min-width:0;'; // colors come from .kpi-card / .kpi-cN (dark + light)
-            const LBL = 'font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;';
-            const BIG = 'font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.15;';
+            const LBL = 'font-size:10px; font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;';
+            const BIG = 'font-size:30px; font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; letter-spacing:-.02em; line-height:1.15;';
             const SUB = 'font-size:11px; color:var(--text-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
             const miniRow = (label, v) => '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:11px; padding:2px 0;"><span style="color:var(--text-muted);">' + label + '</span>' +
                 '<span style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:48px; height:4px; border-radius:4px; background:rgba(148,163,184,.25); overflow:hidden;"><i style="display:block; height:100%; width:' + Math.min(100, Math.round((v || 0) * 100)) + '%; background:' + (v == null ? 'transparent' : scoreColor(v)) + ';"></i></span>' +
@@ -4291,7 +4403,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
 
             const heads = ['Trainer', 'Job Group', 'Total KPI', 'Uncapped', 'KPI Band',
                 'Target Count', 'Accuracy', 'Efficiency', 'Timeliness', 'Productivity',
-                'Target', 'Own Content', 'Proofread', 'Total Content', 'W/o revisions', 'Revisions', 'On Time', 'Awaiting',
+                'Target', 'Own Content', 'Proofread', 'Total Content', 'Plus (not in plan)', 'W/o revisions', 'Revisions', 'On Time', 'Awaiting',
                 'Approved mins', 'Mins w/o rev', 'Revision mins', 'On-time mins'];
 
             container.innerHTML = cardsHtml + '<div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Specialized Trainers KPI · <strong>' + monthLabel + '</strong> · ' + users.length + ' trainer' + (users.length > 1 ? 's' : '') + '</div>' +
@@ -4300,7 +4412,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 '<thead><tr>' +
                 '<th colspan="5" style="' + GRP + ' background:#1e293b; color:#cbd5e1;">Overall</th>' +
                 '<th colspan="5" style="' + GRP + ' background:linear-gradient(90deg,#2563eb,#3b82f6); color:#fff;">KPI Achievement</th>' +
-                '<th colspan="8" style="' + GRP + ' background:linear-gradient(90deg,#10b981,#34d399); color:#052e1f;">Content Creation</th>' +
+                '<th colspan="9" style="' + GRP + ' background:linear-gradient(90deg,#10b981,#34d399); color:#052e1f;">Content Creation</th>' +
                 '<th colspan="4" style="' + GRP + ' background:#334155; color:#e2e8f0;">Minutes</th>' +
                 '</tr><tr style="background:linear-gradient(180deg,#1e3a8a,#1d4ed8); color:#e8f0ff;">' +
                 heads.map((h, i) => '<th style="' + TH + (i === 0 ? ' text-align:left; position:sticky; left:0; background:#1e3a8a; z-index:2;' : '') + '">' + h + '</th>').join('') +
@@ -4310,41 +4422,6 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f59e0b;margin-right:3px;"></span>80–99% &nbsp;' +
                 '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:3px;"></span>Below 80%<br>' +
                 'Weights (TC · ACC · EFF · TIM · PROD) — Content Developer: 20 · 20 · 10 · 20 · 30 &nbsp;|&nbsp; SES / NSO / CX: 20 · 15 · 15 · 20 · 30 &nbsp;|&nbsp; S+ Expert / Admin: 20 · 15 · 15 · 15 · 35. Each KPI is capped at 100% in the Total KPI.</div>';
-        }
-
-        function fetchApprovalsFromAppsScript() {
-            let tbody = document.getElementById('sepcoTableBody');
-            let tbodyForApproval = document.getElementById('forApprovalTableBody');
-            let loadingHtmlFor = `<tr><td colspan="11" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td></tr>`;
-            let loadingHtmlList = `<tr><td colspan="9" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td></tr>`;
-            tbody.innerHTML = loadingHtmlList;
-            tbodyForApproval.innerHTML = loadingHtmlFor;
-
-            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                
-                if (data.success && data.approvals && data.approvals.length > 0) {
-                    globalApprovalsData = data.approvals;
-                    processAndRenderData(globalApprovalsData);
-                    try { renderAllTrainersKpi(); } catch (e) { console.error(e); }
-                    try { renderDailyProgress(); } catch (e) { console.error(e); }
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="9" style="color: var(--text-muted); padding: 20px;">No data found in Google Sheet.</td></tr>`;
-                    tbodyForApproval.innerHTML = `<tr><td colspan="11" style="color: var(--text-muted); padding: 20px;">No data found in Google Sheet.</td></tr>`;
-                }
-            };
-
-            const script = document.createElement('script');
-            script.src = `${GA_WEB_APP_URL}?action=getApprovals&user=sepco&callback=${callbackName}`;
-            script.onerror = function() {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                tbody.innerHTML = `<tr><td colspan="9" style="color: #dc2626; padding: 20px;">Failed to fetch data. Please check the Apps Script deployment.</td></tr>`;
-                tbodyForApproval.innerHTML = `<tr><td colspan="11" style="color: #dc2626; padding: 20px;">Failed to fetch data. Please check the Apps Script deployment.</td></tr>`;
-            };
-            document.body.appendChild(script);
         }
 
         function matchesSelectedMonth(dateStr, filterValue) {
@@ -4562,7 +4639,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 if (!ovMonthMatches(plan["MONTH"] || plan["Month"] || plan["month"] || "", monthKey)) return total;
                 const rawFreq = plan["FREQUENCY PER MONTH"] || plan["Frequency per Month"] || plan["FREQUENCY"] || "";
                 const freq = parseFloat(String(rawFreq).replace(/[^0-9.\-]/g, ""));
-                return total + (Number.isFinite(freq) && freq > 0 ? freq : 0);
+                return total + (Number.isFinite(freq) && freq > 0 ? Math.round(skEffFreq(plan, freq, skNorm(sepcoPlanUser(plan)), monthKey)) : 0);
             }, 0);
         }
 
@@ -4599,12 +4676,12 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 const netApproved = Math.max(0, stat.approved - stat.revised);
                 const achievement = target > 0 ? (netApproved / target) * 100 : 0;
                 tr.innerHTML = `
-                    <td style="font-weight: 600; text-align: left; padding-left: 15px;">👤 ${userId}</td>
-                    <td><span style="background: rgba(59,130,246,.15); color: #8ab8ff; padding: 4px 8px; border-radius: 6px; font-weight: 700;">${target}</span></td>
+                    <td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align: left; padding-left: 15px;">👤 ${userId}</td>
+                    <td><span style="background: rgba(59,130,246,.15); color: #8ab8ff; padding: 4px 8px; border-radius: 6px; font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">${target}</span></td>
                     <td><span class="badge-approved">${stat.approved}</span></td>
                     <td><span class="badge-rejected">${stat.rejected}</span></td>
-                    <td><span style="background: #e0f2fe; color: #0284c7; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">${stat.revised}</span></td>
-                    <td><span style="font-weight:700; color:${achievement >= 100 ? '#34d399' : '#fbbf24'};">${target > 0 ? achievement.toFixed(1) + '%' : '—'}</span><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">(${netApproved}/${target})</div></td>
+                    <td><span style="background: #e0f2fe; color: #0284c7; padding: 4px 8px; border-radius: 4px; font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; font-size: 11px;">${stat.revised}</span></td>
+                    <td><span style="font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; color:${achievement >= 100 ? '#34d399' : '#fbbf24'};">${target > 0 ? achievement.toFixed(1) + '%' : '—'}</span><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">(${netApproved}/${target})</div></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -4645,135 +4722,559 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
         function personCell(email) {
             let e = String(email || "").trim();
             if (!e) return '<span style="color:var(--text-muted);">&mdash;</span>';
-            return '<span style="font-size:11px; font-weight:600; white-space:nowrap;">👤 ' + escapeHtmlLocal(e) + '</span>';
+            return '<span style="font-size:11px; font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; white-space:nowrap;">👤 ' + escapeHtmlLocal(e) + '</span>';
         }
 
-        function renderTableRows(tableBodyId, list, isForApprovalTab) {
-            let tbody = document.getElementById(tableBodyId);
-            tbody.innerHTML = "";
-            let colSpan = isForApprovalTab ? 11 : 9;
+        // =====================================================================
+        //  APPROVAL SECTION v2  —  column filters · bulk approve · live auto-refresh
+        // =====================================================================
+        var APPR_FOR = 'forApprovalTableBody';
+        var APPR_LIST = 'sepcoTableBody';
+        var __src = {};                 // tbodyId -> full (unfiltered) list
+        var colFilt = {};               // tbodyId -> { colKey: Set(allowed labels) }
+        var searchTxt = {};             // tbodyId -> lowercase search text
+        var selRows = new Set();        // selected sheetRows (For Approval tab)
+        var remarkDraft = {};           // sheetRow -> typed-but-unsaved SEPCO remark
+        var approvalsSig = '';
+        var knownPendingRows = null;    // Set of pending-SEPCO rows seen on the last sync
+        var refreshInFlight = false;
+        var bulkBusy = false;
+        var pendingApplyList = null;
+        var BASE_TITLE = document.title;
+        var POLL_MS = 12000;
 
-            if (!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${colSpan}" style="color: var(--text-muted); padding: 20px;">${isForApprovalTab ? "No requests awaiting SEPCO approval right now." : "No records found for this month."}</td></tr>`;
-                return;
-            }
+        function dayLabel(v) {
+            if (!v) return '';
+            var d = new Date(v);
+            if (isNaN(d.getTime())) return String(v);
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        function statusLabel(s) {
+            var st = String(s || '').toLowerCase().trim();
+            if (st.indexOf('pending sepco') !== -1) return 'Pending SEPCO';
+            if (st.indexOf('pending rto') !== -1) return 'Pending RTO';
+            if (st.indexOf('approve') !== -1) return 'Approved';
+            if (st.indexOf('reject') !== -1) return 'Rejected';
+            return st ? String(s) : 'Pending';
+        }
+        function rtoRemOf(i) {
+            var r = String(i.rtoRemarks || '').trim();
+            if (!r && String(i.status || '').toLowerCase().indexOf('pending sepco') !== -1) r = String(i.remarks || '').trim();
+            return r;
+        }
+        function sepcoRemOf(i) {
+            var r = String(i.sepcoRemarks || '').trim();
+            var st = String(i.status || '').toLowerCase();
+            if (!r && (st.indexOf('approve') !== -1 || st.indexOf('reject') !== -1)) r = String(i.remarks || '').trim();
+            return r;
+        }
+        var C_FILE   = { label: 'File Name',           get: function (i) { return i.fileName; } };
+        var C_CAT    = { label: 'Category',            get: function (i) { return i.category; } };
+        var C_USER   = { label: 'Request User',        get: function (i) { return i.uploadedBy; } };
+        var C_RTO    = { label: 'RTO',                 get: function (i) { return i.rtoEmail; } };
+        var C_SEPCO  = { label: 'SEPCO',               get: function (i) { return i.sepcoEmail || i.approverEmail || i.approver; } };
+        var C_DATE   = { label: 'Request Date',        get: function (i) { return dayLabel(i.uploadDate); }, isDate: true };
+        var C_STATUS = { label: 'Status',              get: function (i) { return statusLabel(i.status); } };
+        var C_NOTE   = { label: 'Note from requester', get: function (i) { return i.submitterNote || i.note; } };
+        var C_RTOREM = { label: 'RTO Remarks',         get: rtoRemOf };
+        var C_SEPREM = { label: 'SEPCO Remarks',       get: sepcoRemOf };
+        var C_ACTION = { label: 'Action' };
+        var COLSETS = {};
+        COLSETS[APPR_FOR] = [
+            ['file', C_FILE], ['cat', C_CAT], ['user', C_USER], ['rto', C_RTO], ['sepco', C_SEPCO], ['date', C_DATE],
+            ['status', C_STATUS], ['note', C_NOTE], ['rtoRem', C_RTOREM], ['action', C_ACTION], ['sepRem', C_SEPREM]
+        ];
+        COLSETS[APPR_LIST] = [
+            ['file', C_FILE], ['cat', C_CAT], ['user', C_USER], ['rto', C_RTO], ['sepco', C_SEPCO], ['date', C_DATE],
+            ['status', C_STATUS], ['rtoRem', C_RTOREM], ['sepRem', C_SEPREM]
+        ];
+        function colDef(body, key) {
+            var arr = COLSETS[body] || [];
+            for (var n = 0; n < arr.length; n++) if (arr[n][0] === key) return arr[n][1];
+            return null;
+        }
+        function cellVal(col, item) {
+            var v = col.get ? String(col.get(item) == null ? '' : col.get(item)).trim() : '';
+            return v === '' ? '(Blank)' : v;
+        }
 
-            list.forEach((item) => {
-                let tr = document.createElement("tr");
-                let statusLower = String(item.status || "").toLowerCase();
-                let isActionTaken = statusLower.includes("approve") || statusLower.includes("reject");
-                let statusBadge = statusBadgeHtml(item.status);
-
-                let fileDisplayHtml = "📄 " + escapeHtmlLocal(item.fileName || "N/A");
-                if (item.fileUrl && String(item.fileUrl).startsWith("http")) {
-                    fileDisplayHtml = `<a href="${escapeHtmlLocal(item.fileUrl)}" target="_blank" rel="noopener" class="file-link" title="Click to view or download">📄 ${escapeHtmlLocal(item.fileName || "View File")} 🔗</a>`;
+        function buildApprovalHeaders() {
+            var map = { forApprovalThead: APPR_FOR, requestsThead: APPR_LIST };
+            Object.keys(map).forEach(function (id) {
+                var thead = document.getElementById(id);
+                if (!thead) return;
+                var body = map[id];
+                var html = '<tr>';
+                if (body === APPR_FOR) {
+                    html += '<th class="chk-col"><input type="checkbox" id="chkAllVisible" title="Select all visible" onclick="selectAllVisible(this.checked)"></th>';
                 }
-
-                let catHtml = item.category
-                    ? `<span style="font-size:11px; font-weight:600;">${escapeHtmlLocal(item.category)}</span>`
-                    : `<span style="color:var(--text-muted);">&mdash;</span>`;
-
-                // RTO / SEPCO assignees (from ST submit form)
-                let rtoPerson = personCell(item.rtoEmail);
-                let sepcoPerson = personCell(item.sepcoEmail || item.approverEmail || item.approver);
-
-                let noteText = String(item.submitterNote || item.note || "").trim();
-                let noteHtml = noteText
-                    ? `<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:220px;">${escapeHtmlLocal(noteText)}</span>`
-                    : `<span style="color:var(--text-muted);">&mdash;</span>`;
-
-                let rtoRem = String(item.rtoRemarks || "").trim();
-                if (!rtoRem && statusLower.includes("pending sepco")) {
-                    rtoRem = String(item.remarks || "").trim();
-                }
-                let rtoHtml = rtoRem
-                    ? `<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:200px;">${escapeHtmlLocal(rtoRem)}</span>`
-                    : `<span style="color:var(--text-muted);">&mdash;</span>`;
-
-                let sepcoRem = String(item.sepcoRemarks || "").trim();
-                if (!sepcoRem && isActionTaken) {
-                    sepcoRem = String(item.remarks || "").trim();
-                }
-
-                if (isForApprovalTab) {
-                    let remarksHtml = `<input type="text" id="remarks_${item.sheetRow}" class="remarks-input" value="${escapeHtmlLocal(sepcoRem)}" placeholder="Add SEPCO remarks...">`;
-                    let actionHtml = `
-                        <div style="display: flex; gap: 5px; justify-content: center; flex-wrap:wrap;">
-                            <button class="btn-approve" onclick="updateItemStatus(${item.sheetRow}, 'Approved', this)">Approve</button>
-                            <button class="btn-reject" onclick="updateItemStatus(${item.sheetRow}, 'Rejected', this)">Reject</button>
-                        </div>`;
-                    tr.innerHTML = `
-                        <td style="text-align:left; padding-left:12px; white-space:normal; min-width:160px;">${fileDisplayHtml}</td>
-                        <td>${catHtml}</td>
-                        <td style="font-weight:600; text-align:left;">👤 ${escapeHtmlLocal(item.uploadedBy || "N/A")}</td>
-                        <td>${rtoPerson}</td>
-                        <td>${sepcoPerson}</td>
-                        <td style="white-space:nowrap;">${formatWhen(item.uploadDate)}</td>
-                        <td>${statusBadge}</td>
-                        <td>${noteHtml}</td>
-                        <td>${rtoHtml}</td>
-                        <td>${actionHtml}</td>
-                        <td>${remarksHtml}</td>
-                    `;
-                } else {
-                    let sepcoHtml = sepcoRem
-                        ? `<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:200px;">${escapeHtmlLocal(sepcoRem)}</span>`
-                        : `<span style="color:var(--text-muted);">No remarks</span>`;
-                    tr.innerHTML = `
-                        <td style="text-align:left; padding-left:12px; white-space:normal; min-width:160px;">${fileDisplayHtml}</td>
-                        <td>${catHtml}</td>
-                        <td style="font-weight:600; text-align:left;">👤 ${escapeHtmlLocal(item.uploadedBy || "N/A")}</td>
-                        <td>${rtoPerson}</td>
-                        <td>${sepcoPerson}</td>
-                        <td style="white-space:nowrap;">${formatWhen(item.uploadDate)}</td>
-                        <td>${statusBadge}</td>
-                        <td>${rtoHtml}</td>
-                        <td>${sepcoHtml}</td>
-                    `;
-                }
-                tbody.appendChild(tr);
+                COLSETS[body].forEach(function (p) {
+                    var key = p[0], col = p[1];
+                    html += '<th><span class="th-wrap"><span>' + col.label + '</span>' +
+                        (col.get ? '<button type="button" class="colf-btn" data-body="' + body + '" data-col="' + key + '" title="Filter ' + col.label + '" onclick="openColFilter(event, this)">&#9660;</button>' : '') +
+                        '</span></th>';
+                });
+                thead.innerHTML = html + '</tr>';
             });
         }
 
-        function updateItemStatus(sheetRow, newStatus, btnElement) {
-            let remarksInput = document.getElementById(`remarks_${sheetRow}`);
-            let remarksText = remarksInput ? remarksInput.value.trim() : "";
+        // ---------- filtering ----------
+        function itemPasses(body, item) {
+            var f = colFilt[body] || {};
+            var keys = Object.keys(f);
+            for (var n = 0; n < keys.length; n++) {
+                var col = colDef(body, keys[n]);
+                if (!col) continue;
+                if (!f[keys[n]].has(cellVal(col, item))) return false;
+            }
+            var q = searchTxt[body];
+            if (q) {
+                var hay = COLSETS[body].map(function (p) { return p[1].get ? String(p[1].get(item) || '') : ''; }).join(' ').toLowerCase();
+                if (hay.indexOf(q) === -1) return false;
+            }
+            return true;
+        }
+        function activeFilterCount(body) {
+            return Object.keys(colFilt[body] || {}).length + (searchTxt[body] ? 1 : 0);
+        }
+        function onApprSearch(body, v) {
+            searchTxt[body] = String(v || '').toLowerCase().trim();
+            paintTable(body);
+        }
+        function clearAllFilters(body) {
+            colFilt[body] = {};
+            searchTxt[body] = '';
+            var s = document.getElementById('search_' + body);
+            if (s) s.value = '';
+            closeColPop();
+            paintTable(body);
+        }
+        function closeColPop() {
+            var p = document.getElementById('colPop');
+            if (p) p.remove();
+        }
+        function openColFilter(ev, btn) {
+            ev.stopPropagation();
+            var existing = document.getElementById('colPop');
+            var same = existing && existing.dataset.col === btn.dataset.col && existing.dataset.body === btn.dataset.body;
+            closeColPop();
+            if (same) return;
+            var body = btn.dataset.body, key = btn.dataset.col, col = colDef(body, key);
+            var src = __src[body] || [];
+            var counts = {};
+            src.forEach(function (it) { var v = cellVal(col, it); counts[v] = (counts[v] || 0) + 1; });
+            var values = Object.keys(counts);
+            if (col.isDate) values.sort(function (a, b) { return (new Date(b).getTime() || 0) - (new Date(a).getTime() || 0); });
+            else values.sort(function (a, b) { return a.localeCompare(b, undefined, { sensitivity: 'base' }); });
+            var cur = (colFilt[body] || {})[key];
 
-            // Reject requires remarks (same rule as the email reject form in Apps Script)
-            if (String(newStatus).toLowerCase() === "rejected" && !remarksText) {
-                alert("Please enter a reason in SEPCO Remarks before rejecting.");
-                if (remarksInput) remarksInput.focus();
+            var pop = document.createElement('div');
+            pop.id = 'colPop';
+            pop.className = 'col-pop';
+            pop.dataset.body = body;
+            pop.dataset.col = key;
+            var h = '<input type="search" class="col-pop-search" placeholder="Search ' + col.label + '...">' +
+                '<div class="col-pop-actions"><a href="#" data-act="all">Select all</a><a href="#" data-act="none">Clear</a></div>' +
+                '<div class="col-pop-list">';
+            values.forEach(function (v, n) {
+                var checked = !cur || cur.has(v);
+                var shown = v.length > 60 ? v.substring(0, 58) + '…' : v;
+                h += '<label data-v="' + escapeHtmlLocal(v.toLowerCase()) + '"><input type="checkbox" data-i="' + n + '"' + (checked ? ' checked' : '') + '> <span>' + escapeHtmlLocal(shown) + '</span> <em>' + counts[v] + '</em></label>';
+            });
+            pop.innerHTML = h + '</div>';
+            document.body.appendChild(pop);
+            var r = btn.getBoundingClientRect();
+            pop.style.top = Math.min(r.bottom + 4, window.innerHeight - 40) + 'px';
+            pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 280)) + 'px';
+
+            function commit() {
+                var boxes = pop.querySelectorAll('.col-pop-list input[type=checkbox]');
+                var set = new Set(), all = true;
+                boxes.forEach(function (b) {
+                    if (b.checked) set.add(values[Number(b.dataset.i)]); else all = false;
+                });
+                colFilt[body] = colFilt[body] || {};
+                if (all) delete colFilt[body][key]; else colFilt[body][key] = set;
+                paintTable(body);
+            }
+            pop.addEventListener('change', commit);
+            pop.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var a = e.target.closest ? e.target.closest('a[data-act]') : null;
+                if (!a) return;
+                e.preventDefault();
+                var on = a.dataset.act === 'all';
+                pop.querySelectorAll('.col-pop-list label').forEach(function (lb) {
+                    if (lb.style.display !== 'none') lb.querySelector('input').checked = on;
+                });
+                commit();
+            });
+            pop.querySelector('.col-pop-search').addEventListener('input', function () {
+                var q = this.value.toLowerCase().trim();
+                pop.querySelectorAll('.col-pop-list label').forEach(function (lb) {
+                    lb.style.display = (!q || lb.dataset.v.indexOf(q) !== -1) ? '' : 'none';
+                });
+            });
+            pop.querySelector('.col-pop-search').focus();
+        }
+        document.addEventListener('click', function (e) {
+            var p = document.getElementById('colPop');
+            if (p && !p.contains(e.target)) closeColPop();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeColPop(); });
+        window.addEventListener('resize', closeColPop);
+
+        // ---------- toast ----------
+        var __toastTimer = null;
+        function apprToast(msg, kind, sticky) {
+            var t = document.getElementById('apprToast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'apprToast';
+                document.body.appendChild(t);
+            }
+            t.className = 'appr-toast ' + (kind || 'ok') + ' show';
+            t.textContent = msg;
+            clearTimeout(__toastTimer);
+            if (!sticky) __toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3800);
+        }
+
+        // ---------- JSONP helper ----------
+        function jsonpCall(url, timeoutMs) {
+            return new Promise(function (resolve, reject) {
+                var cb = 'jsonp_a_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+                var s = document.createElement('script');
+                var done = false;
+                function cleanup() {
+                    done = true;
+                    clearTimeout(timer);
+                    window[cb] = function () {};
+                    if (s.parentNode) s.parentNode.removeChild(s);
+                }
+                var timer = setTimeout(function () { if (done) return; cleanup(); reject(new Error('timeout')); }, timeoutMs || 60000);
+                window[cb] = function (d) { if (done) return; cleanup(); resolve(d); };
+                s.onerror = function () { if (done) return; cleanup(); reject(new Error('network')); };
+                s.src = url + (url.indexOf('?') > -1 ? '&' : '?') + 'callback=' + cb;
+                document.body.appendChild(s);
+            });
+        }
+
+        // ---------- live auto-refresh ----------
+        function approvalsSignature(list) {
+            return list.map(function (i) {
+                return [i.sheetRow, i.status, i.rtoRemarks, i.sepcoRemarks, i.remarks, i.fileName, i.category, i.rtoEmail, i.sepcoEmail, i.submitterNote, i.uploadDate].join('|');
+            }).join('\n');
+        }
+        function setLiveStatus(ok) {
+            var el = document.getElementById('liveStatus');
+            if (!el) return;
+            if (ok) {
+                el.className = 'live-status ok';
+                el.textContent = '● Live · ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+            } else {
+                el.className = 'live-status bad';
+                el.textContent = '● Offline — nagre-retry...';
+            }
+        }
+        function applyApprovalsList(list) {
+            globalApprovalsData = list;
+            processAndRenderData(globalApprovalsData);
+            try { renderAllTrainersKpi(); } catch (e) { console.error(e); }
+            try { renderDailyProgress(); } catch (e) { console.error(e); }
+        }
+        function isTypingRemark() {
+            var a = document.activeElement;
+            return !!(a && a.classList && (a.classList.contains('remarks-input') || a.classList.contains('col-pop-search')));
+        }
+        function refreshApprovals(opts) {
+            opts = opts || {};
+            if (refreshInFlight || bulkBusy) return Promise.resolve();
+            refreshInFlight = true;
+            var url = GA_WEB_APP_URL + '?action=getApprovals&user=sepco&fresh=1&t=' + Date.now();
+            return jsonpCall(url, 30000).then(function (d) {
+                if (!d || !d.success) throw new Error('bad response');
+                setLiveStatus(true);
+                var list = d.approvals || [];
+                var sig = approvalsSignature(list);
+                if (!opts.force && sig === approvalsSig) return;
+                approvalsSig = sig;
+
+                // detect brand-new requests that are now waiting for SEPCO
+                var nowPending = new Set();
+                list.forEach(function (i) { if (isPendingSepco(i)) nowPending.add(i.sheetRow); });
+                var fresh = 0;
+                if (knownPendingRows) nowPending.forEach(function (r) { if (!knownPendingRows.has(r)) fresh++; });
+                knownPendingRows = nowPending;
+
+                if (!opts.immediate && isTypingRemark()) {
+                    pendingApplyList = list;          // apply when the user stops typing
+                } else {
+                    applyApprovalsList(list);
+                }
+                if (fresh > 0) {
+                    apprToast('🔔 ' + fresh + ' bagong request na naghihintay ng approval', 'info');
+                    try { var au = new (window.AudioContext || window.webkitAudioContext)(); var o = au.createOscillator(); var g = au.createGain(); o.connect(g); g.connect(au.destination); g.gain.value = 0.04; o.frequency.value = 880; o.start(); o.stop(au.currentTime + 0.12); } catch (e) {}
+                }
+            }).catch(function (err) {
+                console.warn('approvals refresh failed', err);
+                setLiveStatus(false);
+                if (opts.showError) apprToast('Hindi ma-load ang data. Check ang Apps Script deployment.', 'err');
+            }).then(function () { refreshInFlight = false; });
+        }
+        document.addEventListener('focusout', function (e) {
+            if (pendingApplyList && e.target && e.target.classList && e.target.classList.contains('remarks-input')) {
+                setTimeout(function () {
+                    if (pendingApplyList && !isTypingRemark()) { var l = pendingApplyList; pendingApplyList = null; applyApprovalsList(l); }
+                }, 150);
+            }
+        });
+        setInterval(function () { if (!document.hidden) refreshApprovals(); }, POLL_MS);
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) refreshApprovals(); });
+        window.addEventListener('focus', function () { refreshApprovals(); });
+        window.addEventListener('online', function () { refreshApprovals(); });
+
+        // Initial load (called from window.onload and after actions)
+        function fetchApprovalsFromAppsScript() {
+            if (!globalApprovalsData || !globalApprovalsData.length) {
+                var a = document.getElementById(APPR_LIST), b = document.getElementById(APPR_FOR);
+                var ph = '<tr><td colspan="12" style="color: var(--text-muted); padding: 20px;">Fetching data from Google Sheet...</td></tr>';
+                if (a) a.innerHTML = ph;
+                if (b) b.innerHTML = ph;
+            }
+            return refreshApprovals({ force: true, immediate: true, showError: true });
+        }
+
+        // ---------- rendering ----------
+        function renderTableRows(tableBodyId, list, isForApprovalTab) {
+            __src[tableBodyId] = list || [];
+            paintTable(tableBodyId);
+        }
+
+        function paintTable(tableBodyId) {
+            var tbody = document.getElementById(tableBodyId);
+            if (!tbody) return;
+            var isFor = tableBodyId === APPR_FOR;
+            var list = __src[tableBodyId] || [];
+            var filtered = list.filter(function (it) { return itemPasses(tableBodyId, it); });
+            var colSpan = isFor ? 12 : 9;
+
+            if (isFor) {
+                // drop selections that are no longer pending
+                var alive = new Set(list.map(function (i) { return i.sheetRow; }));
+                selRows.forEach(function (r) { if (!alive.has(r)) selRows.delete(r); });
+                Object.keys(remarkDraft).forEach(function (r) { if (!alive.has(Number(r))) delete remarkDraft[r]; });
+                updateForApprovalBadge(list.length);
+            }
+
+            // status line + filter button highlights
+            var stEl = document.getElementById('status_' + tableBodyId);
+            if (stEl) {
+                var n = activeFilterCount(tableBodyId);
+                stEl.textContent = 'Showing ' + filtered.length + ' of ' + list.length + (n ? ' · ' + n + ' filter' + (n > 1 ? 's' : '') + ' active' : '');
+            }
+            document.querySelectorAll('.colf-btn[data-body="' + tableBodyId + '"]').forEach(function (b) {
+                b.classList.toggle('active', !!(colFilt[tableBodyId] && colFilt[tableBodyId][b.dataset.col]));
+            });
+
+            tbody.innerHTML = '';
+            if (!list.length) {
+                tbody.innerHTML = '<tr><td colspan="' + colSpan + '" style="color: var(--text-muted); padding: 20px;">' + (isFor ? 'No requests awaiting SEPCO approval right now. 🎉' : 'No records found for this month.') + '</td></tr>';
+                refreshBulkBar();
+                return;
+            }
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="' + colSpan + '" style="color: var(--text-muted); padding: 20px;">Walang tumutugma sa filters. <a href="#" onclick="clearAllFilters(\'' + tableBodyId + '\'); return false;" style="color:var(--primary); font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">Clear filters</a></td></tr>';
+                refreshBulkBar();
                 return;
             }
 
-            btnElement.innerText = "Saving...";
-            btnElement.disabled = true;
-            let sibling = btnElement.parentElement ? btnElement.parentElement.querySelectorAll("button") : [];
-            sibling.forEach(function (b) { b.disabled = true; });
-            
-            const cbName = 'jsonp_update_' + Math.round(100000 * Math.random());
-            window[cbName] = function(data) {
-                delete window[cbName];
-                document.body.removeChild(sTag);
-                if (data.success) {
-                    alert(`Successfully updated as ${newStatus}!`);
-                    fetchApprovalsFromAppsScript(); 
-                } else {
-                    alert("Error: " + (data.message || "Failed to update."));
-                    fetchApprovalsFromAppsScript();
-                }
-            };
+            filtered.forEach(function (item) {
+                var tr = document.createElement('tr');
+                var statusLower = String(item.status || '').toLowerCase();
+                var statusBadge = statusBadgeHtml(item.status);
 
-            const sTag = document.createElement('script');
-            sTag.src = `${GA_WEB_APP_URL}?action=updateApprovalStatus&row=${sheetRow}&status=${encodeURIComponent(newStatus)}&remarks=${encodeURIComponent(remarksText)}&callback=${cbName}`;
-            sTag.onerror = function() {
-                delete window[cbName];
-                document.body.removeChild(sTag);
-                alert("Connection error occurred while updating.");
-                fetchApprovalsFromAppsScript();
-            };
-            document.body.appendChild(sTag);
+                var fileDisplayHtml = '📄 ' + escapeHtmlLocal(item.fileName || 'N/A');
+                if (item.fileUrl && String(item.fileUrl).startsWith('http')) {
+                    fileDisplayHtml = '<a href="' + escapeHtmlLocal(item.fileUrl) + '" target="_blank" rel="noopener" class="file-link" title="Click to view or download">📄 ' + escapeHtmlLocal(item.fileName || 'View File') + ' 🔗</a>';
+                }
+                var catHtml = item.category
+                    ? '<span style="font-size:11px; font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">' + escapeHtmlLocal(item.category) + '</span>'
+                    : '<span style="color:var(--text-muted);">&mdash;</span>';
+                var rtoPerson = personCell(item.rtoEmail);
+                var sepcoPerson = personCell(item.sepcoEmail || item.approverEmail || item.approver);
+
+                var noteText = String(item.submitterNote || item.note || '').trim();
+                var noteHtml = noteText
+                    ? '<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:220px;">' + escapeHtmlLocal(noteText) + '</span>'
+                    : '<span style="color:var(--text-muted);">&mdash;</span>';
+                var rtoRem = rtoRemOf(item);
+                var rtoHtml = rtoRem
+                    ? '<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:200px;">' + escapeHtmlLocal(rtoRem) + '</span>'
+                    : '<span style="color:var(--text-muted);">&mdash;</span>';
+                var sepcoRem = sepcoRemOf(item);
+
+                if (isFor) {
+                    var row = item.sheetRow;
+                    var val = remarkDraft[row] !== undefined ? remarkDraft[row] : sepcoRem;
+                    var checked = selRows.has(row) ? ' checked' : '';
+                    tr.className = selRows.has(row) ? 'row-selected' : '';
+                    tr.dataset.row = row;
+                    tr.innerHTML =
+                        '<td class="chk-col"><input type="checkbox" class="row-chk" data-row="' + row + '"' + checked + '></td>' +
+                        '<td style="text-align:left; padding-left:12px; white-space:normal; min-width:160px;">' + fileDisplayHtml + '</td>' +
+                        '<td>' + catHtml + '</td>' +
+                        '<td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align:left;">👤 ' + escapeHtmlLocal(item.uploadedBy || 'N/A') + '</td>' +
+                        '<td>' + rtoPerson + '</td>' +
+                        '<td>' + sepcoPerson + '</td>' +
+                        '<td style="white-space:nowrap;">' + formatWhen(item.uploadDate) + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                        '<td>' + noteHtml + '</td>' +
+                        '<td>' + rtoHtml + '</td>' +
+                        '<td><div style="display:flex; gap:5px; justify-content:center; flex-wrap:wrap;">' +
+                            '<button class="btn-approve" onclick="updateItemStatus(' + row + ', \'Approved\', this)">Approve</button>' +
+                            '<button class="btn-reject" onclick="updateItemStatus(' + row + ', \'Rejected\', this)">Reject</button></div></td>' +
+                        '<td><input type="text" id="remarks_' + row + '" class="remarks-input" list="quickRemarks" data-row="' + row + '" value="' + escapeHtmlLocal(val) + '" placeholder="Remarks (Enter = Approve)"></td>';
+                } else {
+                    var sepcoHtml = sepcoRem
+                        ? '<span style="font-size:11px; color:var(--text-main); white-space:pre-wrap; text-align:left; display:block; max-width:200px;">' + escapeHtmlLocal(sepcoRem) + '</span>'
+                        : '<span style="color:var(--text-muted);">No remarks</span>';
+                    tr.innerHTML =
+                        '<td style="text-align:left; padding-left:12px; white-space:normal; min-width:160px;">' + fileDisplayHtml + '</td>' +
+                        '<td>' + catHtml + '</td>' +
+                        '<td style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; text-align:left;">👤 ' + escapeHtmlLocal(item.uploadedBy || 'N/A') + '</td>' +
+                        '<td>' + rtoPerson + '</td>' +
+                        '<td>' + sepcoPerson + '</td>' +
+                        '<td style="white-space:nowrap;">' + formatWhen(item.uploadDate) + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                        '<td>' + rtoHtml + '</td>' +
+                        '<td>' + sepcoHtml + '</td>';
+                }
+                tbody.appendChild(tr);
+            });
+            if (isFor) refreshBulkBar();
         }
+
+        function updateForApprovalBadge(n) {
+            var li = document.getElementById('subForApproval');
+            if (li) li.innerHTML = 'For Approval' + (n > 0 ? ' <span class="nav-badge">' + n + '</span>' : '');
+            document.title = (n > 0 ? '(' + n + ') ' : '') + BASE_TITLE;
+        }
+
+        // ---------- selection + bulk ----------
+        function visibleForApprovalRows() {
+            return (__src[APPR_FOR] || []).filter(function (it) { return itemPasses(APPR_FOR, it); }).map(function (it) { return it.sheetRow; });
+        }
+        function selectAllVisible(on) {
+            visibleForApprovalRows().forEach(function (r) { if (on) selRows.add(r); else selRows.delete(r); });
+            paintTable(APPR_FOR);
+        }
+        function clearSelection() { selRows.clear(); paintTable(APPR_FOR); }
+        function refreshBulkBar() {
+            var bar = document.getElementById('bulkBar');
+            if (!bar) return;
+            var n = selRows.size;
+            bar.style.display = n ? 'flex' : 'none';
+            var c = document.getElementById('bulkCount');
+            if (c) c.textContent = n + ' selected';
+            var all = document.getElementById('chkAllVisible');
+            if (all) {
+                var vis = visibleForApprovalRows();
+                var cnt = vis.filter(function (r) { return selRows.has(r); }).length;
+                all.checked = vis.length > 0 && cnt === vis.length;
+                all.indeterminate = cnt > 0 && cnt < vis.length;
+            }
+        }
+        function bulkDecision(status) {
+            var rows = Array.from(selRows);
+            if (!rows.length) { apprToast('Wala pang napili.', 'err'); return; }
+            var bulk = (document.getElementById('bulkRemarks') || {}).value || '';
+            runDecisions(rows, status, bulk.trim());
+        }
+        function updateItemStatus(sheetRow, newStatus, btnElement) {
+            runDecisions([sheetRow], newStatus, '');
+        }
+
+        function runDecisions(rows, status, bulkRemark) {
+            if (bulkBusy) { apprToast('May tinatapos pang approval, sandali lang...', 'info'); return Promise.resolve(); }
+            var isRej = String(status).toLowerCase() === 'rejected';
+            var items = rows.map(function (r) {
+                var inp = document.getElementById('remarks_' + r);
+                var own = inp ? inp.value.trim() : (remarkDraft[r] || '').trim();
+                return { row: r, remark: own || bulkRemark || '' };
+            });
+            if (isRej) {
+                var miss = items.filter(function (x) { return !x.remark; })[0];
+                if (miss) {
+                    apprToast('Maglagay ng reason sa remarks bago mag-Reject.', 'err');
+                    var inp2 = document.getElementById('remarks_' + miss.row) || document.getElementById('bulkRemarks');
+                    if (inp2) inp2.focus();
+                    return Promise.resolve();
+                }
+            }
+            if (items.length > 1 && !confirm((isRej ? 'Reject ' : 'Approve ') + items.length + ' request(s)?')) return Promise.resolve();
+
+            bulkBusy = true;
+            document.querySelectorAll('#forApprovalSection button').forEach(function (b) { b.disabled = true; });
+            var ok = 0, failed = [];
+            var chain = Promise.resolve();
+            items.forEach(function (x, idx) {
+                chain = chain.then(function () {
+                    apprToast((isRej ? 'Rejecting ' : 'Approving ') + (idx + 1) + '/' + items.length + '...', 'info', true);
+                    var url = GA_WEB_APP_URL + '?action=updateApprovalStatus&row=' + x.row + '&status=' + encodeURIComponent(status) + '&remarks=' + encodeURIComponent(x.remark);
+                    return jsonpCall(url, 90000).then(function (d) {
+                        if (d && d.success) {
+                            ok++;
+                            (globalApprovalsData || []).forEach(function (it) {
+                                if (it.sheetRow === x.row) { it.status = status; it.sepcoRemarks = x.remark; it.remarks = x.remark; }
+                            });
+                            selRows.delete(x.row);
+                            delete remarkDraft[x.row];
+                        } else {
+                            failed.push('Row ' + x.row + ': ' + ((d && d.message) || 'Failed'));
+                        }
+                    }).catch(function (err) {
+                        failed.push('Row ' + x.row + ': ' + (err && err.message === 'timeout' ? 'walang response (i-check ang status)' : 'connection error'));
+                    });
+                });
+            });
+            return chain.then(function () {
+                bulkBusy = false;
+                document.querySelectorAll('#forApprovalSection button').forEach(function (b) { b.disabled = false; });
+                approvalsSig = '';
+                applyApprovalsList(globalApprovalsData);
+                if (failed.length) apprToast('✔ ' + ok + ' done · ✖ ' + failed.length + ' failed — ' + failed[0], 'err');
+                else apprToast('✔ ' + ok + ' request(s) ' + (isRej ? 'rejected' : 'approved') + '!', 'ok');
+                return refreshApprovals({ force: true, immediate: true });
+            });
+        }
+
+        // delegated events for the For Approval table
+        (function () {
+            var body = document.getElementById(APPR_FOR);
+            if (!body) return;
+            body.addEventListener('change', function (e) {
+                var t = e.target;
+                if (t && t.classList && t.classList.contains('row-chk')) {
+                    var r = Number(t.dataset.row);
+                    if (t.checked) selRows.add(r); else selRows.delete(r);
+                    var tr = t.closest('tr');
+                    if (tr) tr.classList.toggle('row-selected', t.checked);
+                    refreshBulkBar();
+                }
+            });
+            body.addEventListener('input', function (e) {
+                var t = e.target;
+                if (t && t.classList && t.classList.contains('remarks-input')) remarkDraft[t.dataset.row] = t.value;
+            });
+            body.addEventListener('keydown', function (e) {
+                var t = e.target;
+                if (e.key === 'Enter' && t && t.classList && t.classList.contains('remarks-input')) {
+                    e.preventDefault();
+                    runDecisions([Number(t.dataset.row)], 'Approved', '');
+                }
+            });
+        })();
+        buildApprovalHeaders();
 
         
         
@@ -4787,11 +5288,11 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
         function snsStatusBadgeSepco(st) {
             var s = String(st || 'Pending');
             var bg = s === 'Updated' ? 'rgba(16,185,129,0.2);color:#34d399' : (String(s).indexOf('Error') === 0 ? 'rgba(239,68,68,0.2);color:#f87171' : 'rgba(245,158,11,0.2);color:#fbbf24');
-            return '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:' + bg + ';">' + escapeSns(s) + '</span>';
+            return '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;background:' + bg + ';">' + escapeSns(s) + '</span>';
         }
         function loadSnsBoostingSepco() {
             var tbody = document.getElementById('snsBoostingTableBody');
-            if (tbody) tbody.innerHTML = '<tr><td colspan="14" style="padding:20px;color:var(--text-muted);text-align:center;">Loading...</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="15" style="padding:20px;color:var(--text-muted);text-align:center;">Loading...</td></tr>';
             var cb = 'jsonp_sns_' + Math.round(Math.random() * 1e6);
             var done = false;
             window[cb] = function (data) {
@@ -4806,7 +5307,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 if (done) return; done = true;
                 delete window[cb];
                 try { document.body.removeChild(tag); } catch (e) {}
-                if (tbody) tbody.innerHTML = '<tr><td colspan="14" style="padding:20px;color:#ef4444;text-align:center;">Failed to load.</td></tr>';
+                if (tbody) tbody.innerHTML = '<tr><td colspan="15" style="padding:20px;color:#ef4444;text-align:center;">Failed to load.</td></tr>';
             };
             document.body.appendChild(tag);
         }
@@ -4817,7 +5318,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
             var tbody = document.getElementById('snsBoostingTableBody');
             if (!tbody) return;
             if (!rows.length) {
-                tbody.innerHTML = '<tr><td colspan="14" style="padding:20px;color:var(--text-muted);text-align:center;">No TikTok links submitted yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="15" style="padding:20px;color:var(--text-muted);text-align:center;">No TikTok links submitted yet.</td></tr>';
                 return;
             }
             tbody.innerHTML = rows.map(function (r) {
@@ -4833,7 +5334,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                 var mode = String(r.mode || '');
                 if (mode && mode.indexOf('Creation') === -1 && mode.indexOf('Boosting') === -1) mode = '—';
                 return '<tr>' +
-                    '<td style="text-align:left;font-weight:600;font-size:12px;">' + escapeSns(r.stUser) + '</td>' +
+                    '<td style="text-align:left;font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;">' + escapeSns(r.stUser) + '</td>' +
                     '<td style="text-align:left;">' + escapeSns(r.stName) + '</td>' +
                     '<td style="font-size:11px;white-space:nowrap;">' + escapeSns(mode) + '</td>' +
                     '<td style="text-align:left;max-width:150px;white-space:normal;">' + linkHtml + '</td>' +
@@ -4846,6 +5347,7 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
                     '<td><strong>' + (r.scorePct === '' || r.scorePct == null ? '—' : escapeSns(r.scorePct) + '%') + '</strong></td>' +
                     '<td style="white-space:nowrap;font-size:11px;">' + escapeSns(period) + '</td>' +
                     '<td>' + snsStatusBadgeSepco(r.status) + '</td>' +
+                    '<td>' + (r.proofUrl ? '<a href="' + escapeSns(r.proofUrl) + '" target="_blank" rel="noopener noreferrer" class="file-link" style="font-size:11px;">🖼 View</a>' : '<span style="color:var(--text-muted);font-size:11px;">—</span>') + '</td>' +
                     '<td><button type="button" style="background:var(--primary);padding:5px 10px;" onclick="updateSnsEngagementRow(' + Number(r.sheetRow) + ', this)">Update</button></td>' +
                     '</tr>';
             }).join('');
@@ -4915,7 +5417,7 @@ html[data-theme="light"] #kpiBotPanel{--kb-bg:#fff;--kb-card:#f1f5f9;--kb-text:#
 #kpiBotForm{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--kb-line)}
 #kpiBotInput{flex:1;background:var(--kb-card);color:var(--kb-text);border:1px solid var(--kb-line);border-radius:8px;padding:8px 10px;font:inherit;outline:none}
 #kpiBotInput:focus{border-color:#2563eb}
-#kpiBotSend{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:0 14px;cursor:pointer;font-weight:600}
+#kpiBotSend{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:0 14px;cursor:pointer;font-weight:600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 #kpiBotSend:disabled{opacity:.5;cursor:default}
 @media(max-width:520px){#kpiBotPanel{right:8px;left:8px;width:auto;bottom:84px}}
 </style>
@@ -4959,14 +5461,14 @@ var KB = [
   a:'**Target Count / Own Content / Ach %**\n'+
     '- **Target** = total ng *FREQUENCY PER MONTH* ng lahat ng Monthly Plan rows na CONTENT ang bucket (blank = 1).\n'+
     '- Bucket: *CATEGORY 2* muna ang tinitingnan kung CONTENT/TASK/OTHERS/TRAINING; kung hindi, *CATEGORY*. Ang "CONTENT - One-Pager Templated" ay detalye lang, hindi bucket.\n'+
-    '- **Actual (approved)**: bawat Approved na file sa Approval Requests ay itinutugma sa Monthly Plan slot — **(1)** file name vs plan TITLE, **(2)** kung wala, approval category vs plan CATEGORY. Walang match = hindi bibilangin.\n'+
+    '- **Actual (approved)**: bawat Approved na file sa Approval Requests ay itinutugma sa Monthly Plan slot — **(1)** file name vs plan TITLE, **(2)** kung wala, approval category vs plan CATEGORY. Walang match sa plan (o lampas na sa Target) = **PLUS points**: bibilangin pa rin sa Own Content, Ach %, Efficiency at Productivity (basta approved na CONTENT).\n'+
     '- Ang file na may "proofread" sa pangalan/category ay bilang **Proof**, hindi **Own**. Total = Own + Proof.\n'+
     '- **Ach %** = Own Content ÷ Target × 100 (— kapag Target = 0).\n'+
     'Halimbawa: Target 10, Own 8 → Ach 80%.' },
 { id:'accuracy', title:'Accuracy',
   kw:['accuracy','accurate','quality','revision','revisions','rejected','reject','error','errors','deduction','content errors','mali','ayos'],
   a:'**Accuracy** = (Target − Revisions) ÷ Target − error deduction\n'+
-    '- **Revisions** = bilang ng *Rejected* Approval Requests sa buwan na tumutugma sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY). Hindi lahat ng reject ay binibilang.\n'+
+    '- **Revisions** = bilang ng *Rejected* Approval Requests sa buwan na tumutugma sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY). Hindi lahat ng reject ay binibilang — ang reject na **wala sa Monthly Plan** ay *not counted* bilang revision.\n'+
     '- **Error deduction** (galing sa *KPI Inputs* → CONTENT ERRORS): `ceil(errors ÷ 2) × 1%` → 1–2 errors = −1%, 3–4 = −2%, 5–6 = −3% …\n'+
     '- Hindi bababa sa 0%. Kapag **walang Target**, "—" (walang data) ang lalabas, hindi 100%.\n'+
     'Halimbawa: Target 10, Revisions 2, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
@@ -5028,7 +5530,8 @@ var KB = [
   kw:['sns','boost','boosting','tiktok','score','score%','ach%','creation','creation+boosting','heart','share','views','plays','diggs','engagement'],
   a:'**SNS Boosting**\n'+
     '- **Target TTL** = Heart + Share + Views (inilagay mo). **Actual TTL** = diggs + shares + plays. **ACH%** = Actual ÷ Target × 100.\n'+
-    '- Isang TikTok video ay isang beses lang puwedeng i-submit kada buwan. Boost period: araw ng submit → katapusan ng buwan.\n\n'+
+    '- Isang TikTok video ay isang beses lang puwedeng i-submit kada buwan. Boost period: araw ng submit → katapusan ng buwan.\n'+
+    '- Kailangan mag-upload ng **screenshot bilang proof** ng target engagement (Heart / Share / Views) sa pag-submit.\n\n'+
     '**Boosting only** (ACH% → SCORE%):\n'+
     '<table><tr><th>ACH%</th><th>SCORE%</th></tr><tr><td>≥2001</td><td>180</td></tr><tr><td>501–2000</td><td>150</td></tr><tr><td>101–500</td><td>100</td></tr><tr><td>85–100</td><td>95</td></tr><tr><td>75–84</td><td>90</td></tr><tr><td>50–74</td><td>80</td></tr><tr><td>31–49</td><td>70</td></tr><tr><td>21–30</td><td>60</td></tr><tr><td>11–20</td><td>50</td></tr><tr><td>1–10</td><td>25</td></tr></table>'+
     '- Special: Actual TTL ≥ 100,000 (o lamang ng ≥100,000 sa target) = **200**.\n\n'+
@@ -5038,6 +5541,7 @@ var KB = [
   kw:['leave','absent','absence','vacation','sick','480','holiday','holidays','sunday','leave days','wfh','day off','liban','absent etc'],
   a:'**Leave / Absent**\n'+
     '- Bawat leave/absent day = **480 mins** (isang araw).\n'+
+    '- Sa Leave / Absent Log, pumili ng **Plan Task (title)** mula sa Monthly Plan ng buwan: ang **frequency** ng task na iyon ay mababawasan ng *480 ÷ duration per min* (hal. 60 min → −8×).\n'+
     '- **Productivity**: ibinabawas sa plan → *Monthly Plan mins − leave × 480*.\n'+
     '- **Designated Minutes**: *(working days − leave) × 480*.\n'+
     '- **Target days**: working days − leave.\n'+
@@ -5294,5 +5798,32 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 </script>
 <!-- =================== END KPI HELPER CHATBOT =================== -->
 
+<script>(function(){try{if(!document.fonts||!document.fonts.load)return;var l=['600 14px "SamsungOne 600C"','700 14px "Samsung Sharp Sans Bold"','400 14px "Samsung Sharp Sans"'];try{Chart.defaults.plugins.title.font.family='Samsung Sharp Sans Bold, Samsung Sharp Sans, SamsungOne 600C, sans-serif'}catch(e){};var r=function(){try{if(window.Chart&&Chart.instances)Object.keys(Chart.instances).forEach(function(k){try{Chart.instances[k].update()}catch(e){}})}catch(e){}};Promise.all(l.map(function(x){return document.fonts.load(x)})).then(r,r);document.fonts.ready.then(r);}catch(e){}})();</script>
+<script>(function(){function i(){try{if(window.lucide)lucide.createIcons()}catch(e){}}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",i);else i();window.addEventListener("load",i);})();</script>
+<script>
+/* ===== Auto month rollover: filters that sit on the current month follow the calendar (1 Nov -> November). Past months stay selectable. ===== */
+(function () {
+    var IDS = ['monthYearFilter', 'requestMonthYearFilter', 'overviewMonthFilter', 'monthlyPlanMonthFilter', 'dailyMonthFilter', 'dashKpiMonth'];
+    function curKey() { var n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0'); }
+    var lastKey = curKey();
+    function check() {
+        try {
+            var k = curKey();
+            if (k === lastKey) return;
+            var old = lastKey; lastKey = k;
+            IDS.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el && (el.value === old || !el.value)) {
+                    el.value = k;
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        } catch (e) { console.error('month rollover', e); }
+    }
+    setInterval(check, 30000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+    window.addEventListener('focus', check);
+})();
+</script>
 </body>
 </html>
