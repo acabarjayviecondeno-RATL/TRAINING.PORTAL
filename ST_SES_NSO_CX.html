@@ -9642,5 +9642,32 @@ document.addEventListener('pointerdown',function(e){
 })();
 /* ===== /FX MOTION LAYER JS ===== */
 </script>
+<script>
+/* ===== Session guard: Admin "Logout all accounts" ===== */
+(function(){
+  var API = "https://script.google.com/macros/s/AKfycbyRvkqZdaAAwWtl59hu4qOvQ-6u-QIgVRMM47h_HJ5wLVPIezlFfoI7Kcoung-tWxg5/exec";
+  var busy = false;
+  function check(){
+    if (busy || !localStorage.getItem('portal_user')) return;   // not logged in -> nothing to check
+    busy = true;
+    fetch(API + "?action=checkSession&_=" + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        busy = false;
+        if (!j || !j.success) return;
+        var mine = localStorage.getItem('portal_session_epoch');
+        if (!mine) { try { localStorage.setItem('portal_session_epoch', String(j.epoch)); } catch(e){} return; }
+        if (String(j.epoch) !== String(mine)) {
+          alert("You have been logged out because an admin forced a logout. Please log in again.");
+          handleLogout();
+        }
+      })
+      .catch(function(){ busy = false; });
+  }
+  setTimeout(check, 2000);
+  setInterval(check, 60000);
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) check(); });
+})();
+</script>
 </body>
 </html>
