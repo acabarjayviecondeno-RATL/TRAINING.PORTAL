@@ -284,6 +284,15 @@
             border-radius: var(--radius-sm);font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
         .logout-btn:hover { background-color: #dc2626; color: white; }
 
+        /* ---- Overview category tabs (same look as ST .ov-sum-tabs) ---- */
+        .ov-sum-tabs { display:flex; gap:4px; padding:4px; border-radius:12px; border:1px solid var(--border-color); background:rgba(148,163,184,.08); width:fit-content; max-width:100%; margin:0 0 14px 0; flex-wrap:wrap; }
+        .ov-sum-tab { border:0; background:transparent; color:var(--text-muted); font-weight:700; font-size:12px; padding:7px 16px; border-radius:9px; cursor:pointer; transition:background .15s, color .15s; font-family:inherit; box-shadow:none; }
+        .ov-sum-tab:hover { color:var(--text-main); background:transparent; }
+        .ov-sum-tab.active { background:linear-gradient(135deg,#3b82f6,#6366f1); color:#fff; box-shadow:0 4px 14px rgba(59,130,246,.35); }
+        @media (max-width: 600px) { .ov-sum-tabs { width:100%; } .ov-sum-tab { flex:1; padding:7px 6px; } }
+        .ov-cat-note { font-size:12px; color:var(--text-muted); margin:10px 2px 0; }
+        .ov-score-big { font-size:15px; font-weight:800; }
+
         .filter-container {
             display: flex;
             align-items: center;
@@ -1599,7 +1608,6 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                             <span class="arrow-icon">▶</span>
                         </div>
                         <ul class="sub-menu" id="reportsSubMenu" style="display: none;">
-                            <li id="subOverview" onclick="switchSubTab(event, 'overviewSection', 'reportsMenuParent')">Overview</li>
                             <li id="subMonthlyPlan" onclick="switchSubTab(event, 'monthlyPlanSection', 'reportsMenuParent')">Monthly Plan</li>
                             <li id="subPlanActual" onclick="switchSubTab(event, 'planActualSection', 'reportsMenuParent')">Plan vs Actual</li>
                         </ul>
@@ -1675,6 +1683,15 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                             <button style="background: transparent; border:1px solid var(--border-color); color: var(--text-muted);" onclick="toggleAnnouncementForm(false)">Cancel</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Category tabs (same as the ST KPI Landing Page) -->
+                <div class="ov-sum-tabs" role="tablist" aria-label="Summary category">
+                    <button type="button" role="tab" class="ov-sum-tab active" data-b="CONTENT" onclick="switchOvSummaryTab('CONTENT')">Content (Main KPI)</button>
+                    <button type="button" role="tab" class="ov-sum-tab" data-b="TRAINING" onclick="switchOvSummaryTab('TRAINING')">Training</button>
+                    <button type="button" role="tab" class="ov-sum-tab" data-b="TASK" onclick="switchOvSummaryTab('TASK')">Task</button>
+                    <button type="button" role="tab" class="ov-sum-tab" data-b="OTHERS" onclick="switchOvSummaryTab('OTHERS')">Others</button>
+                    <button type="button" role="tab" class="ov-sum-tab" data-b="OVERALL" onclick="switchOvSummaryTab('OVERALL')">Overall Monthly Score</button>
                 </div>
 
                 <!-- All Trainers KPI Cards -->
@@ -1814,7 +1831,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             </div>
 
             <!-- OVERVIEW SECTION -->
-            <div id="overviewSection" class="content-section">
+            <!-- Overview page removed from the menu. The markup is kept hidden because the KPI computation / Monthly Plan month sync still read its month filter and table body. -->
+            <div id="overviewSection" class="content-section" style="display:none !important;" aria-hidden="true">
                 <h3 style="margin-top:0; font-size: 15px;">📈 Overview - Plan vs Actual per Specialized Trainer</h3>
                 <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">
                     Same rules as ST dashboards (Content Developer · SES/NSO/CX · S+ Expert/Admin): category buckets, approved-content minutes, productivity &amp; efficiency.
@@ -1825,23 +1843,6 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     <input type="month" id="overviewMonthFilter" class="filter-input" onchange="onOverviewMonthChange()">
                     <button style="background: var(--primary);" onclick="resetOverviewMonthFilter()">Current Month</button>
                 </div>
-
-                <!-- Computation Notes Box — aligned with ST.html / ST_* job-group pages -->
-                <details class="computation-notes-box" open>
-                    <summary>📝 Computation Guide & Notes (same as ST)</summary>
-                    <ul>
-                        <li><strong>Category bucket:</strong> Uses <em>CATEGORY 2</em> first if it is CONTENT / TASK / OTHERS / TRAINING; otherwise CATEGORY. Detailed types like “CONTENT - One-Pager Templated” are <em>not</em> counted as CONTENT unless CATEGORY 2 says so.</li>
-                        <li><strong>Target Count:</strong> Sum of Monthly Plan <em>FREQUENCY PER MONTH</em> per bucket.</li>
-                        <li><strong>Actual Count:</strong> CONTENT = Approved items (from Approvals sheet <em>or</em> Daily Actual with APPROVAL DATE / matching Approved file) <strong>and</strong> its Category 2 must exist in that trainer's Monthly Plan; not yet approved or not in the Monthly Plan = not counted. TASK / OTHERS / TRAINING: <strong>unique units</strong> only &mdash; the same title on the same day counts once (not per submission), it must match a line in the trainer's Monthly Plan (Category 2, then title), and each plan line is capped at its Target Count, so Achievement % cannot exceed 100%. Minutes are unaffected.</li>
-                        <li><strong>Plan Minutes:</strong> FREQUENCY × DURATION PER MIN (defaults to 480 × frequency when duration is blank).</li>
-                        <li><strong>Actual Minutes:</strong> DURATION PER MIN from Daily Actual, <strong>unique rows only</strong> (an exact duplicate time block counts once). <strong>CONTENT</strong> count <em>and</em> minutes count only after Approved (APPROVAL DATE on the Daily Actual row, or a matching Approved file in Approvals — same rule as all ST files). Only actuals that are in the trainer's <strong>Monthly Plan</strong> are shown here; hover the cell to see the logged / excluded minutes.</li>
-                        <li><strong>Achievement %:</strong> Actual Count ÷ Target Count × 100 (— when target is 0).</li>
-                        <li><strong>On Time / Late:</strong> One result per unique Daily Plan item (user + date + title; several time blocks add up). On Time = actual duration &lt; plan duration; Late = actual &gt; plan.</li>
-                        <li><strong>Designated Minutes:</strong> (working days − approved leave) × 480. This is the gate for the two rates below.</li>
-                        <li><strong>Productivity:</strong> Counted Actual mins ÷ (Monthly Plan mins − leave × 480) × 100. <strong>Only actuals in the Monthly Plan count.</strong> If the Monthly Plan is <em>below</em> Designated Minutes, actuals not in the plan are excluded and Productivity cannot go over 100%. Once the Monthly Plan <em>meets</em> Designated Minutes, actuals not in the plan are added on top (plus to productivity), so over-achievement is possible.</li>
-                        <li><strong>Efficiency:</strong> Unique Daily Plan mins ÷ their Daily Actual mins × 100 (each Daily Plan item matched once). Same gate: plan below Designated → only Monthly-Plan items count and it is capped at 100%; plan meets Designated → all matched items count and it can exceed 100%.</li>
-                    </ul>
-                </details>
 
                 <div class="task-table-container">
                     <table class="task-table ov-table">
@@ -2823,7 +2824,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const x = skLeavePlanDeduct(userKey, monthKey).red.get(r);
             return x ? Math.max(0, f - x) : f;
         }
-        function skProdEff(userKey, monthKey, displayName) {
+        function skProdEff(userKey, monthKey, displayName, onlyBucket) {   // onlyBucket (optional): CONTENT / TASK / OTHERS / TRAINING -> category-only productivity & efficiency (same as ST kpiProdEff)
             const X = SK_EXTRA[userKey] || { loaded: false, name: '', leaves: [] };
             const D = skDailyObjects();
             const dateOf = r => skRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || r['Date Submitted'];
@@ -2834,7 +2835,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 skNorm(sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'USER ID', 'EMAIL', 'User'])) === userKey &&
                 skMonthMatches(sepcoGetVal(r, ['MONTH', 'Month']), monthKey));
             const lines = [], contentNorms = [];
-            let planMins = 0, planMinsEff = 0;
+            let planMins = 0, planMinsEff = 0, planMinsEffB = 0;
             plan.forEach(r => {
                 const rawF = String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, '');
                 const f = rawF === '' ? 1 : (parseFloat(rawF) || 0);
@@ -2846,6 +2847,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 planMinsEff += d * fe;
                 const pair = sepcoNormalizeCatPair(r);
                 const nc = sepcoNormCat2(pair.cat2) || String(pair.cat2 || '').toLowerCase();
+                if (!onlyBucket || pair.cat === onlyBucket) planMinsEffB += d * fe;
                 if (pair.cat === 'CONTENT') { if (nc && Math.round(fe) > 0) contentNorms.push(nc); return; }
                 let ln = lines.find(x => x.bucket === pair.cat && x.norm === nc);
                 if (!ln) { ln = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, actualMins: 0, titles: [], seen: {} }; lines.push(ln); }
@@ -2862,7 +2864,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const leaveDays = (X.leaves || []).filter(l => String((l && l.status) || 'Approved').toLowerCase() === 'approved' && skMonthKey(l.date) === monthKey).length;
             const designated = Math.max(0, skWorkingDays(monthKey) - leaveDays) * 480;
             const planHit = planMins > 0 && planMins >= designated - 0.5;
-            const adjPlan = Math.max(0, planMinsEff - skLeavePlanDeduct(userKey, monthKey).untitledMins);   // = plan mins - leave x 480
+            const adjPlan = onlyBucket ? Math.max(0, planMinsEffB) : Math.max(0, planMinsEff - skLeavePlanDeduct(userKey, monthKey).untitledMins);   // = plan mins - leave x 480
 
             // ---- Daily Plan index: ONE entry per (date + title) ----
             const planByKey = {};
@@ -2883,6 +2885,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             ordered.forEach(o => {
                 const r = o.r;
                 const bucket = skBucket(r);
+                if (onlyBucket && bucket !== onlyBucket) return;                // category-only view
                 if (bucket === 'CONTENT' && !apprRows.has(r)) return;           // CONTENT counts only once approved
                 const title = skTitle(r);
                 const st = String(skRowVal(r, ['START TIME', 'Start Time']) || '').trim(), en = String(skRowVal(r, ['TIME ENDED', 'End Time']) || '').trim();
@@ -3545,8 +3548,165 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             if (pe.leaveDays > 0) out.push(rm(M, 'Leave:', pe.leaveDays + ' day(s) deducted from Designated.'));
             return out.join('');
         }
-        function computeCategoryOverviewSummary(actualRows, monthlyPlanList) {
-            const monthKey = ovGetOverviewMonth();
+        // ======== Dashboard category tabs: Content (Main KPI) / Training / Task / Others / Overall Monthly Score (same as the ST KPI Landing Page) ========
+        // CONTENT = the Main KPI scorecard below (unchanged). TRAINING / TASK / OTHERS = same layout built from that category only.
+        // OVERALL = average of the categories that have data (each capped at 100%); Content uses the Main KPI total score.
+        window._ovSumBucket = window._ovSumBucket || 'CONTENT';
+        function syncOvSummaryTabs() {
+            const b = window._ovSumBucket || 'CONTENT';
+            document.querySelectorAll('.ov-sum-tab').forEach(el => {
+                const on = el.getAttribute('data-b') === b;
+                el.classList.toggle('active', on);
+                el.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+        }
+        function switchOvSummaryTab(bucket) {
+            window._ovSumBucket = bucket;
+            syncOvSummaryTabs();
+            try { renderAllTrainersKpi(); } catch (e) { console.error(e); }
+        }
+        // per-trainer, per-category numbers for ANY month (does not depend on the Overview month filter)
+        function skCatAgg(monthKey) {
+            try {
+                if (!(actualDataGlobal.length > 0 || (monthlyPlanDataGlobal && monthlyPlanDataGlobal.length > 0))) return { stats: {}, monthlyTargets: {} };
+                return computeCategoryOverviewSummary(actualDataGlobal, monthlyPlanDataGlobal, { monthKey: monthKey, silent: true }) || { stats: {}, monthlyTargets: {} };
+            } catch (e) { console.error(e); return { stats: {}, monthlyTargets: {} }; }
+        }
+        // category score = equal-weight average of the KPIs that have data, each capped at 100% (ST ovCatScore / renderKpiCategory)
+        function skCatMetrics(user, B, monthKey, agg, display) {
+            const s = (agg.stats || {})[user] || {}, t = (agg.monthlyTargets || {})[user] || {};
+            const key = B.toLowerCase();
+            const target = t[key] || 0, actual = s[key + 'Count'] || 0;
+            const pe = skProdEff(user, monthKey, display, B);
+            const ach = target > 0 ? actual / target : null;
+            const tl = (pe.onTime + pe.late) > 0 ? pe.onTime / (pe.onTime + pe.late) : null;
+            const has = target > 0 || actual > 0 || pe.adjPlan > 0 || pe.usedMins > 0;
+            const vals = [ach, pe.productivity, pe.efficiency, tl].filter(v => v != null && !isNaN(v));
+            const score = (has && vals.length) ? vals.reduce((a, v) => a + Math.min(v, 1), 0) / vals.length : null;
+            return { target, actual, pe, ach, tl, has, score };
+        }
+        function renderDashCategoryView(container, users, stats, monthKey, monthLabel) {
+            const now = new Date();
+            monthKey = monthKey || (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
+            const B = window._ovSumBucket || 'CONTENT';
+            const isOv = B === 'OVERALL';
+            const label = isOv ? 'Overall Monthly Score' : (B.charAt(0) + B.slice(1).toLowerCase());
+            const agg = skCatAgg(monthKey);
+            const pc = v => (v == null || isNaN(v)) ? '—' : (Math.round(v * 1000) / 10) + '%';
+            const col = v => v == null ? '#64748b' : (v >= 1 ? '#22c55e' : (v >= 0.8 ? '#f59e0b' : '#ef4444'));
+            const FONT = 'font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;';
+            const TD = 'padding:10px 8px; border-bottom:1px solid rgba(148,163,184,.12); text-align:center; white-space:nowrap;';
+            const TH = 'padding:8px 8px; font-size:10px; letter-spacing:.03em; text-transform:uppercase; white-space:nowrap; text-align:center;';
+            const GRP = 'padding:8px 10px; font-size:11px; font-weight:800;' + FONT + ' letter-spacing:.06em; text-transform:uppercase; text-align:center;';
+            const pctCell = v => '<td style="' + TD + ' font-weight:700;' + FONT + ' color:' + col(v) + ';">' + pc(v) + '</td>';
+            const numCell = v => '<td style="' + TD + (Number(v) === 0 ? ' color:#ffffff;' : ' font-weight:600;' + FONT) + '">' + (Math.round(Number(v) || 0)).toLocaleString() + '</td>';
+            const bandOf = v => v == null ? '—' : (v >= 0.8 ? '80–100%' : 'Below 80%');
+            const bandCell = v => {
+                if (v == null) return '<td style="' + TD + '">—</td>';
+                const st = v < 0.8 ? 'background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.4); color:#f87171;' : 'background:rgba(16,185,129,.18); border:1px solid rgba(16,185,129,.4); color:#34d399;';
+                return '<td style="' + TD + '"><span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700;' + FONT + st + '">' + bandOf(v) + '</span></td>';
+            };
+            const nameOf = d => { const i = String(d).indexOf(' · '); return i > -1 ? String(d).slice(0, i) : String(d); };
+
+            const results = [];
+            users.slice().sort().forEach(user => {
+                const s = stats[user] || { display: user };
+                const display = s.display || user;
+                const X = SK_EXTRA[user] || { loaded: false, jobGroup: '' };
+                const gk = skGroupKey(X.jobGroup);
+                const jg = !X.loaded ? 'Loading…' : (gk ? SK_GROUP_LABEL[gk] : 'Not set (CD weights)');
+                const r = { user, display, jg };
+                if (isOv) {
+                    let content = null;
+                    try { const k = skComputeKpi(user, monthKey, display); content = (k && (k.target > 0 || k.own > 0)) ? k.capped : null; } catch (e) { console.error(e); }
+                    r.items = [{ b: 'CONTENT', v: content }].concat(['TRAINING', 'TASK', 'OTHERS'].map(b => ({ b, v: skCatMetrics(user, b, monthKey, agg, display).score })));
+                    const used = r.items.filter(i => i.v != null);
+                    r.used = used.length;
+                    r.score = used.length ? used.reduce((a, i) => a + Math.min(i.v, 1), 0) / used.length : null;
+                } else {
+                    r.m = skCatMetrics(user, B, monthKey, agg, display);
+                    r.score = r.m.score;
+                }
+                results.push(r);
+            });
+
+            // ---- summary cards ----
+            const scored = results.filter(r => r.score != null);
+            const n = results.length;
+            const avg = scored.length ? scored.reduce((t, r) => t + r.score, 0) / scored.length : null;
+            const okCount = scored.filter(r => r.score >= 0.8).length, lowCount = scored.length - okCount;
+            const sorted = scored.slice().sort((a, b) => b.score - a.score);
+            const top = sorted[0], low = sorted[sorted.length - 1];
+            const CARD = 'border-radius:14px; padding:14px 16px; min-width:0;';
+            const LBL = 'font-size:10px; font-weight:700;' + FONT + ' letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;';
+            const BIG = 'font-size:30px; font-weight:800;' + FONT + ' letter-spacing:-.02em; line-height:1.15;';
+            const SUB = 'font-size:11px; color:var(--text-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+            const miniRow = (l, v) => '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:11px; padding:2px 0;"><span style="color:var(--text-muted);">' + l + '</span>' +
+                '<strong style="min-width:42px; text-align:right; color:' + (v == null ? 'var(--text-muted)' : col(v)) + ';">' + pc(v) + '</strong></div>';
+            const avgOf = f => { const vs = results.map(f).filter(v => v != null && !isNaN(v)); return vs.length ? vs.reduce((t, v) => t + v, 0) / vs.length : null; };
+            const row2 = (l, v) => '<div style="display:flex; justify-content:space-between; font-size:12px; padding:2px 0;"><span style="color:var(--text-muted);">' + l + '</span><strong>' + v + '</strong></div>';
+            let card5, card6;
+            if (isOv) {
+                card5 = '<div class="kpi-card kpi-c5" style="' + CARD + '"><div style="' + LBL + '">Average per category</div>' +
+                    ['Content (Main KPI)', 'Training', 'Task', 'Others'].map((l, i) => miniRow(l, avgOf(r => r.items[i].v))).join('') + '</div>';
+                card6 = '<div class="kpi-card kpi-c6" style="' + CARD + '"><div style="' + LBL + '">Coverage</div>' +
+                    row2('Trainers scored', scored.length + ' / ' + n) + row2('4 of 4 categories', results.filter(r => r.used === 4).length) + row2('Month', monthLabel || monthKey) + '</div>';
+            } else {
+                const sum = f => results.reduce((t, r) => t + (f(r) || 0), 0);
+                card5 = '<div class="kpi-card kpi-c5" style="' + CARD + '"><div style="' + LBL + '">Average per KPI</div>' +
+                    miniRow('Achievement', avgOf(r => r.m.ach)) + miniRow('Productivity', avgOf(r => r.m.pe.productivity)) + miniRow('Efficiency', avgOf(r => r.m.pe.efficiency)) + miniRow('Timeliness (On-time)', avgOf(r => r.m.tl)) + '</div>';
+                card6 = '<div class="kpi-card kpi-c6" style="' + CARD + '"><div style="' + LBL + '">' + label + ' Summary</div>' +
+                    row2('Actual / Target', sum(r => r.m.actual) + ' / ' + sum(r => r.m.target)) + row2('Plan mins', Math.round(sum(r => r.m.pe.adjPlan)).toLocaleString()) +
+                    row2('Actual mins', Math.round(sum(r => r.m.pe.usedMins)).toLocaleString()) + row2('On time / Late', sum(r => r.m.pe.onTime) + ' / ' + sum(r => r.m.pe.late)) + '</div>';
+            }
+            const cardsHtml = '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin-bottom:18px;">' +
+                '<div class="kpi-card kpi-c1" style="' + CARD + '"><div style="' + LBL + '">Average ' + (isOv ? 'Overall Monthly Score' : label + ' Score') + '</div><div style="' + BIG + ' color:' + col(avg) + ';">' + pc(avg) + '</div><div style="' + SUB + '">' + scored.length + ' of ' + n + ' trainers scored</div></div>' +
+                '<div class="kpi-card kpi-c2" style="' + CARD + '"><div style="' + LBL + '">Trainers</div><div style="' + BIG + '">' + n + '</div><div style="' + SUB + '"><span style="color:#22c55e;">● ' + okCount + ' at 80%+</span> &nbsp; <span style="color:#ef4444;">● ' + lowCount + ' below 80%</span></div></div>' +
+                '<div class="kpi-card kpi-c3" style="' + CARD + '"><div style="' + LBL + '">🏆 Top Performer</div><div style="' + BIG + ' color:' + col(top ? top.score : null) + ';">' + (top ? pc(top.score) : '—') + '</div><div style="' + SUB + '">' + (top ? esc2(top.display) : 'No data yet') + '</div></div>' +
+                '<div class="kpi-card kpi-c4" style="' + CARD + '"><div style="' + LBL + '">⚠️ Needs Attention</div><div style="' + BIG + ' color:' + col(low ? low.score : null) + ';">' + (low ? pc(low.score) : '—') + '</div><div style="' + SUB + '">' + (low ? esc2(low.display) : 'No data yet') + '</div></div>' +
+                card5 + card6 + '</div>';
+
+            // ---- table ----
+            const trainerTd = r => '<td style="' + TD + ' text-align:left; font-weight:700;' + FONT + ' position:sticky; left:0; background:var(--card-bg); z-index:1;">' + esc2(r.display) + '</td>';
+            const jgTd = r => '<td style="' + TD + ' font-size:11px; color:var(--text-muted);">' + esc2(r.jg) + '</td>';
+            let thead, rows = '', minW;
+            if (isOv) {
+                minW = 900;
+                rows = results.map(r => '<tr>' + trainerTd(r) + jgTd(r) + r.items.map(i => pctCell(i.v)).join('') +
+                    '<td style="' + TD + ' font-weight:800;' + FONT + ' font-size:14px; color:' + col(r.score) + ';">' + pc(r.score) + '</td>' + bandCell(r.score) + '</tr>').join('');
+                thead = '<tr><th colspan="2" style="' + GRP + ' background:#1e293b; color:#cbd5e1;">Overall</th>' +
+                    '<th colspan="4" style="' + GRP + ' background:linear-gradient(90deg,#10b981,#34d399); color:#052e1f;">Category Scores</th>' +
+                    '<th colspan="2" style="' + GRP + ' background:linear-gradient(90deg,#2563eb,#3b82f6); color:#fff;">Overall Monthly Score</th></tr>' +
+                    '<tr style="background:linear-gradient(180deg,#1e3a8a,#1d4ed8); color:#e8f0ff;">' +
+                    ['Trainer', 'Job Group', 'Content (Main KPI)', 'Training', 'Task', 'Others', 'Overall', 'Band'].map((h, i) => '<th style="' + TH + (i === 0 ? ' text-align:left; position:sticky; left:0; background:#1e3a8a; z-index:2;' : '') + '">' + h + '</th>').join('') + '</tr>';
+            } else {
+                minW = 1300;
+                rows = results.map(r => {
+                    const m = r.m, pe = m.pe;
+                    return '<tr>' + trainerTd(r) + jgTd(r) +
+                        '<td style="' + TD + ' font-weight:800;' + FONT + ' font-size:14px; color:' + col(r.score) + ';">' + pc(r.score) + '</td>' + bandCell(r.score) +
+                        pctCell(m.ach) + pctCell(pe.productivity) + pctCell(pe.efficiency) + pctCell(m.tl) +
+                        numCell(m.target) + numCell(m.actual) + numCell(pe.adjPlan) + numCell(pe.usedMins) + numCell(pe.onTime) + numCell(pe.late) + '</tr>';
+                }).join('');
+                thead = '<tr><th colspan="4" style="' + GRP + ' background:#1e293b; color:#cbd5e1;">Overall</th>' +
+                    '<th colspan="4" style="' + GRP + ' background:linear-gradient(90deg,#2563eb,#3b82f6); color:#fff;">KPI Achievement</th>' +
+                    '<th colspan="2" style="' + GRP + ' background:linear-gradient(90deg,#10b981,#34d399); color:#052e1f;">' + esc2(label) + ' Count</th>' +
+                    '<th colspan="4" style="' + GRP + ' background:#334155; color:#e2e8f0;">Minutes &amp; Time</th></tr>' +
+                    '<tr style="background:linear-gradient(180deg,#1e3a8a,#1d4ed8); color:#e8f0ff;">' +
+                    ['Trainer', 'Job Group', label + ' Score', 'KPI Band', 'Achievement', 'Productivity', 'Efficiency', 'Timeliness', 'Target', 'Actual', 'Plan mins', 'Actual mins', 'On Time', 'Late'].map((h, i) => '<th style="' + TH + (i === 0 ? ' text-align:left; position:sticky; left:0; background:#1e3a8a; z-index:2;' : '') + '">' + h + '</th>').join('') + '</tr>';
+            }
+            const note = isOv
+                ? 'Average of the categories that have data (each capped at 100%) — Content uses the Main KPI total score; Training / Task / Others use their category score. A category with no data is left out.'
+                : label + ' Score = average of Achievement, Productivity, Efficiency and On-time (Timeliness) for this category only, each capped at 100%; a KPI with no data is left out. Same rules as the ST dashboards.';
+            container.innerHTML = cardsHtml +
+                '<div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">' + esc2(label) + ' · <strong>' + esc2(monthLabel || monthKey) + '</strong> · ' + n + ' trainers</div>' +
+                '<div style="overflow-x:auto; border-radius:12px; border:1px solid var(--border-color);"><table style="width:100%; border-collapse:collapse; font-size:12px; min-width:' + minW + 'px;"><thead>' + thead + '</thead><tbody>' + rows + '</tbody></table></div>' +
+                '<div style="margin-top:10px; font-size:11px; color:var(--text-muted); line-height:1.7;"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#22c55e;margin-right:3px;"></span>100%+ &nbsp;' +
+                '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f59e0b;margin-right:3px;"></span>80–99% &nbsp;' +
+                '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:3px;"></span>Below 80%<br>' + note + '</div>';
+        }
+        function computeCategoryOverviewSummary(actualRows, monthlyPlanList, opts) {   // opts = { monthKey, silent:true } -> returns { stats, monthlyTargets } without drawing the Overview table
+            const monthKey = (opts && opts.monthKey) || ovGetOverviewMonth();
             const stats = {}; // userKey -> aggregates
             const monthlyTargets = {};
             const userLines = {};   // userKey -> non-content plan lines (unique-unit counting)
@@ -3831,6 +3991,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 if (!countedContentTitles[userKey]) countedContentTitles[userKey] = {};
                 countedContentTitles[userKey][nt] = true;
             });
+
+            if (opts && opts.silent) return { stats, monthlyTargets };
 
             // ---- Render ----
             const tbody = document.getElementById('overviewTableBody');
@@ -4277,9 +4439,13 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const productivity = pe.productivity;
 
             const vals = [ach, quality, eff, timeliness, productivity];
+            // Same as ST computeKpi: a KPI with no target / no data is NOT scored as 0 - it is left out and the remaining weights are re-scaled to 100%.
+            const _has = v => v != null && !isNaN(v);
+            const _sumW = vals.reduce((t, v, i) => t + (_has(v) ? weights[i] : 0), 0);
+            const effW = vals.map((v, i) => (_has(v) && _sumW > 0) ? weights[i] / _sumW : 0);
             let capped = 0, uncapped = 0;
-            vals.forEach((v, i) => { const val = (v != null && !isNaN(v)) ? v : 0; capped += Math.min(val, 1) * weights[i]; uncapped += val * weights[i]; });
-            return { gk, extrasLoaded: X.loaded, jobGroup: X.jobGroup, vals, weights, capped, uncapped,
+            vals.forEach((v, i) => { if (!_has(v)) return; capped += Math.min(v, 1) * effW[i]; uncapped += v * effW[i]; });
+            return { gk, extrasLoaded: X.loaded, jobGroup: X.jobGroup, vals, weights: effW, capped, uncapped,
                 target, own, proof, total, extraCount, woRev, revisions, onTime, pendingApproval, errCount,
                 totalMins, woRevMins, revMins, onTimeMins, planContentMins, planMins, leaveDays, adjPlan, actMins, dailyPlanMins, dailyActMins,
                 designated: pe.designated, planHit: pe.planHit, extraMins: pe.extraMins, bonusMins: pe.bonusMins, inPlanMins: pe.inMins };
@@ -4325,6 +4491,11 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 return;
             }
             skLoadExtras(users);
+            if ((window._ovSumBucket || 'CONTENT') !== 'CONTENT') {   // Training / Task / Others / Overall Monthly Score tabs
+                try { renderDashCategoryView(container, users, stats, monthKey, monthLabel); }
+                catch (e) { console.error(e); container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Could not build this view.</div>'; }
+                return;
+            }
 
             const pctStr = v => (v == null || isNaN(v)) ? '—' : (Math.round(v * 1000) / 10) + '%';
             const achCls = v => (v == null || isNaN(v)) ? 'color:var(--text-muted)' : (v >= 1 ? 'color:#22c55e' : (v >= 0.8 ? 'color:#f59e0b' : 'color:#ef4444'));
@@ -5824,6 +5995,97 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
     window.addEventListener('focus', check);
 })();
+</script>
+<style id="fx-motion">
+/* ===== FX MOTION LAYER (lite): light, GPU-friendly animations ===== */
+:root{--fx-ease:cubic-bezier(.22,.8,.24,1)}
+@keyframes fxFade{from{opacity:0}to{opacity:1}}
+@keyframes fxRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fxSlideL{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes fxPop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes fxBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fxRipple{from{transform:translate(-50%,-50%) scale(0);opacity:.5}to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+
+/* page + sidebar entrance (one-time, short) */
+body{animation:fxFade .3s ease backwards}
+.sidebar-menu>li,.menu>.item{animation:fxSlideL .35s var(--fx-ease) backwards}
+.sidebar-menu>li:nth-child(2),.menu>.item:nth-child(2){animation-delay:.03s}
+.sidebar-menu>li:nth-child(3),.menu>.item:nth-child(3){animation-delay:.06s}
+.sidebar-menu>li:nth-child(4),.menu>.item:nth-child(4){animation-delay:.09s}
+.sidebar-menu>li:nth-child(5),.menu>.item:nth-child(5){animation-delay:.12s}
+.sidebar-menu>li:nth-child(n+6),.menu>.item:nth-child(n+6){animation-delay:.15s}
+
+/* sidebar hover */
+.main-menu-item,.sub-menu li,.item{transition:background-color .2s ease,color .2s ease,transform .2s var(--fx-ease)}
+.main-menu-item:hover,.sub-menu li:hover,.item:hover{transform:translateX(4px)}
+.arrow-icon{transition:transform .25s var(--fx-ease)}
+
+/* tab / section switch */
+.content-section.active,.sub-content-section.active,.socmed-sub-view.active,.sec.active{animation:fxRise .3s var(--fx-ease) backwards}
+
+/* small cards only: reveal + hover lift (transform only) */
+/* cards enter once when their section is shown (no scroll observers) */
+.content-section.active .summary-card,.sec.active .stat{animation:fxRise .4s var(--fx-ease) backwards}
+.content-section.active .summary-card:nth-child(2),.sec.active .stat:nth-child(2){animation-delay:.04s}
+.content-section.active .summary-card:nth-child(3),.sec.active .stat:nth-child(3){animation-delay:.08s}
+.content-section.active .summary-card:nth-child(4),.sec.active .stat:nth-child(4){animation-delay:.12s}
+.content-section.active .summary-card:nth-child(n+5),.sec.active .stat:nth-child(n+5){animation-delay:.16s}
+.summary-card,.kpi-card,.stat{transition:transform .2s var(--fx-ease)}
+.summary-card:hover,.kpi-card:hover,.stat:hover{transform:translateY(-4px)!important}
+
+/* no hover work while the page is scrolling */
+html.fx-scrolling body{pointer-events:none}
+
+/* progress bars */
+.cat-bar-fill,.kpi-bar>i{transform-origin:left center;animation:fxBar .6s var(--fx-ease) backwards}
+
+/* buttons / inputs */
+button,.btn,.btn-ghost,.btn-approve,.btn-reject{transition:transform .15s ease,background-color .2s ease}
+button:hover,.btn:hover,.btn-ghost:hover,.btn-approve:hover,.btn-reject:hover{transform:translateY(-1px)}
+button:active,.btn:active,.btn-ghost:active,.btn-approve:active,.btn-reject:active{transform:scale(.96)}
+input,select,textarea{transition:box-shadow .2s ease,border-color .2s ease}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(59,130,246,.22)!important}
+
+/* modals / popups */
+.modal.show{animation:fxFade .2s ease both}
+.modal.show .box{animation:fxPop .28s var(--fx-ease) both}
+.mp-empty-overlay{animation:fxFade .2s ease both}
+.mp-empty-overlay>*{animation:fxPop .3s var(--fx-ease) both}
+#kpiBotPanel.open{animation:fxPop .28s var(--fx-ease) both}
+
+/* click ripple */
+.fx-ripple{position:fixed;width:150px;height:150px;border-radius:50%;pointer-events:none;z-index:2147482000;
+  background:radial-gradient(circle,rgba(96,165,250,.4) 0%,transparent 70%);animation:fxRipple .5s ease-out forwards}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}
+/* ===== /FX MOTION LAYER ===== */
+</style>
+<script id="fx-motion-js">
+/* ===== FX MOTION LAYER JS (lite) ===== */
+(function(){
+try{
+if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var de=document.documentElement,st=0;
+/* pause hover effects while scrolling so scroll stays smooth */
+document.addEventListener('scroll',function(){
+  if(!st)de.classList.add('fx-scrolling');
+  clearTimeout(st);
+  st=setTimeout(function(){de.classList.remove('fx-scrolling');st=0;},140);
+},{passive:true,capture:true});
+/* click ripple */
+document.addEventListener('pointerdown',function(e){
+  var t=e.target.closest&&e.target.closest('button,.btn,.btn-ghost,.main-menu-item,.sub-menu li,.item,.ov-sum-tab');
+  if(!t)return;
+  var s=document.createElement('span');
+  s.className='fx-ripple';s.style.left=e.clientX+'px';s.style.top=e.clientY+'px';
+  document.body.appendChild(s);
+  setTimeout(function(){s.remove();},550);
+},true);
+}catch(err){console.warn('FX layer disabled:',err);}
+})();
+/* ===== /FX MOTION LAYER JS ===== */
 </script>
 </body>
 </html>
