@@ -648,6 +648,116 @@ html[data-theme="light"] .filter-container input {
     .filter-container label { width: auto !important; }
     .filter-container button { width: auto !important; }
 }
+
+/* ---------- Overview Summary tabs ---------- */
+.ov-sum-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:4px; }
+.summary-grid.ov-hide, .ov-hide { display:none !important; }
+.ov-sum-tabs--top { margin:0 0 14px 0; width:fit-content; max-width:100%; }
+.ov-sum-tabs { display:flex; gap:4px; padding:4px; border-radius:12px; border:1px solid var(--border-color); background:rgba(148,163,184,.08); }
+.ov-sum-tab { border:0; background:transparent; color:var(--text-muted); font-weight:700; font-size:12px; padding:7px 16px; border-radius:9px; cursor:pointer; transition:background .15s, color .15s; font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+.ov-sum-tab:hover { color:var(--text-main); }
+.ov-sum-tab.active { background:linear-gradient(135deg,#3b82f6,#6366f1); color:#fff; box-shadow:0 4px 14px rgba(59,130,246,.35); }
+@media (max-width: 600px) { .ov-sum-tabs { width:100%; } .ov-sum-tab { flex:1; padding:7px 6px; } }
+
+/* ---------- Overall Monthly Score ---------- */
+.ov-overall { display:flex; align-items:center; gap:22px; flex-wrap:wrap; padding:16px 20px; margin:0 0 14px 0; border-radius:16px; border:1px solid var(--border-color); background:linear-gradient(135deg, rgba(59,130,246,.16), rgba(99,102,241,.08)); }
+.ov-overall:empty { display:none; }
+.ov-ov-main small { display:block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
+.ov-ov-big { font-size:40px; font-weight:800; line-height:1.1; color:var(--text-main); letter-spacing:-.02em; }
+.ov-ov-band { display:inline-block; margin-top:4px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; color:#22c55e; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.35); }
+.ov-ov-band.warn { color:#f59e0b; background:rgba(245,158,11,.12); border-color:rgba(245,158,11,.35); }
+.ov-ov-band.low { color:#ef4444; background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.35); }
+.ov-ov-chips { display:flex; gap:10px; flex-wrap:wrap; flex:1; min-width:260px; }
+.ov-ov-chip { flex:1; min-width:120px; padding:10px 12px; border-radius:12px; border:1px solid var(--border-color); background:rgba(148,163,184,.07); cursor:pointer; text-align:left; color:var(--text-main); }
+.ov-ov-chip:hover { border-color:#3b82f6; }
+.ov-ov-chip small { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted); }
+.ov-ov-chip b { font-size:20px; }
+.ov-ov-chip.good b { color:#22c55e; } .ov-ov-chip.warn b { color:#f59e0b; } .ov-ov-chip.bad b { color:#ef4444; } .ov-ov-chip.na b { color:var(--text-muted); }
+.ov-ov-note { width:100%; margin:0; font-size:11px; color:var(--text-muted); }
+
+/* ---- Overall Monthly Score: refined hero ---- */
+.ov-overall { position:relative; display:flex; align-items:stretch; gap:20px 28px; flex-wrap:wrap; padding:22px 24px; margin:0 0 16px 0; border-radius:18px; border:1px solid rgba(148,163,184,.16); background:radial-gradient(520px 220px at 0% 0%, rgba(59,130,246,.20), transparent 70%), linear-gradient(160deg, rgba(20,30,56,.95), rgba(12,19,34,.95)); box-shadow:0 10px 30px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04); overflow:hidden; }
+.ov-ov-main { display:flex; align-items:center; gap:20px; min-width:280px; }
+.ov-ring { --p:0; --c:#22c55e; flex:0 0 auto; width:112px; height:112px; border-radius:50%; display:grid; place-items:center; position:relative; background:conic-gradient(var(--c) calc(var(--p) * 1%), rgba(148,163,184,.16) 0); box-shadow:0 0 28px color-mix(in srgb, var(--c) 28%, transparent); }
+.ov-ring::before { content:""; position:absolute; inset:9px; border-radius:50%; background:#0e1628; box-shadow:inset 0 2px 10px rgba(0,0,0,.45); }
+.ov-ring.warn { --c:#f59e0b; } .ov-ring.low { --c:#ef4444; }
+.ov-ring .ov-ov-big { position:relative; z-index:1; display:flex; align-items:baseline; font-size:30px; font-weight:800; line-height:1; letter-spacing:-.03em; color:#f1f5ff; font-variant-numeric:tabular-nums; }
+.ov-ring .ov-ov-big em { font-style:normal; font-size:14px; font-weight:700; margin-left:2px; color:var(--text-muted); letter-spacing:0; }
+.ov-ov-txt { display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.ov-ov-txt small { font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--text-muted); line-height:1.4; }
+.ov-ov-txt small span { display:block; color:#cbd5e8; font-size:15px; letter-spacing:.01em; text-transform:none; font-weight:700; margin-top:2px; }
+.ov-ov-band { display:inline-flex; align-items:center; gap:7px; margin:0; padding:5px 12px 5px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+.ov-ov-band::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; box-shadow:0 0 8px currentColor; }
+.ov-ov-sub { font-size:11px; color:var(--text-muted); }
+.ov-ov-chips { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); align-content:center; gap:12px; min-width:300px; }
+.ov-ov-chip { position:relative; min-width:0; padding:14px 16px 12px; border-radius:14px; background:rgba(148,163,184,.06); border:1px solid rgba(148,163,184,.14); transition:transform .15s, border-color .15s, background .15s; overflow:hidden; }
+.ov-ov-chip::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--cc, rgba(148,163,184,.4)); }
+.ov-ov-chip.good { --cc:#22c55e; } .ov-ov-chip.warn { --cc:#f59e0b; } .ov-ov-chip.bad { --cc:#ef4444; }
+.ov-ov-chip:hover { transform:translateY(-2px); border-color:rgba(59,130,246,.55); background:rgba(59,130,246,.09); }
+.ov-ov-chip small { font-size:10.5px; letter-spacing:.07em; margin-bottom:4px; }
+.ov-ov-chip b { font-size:24px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.ov-ov-note { padding-top:2px; }
+@media (max-width:600px) { .ov-overall { padding:18px 16px; } .ov-ov-main { min-width:0; width:100%; } .ov-ov-chips { min-width:0; }  }
+
+/* ---- KPI toolbar (job group / month / refresh): refined ---- */
+.kpi-top .kpi-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 10px !important; border-radius:14px !important; border:1px solid rgba(148,163,184,.18) !important; background:linear-gradient(160deg, rgba(20,30,56,.7), rgba(12,19,34,.7)) !important; box-shadow:0 6px 18px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.04); }
+.kpi-top .kpi-chip { display:inline-flex; align-items:center; gap:7px; padding:7px 14px; font-size:12px; white-space:nowrap; }
+.kpi-top .kpi-chip::before { content:""; width:7px; height:7px; border-radius:50%; background:#3b82f6; box-shadow:0 0 8px #3b82f6; }
+.kpi-top .kpi-controls .kpi-lbl { margin:0 -2px 0 6px; font-size:10.5px; letter-spacing:.1em; }
+.kpi-top .kpi-controls select { width:auto !important; min-width:240px; max-width:100%; height:38px; margin:0 !important; padding:0 38px 0 14px !important; border-radius:10px !important; border:1px solid rgba(148,163,184,.22) !important; background-color:rgba(8,13,25,.65) !important; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238795b1' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; background-repeat:no-repeat !important; background-position:right 13px center !important; -webkit-appearance:none !important; appearance:none !important; color:var(--text-main) !important; font-size:13px; font-weight:600; text-overflow:ellipsis; cursor:pointer; transition:border-color .15s, box-shadow .15s; }
+.kpi-top .kpi-controls select:hover { border-color:rgba(59,130,246,.55) !important; }
+.kpi-top .kpi-controls select:focus { outline:none; border-color:#3b82f6 !important; box-shadow:0 0 0 3px rgba(59,130,246,.22); }
+.kpi-top .kpi-controls .kpi-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:38px; padding:0 18px; border-radius:10px; border:1px solid rgba(59,130,246,.45); background:rgba(59,130,246,.14); color:#cfe0ff; font-size:12.5px; font-weight:700; transition:background .15s, transform .15s, box-shadow .15s; }
+.kpi-top .kpi-controls .kpi-btn:hover { background:rgba(59,130,246,.28); box-shadow:0 4px 14px rgba(59,130,246,.3); transform:translateY(-1px); }
+.kpi-top .kpi-controls .kpi-btn:active { transform:none; }
+@media (max-width:640px) { .kpi-top .kpi-controls { width:100%; } .kpi-top .kpi-controls select { flex:1 1 100%; min-width:0; } .kpi-top .kpi-controls .kpi-btn { flex:1 1 100%; } .kpi-top .kpi-controls .kpi-lbl { display:none; } }
+
+/* ---- SNS Boosting: refined form ---- */
+#snsBoostingTab > div:first-child h3 { font-size:22px !important; letter-spacing:-.01em; margin-bottom:6px !important; }
+#snsBoostingTab > div:first-child p { font-size:12.5px !important; line-height:1.55; max-width:760px; }
+#snsBoostingTab .section-container { padding:22px 24px !important; border-radius:18px !important; border:1px solid rgba(148,163,184,.16) !important; background:linear-gradient(160deg, rgba(20,30,56,.78), rgba(12,19,34,.78)) !important; box-shadow:0 10px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.04) !important; }
+#snsBoostingTab .section-container > h4, #snsBoostingTab .section-container > div > h4 { font-size:15px !important; font-weight:700; letter-spacing:-.005em; color:var(--text-main); display:flex; align-items:center; gap:10px; }
+#snsBoostingTab .section-container > h4::before { content:""; width:4px; height:16px; border-radius:3px; background:linear-gradient(180deg,#3b82f6,#8b5cf6); }
+#snsBoostingTab label { font-size:10.5px !important; letter-spacing:.08em !important; margin-bottom:7px !important; color:#8fa0bf !important; }
+#snsBoostingTab input[type="url"], #snsBoostingTab input[type="text"], #snsBoostingTab input[type="number"], #snsBoostingTab select { height:44px !important; padding:0 14px !important; border-radius:11px !important; border:1px solid rgba(148,163,184,.2) !important; background-color:rgba(8,13,25,.62) !important; color:var(--text-main) !important; font-size:13.5px !important; transition:border-color .15s, box-shadow .15s, background-color .15s; }
+#snsBoostingTab input::placeholder { color:#5d6b88 !important; font-size:13px; }
+#snsBoostingTab input:hover, #snsBoostingTab select:hover { border-color:rgba(59,130,246,.45) !important; }
+#snsBoostingTab input:focus, #snsBoostingTab select:focus { outline:none !important; border-color:#3b82f6 !important; background-color:rgba(8,13,25,.9) !important; box-shadow:0 0 0 3px rgba(59,130,246,.22) !important; }
+#snsBoostingTab input[type="number"] { -moz-appearance:textfield; appearance:textfield; font-variant-numeric:tabular-nums; }
+#snsBoostingTab input[type="number"]::-webkit-outer-spin-button, #snsBoostingTab input[type="number"]::-webkit-inner-spin-button { -webkit-appearance:none; appearance:none; margin:0; }
+#snsBoostingTab select { -webkit-appearance:none !important; appearance:none !important; padding-right:38px !important; cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238795b1' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; background-repeat:no-repeat !important; background-position:right 14px center !important; }
+#snsBoostingTab #snsProofDrop { position:relative; padding:16px 18px !important; gap:16px !important; border:1.5px dashed rgba(148,163,184,.3) !important; border-radius:14px !important; background:rgba(8,13,25,.38); transition:border-color .15s, background .15s; }
+#snsBoostingTab #snsProofDrop:hover, #snsBoostingTab #snsProofDrop.is-drag { border-color:#3b82f6 !important; background:rgba(59,130,246,.07); }
+#snsBoostingTab #snsProofFile { max-width:none !important; width:auto; height:auto !important; padding:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important; color:var(--text-muted) !important; font-size:12.5px !important; cursor:pointer; }
+#snsBoostingTab #snsProofFile::file-selector-button { height:38px; margin-right:12px; padding:0 18px; border-radius:10px; border:1px solid rgba(59,130,246,.45); background:rgba(59,130,246,.14); color:#cfe0ff; font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; transition:background .15s, box-shadow .15s; }
+#snsBoostingTab #snsProofFile::file-selector-button:hover { background:rgba(59,130,246,.28); box-shadow:0 4px 14px rgba(59,130,246,.3); }
+#snsBoostingTab #snsProofHint { flex:1 1 260px; line-height:1.5; }
+#snsBoostingTab #snsProofClear { border:1px solid rgba(239,68,68,.4) !important; background:rgba(239,68,68,.12) !important; color:#fca5a5 !important; border-radius:9px !important; padding:6px 12px !important; font-weight:700; }
+#snsBoostingTab #snsProofPreview { border-radius:10px !important; max-height:64px !important; }
+#snsBoostingTab .sns-submit-btn { height:46px; padding:0 30px; border-radius:12px; font-size:14px; }
+#snsBoostingTab .sns-submit-btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 10px 24px rgba(37,99,235,.5); }
+.sns-ttl { display:inline-flex; align-items:center; gap:8px; padding:7px 14px; border-radius:999px; font-size:12px; color:var(--text-muted); background:rgba(148,163,184,.08); border:1px solid rgba(148,163,184,.18); }
+.sns-ttl b { font-size:15px; color:#8ab8ff; font-variant-numeric:tabular-nums; }
+.sns-ttl em { font-style:normal; font-size:11px; opacity:.8; }
+#snsBoostingTab .section-container:last-child button[onclick="loadSnsBoostingSt()"] { display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px !important; border-radius:10px !important; border:1px solid rgba(59,130,246,.45) !important; background:rgba(59,130,246,.14) !important; color:#cfe0ff !important; font-size:12px !important; font-weight:700; transition:background .15s; }
+#snsBoostingTab .section-container:last-child button[onclick="loadSnsBoostingSt()"]:hover { background:rgba(59,130,246,.28) !important; }
+@media (max-width:900px) { #snsBoostingTab div[style*="repeat(4"] { grid-template-columns:1fr 1fr !important; } }
+@media (max-width:640px) { #snsBoostingTab .section-container { padding:16px !important; } #snsBoostingTab div[style*="grid-template-columns"] { grid-template-columns:1fr !important; } #snsBoostingTab .sns-submit-btn { width:100%; } }
+
+/* ---- Monthly Plan: total planned minutes vs month capacity ---- */
+.mp-total { --c:#22c55e; display:flex; flex-wrap:wrap; gap:18px 36px; align-items:center; justify-content:space-between; padding:18px 22px; margin:0 0 14px 0; border-radius:16px; border:1px solid rgba(148,163,184,.16); border-left:4px solid var(--c); background:linear-gradient(160deg, rgba(20,30,56,.85), rgba(12,19,34,.85)); }
+.mp-total.mp-short { --c:#f59e0b; } .mp-total.mp-over { --c:#ef4444; }
+.mp-total-main small { display:block; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); }
+.mp-total-val { font-size:32px; font-weight:800; line-height:1.15; letter-spacing:-.02em; color:var(--text-main); font-variant-numeric:tabular-nums; margin:4px 0 8px; }
+.mp-total-val em { font-style:normal; font-size:14px; font-weight:600; color:var(--text-muted); letter-spacing:0; }
+.mp-total-pill { display:inline-block; padding:4px 12px; border-radius:999px; font-size:11.5px; font-weight:700; color:var(--c); background:color-mix(in srgb, var(--c) 14%, transparent); border:1px solid color-mix(in srgb, var(--c) 40%, transparent); }
+.mp-total-side { flex:1 1 280px; max-width:460px; }
+.mp-total-row { display:flex; justify-content:space-between; align-items:baseline; font-size:12px; color:var(--text-muted); }
+.mp-total-row b { font-size:18px; color:var(--text-main); font-variant-numeric:tabular-nums; }
+.mp-total-sub { font-size:11px; color:var(--text-muted); margin-top:3px; }
+.mp-total-bar { height:8px; border-radius:8px; background:rgba(148,163,184,.2); overflow:hidden; margin-top:10px; }
+.mp-total-bar i { display:block; height:100%; border-radius:8px; background:var(--c); }
+@media (max-width:640px) { .mp-total { padding:16px; } .mp-total-side { max-width:none; } }
 </style>
 <style id="aura-theme">
 /* ==========================================================
@@ -3180,7 +3290,6 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                             <span class="arrow-icon">▶</span>
                         </div>
                         <ul class="sub-menu" id="dailyTaskSubMenu" style="display: none;">
-                            <li id="subSummary" onclick="switchSubTab(event, 'summarySection')">Summary</li>
                             <li id="subPlanActual" onclick="switchSubTab(event, 'planActualSection')">Plan vs Actual</li>
                             <li id="subMonthlyPlan" onclick="switchSubTab(event, 'monthlyPlanSection')">Monthly Plan</li>
                             <li id="subLeaveAbsent" onclick="switchSubTab(event, 'leaveAbsentSection')">Leave / Absent Log</li>
@@ -3279,6 +3388,16 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
 
                     <div id="kpiMissingBanner" class="kpi-banner" style="display:none;"></div>
 
+                    <div id="ovScratch" class="ov-hide" aria-hidden="true"></div>
+                    <div class="ov-sum-tabs ov-sum-tabs--top" role="tablist" aria-label="Summary category">
+                                <button type="button" role="tab" class="ov-sum-tab active" data-b="CONTENT" onclick="switchOvSummaryTab('CONTENT')">Content (Main KPI)</button>
+                                <button type="button" role="tab" class="ov-sum-tab" data-b="TRAINING" onclick="switchOvSummaryTab('TRAINING')">Training</button>
+                                <button type="button" role="tab" class="ov-sum-tab" data-b="TASK" onclick="switchOvSummaryTab('TASK')">Task</button>
+                                <button type="button" role="tab" class="ov-sum-tab" data-b="OTHERS" onclick="switchOvSummaryTab('OTHERS')">Others</button>
+                                <button type="button" role="tab" class="ov-sum-tab" data-b="OVERALL" onclick="switchOvSummaryTab('OVERALL')">Overall Monthly Score</button>
+                            </div>
+                    <div id="ovOverall" class="ov-overall"></div>
+
                     <!-- Hero: total KPI + weighted breakdown -->
                     <div id="kpiHero" class="kpi-hero"></div>
 
@@ -3306,12 +3425,12 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                                 <ul>
                                     <li><strong>Target Count (Content) %</strong> = Own Content ÷ Target. Target = Monthly Plan rows (category CONTENT) for the selected MONTH × FREQUENCY PER MONTH.</li>
                                     <li><strong>Accuracy (Quality) %</strong> = (Target − Revision count) ÷ Target. Revisions = Rejected files in Approval Requests that match Monthly Plan by <em>file name</em> (vs plan TITLE) or by <em>category</em> (vs plan CATEGORY). Unrelated rejects are ignored. Less the Content Errors deduction (1–2 errors = 1%, 3–4 = 2% …).</li>
-                                    <li><strong>Efficiency %</strong> = Total duration of actual <strong>approved</strong> content ÷ Monthly Plan total duration (CONTENT rows: DURATION PER MIN × FREQUENCY PER MONTH).</li>
+                                    <li><strong>Efficiency %</strong> = Total duration of actual <strong>approved</strong> content ÷ Monthly Plan total duration (CONTENT rows: DURATION PER MIN × FREQUENCY PER MONTH, less leave/absent).</li>
                                     <li><strong>Timeliness (On-time) %</strong> = Daily Actual total duration ÷ Daily Plan total duration (both use <code>DURATION PER MIN</code> for the selected month).</li>
                                 </ul>
                             </div>
                             <div class="kpi-notes-card">
-                                <h6>⚡ Productivity Rate (15% weight)</h6>
+                                <h6>⚡ Productivity Rate (30% weight)</h6>
                                 <ul>
                                     <li><strong>Productivity</strong> = counted Actual duration ÷ (Monthly Plan duration − leave/absent × 480). Included in Total KPI (weight capped at 100%). <strong>Only actuals in your Monthly Plan count</strong> and each row is counted once. If your Monthly Plan is below <em>Designated Minutes</em> ((working days − leave) × 480), unplanned actuals are excluded and Productivity cannot exceed 100%; once the plan meets Designated Minutes, unplanned actuals are added on top (over-achievement allowed).</li>
                                     <li><strong>Actual Duration</strong> = sum of <code>DURATION PER MIN</code> from unique Daily Actual rows that are in the Monthly Plan. <em>CONTENT</em> counts only when approved and its Category 2 is in the plan; <em>TASK / OTHERS / TRAINING</em> count when they match a plan line within its Target Count.</li>
@@ -3322,39 +3441,9 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                         </div>
                     </details>
 
-                    <!-- MONTHLY PLAN PENDING TASKS & FREQUENCY TRACKER -->
-                    <div class="bg-blue-50/50 rounded-xl border border-blue-100 p-5 mb-6" style="margin-top:20px;">
-                        <div class="plan-head mb-3">
-                            <h4 class="text-sm font-bold text-gray-800 plan-title" style="margin:0;">
-                                📅 Monthly Plan Pending Tasks & Frequency Tracker (<span id="currentDateText"></span>)
-                            </h4>
-                            <span id="planStatusBadge" class="plan-badge text-xs px-2.5 py-1 rounded-full font-medium bg-yellow-100 text-yellow-800">0 Tasks</span>
-                        </div>
-                        <div id="dailyPlanContainer" class="space-y-2">
-                            <p class="text-sm text-gray-500 italic">Loading pending tasks...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DAILY TASK SECTION -->
-            <div id="dailyTaskTab" class="content-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px;">
-                    <div>
-                        <h3 style="margin:0; font-size: 15px;">Daily Task Time Management</h3>
-                        <p style="color: var(--text-muted); font-size: 12px; margin: 2px 0 0 0; line-height: 1.4;">View your planned and actual tasks submitted from Tarkie.</p>
-                    </div>
-                    <div id="taskSyncStatus" class="sync-status">🔄 Last Synced: --:--:--</div>
-                </div>
-                
-                <!-- Month filter kept hidden for JS (KPI / summary / tables still use selectedMonthFilter). UI month bar + download removed per request. -->
-                <select id="selectedMonthFilter" onchange="onMonthFilterChange()" style="display:none;" aria-hidden="true"></select>
-
-                <!-- SUMMARY SECTION -->
-                <div id="summarySection" class="sub-content-section active">
-                    <div class="section-container">
-                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 15px;">📊 Actual Report Summary</h4>
-                        <div class="summary-grid">
+                    <!-- OVERVIEW SUMMARY (per category tab) -->
+                    <div class="section-container ov-summary" id="ovSummaryWrap" style="margin-top:20px; display:none;">
+                        <div class="summary-grid ov-hide" aria-hidden="true">
                             <div class="summary-card">
                                 <h4>Target Days <span>🎯</span></h4>
                                 <p class="val" id="sumTargetDays">0 days</p>
@@ -3382,7 +3471,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                                 <div style="margin-top:8px; height:6px; border-radius:6px; background:rgba(148,163,184,0.25); overflow:hidden;">
                                     <div id="sumActualDaysBar" style="height:100%; width:0%; background:linear-gradient(90deg,#3b82f6,#22c55e); border-radius:6px; transition:width .4s;"></div>
                                 </div>
-                                <p class="pct-big"><span id="sumActualDaysPercent">0%</span><small>of Target Days</small></p>
+                                <p class="pct-big"><span id="sumActualDaysPercent">0%</span><small>of Category Plan Days</small></p>
                             </div>
 <div class="summary-card">
                                 <h4>Designated vs Actual Mins <span>⚖️</span></h4>
@@ -3392,7 +3481,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                                 <div style="margin-top:8px; height:6px; border-radius:6px; background:rgba(148,163,184,0.25); overflow:hidden;">
                                     <div id="sumDesigBar" style="height:100%; width:0%; background:linear-gradient(90deg,#3b82f6,#22c55e); border-radius:6px; transition:width .4s;"></div>
                                 </div>
-                                <p class="pct-big"><span id="sumDesigPercent">0%</span><small>of Designated Mins</small></p>
+                                <p class="pct-big"><span id="sumDesigPercent">0%</span><small>of Category Plan Mins</small></p>
                             </div>
                             <div class="summary-card">
                                 <h4>PRODUCTIVITY RATE <span style="font-size: 14px;">⚡</span></h4>
@@ -3402,17 +3491,44 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                         </div>
 
                         <!-- Plan vs Actual by Category -->
-                        <div id="summaryCategoryProgress" style="margin-top: 22px;"></div>
+                        <div id="summaryCategoryProgress" class="ov-hide" style="margin-top: 22px;"></div>
 
                         <div style="margin-top: 25px;">
-                            <h4 style="font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📅 Hourly Gantt Chart (Grouped by Category & Broken Down per Hour - 8 AM to 5 PM)</h4>
+                            <h4 style="font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📅 Gantt Chart (By Category · Date & Time, 8 AM to 5 PM)</h4>
                             <div id="calendarGanttContainer" class="gantt-calendar-container"></div>
                         </div>
                     </div>
+
+                    <!-- MONTHLY PLAN PENDING TASKS & FREQUENCY TRACKER -->
+                    <div id="ovPendingBox" class="bg-blue-50/50 rounded-xl border border-blue-100 p-5 mb-6" style="margin-top:20px; display:none;">
+                        <div class="plan-head mb-3">
+                            <h4 class="text-sm font-bold text-gray-800 plan-title" style="margin:0;">
+                                📅 Monthly Plan Pending Tasks & Frequency Tracker (<span id="currentDateText"></span>)
+                            </h4>
+                            <span id="planStatusBadge" class="plan-badge text-xs px-2.5 py-1 rounded-full font-medium bg-yellow-100 text-yellow-800">0 Tasks</span>
+                        </div>
+                        <div id="dailyPlanContainer" class="space-y-2">
+                            <p class="text-sm text-gray-500 italic">Loading pending tasks...</p>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- DAILY TASK SECTION -->
+            <div id="dailyTaskTab" class="content-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px;">
+                    <div>
+                        <h3 style="margin:0; font-size: 15px;">Daily Task Time Management</h3>
+                        <p style="color: var(--text-muted); font-size: 12px; margin: 2px 0 0 0; line-height: 1.4;">View your planned and actual tasks submitted from Tarkie.</p>
+                    </div>
+                    <div id="taskSyncStatus" class="sync-status">🔄 Last Synced: --:--:--</div>
+                </div>
+                
+                <!-- Month filter kept hidden for JS (KPI / summary / tables still use selectedMonthFilter). UI month bar + download removed per request. -->
+                <select id="selectedMonthFilter" onchange="onMonthFilterChange()" style="display:none;" aria-hidden="true"></select>
 
                 <!-- PLAN SECTION -->
-                <div id="planActualSection" class="sub-content-section" style="display: none;">
+                <div id="planActualSection" class="sub-content-section active" style="display: block;">
                     <div class="section-container">
                         <div class="sec-head">
                             <h4 class="sec-title">📅 Daily Plan vs Actual</h4>
@@ -3989,7 +4105,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                     </div>
                     <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
                         <button type="button" id="snsSubmitBtn" class="sns-submit-btn" onclick="submitSnsTikTokLink()">Submit Link</button>
-                        <span style="font-size:11px; color:var(--text-muted);">TTL target = Heart + Share + Views</span>
+                        <span class="sns-ttl" id="snsTtlChip">TTL target <b id="snsTtlVal">0</b><em>= Heart + Share + Views</em></span>
                         <span id="snsSubmitMsg" role="alert" style="display:none; flex-basis:100%; font-size:12px; font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; padding:8px 12px; border-radius:8px;"></span>
                     </div>
                 </div>
@@ -4229,8 +4345,11 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                 if (!byTitle[k]) { byTitle[k] = { title: title, freq: 0, dur: kpiPlanDurMins(r) }; order.push(k); }
                 byTitle[k].freq += kpiEffFreq(r, kpiPlanFreqNum(r), monthKey);
             });
+            // hide titles with nothing left (0× left) - nothing to deduct a leave from (keep ones already ticked)
+            let hadAny = order.length > 0;
+            order = order.filter(k => byTitle[k].freq > 0 || leavePlanSel[k] != null);
             if (!order.length) {
-                box.innerHTML = '<span style="font-size:12px;color:var(--text-muted);">' + (monthlyPlanDataLoaded ? 'No TASK / OTHERS plan plotted for this month' : 'Loading Monthly Plan...') + '</span>';
+                box.innerHTML = '<span style="font-size:12px;color:var(--text-muted);">' + (monthlyPlanDataLoaded ? (hadAny ? 'No TASK / OTHERS plan with remaining frequency (all are 0× left)' : 'No TASK / OTHERS plan plotted for this month') : 'Loading Monthly Plan...') + '</span>';
                 leavePlanRecalc(); return;
             }
             let fmtN = n => (Math.round(n * 100) / 100).toString();
@@ -5650,6 +5769,22 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             return Math.max(0, totalWorkingDays - leaveAbsentCount);
         }
 
+        function syncOvSummaryTabs() {
+            let b = window._ovSumBucket || 'CONTENT';
+            document.querySelectorAll('.ov-sum-tab').forEach(function (el) {
+                let on = el.getAttribute('data-b') === b;
+                el.classList.toggle('active', on);
+                el.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+        }
+        function switchOvSummaryTab(bucket) {
+            window._ovSumBucket = bucket;
+            window._ovSumPicked = true;
+            syncOvSummaryTabs();
+            try { updateDailyTaskSummaryAndChart(); } catch (e) { console.error(e); }
+            try { renderKpiLanding(); } catch (e) { console.error(e); }
+        }
+
         function updateDailyTaskSummaryAndChart() {
             let selectedMonth = document.getElementById('selectedMonthFilter').value;
             let _nowD = new Date(), year = _nowD.getFullYear(), monthIndex = _nowD.getMonth();   // fallback = current month (no hardcoded month)
@@ -5662,6 +5797,10 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             let planTasks = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === selectedMonth);
             let actualTasks = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === selectedMonth);
 
+            // ---- Overview Summary is per category tab (CONTENT / TRAINING / TASK / OTHERS) ----
+            const OVB = (window._ovSumBucket && window._ovSumBucket !== 'OVERALL') ? window._ovSumBucket : 'CONTENT';
+            const bActual = actualTasks.filter(function (t) { return kpiRowBucket(t) === OVB; });
+
             let filteredLeaves = localLeaveRecords.filter(l => !selectedMonth || getRowMonthKey(l.date) === selectedMonth);
             let leaveAbsentCount = filteredLeaves.length;
             let targetDays = calculateTargetDays(year, monthIndex, leaveAbsentCount);
@@ -5671,7 +5810,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             let durationCount = 0;
             let apprContentRows = kpiApprovedContentRows(selectedMonth);   // content duration counts only once approved
 
-            actualTasks.forEach(t => {
+            bActual.forEach(t => {
                 let titleVal = t["ACTUAL [Title]"];
                 if (titleVal && String(titleVal).trim() !== "") {
                     uniqueDays.add(cleanDateDisplay(t["Date Submitted"]));
@@ -5685,15 +5824,17 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             });
 
             // Monthly Plan mins (freq × duration) less leave/absent — same base as KPI Productivity
-            let totalPlanMins = 0;
-            (allLoadedTasks.monthlyPlan || []).filter(r => matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), selectedMonth)).forEach(r => {
+            let totalPlanMins = 0, bucketPlanMins = 0;
+            (allLoadedTasks.monthlyPlan || []).filter(r => matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), selectedMonth) && kpiRowBucket(r) === OVB).forEach(r => {
                 let d = parseFloat(getRowVal(r, ['DURATION PER MIN', 'DURATION']));
                 let f = parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
                 totalPlanMins += (!isNaN(d) && d > 0) ? d * f : 480 * f;
+                let fe = kpiEffFreq(r, f, selectedMonth);   // less leave / absent
+                bucketPlanMins += (!isNaN(d) && d > 0) ? d * fe : 480 * fe;
             });
             // Actual mins: CONTENT = approved only; TASK / OTHERS = always
             let allActualMins = 0;
-            actualTasks.forEach(t => {
+            bActual.forEach(t => {
                 if (!t['ACTUAL [Title]'] || String(t['ACTUAL [Title]']).trim() === '') return;
                 if (!kpiDurationCounts(t, apprContentRows)) return;
                 let d = parseFloat(getRowVal(t, ['DURATION PER MIN', 'DURATION']));
@@ -5704,7 +5845,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             let totalDaysWorked = uniqueDays.size;
             let actualDays = (allActualMins / 480).toFixed(1);
             let avgActualMins = durationCount > 0 ? Math.round(sumDurationPerMin / durationCount) : 0;
-            let _peSum = kpiProdEff(selectedMonth);   // unique + Monthly-Plan-only, gated by Designated Minutes
+            let _peSum = kpiProdEff(selectedMonth, OVB);   // unique + Monthly-Plan-only, gated by Designated Minutes
             let productivityRate = _peSum.productivity == null ? 0 : Math.round(_peSum.productivity * 1000) / 10;
 
             let targetMinsPerTask = 60;
@@ -5714,15 +5855,16 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             document.getElementById('sumDaysWorked').innerText = totalDaysWorked;
             document.getElementById('sumRenderedDaysPercent').innerText = (targetDays > 0 ? Math.round((totalDaysWorked / targetDays) * 100) : 0) + '%';
             document.getElementById('sumActualDays').innerText = actualDays;
-            document.getElementById('sumActualDaysPercent').innerText = (targetDays > 0 ? Math.round((parseFloat(actualDays) / targetDays) * 100) : 0) + '%';
+            document.getElementById('sumActualDaysPercent').innerText = (bucketPlanMins > 0 ? Math.round((parseFloat(actualDays) / (bucketPlanMins / 480)) * 100) : 0) + '%';
             let renderedPct = targetDays > 0 ? Math.round((totalDaysWorked / targetDays) * 100) : 0;
-            let actualPct = targetDays > 0 ? Math.round((parseFloat(actualDays) / targetDays) * 100) : 0;
+            let bucketPlanDays = bucketPlanMins / 480;
+            let actualPct = bucketPlanDays > 0 ? Math.round((parseFloat(actualDays) / bucketPlanDays) * 100) : 0;
             document.getElementById('sumRenderedTargetText').innerText = 'Target: ' + targetDays + ' days';
-            document.getElementById('sumActualTargetText').innerText = 'Target: ' + targetDays + ' days (Total Actual Mins ÷ 480)';
+            document.getElementById('sumActualTargetText').innerText = 'Target: ' + (bucketPlanMins / 480).toFixed(1) + ' days (' + OVB.charAt(0) + OVB.slice(1).toLowerCase() + ' plan mins ÷ 480 · Actual mins ÷ 480)';
             document.getElementById('sumRenderedDaysBar').style.width = Math.min(100, renderedPct) + '%';
             document.getElementById('sumActualDaysBar').style.width = Math.min(100, actualPct) + '%';
             document.getElementById('sumLeaveAbsentCount').innerText = leaveAbsentCount + ' days';
-            let targetMins = targetDays * 480;
+            let targetMins = Math.round(bucketPlanMins);   // designated for this category = its Monthly Plan mins (less leave)
             let totalMinsPercent = targetMins > 0 ? Math.round((sumDurationPerMin / targetMins) * 1000) / 10 : 0;
             var _el=document.getElementById('sumAvgTime'); if(_el) _el.innerText = Math.round(sumDurationPerMin).toLocaleString() + ' mins';
             var _el2=document.getElementById('sumTotalMinsTarget'); if(_el2) _el2.innerText = 'Target: ' + targetMins.toLocaleString() + ' mins (' + targetDays + ' days × 480)';
@@ -5732,7 +5874,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                 let actM = Math.round(sumDurationPerMin), bal = targetMins - actM;
                 let setT = (id, t) => { let e = document.getElementById(id); if (e) e.innerText = t; };
                 setT('sumDesigMins', targetMins.toLocaleString() + ' mins');
-                setT('sumDesigActualText', targetDays + ' days × 480 · Actual: ' + actM.toLocaleString() + ' mins');
+                setT('sumDesigActualText', OVB.charAt(0) + OVB.slice(1).toLowerCase() + ' Monthly Plan · Actual: ' + actM.toLocaleString() + ' mins');
                 setT('sumDesigBalanceText', bal > 0 ? 'Remaining: ' + bal.toLocaleString() + ' mins (≈ ' + (bal / 480).toFixed(1) + ' days)' : (bal === 0 ? '✔ Fully met' : 'Over by ' + Math.abs(bal).toLocaleString() + ' mins'));
                 let be = document.getElementById('sumDesigBalanceText'); if (be) be.style.color = bal > 0 ? '#f59e0b' : '#10b981';
                 setT('sumDesigPercent', totalMinsPercent + '%');
@@ -5745,8 +5887,12 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             var _ovTm=document.getElementById('overviewTotalMins'); if(_ovTm) _ovTm.innerText = avgActualPercent;
 
             renderMonthlyPlanView();
-            try { renderCategoryProgress(selectedMonth, 'summaryCategoryProgress'); } catch (e) { console.error(e); }
-            renderCalendarGanttChart(actualTasks, selectedMonth);
+            try { renderCategoryProgress(selectedMonth, 'summaryCategoryProgress', OVB); } catch (e) { console.error(e); }
+            renderCalendarGanttChart(window._ovSumBucket === 'OVERALL' ? actualTasks : bActual, selectedMonth);   // Overall tab = all categories
+            try {
+                let sub = document.getElementById('ovSumCatLbl');
+                if (sub) sub.textContent = '· ' + OVB.charAt(0) + OVB.slice(1).toLowerCase();
+            } catch (e) {}
             updateMonthlyPendingPlanUI(actualTasks);
         }
 
@@ -6007,8 +6153,12 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             const container = document.getElementById('calendarGanttContainer');
             if (!container) return;
 
-            const START_H = 8, END_H = 17; // 8 AM to 5 PM, one column per hour
-            const palette = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+            // Compact Gantt: one row per CATEGORY, one column per DATE.
+            // Each date header carries the day + the 8A–5P hour scale; each cell shows that day's time block(s).
+            const START_H = 8, END_H = 17, SPAN = (END_H - START_H) * 60;
+            const GROUP_COLORS = { CONTENT: '#10b981', TRAINING: '#f59e0b', TASK: '#3b82f6', OTHERS: '#8b5cf6' };
+            const groupColor = (c) => { let m = /^\s*(CONTENT|TRAINING|TASK|OTHERS)\b/i.exec(c || ''); return GROUP_COLORS[m ? m[1].toUpperCase() : 'OTHERS']; };
+            const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
             const toMins = (v) => {
                 if (v === undefined || v === null) return null;
@@ -6024,24 +6174,28 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                 if (am && h === 12) h = 0;
                 return h * 60 + m;
             };
-            const fmtHour = (h) => ((h % 12) || 12) + ' ' + (h >= 12 ? 'PM' : 'AM');
+            const fmtT = (m) => { let h = Math.floor(m / 60), mm = m % 60; return ((h % 12) || 12) + (mm ? ':' + String(mm).padStart(2, '0') : '') + (h >= 12 ? 'p' : 'a'); };
+            const dateInfo = (d) => {
+                let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+                if (!m) return { top: d, sub: '' };
+                let dt = new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+                return { top: MON[dt.getMonth()] + ' ' + dt.getDate(), sub: DOW[dt.getDay()] };
+            };
 
-            let groups = {};
+            let groups = {}, dateSet = {};
             (actualTasks || []).forEach(t => {
                 let title = String(t["ACTUAL [Title]"] || '').trim();
                 if (!title) return;
                 let cat = String(getRowVal(t, ["CATEGORY", "CATEGORY 2"]) || '').trim() || 'Uncategorized';
-                let startTxt = String(t["START TIME"] || '').trim();
-                let endTxt = String(t["TIME ENDED"] || '').trim();
-                if (!groups[cat]) groups[cat] = [];
-                groups[cat].push({
-                    title: title,
-                    date: cleanDateDisplay(t["Date Submitted"]),
-                    startTxt: startTxt,
-                    endTxt: endTxt,
-                    start: toMins(startTxt),
-                    end: toMins(endTxt)
-                });
+                let date = cleanDateDisplay(t["Date Submitted"]) || String(t["Date Submitted"] || '').substring(0, 10);
+                let startTxt = String(t["START TIME"] || '').trim(), endTxt = String(t["TIME ENDED"] || '').trim();
+                let st = toMins(startTxt), en = toMins(endTxt);
+                dateSet[date] = 1;
+                let g = groups[cat] || (groups[cat] = { byDate: {}, mins: 0, sessions: 0, titles: {} });
+                g.titles[title.toLowerCase()] = title;
+                (g.byDate[date] = g.byDate[date] || []).push({ st: st, en: en, startTxt: startTxt, endTxt: endTxt, title: title });
+                g.sessions++;
+                if (st !== null && en !== null && en > st) g.mins += (en - st);
             });
 
             let cats = Object.keys(groups).sort();
@@ -6049,44 +6203,44 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                 container.innerHTML = '<div style="padding:28px; text-align:center; color:var(--text-muted); font-size:12px;">No actual records found for this month.</div>';
                 return;
             }
+            let dates = Object.keys(dateSet).sort();
+            let CW = 118;   // date column width
 
-            let colCount = END_H - START_H;
-            let html = '<table class="gantt-cal-table"><thead><tr><th class="gantt-task-name-cell" style="z-index:6;">Task / Date</th>';
-            for (let h = START_H; h < END_H; h++) {
-                html += '<th style="min-width:72px;">' + fmtHour(h) + '</th>';
-            }
+            let html = '<table class="gantt-cal-table gx-table"><thead><tr><th class="gantt-task-name-cell" style="z-index:6; vertical-align:bottom;" rowspan="2">Category</th>';
+            dates.forEach(d => { let di = dateInfo(d); html += '<th style="min-width:' + CW + 'px; padding:6px 4px 2px !important;"><div style="font-size:12px;">' + escHtml(di.top) + '</div><div style="font-size:10px; font-weight:500; opacity:.7;">' + escHtml(di.sub) + '</div></th>'; });
+            html += '</tr><tr>';
+            dates.forEach(() => { html += '<th style="padding:0 6px 5px !important; font-size:9px; font-weight:500; opacity:.65;"><div style="display:flex; justify-content:space-between;"><span>8A</span><span>12P</span><span>5P</span></div></th>'; });
             html += '</tr></thead><tbody>';
 
             cats.forEach((cat, ci) => {
-                let color = palette[ci % palette.length];
-                let items = groups[cat].sort((a, b) => (a.date + String(a.start === null ? 0 : a.start).padStart(5, '0')).localeCompare(b.date + String(b.start === null ? 0 : b.start).padStart(5, '0')));
-
-                html += '<tr><td class="gantt-task-name-cell gantt-group-cell" style="color:' + color + '; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">&#9679; ' + escHtml(cat) + ' (' + items.length + ')</td>';
-                html += '<td class="gantt-group-fill" colspan="' + colCount + '"></td></tr>';
-
-                items.forEach(it => {
-                    let range = (it.startTxt || '--') + ' - ' + (it.endTxt || '--');
-                    let dur = (it.start !== null && it.end !== null && it.end > it.start) ? (it.end - it.start) + ' mins' : '';
-                    html += '<tr><td class="gantt-task-name-cell" title="' + escHtml(it.title) + '">' +
-                        '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escHtml(it.title) + '</div>' +
-                        '<div style="font-size:10px; font-weight:500; color:var(--text-muted);">' + escHtml(it.date) + ' &middot; ' + escHtml(range) + (dur ? ' &middot; ' + dur : '') + '</div></td>';
-
-                    for (let h = START_H; h < END_H; h++) {
-                        let cell = '';
-                        if (it.start !== null && it.end !== null && it.end > it.start) {
-                            let slotStart = h * 60, slotEnd = (h + 1) * 60;
-                            let ovStart = Math.max(it.start, slotStart);
-                            let ovEnd = Math.min(it.end, slotEnd);
-                            if (ovEnd > ovStart) {
-                                let left = ((ovStart - slotStart) / 60) * 100;
-                                let width = ((ovEnd - ovStart) / 60) * 100;
-                                cell = '<div class="gantt-bar" title="' + escHtml(it.title + ' (' + range + ')') + '" style="width:' + width.toFixed(1) + '%; margin-left:' + left.toFixed(1) + '%; background:linear-gradient(135deg,' + color + ',' + color + 'bb); box-shadow:0 0 12px ' + color + '66;"></div>';
-                            }
-                        }
-                        html += '<td class="gantt-bar-cell">' + cell + '</td>';
-                    }
-                    html += '</tr>';
+                let color = groupColor(cat);
+                let g = groups[cat], nTasks = Object.keys(g.titles).length;
+                html += '<tr><td class="gantt-task-name-cell" title="' + escHtml(cat) + '">' +
+                    '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:' + color + '; text-transform:uppercase; letter-spacing:0.04em; font-size:11px;">&#9679; ' + escHtml(cat) + '</div>' +
+                    '<div style="font-size:10px; font-weight:500; color:var(--text-muted);">' + nTasks + ' task' + (nTasks === 1 ? '' : 's') + ' &middot; ' + g.sessions + ' session' + (g.sessions === 1 ? '' : 's') + (g.mins ? ' &middot; ' + g.mins + ' mins' : '') + '</div></td>';
+                dates.forEach(d => {
+                    let items = g.byDate[d];
+                    if (!items) { html += '<td class="gantt-bar-cell" style="min-width:' + CW + 'px; padding:6px 0 !important; border-left:0 !important;"><div style="height:18px;"></div></td>'; return; }
+                    items.sort((a, b) => (a.st === null ? 0 : a.st) - (b.st === null ? 0 : b.st));
+                    // merge touching / overlapping time blocks so they read as one continuous bar
+                    let segs = [];
+                    items.forEach(it => {
+                        if (!(it.st !== null && it.en !== null && it.en > it.st)) return;
+                        let last = segs[segs.length - 1];
+                        if (last && it.st <= last.en) { last.en = Math.max(last.en, it.en); last.tips.push(it); }
+                        else segs.push({ st: it.st, en: it.en, tips: [it] });
+                    });
+                    let track = '';
+                    segs.forEach(sg => {
+                        let l = Math.max(0, Math.min(100, ((sg.st - START_H * 60) / SPAN) * 100));
+                        let w = Math.max(1.5, Math.min(100 - l, ((sg.en - sg.st) / SPAN) * 100));
+                        let tip = sg.tips.map(it => it.title).filter((v, i, arr) => arr.indexOf(v) === i).join(' | ') + ' · ' + d + ' · ' + fmtT(sg.st) + '–' + fmtT(sg.en);
+                        track += '<div class="gantt-bar" title="' + escHtml(tip) + '" style="position:absolute; top:0; height:100%; width:' + w.toFixed(2) + '%; left:' + l.toFixed(2) + '%; border-radius:0; background:linear-gradient(135deg,' + color + ',' + color + 'bb);"></div>';
+                    });
+                    html += '<td class="gantt-bar-cell" style="min-width:' + CW + 'px; padding:6px 0 !important; border-left:0 !important;">' +
+                        '<div style="position:relative; height:18px;">' + track + '</div></td>';
                 });
+                html += '</tr>';
             });
 
             html += '</tbody></table>';
@@ -6522,44 +6676,128 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
         document.addEventListener('visibilitychange', function () { if (!document.hidden) loadApprovals(); });
         window.addEventListener('focus', function () { loadApprovals(); });
 
+        /* ---------- Self-contained .xlsx writer (no CDN / library needed) ---------- */
+        var StXlsx = (function () {
+            var CRC_T = null;
+            function crc32(u8) {
+                if (!CRC_T) { CRC_T = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); CRC_T[n] = c >>> 0; } }
+                var crc = 0xFFFFFFFF;
+                for (var i = 0; i < u8.length; i++) crc = CRC_T[(crc ^ u8[i]) & 0xFF] ^ (crc >>> 8);
+                return (crc ^ 0xFFFFFFFF) >>> 0;
+            }
+            var enc = new TextEncoder();
+            function esc(v) { return String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+            function colName(i) { var s = ''; i++; while (i > 0) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+            function safeName(n, used) {
+                var b = String(n || 'Sheet').replace(/[\[\]:*?\/\\]/g, ' ').trim().substring(0, 31) || 'Sheet', name = b, k = 2;
+                while (used[name.toLowerCase()]) { name = b.substring(0, 28) + ' ' + k++; }
+                used[name.toLowerCase()] = 1; return name;
+            }
+            function sheetXml(rows, headerRow) {
+                var widths = [], out = [];
+                rows.forEach(function (r, ri) {
+                    var cells = [];
+                    (r || []).forEach(function (v, ci) {
+                        if (v === undefined || v === null || v === '') return;
+                        var ref = colName(ci) + (ri + 1), isHead = headerRow && ri === 0, sAttr = isHead ? ' s="1"' : '';
+                        var len = String(v).length; if (len > (widths[ci] || 0)) widths[ci] = len;
+                        if (typeof v === 'number' && isFinite(v)) cells.push('<c r="' + ref + '"' + sAttr + '><v>' + v + '</v></c>');
+                        else cells.push('<c r="' + ref + '"' + sAttr + ' t="inlineStr"><is><t xml:space="preserve">' + esc(v) + '</t></is></c>');
+                    });
+                    out.push('<row r="' + (ri + 1) + '">' + cells.join('') + '</row>');
+                });
+                var cols = widths.length ? '<cols>' + widths.map(function (w, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + Math.max(8, Math.min(60, (w || 8) + 2)) + '" customWidth="1"/>'; }).join('') + '</cols>' : '';
+                var view = headerRow ? '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' : '<sheetViews><sheetView workbookViewId="0"/></sheetViews>';
+                return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + view + cols + '<sheetData>' + out.join('') + '</sheetData></worksheet>';
+            }
+            function zip(files) {
+                var parts = [], central = [], offset = 0;
+                files.forEach(function (f) {
+                    var name = enc.encode(f.name), data = enc.encode(f.data), crc = crc32(data);
+                    var lh = new DataView(new ArrayBuffer(30));
+                    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+                    lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true); lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true);
+                    lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+                    parts.push(new Uint8Array(lh.buffer), name, data);
+                    var ch = new DataView(new ArrayBuffer(46));
+                    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+                    ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true); ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true);
+                    ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+                    central.push(new Uint8Array(ch.buffer), name);
+                    offset += 30 + name.length + data.length;
+                });
+                var cdSize = 0; central.forEach(function (p) { cdSize += p.length; });
+                var end = new DataView(new ArrayBuffer(22));
+                end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+                return new Blob(parts.concat(central, [new Uint8Array(end.buffer)]), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            }
+            // sheets: [{ name: 'Summary', rows: [[..],[..]], header: true|false }]
+            function build(sheets) {
+                var used = {}, names = sheets.map(function (s) { return safeName(s.name, used); });
+                var files = [
+                    { name: '[Content_Types].xml', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map(function (s, i) { return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('') + '</Types>' },
+                    { name: '_rels/.rels', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+                    { name: 'xl/workbook.xml', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + names.map(function (n, i) { return '<sheet name="' + esc(n) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>'; }).join('') + '</sheets></workbook>' },
+                    { name: 'xl/_rels/workbook.xml.rels', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map(function (s, i) { return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>'; }).join('') + '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+                    { name: 'xl/styles.xml', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF2563EB"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>' }
+                ];
+                sheets.forEach(function (s, i) { files.push({ name: 'xl/worksheets/sheet' + (i + 1) + '.xml', data: sheetXml(s.rows, s.header) }); });
+                return zip(files);
+            }
+            return { build: build };
+        })();
+
+        function stSaveBlob(blob, filename) {
+            if (window.navigator && typeof window.navigator.msSaveOrOpenBlob === 'function') { window.navigator.msSaveOrOpenBlob(blob, filename); return; }
+            var url = URL.createObjectURL(blob), a = document.createElement('a');
+            a.href = url; a.download = filename; a.rel = 'noopener'; a.style.display = 'none';
+            document.body.appendChild(a); a.click();
+            setTimeout(function () { try { document.body.removeChild(a); } catch (e) { } URL.revokeObjectURL(url); }, 4000);
+        }
+
         function downloadMonthExcel() {
-            let sel = document.getElementById('selectedMonthFilter');
-            let month = sel ? sel.value : '';
-            let label = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text.replace(' (Current)', '') : month;
-            let inMonth = t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === month;
-            let planRows = (allLoadedTasks.plan || []).filter(inMonth);
-            let actualRows = (allLoadedTasks.actual || []).filter(inMonth);
-            let leaves = localLeaveRecords.filter(l => getRowMonthKey(l.date) === month);
-            let v = id => { let el = document.getElementById(id); return el ? el.innerText : ''; };
+            try {
+                let sel = document.getElementById('selectedMonthFilter');
+                let month = sel ? sel.value : '';
+                let label = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text.replace(' (Current)', '') : month;
+                let inMonth = t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === month;
+                let planRows = (allLoadedTasks.plan || []).filter(inMonth);
+                let actualRows = (allLoadedTasks.actual || []).filter(inMonth);
+                let leaves = (localLeaveRecords || []).filter(l => getRowMonthKey(l.date) === month);
+                let v = id => { let el = document.getElementById(id); return el ? el.innerText : ''; };
 
-            let wb = XLSX.utils.book_new();
-            let summary = [
-                ['Daily Task Time Summary', label],
-                ['User', loggedInUser],
-                [],
-                ['Target Days', v('sumTargetDays')],
-                ['Rendered Days', v('sumDaysWorked') + ' (' + v('sumRenderedDaysPercent') + ' of target)'],
-                ['Actual Days (8 hrs/day)', v('sumActualDays') + ' (' + v('sumActualDaysPercent') + ' of target)'],
-                ['Leaves & Absences', v('sumLeaveAbsentCount')],
-                ['Total Actual Mins', v('sumAvgTime')],
-                ['Target Mins', v('sumTotalMinsTarget')],
-                ['Total Mins % of Target', v('sumTotalMinsPercent')],
-                ['Productivity Rate', v('sumProductivityRate')]
-            ];
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Summary');
-
-            let planCols = ["Date Submitted", "Time Submitted", "START TIME", "TIME ENDED", "DURATION PER MIN", "LOCATION", "PLAN [Title]", "CATEGORY", "CATEGORY 2", "REMARKS"];
-            let actualCols = ["Date Submitted", "Time Submitted", "START TIME", "TIME ENDED", "DURATION PER MIN", "LOCATION", "CATEGORY", "CATEGORY 2", "ACTUAL [Title]", "FORMAT", "Is this the start date?", "TARGET DATE", "APPROVAL DATE", "REMARKS FOR ACTUAL"];
-            let toAoa = (rows, cols) => [cols].concat(rows.map(r => cols.map(c => {
-                if (c === 'DURATION PER MIN') return getRowVal(r, ["DURATION PER MIN", "DURATION"]);
-                if (c === 'CATEGORY 2') return getRowVal(r, ["CATEGORY 2"]);
-                return r[c] !== undefined ? r[c] : '';
-            })));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(toAoa(planRows, planCols)), 'Daily Plan');
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(toAoa(actualRows, actualCols)), 'Daily Actual');
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Date', 'Type', 'Remarks / Reason']].concat(leaves.map(l => [l.date, l.type, l.reason || '']))), 'Leave-Absent');
-
-            XLSX.writeFile(wb, 'Daily_Task_' + month + '_' + (loggedInUser || 'user').replace(/[^a-z0-9@._-]/gi, '_') + '.xlsx');
+                let summary = [
+                    ['Daily Task Time Summary', label],
+                    ['User', loggedInUser],
+                    [],
+                    ['Summary category (Overview tab)', window._ovSumBucket || 'CONTENT'],
+                    ['Target Days', v('sumTargetDays')],
+                    ['Rendered Days', v('sumDaysWorked') + ' (' + v('sumRenderedDaysPercent') + ' of target)'],
+                    ['Actual Days (8 hrs/day)', v('sumActualDays') + ' (' + v('sumActualDaysPercent') + ' of target)'],
+                    ['Leaves & Absences', v('sumLeaveAbsentCount')],
+                    ['Total Actual Mins', v('sumAvgTime')],
+                    ['Target Mins', v('sumTotalMinsTarget')],
+                    ['Total Mins % of Target', v('sumTotalMinsPercent')],
+                    ['Productivity Rate', v('sumProductivityRate')]
+                ];
+                let planCols = ["Date Submitted", "Time Submitted", "START TIME", "TIME ENDED", "DURATION PER MIN", "LOCATION", "PLAN [Title]", "CATEGORY", "CATEGORY 2", "REMARKS"];
+                let actualCols = ["Date Submitted", "Time Submitted", "START TIME", "TIME ENDED", "DURATION PER MIN", "LOCATION", "CATEGORY", "CATEGORY 2", "ACTUAL [Title]", "FORMAT", "Is this the start date?", "TARGET DATE", "APPROVAL DATE", "REMARKS FOR ACTUAL"];
+                let toAoa = (rows, cols) => [cols].concat(rows.map(r => cols.map(c => {
+                    if (c === 'DURATION PER MIN') return getRowVal(r, ["DURATION PER MIN", "DURATION"]);
+                    if (c === 'CATEGORY 2') return getRowVal(r, ["CATEGORY 2"]);
+                    return r[c] !== undefined ? r[c] : '';
+                })));
+                let blob = StXlsx.build([
+                    { name: 'Summary', rows: summary, header: false },
+                    { name: 'Daily Plan', rows: toAoa(planRows, planCols), header: true },
+                    { name: 'Daily Actual', rows: toAoa(actualRows, actualCols), header: true },
+                    { name: 'Leave-Absent', rows: [['Date', 'Type', 'Remarks / Reason']].concat(leaves.map(l => [l.date, l.type, l.reason || ''])), header: true }
+                ]);
+                stSaveBlob(blob, 'Daily_Task_' + (month || 'all') + '_' + (loggedInUser || 'user').replace(/[^a-z0-9@._-]/gi, '_') + '.xlsx');
+            } catch (err) {
+                console.error('Download failed', err);
+                alert('Hindi na-download ang Excel file: ' + (err && err.message ? err.message : err));
+            }
         }
     </script>
 
@@ -6850,14 +7088,14 @@ function kpiDurationCounts(row, approvedSet) {
 //  • DESIGNATED MINUTES GATE: Designated = (working days − leave) × 480.
 //      Monthly Plan mins < Designated  →  actuals NOT in the plan are excluded; Productivity / Efficiency are capped at 100% (no "over").
 //      Monthly Plan mins ≥ Designated  →  actuals NOT in the plan are added on top (plus to productivity), so over-achievement is possible.
-function kpiProdEff(monthKey) {
+function kpiProdEff(monthKey, onlyBucket) {   // onlyBucket (optional): CONTENT / TASK / OTHERS / TRAINING → category-only productivity & efficiency
     var rowDate = function (t) { return getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || t['Date Submitted']; };
     var inMonth = function (t) { return !monthKey || getRowMonthKey(rowDate(t)) === monthKey; };
     var durOf = function (t) { var d = parseFloat(String(getRowVal(t, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, '')); return (!isNaN(d) && d > 0) ? d : NaN; };
 
     // ---- Monthly Plan: plan minutes, non-content plan lines, content Category 2 list ----
     var plan = (allLoadedTasks.monthlyPlan || []).filter(function (r) { return matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), monthKey); });
-    var lines = [], contentNorms = [], planMins = 0, planMinsEff = 0;
+    var lines = [], contentNorms = [], planMins = 0, planMinsEff = 0, planMinsEffB = 0;
     plan.forEach(function (r) {
         var rawF = String(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, '');
         var f = rawF === '' ? 1 : (parseFloat(rawF) || 0);
@@ -6867,6 +7105,7 @@ function kpiProdEff(monthKey) {
         var fe = kpiEffFreq(r, f, monthKey);          // frequency left after leave / absent (480 mins each)
         planMinsEff += d * fe;
         var pair = kpiPairOf(r), nc = kpiPlanLineNorm(pair);
+        if (!onlyBucket || pair.cat === onlyBucket) planMinsEffB += d * fe;
         if (pair.cat === 'CONTENT') { if (nc && Math.round(fe) > 0) contentNorms.push(nc); return; }
         var ln = lines.filter(function (x) { return x.bucket === pair.cat && x.norm === nc; })[0];
         if (!ln) { ln = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, mins: 0, titles: [], seen: {} }; lines.push(ln); }
@@ -6888,7 +7127,7 @@ function kpiProdEff(monthKey) {
     var workingDays = (typeof calculateTargetDays === 'function') ? calculateTargetDays(yr, mi, 0) : 22;
     var designated = Math.max(0, workingDays - leaveDays) * 480;
     var planHit = planMins > 0 && planMins >= designated - 0.5;
-    var adjPlan = Math.max(0, planMinsEff - kpiLeavePlanDeduct(monthKey).untitledMins);   // = plan mins - leave x 480
+    var adjPlan = onlyBucket ? Math.max(0, planMinsEffB) : Math.max(0, planMinsEff - kpiLeavePlanDeduct(monthKey).untitledMins);   // = plan mins - leave x 480
 
     // ---- Daily Plan index: ONE entry per (date + title) ----
     var planByKey = {};
@@ -6906,6 +7145,7 @@ function kpiProdEff(monthKey) {
     var seenRow = {}, eff = {}, inMins = 0, extraMins = 0, bonusMins = 0;
     ordered.forEach(function (o) {
         var r = o.r, bucket = kpiRowBucket(r);
+        if (onlyBucket && bucket !== onlyBucket) return;                           // category-only view
         if (bucket === 'CONTENT' && !apprSet.has(r)) return;                     // CONTENT counts only once approved
         var title = kpiTitle(r);
         var st = String(getRowVal(r, ['START TIME', 'Start Time']) || '').trim(), en = String(getRowVal(r, ['TIME ENDED', 'End Time']) || '').trim();
@@ -7103,7 +7343,7 @@ function computeKpi(monthKey) {
     plan.forEach(function (r) {
         if (!kpiIsContentRow(r)) return;
         var d = parseFloat(String(getRowVal(r, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, ''));
-        var f = parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1;
+        var f = kpiEffFreq(r, parseInt(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']), 10) || 1, monthKey);   // less leave / absent (same as SEPCO)
         if (!isNaN(d) && d > 0) planContentMins += d * f;
         else planContentMins += 480 * f;
     });
@@ -7178,14 +7418,18 @@ function computeKpi(monthKey) {
     if (gk === 'SPLUS') profileKey = (inv.has || dis.has) ? 'SPLUS_ADM' : 'SPLUS_MGT';
     var prof = KPI_PROFILES[profileKey] || [];
     var capped = 0, uncapped = 0, missing = [];
+    // A KPI with no target / no data is NOT scored as 0 — it is left out and the remaining weights are re-scaled to 100%.
+    var _sumW = 0;
+    prof.forEach(function (p) { var v0 = values[p.k]; if (v0 != null && !isNaN(v0)) _sumW += p.w; });
     var lines = prof.map(function (p) {
         var v = values[p.k];
         var has = v != null && !isNaN(v);
         if (!has && KPI_INPUT_NEEDS[p.k]) missing.push({ label: KPI_LABELS[p.k], need: KPI_INPUT_NEEDS[p.k] });
-        var val = has ? v : 0;
-        var cv = Math.min(val, p.c);
-        capped += cv * p.w; uncapped += val * p.w;
-        return { k: p.k, label: KPI_LABELS[p.k], w: p.w, c: p.c, v: has ? v : null, cv: cv, contrib: cv * p.w };
+        if (!has) return { k: p.k, label: KPI_LABELS[p.k], w: 0, c: p.c, v: null, cv: 0, contrib: 0 };
+        var ew = _sumW > 0 ? p.w / _sumW : 0;
+        var cv = Math.min(v, p.c);
+        capped += cv * ew; uncapped += v * ew;
+        return { k: p.k, label: KPI_LABELS[p.k], w: ew, c: p.c, v: v, cv: cv, contrib: cv * ew };
     });
     return {
         productivity: productivity, actMins: actMins, adjPlan: adjPlan, planContentMins: planContentMins, dailyPlanMins: dailyPlanMins, dailyActMins: dailyActMins,
@@ -7518,6 +7762,40 @@ var lines = [];
         '<div class="summary-card"><h4>Approved Content</h4><p class="val">' + (gAppr + extraCount) + '</p><p style="font-size:10px;margin:4px 0 0 0;">Approved requests' + (extraCount ? ' · ' + extraCount + ' plus (not in plan)' : ' in Monthly Plan') + '</p></div>' +
         '<div class="summary-card"><h4>Not Started</h4><p class="val">' + gNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but 0 actual</p></div>' +
         '</div>';
+
+    // ---- Total planned minutes vs the month's date capacity (working days x 480, less approved leave / absent) ----
+    try {
+        if (monthKey) {
+            var _mk = String(monthKey).split('-'), _yr = parseInt(_mk[0], 10), _mi = parseInt(_mk[1], 10) - 1;
+            var _wd = calculateTargetDays(_yr, _mi, 0);
+            // approved leave / absent days: one per date, and only if that date is a real working day (not Sunday / holiday) so nothing is deducted twice
+            var _lvSeen = {};
+            (localLeaveRecords || []).forEach(function (l) {
+                if (getRowMonthKey(l.date) !== monthKey) return;
+                var ds = (typeof cleanDateDisplay === 'function' ? cleanDateDisplay(l.date) : '') || String(l.date || '').substring(0, 10);
+                var dt = /^\d{4}-\d{2}-\d{2}$/.test(ds) ? new Date(parseInt(ds.substr(0, 4), 10), parseInt(ds.substr(5, 2), 10) - 1, parseInt(ds.substr(8, 2), 10)) : new Date(l.date);
+                if (isNaN(dt.getTime())) { _lvSeen[String(l.date)] = 1; return; }
+                if (dt.getDay() === 0 || PH_HOLIDAYS.indexOf(String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0')) !== -1) return;
+                _lvSeen[dt.getFullYear() + '-' + dt.getMonth() + '-' + dt.getDate()] = 1;
+            });
+            var _lv = Object.keys(_lvSeen).length;
+            var _cap = Math.max(0, _wd - _lv) * 480;
+            var _pm = 0; lines.forEach(function (l) { _pm += l.planMins || 0; });
+            var _un = 0; try { _un = kpiLeavePlanDeduct(monthKey).untitledMins || 0; } catch (e0) {}
+            _pm = Math.max(0, Math.round(_pm - _un));
+            var _diff = _pm - _cap, _st, _cls;
+            if (Math.abs(_diff) <= 0.5) { _st = '✔ Matches the month'; _cls = 'ok'; }
+            else if (_diff < 0) { _st = '⚠ Short by ' + Math.abs(Math.round(_diff)).toLocaleString() + ' mins (' + (Math.round(Math.abs(_diff) / 480 * 10) / 10) + ' day' + (Math.abs(_diff) / 480 === 1 ? '' : 's') + ')'; _cls = 'short'; }
+            else { _st = '⚠ Over by ' + Math.round(_diff).toLocaleString() + ' mins (' + (Math.round(_diff / 480 * 10) / 10) + ' day' + (_diff / 480 === 1 ? '' : 's') + ')'; _cls = 'over'; }
+            var _pc = _cap > 0 ? Math.round(_pm / _cap * 1000) / 10 : null;
+            cards = '<div class="mp-total mp-' + _cls + '">' +
+                '<div class="mp-total-main"><small>Total Planned Minutes · ' + escHtml(monthLabel) + '</small><div class="mp-total-val">' + _pm.toLocaleString() + '<em> mins</em></div><span class="mp-total-pill">' + _st + '</span></div>' +
+                '<div class="mp-total-side"><div class="mp-total-row"><span>Month capacity</span><b>' + _cap.toLocaleString() + ' mins</b></div>' +
+                '<div class="mp-total-sub">' + _wd + ' working days' + (_lv ? ' − ' + _lv + ' leave/absent' : '') + ' × 480 mins</div>' +
+                '<div class="mp-total-bar"><i style="width:' + Math.min(100, _pc == null ? 0 : _pc) + '%"></i></div>' +
+                '<div class="mp-total-sub">' + (_pc == null ? '—' : _pc + '% of the month planned') + '</div></div></div>' + cards;
+        }
+    } catch (eTot) { console.error(eTot); }
 
     if (!lines.length) {
         el.innerHTML = cards + '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + escHtml(monthLabel) + '</h5></div><div class="cat-empty">No Monthly Plan for this month yet.</div></div>';
@@ -7854,9 +8132,10 @@ function kpiClaimUnit(lines, bucket, cands, title, day, mins) {
     }
     return { line: null, counted: false, key: key };
 }
-function renderCategoryProgress(monthKey, targetId) {
+function renderCategoryProgress(monthKey, targetId, onlyBucket) {   // onlyBucket (optional): show a single category
     var el = document.getElementById(targetId || 'summaryCategoryProgress') || document.getElementById('kpiCategoryProgress');
     if (!el) return;
+    if (!onlyBucket && el.id === 'summaryCategoryProgress') onlyBucket = (window._ovSumBucket && window._ovSumBucket !== 'OVERALL') ? window._ovSumBucket : 'CONTENT';   // Overview Summary is always per category tab
     var monthLabel = monthKey ? new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' }) : '';
 
     var buckets = ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'];
@@ -7971,9 +8250,11 @@ function renderCategoryProgress(monthKey, targetId) {
         return '<td class="num' + (bold ? ' cat-strong' : '') + '">' + (v === 0 ? '0' : Math.round(v).toLocaleString()) + '</td>';
     }
 
+    window._catStatsLast = { monthKey: monthKey, stats: stats };
     var totPlan = 0, totAct = 0, totTC = 0, totAC = 0;
     var body = '<tr>';
-    buckets.forEach(function (b) {
+    var shownBuckets = onlyBucket ? [onlyBucket] : buckets;
+    shownBuckets.forEach(function (b) {
         var s = stats[b];
         totPlan += s.planMins; totAct += s.actualMins;
         totTC += s.targetCount; totAC += s.actualCount;
@@ -7995,7 +8276,7 @@ function renderCategoryProgress(monthKey, targetId) {
     // Reuse category actual mins (already approval-filtered for CONTENT)
     var kpiActMins = 0;
     buckets.forEach(function (b) { kpiActMins += stats[b].actualMins; });
-    var _peCat = kpiProdEff(monthKey);   // unique + Monthly-Plan-only, gated by Designated Minutes
+    var _peCat = kpiProdEff(monthKey, onlyBucket);   // unique + Monthly-Plan-only, gated by Designated Minutes
     var prod = _peCat.productivity == null ? null : _peCat.productivity * 100;
     if (prod == null) body += '<td class="num cat-muted">—</td>';
     else {
@@ -8115,7 +8396,7 @@ function ensureD(c, c2) {
         else row = ensureD('CONTENT', bestCat2);
         row.actualCount += 1;
     });
-    var detailKeys = Object.keys(detail).sort(function (a, b) {
+    var detailKeys = Object.keys(detail).filter(function (k) { return !onlyBucket || detail[k].cat === onlyBucket; }).sort(function (a, b) {
         var A = detail[a], B = detail[b];
         if (A.cat !== B.cat) return A.cat < B.cat ? -1 : 1;
         return A.cat2 < B.cat2 ? -1 : (A.cat2 > B.cat2 ? 1 : 0);
@@ -8224,19 +8505,118 @@ function ensureD(c, c2) {
         '<div class="cat-progress-scroll"><table class="cat-progress-table cat-progress-table--grouped">' +
         '<thead>' +
         '<tr class="cat-group-row">' +
-        '<th colspan="3">CONTENT</th><th colspan="3">TASK</th><th colspan="3">OTHERS</th><th colspan="3">TRAINING</th>' +
+        shownBuckets.map(function (b) { return '<th colspan="3">' + b + '</th>'; }).join('') +
         '<th rowspan="2" class="num">PLAN MINUTES</th><th rowspan="2" class="num">ACTUAL MINUTES</th><th rowspan="2" class="num">PRODUCTIVITY</th>' +
         '</tr>' +
         '<tr class="cat-subhead">' +
-        '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
-        '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
-        '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
-        '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>' +
+        shownBuckets.map(function () { return '<th class="num">Target Count</th><th class="num">Actual Count</th><th class="num">Achievement %</th>'; }).join('') +
         '</tr>' +
         '</thead><tbody>' + body + '</tbody></table></div></div>' +
         detailTable;
 }
 
+
+// ---------- Overview tab for TRAINING / TASK / OTHERS (same layout as the KPI landing) ----------
+// ---------- Overall Monthly Score (Content main KPI + Training + Task + Others) ----------
+function ovCatScore(B, monthKey) {
+    renderCategoryProgress(monthKey, 'ovScratch', B);   // fills window._catStatsLast (scratch container is hidden)
+    var st = (window._catStatsLast && window._catStatsLast.stats && window._catStatsLast.stats[B]) || { targetCount: 0, actualCount: 0, planMins: 0, actualMins: 0 };
+    var has = st.targetCount > 0 || st.actualCount > 0 || st.planMins > 0 || st.actualMins > 0;
+    if (!has) return null;
+    var pe = kpiProdEff(monthKey, B);
+    var vals = [st.targetCount > 0 ? st.actualCount / st.targetCount : null, pe.productivity, pe.efficiency, (pe.onTime + pe.late) > 0 ? pe.onTime / (pe.onTime + pe.late) : null]
+        .filter(function (v) { return v != null && !isNaN(v); });
+    if (!vals.length) return null;
+    return vals.reduce(function (a, v) { return a + Math.min(v, 1); }, 0) / vals.length;
+}
+function renderOvOverall(monthKey) {
+    var box = document.getElementById('ovOverall');
+    if (!box) return;
+    var monthLabel = monthKey ? new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' }) : '';
+    var items = [];
+    var cs = null;
+    try {
+        if (kpiGroupKey(kpiProfile.jobGroup)) { var k = computeKpi(monthKey); if (k && (k.target > 0 || k.own > 0)) cs = k.capped; }
+    } catch (e) { console.error(e); }
+    items.push({ b: 'CONTENT', label: 'Content (Main KPI)', v: cs });
+    ['TRAINING', 'TASK', 'OTHERS'].forEach(function (b) {
+        var v = null; try { v = ovCatScore(b, monthKey); } catch (e) { console.error(e); }
+        items.push({ b: b, label: b.charAt(0) + b.slice(1).toLowerCase(), v: v });
+    });
+    var used = items.filter(function (i) { return i.v != null; });
+    var overall = used.length ? used.reduce(function (a, i) { return a + Math.min(i.v, 1); }, 0) / used.length : null;
+    var cls = function (v) { return v == null ? 'na' : (v >= 1 ? 'good' : (v >= 0.8 ? 'warn' : 'bad')); };
+    var bandCls = overall == null ? 'low' : (overall >= 1 ? '' : (overall >= 0.8 ? 'warn' : 'low'));
+    box.innerHTML =
+        '<div class="ov-ov-main"><div class="ov-ring ' + bandCls + '" style="--p:' + (overall == null ? 0 : Math.min(100, Math.round(overall * 1000) / 10)) + '"><div class="ov-ov-big">' + (overall == null ? '—' : (Math.round(overall * 1000) / 10) + '<em>%</em>') + '</div></div>' +
+        '<div class="ov-ov-txt"><small>Overall Monthly Score<span>' + escHtml(monthLabel) + '</span></small>' +
+        '<span class="ov-ov-band ' + bandCls + '">' + (overall == null ? 'No data yet' : (overall >= 1 ? '100% and above' : overall >= 0.8 ? '80% – 99%' : 'Below 80%')) + '</span>' +
+        '<span class="ov-ov-sub">' + used.length + ' of 4 categories scored</span></div></div>' +
+        '<div class="ov-ov-chips">' + items.map(function (i) {
+            return '<button type="button" class="ov-ov-chip ' + cls(i.v) + '" onclick="switchOvSummaryTab(\'' + i.b + '\')"><small>' + escHtml(i.label) + '</small><b>' + (i.v == null ? '—' : (Math.round(i.v * 1000) / 10) + '%') + '</b></button>';
+        }).join('') + '</div>' +
+        '<div class="kpi-break" style="width:100%;"><h5>Overall breakdown (score × weight)</h5><table class="kpi-brk-table"><thead><tr><th>Category</th><th class="num">Score</th><th class="num">Cap</th><th class="num">Weight</th><th class="num">Contribution</th></tr></thead><tbody>' +
+        items.map(function (i) {
+            var w = (i.v != null && used.length) ? Math.round(100 / used.length) + '%' : '—';
+            return '<tr><td>' + escHtml(i.label) + '</td><td class="num">' + (i.v == null ? '<span class="kpi-nodata">no data</span>' : '<span class="' + xlCls(i.v) + '">' + pct(i.v) + '</span><span class="kpi-bar"><i style="width:' + Math.min(100, i.v * 100) + '%"></i></span>') + '</td><td class="num">100%</td><td class="num">' + w + '</td><td class="num"><strong>' + (i.v == null ? '—' : pct(Math.min(i.v, 1) / used.length)) + '</strong></td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<p class="ov-ov-note">Average of the categories that have data (' + used.length + ' of 4), each capped at 100% — Content uses the Main KPI total score; Training / Task / Others use their category score.</p>';
+}
+
+function renderKpiCategory(B, monthKey) {
+    var hero = document.getElementById('kpiHero');
+    if (!hero) return;
+    var label = B.charAt(0) + B.slice(1).toLowerCase();
+    var monthLabel = monthKey ? new Date(parseInt(monthKey.split('-')[0], 10), parseInt(monthKey.split('-')[1], 10) - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' }) : '';
+    var banner = document.getElementById('kpiMissingBanner'); if (banner) banner.style.display = 'none';
+    var chip = document.getElementById('kpiJobChip'); if (chip) chip.textContent = kpiProfile.jobGroup ? ('Job Group: ' + kpiProfile.jobGroup) : 'Job Group: not set';
+
+    // counts + minutes for this category (also draws the Plan vs Actual table below)
+    renderCategoryProgress(monthKey, 'summaryCategoryProgress', B);
+    var st = (window._catStatsLast && window._catStatsLast.stats && window._catStatsLast.stats[B]) || { targetCount: 0, actualCount: 0, planMins: 0, actualMins: 0 };
+    var pe = kpiProdEff(monthKey, B);
+    var tgt = st.targetCount, act = st.actualCount;
+    var ach = tgt > 0 ? act / tgt : null;
+    var prod = pe.productivity;
+    var eff = pe.efficiency;
+    var tl = (pe.onTime + pe.late) > 0 ? pe.onTime / (pe.onTime + pe.late) : null;
+
+    // score = equal-weight average of the KPIs that have data (each capped at 100%)
+    var lines = [
+        { label: 'Target Count (Achievement)', v: ach },
+        { label: 'Productivity', v: prod },
+        { label: 'Efficiency', v: eff },
+        { label: 'Timeliness (On-time)', v: tl }
+    ].filter(function (l) { return l.v != null && !isNaN(l.v); });
+    var w = lines.length ? 1 / lines.length : 0, capped = 0, uncapped = 0;
+    lines.forEach(function (l) { l.cv = Math.min(l.v, 1); l.contrib = l.cv * w; capped += l.contrib; uncapped += l.v * w; });
+    var band = capped >= 1.41 ? '141% & up' : capped >= 1.21 ? '121–140%' : capped >= 1.01 ? '101–120%' : capped >= 0.8 ? '80–100%' : 'Below 80%';
+    hero.innerHTML =
+        '<div class="kpi-score-card"><small>' + escHtml(label) + ' Score · ' + escHtml(monthLabel) + '</small>' +
+        '<div class="kpi-score-big">' + (Math.round(capped * 1000) / 10) + '%</div>' +
+        '<div class="kpi-score-meta">Capped · Uncapped: <strong>' + (Math.round(uncapped * 1000) / 10) + '%</strong><br>' + escHtml(label) + '</div>' +
+        '<span class="kpi-band ' + (capped < 0.8 ? 'low' : '') + '">KPI band: ' + band + '</span></div>' +
+        '<div class="kpi-break"><h5>' + escHtml(label) + ' breakdown (achievement × weight)</h5><table class="kpi-brk-table"><thead><tr><th>KPI</th><th class="num">Achievement</th><th class="num">Cap</th><th class="num">Weight</th><th class="num">Score</th></tr></thead><tbody>' +
+        lines.map(function (l) {
+            return '<tr><td>' + escHtml(l.label) + '</td><td class="num"><span class="' + xlCls(l.v) + '">' + pct(l.v) + '</span><span class="kpi-bar"><i style="width:' + Math.min(100, l.cv * 100) + '%"></i></span></td><td class="num">100%</td><td class="num">' + Math.round(w * 100) + '%</td><td class="num"><strong>' + pct(l.contrib) + '</strong></td></tr>';
+        }).join('') +
+        '</tbody></table></div>';
+
+    var has = tgt > 0 || act > 0 || st.planMins > 0 || st.actualMins > 0;
+    var heads = ['Target', 'Actual', 'Ach %', 'Plan mins', 'Actual mins', 'Productivity %', 'Efficiency %', 'On-time', 'Late', 'On-time %'];
+    var cells = xlNum(tgt, has) + xlNum(act, has) + xlPct(ach) + xlNum(Math.round(st.planMins).toLocaleString(), has) + xlNum(Math.round(st.actualMins).toLocaleString(), has) +
+        xlPct(prod) + xlPct(eff) + xlNum(pe.onTime, has) + xlNum(pe.late, has) + xlPct(tl);
+    var html = '<div class="kpi-legend"><span><i style="background:#22c55e"></i>100% and above</span><span><i style="background:#f59e0b"></i>80% – 99%</span><span><i style="background:#ef4444"></i>Below 80%</span></div>';
+    html += xlTable(escHtml(label), escHtml(label.toUpperCase()), heads, cells);
+    document.getElementById('kpiTables').innerHTML = html;
+
+    var rawHeads = ['Target', 'Actual', 'Plan mins', 'Adjusted plan mins', 'Actual mins', 'In plan mins', 'Not in plan mins', 'Matched plan mins', 'Matched actual mins', 'On Time', 'Late', 'Leave days'];
+    var rawVals = [tgt, act, Math.round(st.planMins), Math.round(pe.adjPlan), Math.round(st.actualMins), Math.round(pe.inMins), Math.round(pe.extraMins), Math.round(pe.planMinsMatched), Math.round(pe.matchedActualMins), pe.onTime, pe.late, pe.leaveDays];
+    document.getElementById('kpiRaw').innerHTML =
+        '<div class="xl-wrap"><p class="xl-title">Raw counts · ' + escHtml(label) + ' (' + escHtml(monthLabel) + ')</p><table class="xl-table"><tr class="xl-head">' +
+        rawHeads.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr><tr>' +
+        rawVals.map(function (v) { return '<td>' + (Number(v) || 0).toLocaleString() + '</td>'; }).join('') + '</tr></table></div>';
+}
 
 function renderKpiLanding() {
     var hero = document.getElementById('kpiHero');
@@ -8244,6 +8624,18 @@ function renderKpiLanding() {
     var sel = document.getElementById('selectedMonthFilter');
     var monthKey = sel ? sel.value : '';
     syncKpiMonthSelect();
+
+    // Overview tabs: CONTENT = the job-group KPI scorecard below; TRAINING / TASK / OTHERS = same layout built from that category
+    var _B = window._ovSumBucket || 'CONTENT';
+    var _notesBox = document.querySelector('details.kpi-notes'); if (_notesBox) _notesBox.style.display = (_B === 'CONTENT') ? '' : 'none';
+    var _isOv = (_B === 'OVERALL');
+    var _ovBox = document.getElementById('ovOverall'), _ovWrap = document.getElementById('ovSummaryWrap');
+    if (_ovBox) _ovBox.style.display = _isOv ? '' : 'none';
+    if (_ovWrap) _ovWrap.style.display = _isOv ? '' : 'none';
+    var _pend = document.getElementById('ovPendingBox'); if (_pend) _pend.style.display = 'none';   // pending-tasks tracker removed from Overview (kept in DOM so existing code keeps working)   // Gantt lives only in the Overall tab
+    ['kpiHero', 'kpiTables', 'kpiRaw'].forEach(function (id) { var e = document.getElementById(id); if (e) e.style.display = _isOv ? 'none' : ''; });
+    if (_isOv) { try { renderOvOverall(monthKey); } catch (e) { console.error('renderOvOverall', e); } return; }
+    if (_B !== 'CONTENT') { try { renderKpiCategory(_B, monthKey); } catch (e) { console.error('renderKpiCategory', e); } return; }
 
     var chip = document.getElementById('kpiJobChip');
     var gk = kpiGroupKey(kpiProfile.jobGroup);
@@ -9140,6 +9532,115 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
     window.addEventListener('focus', check);
 })();
+</script>
+<script>
+/* SNS Boosting UI helpers: live TTL total + drag & drop for the proof screenshot */
+(function () {
+    function num(id) { var el = document.getElementById(id); var n = el ? parseFloat(el.value) : 0; return isFinite(n) ? n : 0; }
+    function upd() { var t = document.getElementById('snsTtlVal'); if (t) t.textContent = (num('snsTargetHeart') + num('snsTargetShare') + num('snsTargetViews')).toLocaleString('en-US'); }
+    function init() {
+        ['snsTargetHeart', 'snsTargetShare', 'snsTargetViews'].forEach(function (id) { var el = document.getElementById(id); if (el) { el.addEventListener('input', upd); el.addEventListener('change', upd); } });
+        upd();
+        var drop = document.getElementById('snsProofDrop');
+        if (drop && typeof snsProofFromFile === 'function') {
+            ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('is-drag'); }); });
+            ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('is-drag'); }); });
+            drop.addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) snsProofFromFile(f); });
+        }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+<style id="fx-motion">
+/* ===== FX MOTION LAYER (lite): light, GPU-friendly animations ===== */
+:root{--fx-ease:cubic-bezier(.22,.8,.24,1)}
+@keyframes fxFade{from{opacity:0}to{opacity:1}}
+@keyframes fxRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fxSlideL{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes fxPop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes fxBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fxRipple{from{transform:translate(-50%,-50%) scale(0);opacity:.5}to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+
+/* page + sidebar entrance (one-time, short) */
+body{animation:fxFade .3s ease backwards}
+.sidebar-menu>li,.menu>.item{animation:fxSlideL .35s var(--fx-ease) backwards}
+.sidebar-menu>li:nth-child(2),.menu>.item:nth-child(2){animation-delay:.03s}
+.sidebar-menu>li:nth-child(3),.menu>.item:nth-child(3){animation-delay:.06s}
+.sidebar-menu>li:nth-child(4),.menu>.item:nth-child(4){animation-delay:.09s}
+.sidebar-menu>li:nth-child(5),.menu>.item:nth-child(5){animation-delay:.12s}
+.sidebar-menu>li:nth-child(n+6),.menu>.item:nth-child(n+6){animation-delay:.15s}
+
+/* sidebar hover */
+.main-menu-item,.sub-menu li,.item{transition:background-color .2s ease,color .2s ease,transform .2s var(--fx-ease)}
+.main-menu-item:hover,.sub-menu li:hover,.item:hover{transform:translateX(4px)}
+.arrow-icon{transition:transform .25s var(--fx-ease)}
+
+/* tab / section switch */
+.content-section.active,.sub-content-section.active,.socmed-sub-view.active,.sec.active{animation:fxRise .3s var(--fx-ease) backwards}
+
+/* small cards only: reveal + hover lift (transform only) */
+/* cards enter once when their section is shown (no scroll observers) */
+.content-section.active .summary-card,.sec.active .stat{animation:fxRise .4s var(--fx-ease) backwards}
+.content-section.active .summary-card:nth-child(2),.sec.active .stat:nth-child(2){animation-delay:.04s}
+.content-section.active .summary-card:nth-child(3),.sec.active .stat:nth-child(3){animation-delay:.08s}
+.content-section.active .summary-card:nth-child(4),.sec.active .stat:nth-child(4){animation-delay:.12s}
+.content-section.active .summary-card:nth-child(n+5),.sec.active .stat:nth-child(n+5){animation-delay:.16s}
+.summary-card,.kpi-card,.stat{transition:transform .2s var(--fx-ease)}
+.summary-card:hover,.kpi-card:hover,.stat:hover{transform:translateY(-4px)!important}
+
+/* no hover work while the page is scrolling */
+html.fx-scrolling body{pointer-events:none}
+
+/* progress bars */
+.cat-bar-fill,.kpi-bar>i{transform-origin:left center;animation:fxBar .6s var(--fx-ease) backwards}
+
+/* buttons / inputs */
+button,.btn,.btn-ghost,.btn-approve,.btn-reject{transition:transform .15s ease,background-color .2s ease}
+button:hover,.btn:hover,.btn-ghost:hover,.btn-approve:hover,.btn-reject:hover{transform:translateY(-1px)}
+button:active,.btn:active,.btn-ghost:active,.btn-approve:active,.btn-reject:active{transform:scale(.96)}
+input,select,textarea{transition:box-shadow .2s ease,border-color .2s ease}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(59,130,246,.22)!important}
+
+/* modals / popups */
+.modal.show{animation:fxFade .2s ease both}
+.modal.show .box{animation:fxPop .28s var(--fx-ease) both}
+.mp-empty-overlay{animation:fxFade .2s ease both}
+.mp-empty-overlay>*{animation:fxPop .3s var(--fx-ease) both}
+#kpiBotPanel.open{animation:fxPop .28s var(--fx-ease) both}
+
+/* click ripple */
+.fx-ripple{position:fixed;width:150px;height:150px;border-radius:50%;pointer-events:none;z-index:2147482000;
+  background:radial-gradient(circle,rgba(96,165,250,.4) 0%,transparent 70%);animation:fxRipple .5s ease-out forwards}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}
+/* ===== /FX MOTION LAYER ===== */
+</style>
+<script id="fx-motion-js">
+/* ===== FX MOTION LAYER JS (lite) ===== */
+(function(){
+try{
+if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var de=document.documentElement,st=0;
+/* pause hover effects while scrolling so scroll stays smooth */
+document.addEventListener('scroll',function(){
+  if(!st)de.classList.add('fx-scrolling');
+  clearTimeout(st);
+  st=setTimeout(function(){de.classList.remove('fx-scrolling');st=0;},140);
+},{passive:true,capture:true});
+/* click ripple */
+document.addEventListener('pointerdown',function(e){
+  var t=e.target.closest&&e.target.closest('button,.btn,.btn-ghost,.main-menu-item,.sub-menu li,.item,.ov-sum-tab');
+  if(!t)return;
+  var s=document.createElement('span');
+  s.className='fx-ripple';s.style.left=e.clientX+'px';s.style.top=e.clientY+'px';
+  document.body.appendChild(s);
+  setTimeout(function(){s.remove();},550);
+},true);
+}catch(err){console.warn('FX layer disabled:',err);}
+})();
+/* ===== /FX MOTION LAYER JS ===== */
 </script>
 </body>
 </html>
