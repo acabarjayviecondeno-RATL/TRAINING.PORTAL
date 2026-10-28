@@ -301,6 +301,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
         <button class="ghost" onclick="loadSheet(curSheet)">⟳<span class="lbl"> Reload</span></button>
         <button class="ghost" onclick="clearFilters()">✕<span class="lbl"> Clear</span></button>
         <button class="ghost" onclick="exportXlsx()">⬇<span class="lbl"> Export</span></button>
+        <button class="bad" id="btnForceLogout" style="display:none" onclick="forceLogoutAll()" title="Log out ALL accounts — they must sign in again">⏻<span class="lbl"> Logout all accounts</span></button>
         <button class="ghost t-filt" onclick="document.body.classList.toggle('show-filters')">⚲ Filters</button>
       </div>
       <div class="t-opts">
@@ -600,6 +601,7 @@ function openSheet(i){
 
 async function loadSheet(name){
   curSheet=name; $("sheetTitle").textContent=name; $("sheetSub").textContent="Loading…"; $("tbl").innerHTML="";
+  { const fb=$("btnForceLogout"); if(fb) fb.style.display = /^user account$/i.test(String(name).trim()) ? "" : "none"; }
   try{
     const j=await api("adminGetSheet",{sheet:name});
     data=j.values||[]; formulas=j.formulas||{};
@@ -665,11 +667,6 @@ function chartColors(n){
 }
 
 
-/* ===== KPI-consistent minutes (same rules as ST computeKpi / SEPCO skComputeKpi) =====
-   Monthly Plan  = sum(DURATION x FREQUENCY) - approved leave days x 480
-   Task Actual   = CONTENT rows only when approved (APPROVAL DATE or an Approved file), TASK/OTHERS always
-   Approved CONTENT that is NOT in the Monthly Plan = plus points (always counted). Rejected content that is not in the Monthly Plan is not counted as a revision.
-   Productivity  = Task Actual / Monthly Plan (uncapped here; ST/SEPCO cap each KPI at 100% in the total) */
 function adNorm(v){ return String(v==null?"":v).trim().toLowerCase(); }
 function adCleanDate(raw){
   if(raw==null||raw==="") return "";
@@ -702,32 +699,159 @@ function adTitlesMatch(a,b){
   const ov=aa.filter(t=>bb.indexOf(t)!==-1).length;
   return ov>=Math.min(2,aa.length,bb.length)||(aa.length===1&&bb.indexOf(aa[0])!==-1);
 }
+/* ===== KPI-consistent minutes (same rules as ST kpiProdEff / SEPCO skProdEff) =====
+   UNIQUE + Monthly-Plan-only:
+   - Leave / Absent = 480 mins each, taken off the Monthly Plan task (title) picked on the leave (PLAN TITLE JSON [{t,q,m}] or one old title);
+     leaves with no title only reduce the adjusted plan mins.
+   - CONTENT counts only once approved (APPROVAL DATE or an Approved file) and only if its Category 2 is in the Monthly Plan;
+     approved CONTENT NOT in the plan = plus points. TASK / OTHERS / TRAINING = unique unit (title + day) inside the plan line's Target Count.
+   - Designated = (working days - leave) x 480. Plan mins < Designated -> actuals NOT in the plan are excluded (productivity capped at the plan);
+     Plan mins >= Designated -> actuals NOT in the plan are added on top.
+   - actMins = counted Actual mins, adjPlan = Monthly Plan mins - leave x 480, so Productivity = actMins / adjPlan. */
+const AD_PH_HOLIDAYS=["01-01","04-09","05-01","06-12","08-21","08-26","11-01","11-02","11-30","12-08","12-24","12-25","12-30","12-31"];
+const AD_BUCKETS=["CONTENT","TASK","OTHERS","TRAINING"];
+function adWorkingDays(key){
+  const y=parseInt(key.slice(0,4),10), m=parseInt(key.slice(5,7),10)-1, dim=new Date(y,m+1,0).getDate(); let n=0;
+  for(let d=1;d<=dim;d++){ const dow=new Date(y,m,d).getDay(), k=String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"); if(dow!==0&&AD_PH_HOLIDAYS.indexOf(k)===-1) n++; }
+  return n;
+}
 function adBucket(cat,cat2){
-  const c=String(cat||"").trim().toUpperCase(), c2=String(cat2||"").trim().toUpperCase(), B=["CONTENT","TASK","OTHERS"];
-  if(B.indexOf(c2)!==-1) return c2; if(B.indexOf(c)!==-1) return c;
+  const c=String(cat||"").trim().toUpperCase(), c2=String(cat2||"").trim().toUpperCase();
+  if(AD_BUCKETS.indexOf(c2)!==-1) return c2; if(AD_BUCKETS.indexOf(c)!==-1) return c;
+  let m=c.match(/^(CONTENT|TASK|OTHERS|TRAINING)\s*[-–—:]/); if(m) return m[1];
+  m=c2.match(/^(CONTENT|TASK|OTHERS|TRAINING)\s*[-–—:]/); if(m) return m[1];
   const probe=c2||c;
   if(probe==="CONTENT"||(probe.indexOf("CONTENT")===0&&probe.indexOf("-")===-1)) return "CONTENT";
+  if(probe.indexOf("TRAINING")!==-1&&probe.indexOf("CONTENT")===-1) return "TRAINING";
   if(probe.indexOf("TASK")!==-1&&probe.indexOf("CONTENT")===-1) return "TASK";
   return "OTHERS";
+}
+function adNormCat2(s){
+  let t=String(s||"").toLowerCase().replace(/#n\/?a/g,"").trim();
+  t=t.replace(/^(content|task|others|training)\s*[-–—:]\s*/i,"");
+  return t.replace(/[^a-z0-9]+/g," ").trim();
+}
+function adPair(c,c2,title){   // port of ST kpiPairOf
+  c=String(c||"").trim(); c2=String(c2||"").trim(); title=String(title||"").trim();
+  if(!c2||/^#?n\/?a$/i.test(c2)||c2==="-"||c2==="—") c2="";
+  const splitBD=s=>{ const m=String(s||"").match(/^(CONTENT|TASK|OTHERS|TRAINING)\s*[-–—:]\s*(.+)$/i); return m?{cat:m[1].toUpperCase(),cat2:m[2].trim()}:null; };
+  const fc=splitBD(c); if(fc) return fc;
+  const fc2=splitBD(c2); if(fc2) return fc2;
+  const cUp=c.toUpperCase(), c2Up=c2.toUpperCase();
+  if(AD_BUCKETS.indexOf(c2Up)!==-1){
+    let detail=c; if(!detail||detail.toUpperCase().trim()===c2Up) detail=title||"";
+    const sd=splitBD(detail); return {cat:c2Up,cat2:sd?sd.cat2:detail};
+  }
+  if(AD_BUCKETS.indexOf(cUp)!==-1){
+    const d2=c2||title||""; const sd2=splitBD(d2); return {cat:cUp,cat2:sd2?sd2.cat2:d2};
+  }
+  const probe=c2Up||cUp; let b="OTHERS";
+  if(probe==="CONTENT"||(probe.indexOf("CONTENT")===0&&probe.indexOf("-")===-1)) b="CONTENT";
+  else if(probe.indexOf("TRAINING")!==-1&&probe.indexOf("CONTENT")===-1) b="TRAINING";
+  else if(probe.indexOf("TASK")!==-1&&probe.indexOf("CONTENT")===-1) b="TASK";
+  return {cat:b,cat2:(c2||c||title||"")};
+}
+function adClaimUnit(lines,bucket,cands,title,day,mins){   // port of ST kpiClaimUnit
+  const norms=(cands||[]).map(adNormCat2).filter(n=>n&&["content","task","others","training"].indexOf(n)===-1);
+  const same=(lines||[]).filter(l=>l.bucket===bucket); let line=null;
+  if(norms.length){
+    line=same.filter(l=>l.norm&&norms.some(n=>n===l.norm))[0]||same.filter(l=>l.norm&&norms.some(n=>n.indexOf(l.norm)!==-1||l.norm.indexOf(n)!==-1))[0]||null;
+  }
+  if(!line) line=same.filter(l=>(l.titles||[]).some(t=>adTitlesMatch(title,t)))[0]||null;
+  if(!line) line=same.filter(l=>!l.norm)[0]||null;
+  const key=adNormTitle(title)+"|"+day;
+  if(line){ line.seen=line.seen||{}; if(!line.seen[key]){ line.seen[key]=1; line.actual+=1; return {line,counted:true,key}; } return {line,counted:false,key}; }
+  return {line:null,counted:false,key};
+}
+function adLeaveAllocs(planTitle){
+  const raw=String(planTitle||"").trim();
+  if(!raw) return {items:[],rest:480};
+  if(raw.charAt(0)==="["){
+    try{ const items=[]; let tot=0; JSON.parse(raw).forEach(a=>{ const m=Math.max(0,Number(a.m)||0); if(a.t&&m>0){ items.push({t:String(a.t),q:Number(a.q)||0,m}); tot+=m; } }); return {items,rest:Math.max(0,480-tot)}; }
+    catch(e){ return {items:[],rest:480}; }
+  }
+  return {items:[{t:raw,q:0,m:480}],rest:0};
+}
+function adProdEff(planRows, actRows, files, leaves, key){
+  // ---- Leave -> Monthly Plan title deduction ----
+  const red=new Map(), need={}; let untitled=0;
+  leaves.forEach(l=>{ const al=adLeaveAllocs(l.planTitle); untitled+=al.rest; al.items.forEach(i=>{ const t=adNormTitle(i.t); need[t]=(need[t]||0)+i.m; }); });
+  const ded=planRows.filter(r=>r.bucket==="TASK"||r.bucket==="OTHERS");
+  Object.keys(need).forEach(t=>{
+    let left=need[t];
+    ded.forEach(r=>{ if(left<=0||adNormTitle(r.title)!==t||r.f<=0) return; const take=Math.min(r.f*r.d,left); red.set(r,(red.get(r)||0)+take/r.d); left-=take; });
+    if(left>0) untitled+=left;
+  });
+  // ---- Monthly Plan: minutes, non-content lines, content Category 2 list ----
+  const lines=[], contentNorms=[]; let planMins=0, planMinsEff=0;
+  planRows.forEach(r=>{
+    if(r.f<=0) return;
+    planMins+=r.d*r.f;
+    const fe=Math.max(0,r.f-(red.get(r)||0)); planMinsEff+=r.d*fe;
+    const pair=adPair(r.cat,r.cat2,r.title), nc=adNormCat2(pair.cat2)||String(pair.cat2||"").toLowerCase();
+    if(pair.cat==="CONTENT"){ if(nc&&Math.round(fe)>0) contentNorms.push(nc); return; }
+    let ln=lines.filter(x=>x.bucket===pair.cat&&x.norm===nc)[0];
+    if(!ln){ ln={bucket:pair.cat,cat2:pair.cat2,norm:nc,target:0,actual:0,titles:[],seen:{}}; lines.push(ln); }
+    ln.target+=Math.round(fe);
+    const pt=adNormTitle(r.title); if(pt) ln.titles.push(pt);
+  });
+  const contentInPlan=cands=>(cands||[]).some(c=>{ const n=adNormCat2(c); return !!n&&contentNorms.some(p=>p===n||p.indexOf(n)!==-1||n.indexOf(p)!==-1); });
+  // ---- Leave days + Designated Minutes ----
+  const leaveDays=leaves.length;
+  const designated=Math.max(0,adWorkingDays(key)-leaveDays)*480;
+  const planHit=planMins>0&&planMins>=designated-0.5;
+  const adjPlan=Math.max(0,planMinsEff-untitled);
+  // ---- Approved CONTENT units ----
+  const content=actRows.filter(x=>x.bucket==="CONTENT").slice().sort((a,b)=>a.date<b.date?-1:(a.date>b.date?1:a.i-b.i));
+  const units=[];
+  if(content.some(x=>x.start)){
+    content.forEach(x=>{ if(x.start) units.push({title:x.title,rows:[x]}); else for(let i=units.length-1;i>=0;i--){ if(units[i].title.toLowerCase()===x.title.toLowerCase()){ units[i].rows.push(x); break; } } });
+  } else {
+    const map={}; content.forEach(x=>{ const kk=x.title.toLowerCase(); if(!map[kk]){ map[kk]={title:x.title,rows:[]}; units.push(map[kk]); } map[kk].rows.push(x); });
+  }
+  const apprSet=new Set();
+  units.forEach(un=>{
+    let apr=""; un.rows.forEach(x=>{ if(x.apr) apr=x.apr; });
+    const aprOk=apr!==""&&!/^n\/?a$/i.test(apr)&&apr!=="0"&&(/^\d{4}-\d{2}-\d{2}$/.test(adCleanDate(apr))||/\d{4}/.test(apr));
+    const tn=adNormTitle(un.title);
+    if(aprOk||(tn!==""&&files.some(f=>adTitlesMatch(tn,f)))) un.rows.forEach(x=>apprSet.add(x));
+  });
+  // ---- Daily Actual: unique rows + plan membership ----
+  const ordered=actRows.slice().sort((a,b)=>a.date<b.date?-1:(a.date>b.date?1:a.i-b.i));
+  const seenRow={}; let inMins=0, extraMins=0, bonusMins=0;
+  ordered.forEach(x=>{
+    if(x.bucket==="CONTENT"&&!apprSet.has(x)) return;                    // CONTENT counts only once approved
+    if(x.st||x.en){ const rk=x.date+"|"+adNormTitle(x.title)+"|"+x.st+"|"+x.en+"|"+x.dur; if(seenRow[rk]) return; seenRow[rk]=1; }   // exact duplicate time block = 1
+    let inPlan;
+    if(x.bucket==="CONTENT") inPlan=contentInPlan([x.cat2,x.cat]);
+    else { const pr=adPair(x.cat,x.cat2,x.title); const cr=adClaimUnit(lines,x.bucket,[pr.cat2,x.cat2,x.cat],x.title,x.date,x.dur); inPlan=!!cr.line&&!!(cr.line.seen&&cr.line.seen[cr.key]); }
+    if(inPlan) inMins+=x.dur; else { extraMins+=x.dur; if(x.bucket==="CONTENT") bonusMins+=x.dur; }   // approved CONTENT not in the plan = plus
+  });
+  const usedMins=planHit?(inMins+extraMins):(Math.min(inMins,adjPlan)+bonusMins);
+  return {planMins,adjPlan,leaveDays,designated,planHit,inMins,extraMins,bonusMins,usedMins};
 }
 function adKpiMinutes(range, monthlyRaw, actualRaw, approvals, leaves){
   const key=range.y+"-"+String(range.m).padStart(2,"0");
   const out={};
-  const get=u=>out[u]||(out[u]={planMins:0,leaveDays:0,adjPlan:0,actMins:0});
   const mh=detectHeader(monthlyRaw), mHead=monthlyRaw[mh]||[];
   const mU=findCol(mHead,[/ns\+|user\s*id|email|userid/i]), mM=findCol(mHead,[/^month$/i]);
   let mD=findCol(mHead,[/duration per min/i]); if(mD<0) mD=findCol(mHead,[/duration/i]);
   const mF=findCol(mHead,[/frequency/i]);
+  let mT=findCol(mHead,[/^title$/i,/plan\s*\[title\]/i,/actual\s*\[title\]/i]); if(mT<0) mT=findCol(mHead,[/title/i]);
+  const mC=findCol(mHead,[/^category$/i]), mC2=findCol(mHead,[/category\s*2/i]);
+  const planBy={};
   for(let r=mh+1;r<monthlyRaw.length;r++){
     const row=monthlyRaw[r]||[]; const u=mU>-1?adNorm(row[mU]):""; if(!u) continue;
     if(mM>-1 && !adMonthMatches(row[mM],key)) continue;
-    const d=parseFloat(String(mD>-1?row[mD]:"").replace(/,/g,"")), f=parseInt(mF>-1?row[mF]:"",10)||1;
-    get(u).planMins += (!isNaN(d)&&d>0)?d*f:480*f;
+    const d=parseFloat(String(mD>-1?row[mD]:"").replace(/,/g,"")), fr=String(mF>-1?row[mF]:"").replace(/[^0-9.\-]/g,"");
+    const cat=mC>-1?row[mC]:"", cat2=mC2>-1?row[mC2]:"";
+    (planBy[u]=planBy[u]||[]).push({title:String(mT>-1?row[mT]:"").trim(), cat, cat2, bucket:adBucket(cat,cat2), d:(!isNaN(d)&&d>0)?d:480, f:fr===""?1:(parseFloat(fr)||0)});
   }
+  const leaveBy={};
   (leaves||[]).forEach(l=>{
     if(String((l&&l.status)||"Approved").toLowerCase()!=="approved") return;
     if(adMonthKey(l.date)!==key) return;
-    const u=adNorm(l.user); if(u) get(u).leaveDays++;
+    const u=adNorm(l.user); if(u) (leaveBy[u]=leaveBy[u]||[]).push(l);
   });
   const apprBy={};
   (approvals||[]).forEach(a=>{
@@ -740,43 +864,27 @@ function adKpiMinutes(range, monthlyRaw, actualRaw, approvals, leaves){
   let aDt=findCol(aHead,[/^date submitted$/i,/submitted d/i,/submitted date/i]); if(aDt<0) aDt=findCol(aHead,[/^date$/i]);
   let aT=findCol(aHead,[/actual\s*\[title\]/i]); if(aT<0) aT=findCol(aHead,[/^title$/i,/title/i]);
   let aDur=findCol(aHead,[/duration per min/i]); if(aDur<0) aDur=findCol(aHead,[/duration/i]);
-  const aC=findCol(aHead,[/^category$/i]), aC2=findCol(aHead,[/category 2/i]);
+  const aC=findCol(aHead,[/^category$/i]), aC2=findCol(aHead,[/category\s*2/i]);
   const aApr=findCol(aHead,[/approval date/i]), aSt=findCol(aHead,[/is this the start date/i]);
-  const byUser={};
+  const aTs=findCol(aHead,[/^start time$/i]), aTe=findCol(aHead,[/time ended|^end time$/i]);
+  const actBy={};
   for(let r=3;r<actualRaw.length;r++){
     const row=actualRaw[r]||[]; const u=aU>-1?adNorm(row[aU]):""; if(!u) continue;
     if(aDt>-1 && adMonthKey(row[aDt])!==key) continue;
     const title=String(aT>-1?row[aT]:"").trim(); if(!title) continue;
     const d=parseFloat(String(aDur>-1?row[aDur]:"").replace(/,/g,""));
-    const o={title, dur:(!isNaN(d)&&d>0)?d:0, date:adCleanDate(aDt>-1?row[aDt]:""),
-      bucket:adBucket(aC>-1?row[aC]:"", aC2>-1?row[aC2]:""),
-      apr:String(aApr>-1?row[aApr]:"").trim(), start:aSt>-1&&/^(y|yes|true|1)/i.test(String(row[aSt]||"").trim())};
-    (byUser[u]=byUser[u]||[]).push(o);
+    const dd=adCleanDate(aDt>-1?row[aDt]:"");
+    const cat=aC>-1?row[aC]:"", cat2=aC2>-1?row[aC2]:"";
+    (actBy[u]=actBy[u]||[]).push({title, dur:(!isNaN(d)&&d>0)?d:0, date:/^\d{4}-\d{2}-\d{2}$/.test(dd)?dd:"", i:r, cat, cat2, bucket:adBucket(cat,cat2),
+      apr:String(aApr>-1?row[aApr]:"").trim(), start:aSt>-1&&/^(y|yes|true|1)/i.test(String(row[aSt]||"").trim()),
+      st:String(aTs>-1?row[aTs]:"").trim(), en:String(aTe>-1?row[aTe]:"").trim()});
   }
-  Object.keys(byUser).forEach(u=>{
-    const rows=byUser[u].slice(), k=get(u);
-    let act=0;
-    rows.filter(x=>x.bucket!=="CONTENT").forEach(x=>{ act+=x.dur; });
-    const content=rows.filter(x=>x.bucket==="CONTENT").sort((a,b)=>a.date<b.date?-1:1);
-    const units=[];
-    if(content.some(x=>x.start)){
-      content.forEach(x=>{
-        if(x.start) units.push({title:x.title,rows:[x]});
-        else for(let i=units.length-1;i>=0;i--){ if(units[i].title.toLowerCase()===x.title.toLowerCase()){ units[i].rows.push(x); break; } }
-      });
-    } else {
-      const map={}; content.forEach(x=>{ const kk=x.title.toLowerCase(); if(!map[kk]){ map[kk]={title:x.title,rows:[]}; units.push(map[kk]); } map[kk].rows.push(x); });
-    }
+  const users={}; [planBy,leaveBy,actBy].forEach(o=>Object.keys(o).forEach(u=>{ users[u]=1; }));
+  Object.keys(users).forEach(u=>{
     const files=[]; Object.keys(apprBy).forEach(by=>{ if(by===u||(by.length>2&&u.includes(by))||(u.length>2&&by.includes(u))) apprBy[by].forEach(f=>files.push(f)); });
-    units.forEach(un=>{
-      let apr=""; un.rows.forEach(x=>{ if(x.apr) apr=x.apr; });
-      const aprOk=apr!==""&&!/^n\/?a$/i.test(apr)&&apr!=="0"&&(/^\d{4}-\d{2}-\d{2}$/.test(adCleanDate(apr))||/\d{4}/.test(apr));
-      const tn=adNormTitle(un.title);
-      if(aprOk||(tn!==""&&files.some(f=>adTitlesMatch(tn,f)))) un.rows.forEach(x=>{ act+=x.dur; });
-    });
-    k.actMins=act;
+    const pe=adProdEff(planBy[u]||[], actBy[u]||[], files, leaveBy[u]||[], key);
+    out[u]={planMins:pe.planMins, leaveDays:pe.leaveDays, adjPlan:pe.adjPlan, actMins:pe.usedMins, designated:pe.designated, planHit:pe.planHit, extraMins:pe.extraMins, bonusMins:pe.bonusMins};
   });
-  Object.keys(out).forEach(u=>{ const k=out[u]; k.adjPlan=Math.max(0,k.planMins-k.leaveDays*480); });
   return out;
 }
 
@@ -1325,8 +1433,123 @@ function postAnn(){
 
 function syncThemeBtn(){const l=document.documentElement.getAttribute("data-theme")==="light";$("themeBtn").innerHTML=l?'🌙<span class="lbl"> Dark mode</span>':'☀️<span class="lbl"> Light mode</span>'}
 function toggleTheme(){const d=document.documentElement,l=d.getAttribute("data-theme")==="light";if(l)d.removeAttribute("data-theme");else d.setAttribute("data-theme","light");try{localStorage.setItem("portal_theme",l?"dark":"light")}catch(e){}if(window.auraSetChartTheme)auraSetChartTheme(!l);syncThemeBtn()}
+// ---- Force logout ALL accounts (user account sheet) ----
+async function forceLogoutAll(){
+  if(!confirm("This will log out ALL accounts (ST, RTO, SEPCO, and Admin) on other devices, and they will need to log in again.\n\nContinue?")) return;
+  const b=$("btnForceLogout"); if(b) b.disabled=true;
+  try{
+    const j=await api("adminForceLogoutAll");
+    try{localStorage.setItem("portal_session_epoch", String(j.epoch))}catch(e){}   // so this admin session remains logged in
+    toast("Done — all accounts must log in again.");
+  }catch(e){ toast("Failed: "+e.message); }
+  if(b) b.disabled=false;
+}
+// ---- Session guard: if another admin forces a logout, log out here as well ----
+(function(){
+  function check(){
+    fetch(API+"?action=checkSession&_="+Date.now()).then(r=>r.json()).then(j=>{
+      if(!j||!j.success) return;
+      const mine=localStorage.getItem("portal_session_epoch");
+      if(!mine){ try{localStorage.setItem("portal_session_epoch", String(j.epoch))}catch(e){} }
+      else if(String(j.epoch)!==String(mine)){ alert("You have been logged out because an admin forced a logout. Please log in again."); handleLogout(); }
+    }).catch(()=>{});
+  }
+  setTimeout(check,2000); setInterval(check,60000);
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) check(); });
+})();
 function handleLogout(){ creds=null; try{sessionStorage.removeItem("portal_admin_pass")}catch(e){} {const t=localStorage.getItem("portal_theme");localStorage.clear();if(t)localStorage.setItem("portal_theme",t)} window.location.href="index.html"; }
 </script>
 <script>(function(){try{if(!document.fonts||!document.fonts.load)return;var l=['600 14px "SamsungOne 600C"','700 14px "Samsung Sharp Sans Bold"','400 14px "Samsung Sharp Sans"'];try{Chart.defaults.plugins.title.font.family='Samsung Sharp Sans Bold, Samsung Sharp Sans, SamsungOne 600C, sans-serif'}catch(e){};var r=function(){try{if(window.Chart&&Chart.instances)Object.keys(Chart.instances).forEach(function(k){try{Chart.instances[k].update()}catch(e){}})}catch(e){}};Promise.all(l.map(function(x){return document.fonts.load(x)})).then(r,r);document.fonts.ready.then(r);}catch(e){}})();</script>
+<style id="fx-motion">
+/* ===== FX MOTION LAYER (lite): light, GPU-friendly animations ===== */
+:root{--fx-ease:cubic-bezier(.22,.8,.24,1)}
+@keyframes fxFade{from{opacity:0}to{opacity:1}}
+@keyframes fxRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fxSlideL{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes fxPop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes fxBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fxRipple{from{transform:translate(-50%,-50%) scale(0);opacity:.5}to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+
+/* page + sidebar entrance (one-time, short) */
+body{animation:fxFade .3s ease backwards}
+.sidebar-menu>li,.menu>.item{animation:fxSlideL .35s var(--fx-ease) backwards}
+.sidebar-menu>li:nth-child(2),.menu>.item:nth-child(2){animation-delay:.03s}
+.sidebar-menu>li:nth-child(3),.menu>.item:nth-child(3){animation-delay:.06s}
+.sidebar-menu>li:nth-child(4),.menu>.item:nth-child(4){animation-delay:.09s}
+.sidebar-menu>li:nth-child(5),.menu>.item:nth-child(5){animation-delay:.12s}
+.sidebar-menu>li:nth-child(n+6),.menu>.item:nth-child(n+6){animation-delay:.15s}
+
+/* sidebar hover */
+.main-menu-item,.sub-menu li,.item{transition:background-color .2s ease,color .2s ease,transform .2s var(--fx-ease)}
+.main-menu-item:hover,.sub-menu li:hover,.item:hover{transform:translateX(4px)}
+.arrow-icon{transition:transform .25s var(--fx-ease)}
+
+/* tab / section switch */
+.content-section.active,.sub-content-section.active,.socmed-sub-view.active,.sec.active{animation:fxRise .3s var(--fx-ease) backwards}
+
+/* small cards only: reveal + hover lift (transform only) */
+/* cards enter once when their section is shown (no scroll observers) */
+.content-section.active .summary-card,.sec.active .stat{animation:fxRise .4s var(--fx-ease) backwards}
+.content-section.active .summary-card:nth-child(2),.sec.active .stat:nth-child(2){animation-delay:.04s}
+.content-section.active .summary-card:nth-child(3),.sec.active .stat:nth-child(3){animation-delay:.08s}
+.content-section.active .summary-card:nth-child(4),.sec.active .stat:nth-child(4){animation-delay:.12s}
+.content-section.active .summary-card:nth-child(n+5),.sec.active .stat:nth-child(n+5){animation-delay:.16s}
+.summary-card,.kpi-card,.stat{transition:transform .2s var(--fx-ease)}
+.summary-card:hover,.kpi-card:hover,.stat:hover{transform:translateY(-4px)!important}
+
+/* no hover work while the page is scrolling */
+html.fx-scrolling body{pointer-events:none}
+
+/* progress bars */
+.cat-bar-fill,.kpi-bar>i{transform-origin:left center;animation:fxBar .6s var(--fx-ease) backwards}
+
+/* buttons / inputs */
+button,.btn,.btn-ghost,.btn-approve,.btn-reject{transition:transform .15s ease,background-color .2s ease}
+button:hover,.btn:hover,.btn-ghost:hover,.btn-approve:hover,.btn-reject:hover{transform:translateY(-1px)}
+button:active,.btn:active,.btn-ghost:active,.btn-approve:active,.btn-reject:active{transform:scale(.96)}
+input,select,textarea{transition:box-shadow .2s ease,border-color .2s ease}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(59,130,246,.22)!important}
+
+/* modals / popups */
+.modal.show{animation:fxFade .2s ease both}
+.modal.show .box{animation:fxPop .28s var(--fx-ease) both}
+.mp-empty-overlay{animation:fxFade .2s ease both}
+.mp-empty-overlay>*{animation:fxPop .3s var(--fx-ease) both}
+#kpiBotPanel.open{animation:fxPop .28s var(--fx-ease) both}
+
+/* click ripple */
+.fx-ripple{position:fixed;width:150px;height:150px;border-radius:50%;pointer-events:none;z-index:2147482000;
+  background:radial-gradient(circle,rgba(96,165,250,.4) 0%,transparent 70%);animation:fxRipple .5s ease-out forwards}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}
+/* ===== /FX MOTION LAYER ===== */
+</style>
+<script id="fx-motion-js">
+/* ===== FX MOTION LAYER JS (lite) ===== */
+(function(){
+try{
+if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var de=document.documentElement,st=0;
+/* pause hover effects while scrolling so scroll stays smooth */
+document.addEventListener('scroll',function(){
+  if(!st)de.classList.add('fx-scrolling');
+  clearTimeout(st);
+  st=setTimeout(function(){de.classList.remove('fx-scrolling');st=0;},140);
+},{passive:true,capture:true});
+/* click ripple */
+document.addEventListener('pointerdown',function(e){
+  var t=e.target.closest&&e.target.closest('button,.btn,.btn-ghost,.main-menu-item,.sub-menu li,.item,.ov-sum-tab');
+  if(!t)return;
+  var s=document.createElement('span');
+  s.className='fx-ripple';s.style.left=e.clientX+'px';s.style.top=e.clientY+'px';
+  document.body.appendChild(s);
+  setTimeout(function(){s.remove();},550);
+},true);
+}catch(err){console.warn('FX layer disabled:',err);}
+})();
+/* ===== /FX MOTION LAYER JS ===== */
+</script>
 </body>
 </html>
