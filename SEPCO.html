@@ -4322,7 +4322,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const monthApprovals = approvalsAll.filter(a => skMonthKey(a.uploadDate) === monthKey);
             const approvedList = monthApprovals.filter(a => /approve/i.test(String(a.status || '')));
 
-            let own = 0, proof = 0, onTime = 0, totalMins = 0, ownMins = 0, onTimeMins = 0, extraCount = 0;
+            let own = 0, proof = 0, onTime = 0, totalMins = 0, ownMins = 0, extraCount = 0;
             const approvedUnits = [];
             const daByTitle = {};
             dailyActual.filter(r => skMonthKey(skRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date']) || r['Date Submitted']) === monthKey && skIsContent(r) && skTitle(r) !== '').forEach(r => {
@@ -4359,12 +4359,13 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 let da = fn ? daByTitle[fn] : null;
                 if (!da && fn) Object.keys(daByTitle).forEach(k => { if (!da && (fn.indexOf(k) !== -1 || k.indexOf(fn) !== -1)) da = daByTitle[k]; });
                 const mins = da ? da.mins : ((slot && slot.mins) || 0);
-                if (da && da.tgt && da.apr && da.apr <= da.tgt) { onTime++; onTimeMins += mins; }
-                approvedUnits.push({ title: a.fileName || (slot && slot.title) || '', mins, extra: isExtra });
+                                approvedUnits.push({ title: a.fileName || (slot && slot.title) || '', mins, extra: isExtra });
                 if (isExtra) extraCount++;
                 totalMins += mins;
                 if (isProof) proof++; else { own++; ownMins += mins; }
             });
+            // On-time (content) = unique Daily Plan items of approved content finished within the planned duration (same rule as Overview On Time / Late)
+            onTime = skProdEff(userKey, monthKey, displayName, 'CONTENT').onTime;
             let pendingApproval = planSlots.filter(sl => !sl.used).length;
             pendingApproval += monthApprovals.filter(a => /pending/i.test(String(a.status || 'pending'))).length;
             const total = own + proof;
@@ -4392,7 +4393,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             // Accuracy = (Target - Revisions) / Target, less KPI Inputs error deduction
             let quality = target > 0 ? Math.max(0, (target - revisions) / target) : null;
 
-            // Efficiency = approved content mins / Monthly Plan content mins
+            // Efficiency = (content w/o revisions) / Target
             let planContentMins = 0;
             plan.forEach(r => {
                 if (!skIsContent(r)) return;
@@ -4408,7 +4409,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 revMins += m ? m.mins : avgMins;
             });
             const woRevMins = Math.max(0, totalMins - revMins);
-            const eff = planContentMins > 0 ? totalMins / planContentMins : (totalMins > 0 ? 1 : null);
+            const eff = target > 0 ? Math.min(1, woRev / target) : null;   // Efficiency = (content w/o revisions) ÷ Target
 
             // Timeliness = Daily Actual mins / Daily Plan mins (same as ST)
             // Revised sheets use Title / Submitted D / Duration — resolve via skTitle / skRowVal
@@ -4447,7 +4448,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             vals.forEach((v, i) => { if (!_has(v)) return; capped += Math.min(v, 1) * effW[i]; uncapped += v * effW[i]; });
             return { gk, extrasLoaded: X.loaded, jobGroup: X.jobGroup, vals, weights: effW, capped, uncapped,
                 target, own, proof, total, extraCount, woRev, revisions, onTime, pendingApproval, errCount,
-                totalMins, woRevMins, revMins, onTimeMins, planContentMins, planMins, leaveDays, adjPlan, actMins, dailyPlanMins, dailyActMins,
+                totalMins, woRevMins, revMins, planContentMins, planMins, leaveDays, adjPlan, actMins, dailyPlanMins, dailyActMins,
                 designated: pe.designated, planHit: pe.planHit, extraMins: pe.extraMins, bonusMins: pe.bonusMins, inPlanMins: pe.inMins };
         }
 
@@ -4531,7 +4532,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     '<td style="' + TD + '"><span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; ' + bandStyle + '">' + band + '</span></td>' +
                     k.vals.map(pctCell).join('') +
                     numCell(k.target) + numCell(k.own) + numCell(k.proof) + numCell(k.total) + numCell(k.extraCount || 0) + numCell(k.woRev) + numCell(k.revisions) + numCell(k.onTime) + numCell(k.pendingApproval) +
-                    numCell(Math.round(k.totalMins)) + numCell(Math.round(k.woRevMins)) + numCell(Math.round(k.revMins)) + numCell(Math.round(k.onTimeMins)) +
+                    numCell(Math.round(k.totalMins)) + numCell(Math.round(k.woRevMins)) + numCell(Math.round(k.revMins)) +
                     '</tr>';
             });
 
@@ -4575,7 +4576,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const heads = ['Trainer', 'Job Group', 'Total KPI', 'Uncapped', 'KPI Band',
                 'Target Count', 'Accuracy', 'Efficiency', 'Timeliness', 'Productivity',
                 'Target', 'Own Content', 'Proofread', 'Total Content', 'Plus (not in plan)', 'W/o revisions', 'Revisions', 'On Time', 'Awaiting',
-                'Approved mins', 'Mins w/o rev', 'Revision mins', 'On-time mins'];
+                'Approved mins', 'Mins w/o rev', 'Revision mins'];
 
             container.innerHTML = cardsHtml + '<div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Specialized Trainers KPI · <strong>' + monthLabel + '</strong> · ' + users.length + ' trainer' + (users.length > 1 ? 's' : '') + '</div>' +
                 '<div style="overflow-x:auto; border-radius:12px; border:1px solid var(--border-color);">' +
@@ -5645,9 +5646,11 @@ var KB = [
     'Halimbawa: Target 10, Revisions 2, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
 { id:'efficiency', title:'Efficiency',
   kw:['efficiency','efficient','eff','approved content mins','plan mins','minutes','mins','efficiency %'],
-  a:'**Efficiency** (KPI Landing Page) = Approved content mins ÷ Monthly Plan content mins\n'+
-    '- **Approved content mins** = total *DURATION PER MIN* ng mga approved na content (galing sa Daily Actual na tugma sa approved file; kung wala, duration ng plan slot).\n'+
-    '- **Monthly Plan content mins** = Σ (DURATION PER MIN × FREQUENCY) ng CONTENT rows. Kapag walang duration → 480 × frequency.\n'+
+  a:'**Efficiency** (KPI Landing Page) = (Content na walang revision) ÷ Target\n'+
+    '- **W/o revisions** = Approved content − Revisions.\n'+
+    '- **Revisions** = bilang ng Rejected files na tugma sa Monthly Plan.\n'+
+    '- Kapag **walang Target**, "—" ang lalabas.\n'+
+    'Halimbawa: Target 10, W/o revisions 7 → 7/10 = **70%**.\n'+
     '\n**Sa SEPCO Overview table**, ibang sukat ang Efficiency: *Daily Plan mins ÷ Daily Actual mins* (bawat unique Daily Plan item ay isang beses lang itinutugma).\n'+
     '- Kung ang Monthly Plan ay **mababa sa Designated Minutes** → ang plano lang ang bibilangin at **hanggang 100%** lang.\n'+
     '- Kung **abot na** ang Designated Minutes → lahat ng matched items ang bibilangin at puwedeng lumampas sa 100%.' },
@@ -5812,10 +5815,10 @@ function liveSnapshot() {
     try {
         if (typeof computeKpi !== 'function' || typeof kpiProfile === 'undefined') return null;
         var mk = monthKey(), k = computeKpi(mk), pe = (typeof kpiProdEff === 'function') ? kpiProdEff(mk) : {};
-        return { month: mk, group: k.gk, profile: k.profileKey, target: k.target, ownContent: k.own, proof: k.proof, revisions: k.revisions,
+        return { month: mk, group: k.gk, profile: k.profileKey, target: k.target, ownContent: k.own, proof: k.proof, woRev: k.woRev, revisions: k.revisions,
             contentErrors: k.errCount, accuracyDeduction: k.deduction, achievement: k.ach, accuracy: k.quality, efficiency: k.eff, timeliness: k.timeliness,
             productivity: k.productivity, monthlyPlanMins: pe.planMins, leaveDays: pe.leaveDays, adjustedPlanMins: pe.adjPlan, designatedMins: pe.designated,
-            planMeetsDesignated: pe.planHit, countedActualMins: pe.usedMins, approvedContentMins: k.totalMins, planContentMins: k.planContentMins,
+            planMeetsDesignated: pe.planHit, countedActualMins: pe.usedMins, approvedContentMins: k.totalMins, planContentMins: k.planContentMins, contentOnTime: k.onTime,
             dailyPlanMins: k.dailyPlanMins, dailyActualMins: k.dailyActMins, onTime: pe.onTime, late: pe.late,
             weights: (k.lines || []).map(function (l) { return { component: l.label, weight: l.w, value: l.v, contribution: l.contrib }; }), totalScore: k.capped };
     } catch (e) { return null; }
@@ -5826,7 +5829,7 @@ function mineAnswer() {
     return '**Numbers mo para sa ' + s.month + '**\n' +
       '- Target ' + s.target + ' · Own ' + s.ownContent + ' (+' + s.proof + ' proof) → **Ach ' + pct(s.achievement) + '**\n' +
       '- Revisions ' + s.revisions + ', content errors ' + s.contentErrors + ' (deduction ' + pct(s.accuracyDeduction) + ') → **Accuracy ' + pct(s.accuracy) + '**\n' +
-      '- Approved content ' + Math.round(s.approvedContentMins) + ' ÷ plan content ' + Math.round(s.planContentMins) + ' mins → **Efficiency ' + pct(s.efficiency) + '**\n' +
+      '- (W/o revisions ' + s.woRev + ') ÷ Target ' + s.target + ' → **Efficiency ' + pct(s.efficiency) + '**\n' +
       '- Daily actual ' + Math.round(s.dailyActualMins) + ' ÷ daily plan ' + Math.round(s.dailyPlanMins) + ' mins → **Timeliness ' + pct(s.timeliness) + '**\n' +
       '- Counted ' + Math.round(s.countedActualMins) + ' ÷ (plan ' + Math.round(s.monthlyPlanMins) + ' − leave ' + s.leaveDays + '×480 = ' + Math.round(s.adjustedPlanMins) + ') → **Productivity ' + pct(s.productivity) + '**' +
         (s.planMeetsDesignated ? ' (abot ang Designated Minutes, puwedeng >100%)' : ' (kulang ang plan sa Designated ' + Math.round(s.designatedMins) + ' mins → naka-cap sa 100%)') + '\n' +
