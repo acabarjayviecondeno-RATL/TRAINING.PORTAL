@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <script>
     /* Early auth guard: runs before the page renders, so a visitor who is not logged in never sees the dashboard. */
     (function(){try{
@@ -254,8 +254,8 @@
             justify-content: space-between;
             align-items: center;
             position: sticky;
-            top: 0;
-            z-index: 30;
+            top: 12px;
+            z-index: 50;
         }
 
         .content-section {
@@ -862,15 +862,62 @@ h2, h3, h4 { color: var(--aura-text); letter-spacing: -0.01em; }
 .sub-menu li:hover { background: rgba(148, 163, 184, 0.08) !important; color: #9cc3ff !important; }
 .sub-menu li.active { background: rgba(59, 130, 246, 0.18) !important; color: #9cc3ff !important; box-shadow: none !important; }
 
-/* ---------- HEADER BAR ---------- */
+/* ---------- HEADER BAR (RTO-style floating bar) ---------- */
 .header-bar {
-    background: rgba(16, 24, 40, 0.72) !important;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-color: var(--aura-line) !important;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22) !important;
+    background: rgba(15, 23, 42, 0.92) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    border-radius: 14px !important;
+    margin: 12px 16px 0 16px !important;
+    padding: 10px 16px !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28) !important;
+    width: auto !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    min-height: 56px !important;
+    /* Fixed sa scroll — hindi gagalaw */
+    position: sticky !important;
+    top: 12px !important;
+    z-index: 50 !important;
 }
-.header-bar h3 { font-size: 17px !important; color: #fff; }
+.header-bar h3 { font-size: 16px !important; color: #fff !important; font-weight: 700 !important; line-height: 1.25 !important; margin: 0 !important; }
+.header-bar p { color: #94a3b8 !important; margin: 2px 0 0 0 !important; line-height: 1.25 !important; }
+.header-bar #dashRole { color: #cbd5e1 !important; }
+.header-left { display: flex !important; align-items: center !important; gap: 10px !important; min-width: 0 !important; flex: 1 1 auto !important; }
+.header-left > div { min-width: 0 !important; }
+.header-right { display: flex !important; align-items: center !important; gap: 8px !important; flex: 0 0 auto !important; }
+/* Pantay na height ng controls sa kanan */
+.header-bar .theme-toggle,
+.header-bar .logout-btn,
+.header-bar #notifBtn {
+    height: 36px !important;
+    min-height: 36px !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.header-bar .theme-toggle { padding: 0 14px !important; }
+.header-bar .logout-btn { padding: 0 14px !important; }
+.header-bar #notifBtn {
+    width: 36px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(148, 163, 184, 0.10) !important;
+    border: 1px solid var(--aura-line-strong, rgba(148,163,184,0.25)) !important;
+}
+.header-bar #notifBtn:hover { background: rgba(59, 130, 246, 0.16) !important; }
+/* Align content with floating header edges */
+.content-section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+}
+.content-section.active { padding-top: 12px !important; }
+
 
 /* ---------- CARDS / SECTIONS ---------- */
 .content-section.active,
@@ -1288,10 +1335,22 @@ html[data-theme="light"] .sub-menu li.active { background: rgba(37, 99, 235, 0.1
 
 /* Header */
 html[data-theme="light"] .header-bar {
-    background: rgba(255, 255, 255, 0.88) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    border-radius: 14px !important;
+    margin: 12px 16px 0 16px !important;
     box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06) !important;
+    position: sticky !important;
+    top: 12px !important;
+    z-index: 50 !important;
 }
-html[data-theme="light"] .header-bar h3 { color: #0f172a; }
+html[data-theme="light"] .header-bar h3 { color: #0f172a !important; }
+html[data-theme="light"] .header-bar p { color: #64748b !important; }
+html[data-theme="light"] .header-bar #dashRole { color: #334155 !important; }
+html[data-theme="light"] .header-bar #notifBtn {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
 
 /* Cards */
 html[data-theme="light"] .content-section,
@@ -1305,6 +1364,31 @@ html[data-theme="light"] #socmedTab.content-section,
 html[data-theme="light"] #approvalTab.content-section,
 html[data-theme="light"] #overviewTab.content-section,
 html[data-theme="light"] #snsBoostingTab.content-section { background: transparent !important; border: none !important; box-shadow: none !important; }
+
+/* ---- Light mode fixes: components that kept their dark styling ---- */
+html[data-theme="light"] .kpi-top .kpi-controls { background:#ffffff !important; border-color:rgba(15,23,42,.14) !important; box-shadow:0 4px 14px rgba(15,23,42,.06) !important; }
+html[data-theme="light"] .kpi-top .kpi-controls select { background-color:#f8fafc !important; border-color:rgba(15,23,42,.18) !important; color:#0f172a !important; }
+html[data-theme="light"] .kpi-top .kpi-controls .kpi-btn { background:rgba(37,99,235,.10); border-color:rgba(37,99,235,.40); color:#1d4ed8; }
+html[data-theme="light"] .kpi-top .kpi-controls .kpi-btn:hover { background:rgba(37,99,235,.18); box-shadow:0 4px 14px rgba(37,99,235,.18); }
+html[data-theme="light"] .ov-overall { background:radial-gradient(520px 220px at 0% 0%, rgba(59,130,246,.10), transparent 70%), linear-gradient(160deg, #ffffff, #f4f7fd); border-color:rgba(15,23,42,.12); box-shadow:0 6px 20px rgba(15,23,42,.07); }
+html[data-theme="light"] .ov-ring::before { background:#ffffff; box-shadow:inset 0 2px 8px rgba(15,23,42,.10); }
+html[data-theme="light"] .mp-total { background:linear-gradient(160deg, #ffffff, #f4f7fd); border-color:rgba(15,23,42,.12); border-left-color:var(--c); }
+html[data-theme="light"] #snsBoostingTab h3[style*="color:#fff"], html[data-theme="light"] #snsBoostingTab h3[style*="color: #fff"] { color:#0f172a !important; }
+html[data-theme="light"] #snsBoostingTab .section-container { background:#ffffff !important; border-color:rgba(15,23,42,.12) !important; box-shadow:0 6px 20px rgba(15,23,42,.07) !important; }
+html[data-theme="light"] #snsBoostingTab .section-container > h4, html[data-theme="light"] #snsBoostingTab .section-container > div > h4 { color:#0f172a; }
+html[data-theme="light"] #snsBoostingTab label { color:#64748b !important; }
+html[data-theme="light"] #snsBoostingTab input[type="url"], html[data-theme="light"] #snsBoostingTab input[type="text"], html[data-theme="light"] #snsBoostingTab input[type="number"], html[data-theme="light"] #snsBoostingTab select { background-color:#f8fafc !important; border-color:rgba(15,23,42,.18) !important; color:#0f172a !important; }
+html[data-theme="light"] #snsBoostingTab input::placeholder { color:#94a3b8 !important; }
+html[data-theme="light"] #snsBoostingTab input:hover, html[data-theme="light"] #snsBoostingTab select:hover { border-color:rgba(37,99,235,.55) !important; }
+html[data-theme="light"] #snsBoostingTab input:focus, html[data-theme="light"] #snsBoostingTab select:focus { background-color:#ffffff !important; border-color:#2563eb !important; box-shadow:0 0 0 3px rgba(37,99,235,.18) !important; }
+html[data-theme="light"] #snsBoostingTab #snsProofDrop { background:#f8fafc; border-color:rgba(15,23,42,.25) !important; }
+html[data-theme="light"] #snsBoostingTab #snsProofDrop:hover, html[data-theme="light"] #snsBoostingTab #snsProofDrop.is-drag { background:rgba(37,99,235,.06); border-color:#2563eb !important; }
+html[data-theme="light"] #snsBoostingTab #snsProofFile::file-selector-button { background:rgba(37,99,235,.10); border-color:rgba(37,99,235,.40); color:#1d4ed8; }
+html[data-theme="light"] #snsBoostingTab #snsProofClear { color:#b91c1c !important; background:rgba(239,68,68,.10) !important; border-color:rgba(239,68,68,.40) !important; }
+html[data-theme="light"] .sns-ttl b { color:#1d4ed8 !important; }
+html[data-theme="light"] #snsBoostingTab .section-container:last-child button[onclick="loadSnsBoostingSt()"] { background:rgba(37,99,235,.10) !important; border-color:rgba(37,99,235,.40) !important; color:#1d4ed8 !important; }
+html[data-theme="light"] #snsBoostingTab .section-container:last-child button[onclick="loadSnsBoostingSt()"]:hover { background:rgba(37,99,235,.18) !important; }
+html[data-theme="light"] span[style*="color:#8ab8ff"] { color:#1d4ed8 !important; }
 html[data-theme="light"] .announcement-box,
 html[data-theme="light"] .filter-container,
 html[data-theme="light"] .computation-notes-box { background: #f8fafc !important; border-color: var(--aura-line) !important; }
@@ -1708,9 +1792,9 @@ html[data-theme="light"] .kpi-score-big { background:none; -webkit-text-fill-col
 
 .kpi-notes[open] > summary { border-bottom:1px solid var(--border-color); }
 
-.kpi-notes-body { padding:16px 18px 18px 18px; display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+.kpi-notes-body { padding:16px 18px 18px 18px; display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr)); }
 
-.kpi-notes-card { border:1px solid var(--border-color); border-radius:12px; padding:12px 14px; background:rgba(148,163,184,.05); }
+.kpi-notes-card { min-width:0; max-width:100%; overflow-wrap:anywhere; border:1px solid var(--border-color); border-radius:12px; padding:12px 14px; background:rgba(148,163,184,.05); }
 
 .kpi-notes-card h6 { margin:0 0 8px 0; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-main); }
 
@@ -2963,7 +3047,7 @@ html[data-theme="light"] button.sec-action-btn:hover {
         justify-content: space-between !important;
         gap: 10px !important;
         padding: 10px 12px !important;
-        position: sticky; top: 0; z-index: 30;
+        position: sticky !important; top: 8px !important; z-index: 50 !important;
     }
     .header-left {
         display: flex !important;
@@ -3054,7 +3138,7 @@ html[data-theme="light"] button.sec-action-btn:hover {
 }
 
 @media (max-width: 380px) {
-    .header-bar { padding: 8px 10px !important; gap: 8px !important; }
+    .header-bar { padding: 8px 10px !important; gap: 8px !important; margin: 8px 8px 0 8px !important; border-radius: 12px !important; position: sticky !important; top: 8px !important; z-index: 50 !important; }
     .header-left { gap: 8px !important; }
     .header-right, .header-bar > .flex { gap: 5px !important; }
     .mobile-menu-btn, .theme-toggle, #notifBtn { width: 38px !important; height: 38px !important; min-height: 38px !important; }
@@ -3259,6 +3343,336 @@ html[data-theme="light"] button.sec-action-btn:hover {
 h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.font-black{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important}
 .brand-name,.logo,.sidebar-brand-text,.ld-title,.ld-role,.summary-card .val,.summary-card h4,.kpi-score-big,.kpi-live-item strong,.stat b,.pct-big,.plan-name,.sec-title,.section-title,.cat-progress-head h5,#kpiBotHead b,summary,[class*="title"],[class*="heading"],.login-card button,.logout-btn,.btn-primary,button[type="submit"],.kb-tag{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;font-weight:700 !important}
 </style>
+<script>
+/* ===== StEdit: Edit / Save for Daily Plan, Daily Actual and Monthly Plan rows ===== */
+(function () {
+    if (window.StEdit) return;
+    var ED = window.StEdit = {};
+    var reg = {}, seq = 0, overrides = [], OVERRIDE_MS = 15 * 60 * 1000;
+    var cur = null;           // row being edited
+    var mpKey = '';           // category filter for the Monthly Plan records table
+
+    /* ---------- styles ---------- */
+    var css = document.createElement('style');
+    css.textContent =
+        '.st-ed-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;border:1px solid rgba(59,130,246,.45);background:rgba(59,130,246,.12);color:#60a5fa;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;line-height:1.4;font-family:inherit}' +
+        '.st-ed-btn:hover{background:rgba(59,130,246,.25);color:#93c5fd}' +
+        '.st-ed-btn+.st-ed-btn{margin-left:6px}' +
+        '.st-ed-ov{position:fixed;inset:0;background:rgba(2,6,23,.62);z-index:100000;display:none;align-items:center;justify-content:center;padding:16px}' +
+        '.st-ed-ov.on{display:flex}' +
+        '.st-ed-box{width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;background:var(--card-bg,#101828);color:var(--text-main,#e6ebf5);border:1px solid rgba(148,163,184,.28);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.5)}' +
+        '.st-ed-head{padding:16px 20px 10px;border-bottom:1px solid rgba(148,163,184,.18)}' +
+        '.st-ed-head h3{margin:0;font-size:15px;font-weight:800}' +
+        '.st-ed-head p{margin:4px 0 0;font-size:11px;color:var(--text-muted,#8795b1);line-height:1.5}' +
+        '.st-ed-body{padding:14px 20px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px}' +
+        '.st-ed-body label{display:block;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted,#8795b1);margin-bottom:4px}' +
+        '.st-ed-body select,.st-ed-body input,.st-ed-body textarea{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.10);color:var(--text-main,#e6ebf5);font-size:13px;font-family:inherit}' +
+        '.st-ed-body select:focus,.st-ed-body input:focus,.st-ed-body textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.25)}' +
+        '.st-ed-body .full{grid-column:1/-1}' +
+        '.st-ed-body .chg select,.st-ed-body .chg input,.st-ed-body .chg textarea{border-color:#f59e0b;background:rgba(245,158,11,.10)}' +
+        '.st-ed-msg{grid-column:1/-1;font-size:12px;line-height:1.5;border-radius:8px;padding:8px 12px;display:none}' +
+        '.st-ed-msg.err{display:block;color:#f87171;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35)}' +
+        '.st-ed-msg.warn{display:block;color:#fbbf24;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35)}' +
+        '.st-ed-foot{padding:12px 20px 16px;border-top:1px solid rgba(148,163,184,.18);display:flex;justify-content:flex-end;gap:10px}' +
+        '.st-ed-save{padding:9px 22px;border-radius:8px;border:none;background:#2563eb;color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}' +
+        '.st-ed-save:hover{background:#1d4ed8}.st-ed-save:disabled{opacity:.6;cursor:wait}' +
+        '.st-ed-cancel{padding:9px 20px;border-radius:8px;border:1px solid rgba(148,163,184,.35);background:transparent;color:var(--text-main,#e6ebf5);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit}' +
+        '.st-ed-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#059669;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:100001;box-shadow:0 10px 30px rgba(0,0,0,.4)}' +
+        '.st-ed-chip{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#fbbf24;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:999px;padding:3px 10px;margin:0 0 10px}' +
+        '.st-ed-chip button{background:none;border:none;color:#fbbf24;font-weight:800;cursor:pointer;padding:0}' +
+        '.st-cb{position:relative}.st-cb input{padding-right:26px!important}.st-cb-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted,#8795b1);font-size:12px}' +
+        '.st-cb-list{position:fixed;z-index:100002;max-height:220px;overflow:auto;background:var(--card-bg,#101828);color:var(--text-main,#e6ebf5);border:1px solid rgba(59,130,246,.55);border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.5)}' +
+        '.st-cb-item{padding:8px 10px;font-size:12.5px;cursor:pointer;line-height:1.35}.st-cb-item:hover{background:rgba(59,130,246,.22)}.st-cb-item.sel{background:rgba(59,130,246,.14);font-weight:700}.st-cb-none{padding:10px;font-size:12px;color:var(--text-muted,#8795b1)}' +
+        '@media(max-width:560px){.st-ed-body{grid-template-columns:1fr}}';
+    document.head.appendChild(css);
+
+    /* ---------- field definitions (keys = header aliases, first = canonical) ---------- */
+    var T = ['PLAN [Title]', 'TITLE', 'Title', 'PLAN [TITLE]', 'Plan [Title]'];
+    var TA = ['ACTUAL [Title]', 'TITLE', 'Title', 'ACTUAL [TITLE]', 'Actual [Title]'];
+    var F = {
+        date:  { l: 'Date Submitted', k: ['Date Submitted', 'Submitted D', 'Submitted Date'], hint: 'Keep the same format as the sheet' },
+        start: { l: 'Start Time', k: ['START TIME', 'Start Time', 'Time Start'] },
+        end:   { l: 'Time Ended', k: ['TIME ENDED', 'End Time', 'Time End'] },
+        dur:   { l: 'Duration (mins)', k: ['DURATION PER MIN', 'DURATION', 'Duration'], num: true },
+        loc:   { l: 'Location', k: ['LOCATION', 'Location'] },
+        cat:   { l: 'Category', k: ['CATEGORY', 'Category'], sel: 'cat' },
+        cat2:  { l: 'Category 2', k: ['CATEGORY 2', 'Category 2', 'CATEGORY2'], sel: 'cat2' },
+        fmt:   { l: 'Format', k: ['FORMAT', 'Dropdown', 'Format'] },
+        month: { l: 'Month', k: ['MONTH', 'Month'] },
+        avg:   { l: 'Average Time (mins)', k: ['AVERAGE TIME (in minutes)', 'AVERAGE TIME'], num: true },
+        freq:  { l: 'Frequency per Month', k: ['FREQUENCY PER MONTH', 'FREQUENCY', 'Frequency'], num: true },
+        titlePlan:   { l: 'Plan [Title]', k: T, req: true, full: true },
+        titleActual: { l: 'Actual [Title]', k: TA, req: true, full: true },
+        titleMp:     { l: 'Title', k: ['TITLE', 'PLAN [Title]', 'Title'], req: true, full: true },
+        remarks:     { l: 'Remarks', k: ['REMARKS', 'Remarks'], full: true, area: true },
+        remActual:   { l: 'Remarks for Actual', k: ['REMARKS FOR ACTUAL', 'REMARKS', 'Remarks'], full: true, area: true },
+        user:  { l: 'User', k: ['NS+ USER ID', 'NS+ User ID', 'User ID', 'Email'], hidden: true },
+        time:  { l: 'Time Submitted', k: ['Time Submitted'], hidden: true }
+    };
+    var TYPES = {
+        plan: {
+            title: 'Edit Daily Plan', action: 'updatePlanRow',
+            fields: ['date', 'start', 'end', 'dur', 'cat', 'cat2', 'titlePlan', 'remarks'],
+            match: ['user', 'date', 'time', 'start', 'end', 'dur', 'titlePlan']
+        },
+        actual: {
+            title: 'Edit Daily Actual', action: 'updateActualRow',
+            fields: ['date', 'start', 'end', 'dur', 'cat', 'cat2', 'fmt', 'titleActual', 'remActual'],
+            match: ['user', 'date', 'time', 'start', 'end', 'dur', 'titleActual']
+        },
+        monthly: {
+            title: 'Edit Monthly Plan', action: 'updateMonthlyPlanRow',
+            fields: ['month', 'dur', 'cat', 'cat2', 'titleMp', 'fmt', 'avg', 'freq', 'remarks'],
+            match: ['user', 'month', 'dur', 'cat', 'cat2', 'titleMp', 'freq']
+        }
+    };
+
+    function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function val(row, f) {
+        if (f === F.user) return String(row['_nsUserId'] || (window.loggedInUser || '') || '');
+        var v = typeof getRowVal === 'function' ? getRowVal(row, f.k) : '';
+        return v == null ? '' : String(v);
+    }
+    function sigOf(type, row) {
+        return JSON.stringify(TYPES[type].match.map(function (n) { return String(val(row, F[n])).trim(); }));
+    }
+    function setLocal(row, f, v) {
+        var hit = false;
+        f.k.forEach(function (k) { if (Object.prototype.hasOwnProperty.call(row, k)) { row[k] = v; hit = true; } });
+        if (!hit) row[f.k[0]] = v;
+    }
+
+    /* ---------- dropdown options (Category / Category 2) ---------- */
+    function optionsFor(kind, current) {
+        var set = {}, out = [];
+        function add(v) { v = String(v == null ? '' : v).trim(); if (v && !set[v]) { set[v] = 1; out.push(v); } }
+        var f = kind === 'cat' ? F.cat : F.cat2;
+        if (kind === 'cat') { try { (window.rcodeCategories || []).forEach(add); } catch (e) {} }
+        if (kind === 'cat2') ['CONTENT', 'TASK', 'OTHERS', 'TRAINING'].forEach(add);
+        ['plan', 'actual', 'monthlyPlan'].forEach(function (k) {
+            (window.allLoadedTasks && allLoadedTasks[k] || []).forEach(function (r) { add(getRowVal(r, f.k)); });
+        });
+        add(current);
+        out.sort(function (a, b) { return a.localeCompare(b); });
+        return out;
+    }
+    function selectHtml(n, kind, current) {   // searchable dropdown (combobox); only listed values are accepted
+        var opts = optionsFor(kind, current);
+        return '<div class="st-cb" data-kind="' + kind + '"><input type="text" name="' + n + '" value="' + esc(current) + '" data-last="' + esc(current) + '" autocomplete="off" placeholder="Search or select…">' +
+            '<span class="st-cb-arrow">▾</span></div><script type="application/json" class="st-cb-opts" data-for="' + n + '">' + JSON.stringify(opts).replace(/</g, '\\u003c') + '<\/script>';
+    }
+    var cbList = null;
+    function cbClose() { if (cbList) { cbList.remove(); cbList = null; } }
+    function cbOptions(input) {
+        var el = input.closest('.st-ed-body').querySelector('script[data-for="' + input.name + '"]');
+        try { return JSON.parse(el.textContent); } catch (e) { return []; }
+    }
+    function cbOpen(input, filterText) {
+        cbClose();
+        var all = cbOptions(input), q = String(filterText || '').toLowerCase().trim();
+        var list = q ? all.filter(function (o) { return o.toLowerCase().indexOf(q) !== -1; }) : all;
+        var r = input.getBoundingClientRect();
+        cbList = document.createElement('div'); cbList.className = 'st-cb-list';
+        cbList.style.cssText = 'left:' + r.left + 'px;top:' + (r.bottom + 2) + 'px;width:' + r.width + 'px;';
+        if (window.innerHeight - r.bottom < 200) { cbList.style.top = ''; cbList.style.bottom = (window.innerHeight - r.top + 2) + 'px'; }
+        cbList.innerHTML = list.length ? list.map(function (o) { return '<div class="st-cb-item' + (o === input.value ? ' sel' : '') + '" data-v="' + esc(o) + '">' + esc(o) + '</div>'; }).join('') : '<div class="st-cb-none">No match</div>';
+        cbList.onmousedown = function (e) {
+            var it = e.target.closest('.st-cb-item'); if (!it) return;
+            e.preventDefault();
+            input.value = it.getAttribute('data-v'); input.setAttribute('data-last', input.value);
+            cbClose(); input.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+        document.body.appendChild(cbList);
+    }
+    document.addEventListener('focusin', function (e) {
+        var t = e.target; if (t.matches && t.matches('.st-cb input')) { t.select(); cbOpen(t, ''); }
+    });
+    document.addEventListener('input', function (e) {
+        var t = e.target; if (t.matches && t.matches('.st-cb input')) cbOpen(t, t.value);
+    });
+    document.addEventListener('focusout', function (e) {
+        var t = e.target; if (!(t.matches && t.matches('.st-cb input'))) return;
+        setTimeout(function () {
+            cbClose();
+            if (cbOptions(t).indexOf(t.value) === -1) { t.value = t.getAttribute('data-last') || ''; t.dispatchEvent(new Event('input', { bubbles: true })); cbClose(); }
+        }, 120);
+    });
+    document.addEventListener('keydown', function (e) {
+        var t = e.target; if (!(t.matches && t.matches('.st-cb input'))) return;
+        if (e.key === 'Enter') { e.preventDefault(); var f = cbList && cbList.querySelector('.st-cb-item'); if (f) { t.value = f.getAttribute('data-v'); t.setAttribute('data-last', t.value); cbClose(); t.dispatchEvent(new Event('input', { bubbles: true })); } }
+        if (e.key === 'Escape') { e.stopPropagation(); cbClose(); }
+    }, true);
+
+    /* ---------- registry + buttons ---------- */
+    ED.ref = function (type, row) {
+        if (!row) return '';
+        if (!row.__edId) Object.defineProperty(row, '__edId', { value: 'ed' + (++seq), enumerable: false, writable: true });
+        reg[row.__edId] = { type: type, row: row };
+        return row.__edId;
+    };
+    ED.btn = function (id, label) {
+        if (!id) return '';
+        return '<button type="button" class="st-ed-btn" onclick="StEdit.open(\'' + id + '\')" title="Edit this record">✏️ ' + (label || 'Edit') + '</button>';
+    };
+    ED.btns = function (planId, actualId) {
+        var h = '';
+        if (planId) h += ED.btn(planId, 'Plan');
+        if (actualId) h += ED.btn(actualId, 'Actual');
+        return h || '<span style="color:var(--text-muted)">—</span>';
+    };
+
+    /* ---------- modal ---------- */
+    var ov = null;
+    function ensureModal() {
+        if (ov) return ov;
+        ov = document.createElement('div');
+        ov.className = 'st-ed-ov';
+        ov.innerHTML = '<div class="st-ed-box" role="dialog" aria-modal="true"><div class="st-ed-head"><h3 id="stEdTitle"></h3><p id="stEdSub"></p></div>' +
+            '<form id="stEdForm" onsubmit="return false;"><div class="st-ed-body" id="stEdBody"></div></form>' +
+            '<div class="st-ed-foot"><button type="button" class="st-ed-cancel" id="stEdCancel">Cancel</button><button type="button" class="st-ed-save" id="stEdSave">💾 Save changes</button></div></div>';
+        document.body.appendChild(ov);
+        ov.addEventListener('mousedown', function (e) { if (e.target === ov) ED.close(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ov.classList.contains('on')) ED.close(); });
+        ov.querySelector('#stEdCancel').onclick = ED.close;
+        ov.querySelector('#stEdSave').onclick = ED.save;
+        return ov;
+    }
+    function msg(kind, text) {
+        var m = document.getElementById('stEdMsg');
+        if (!m) return;
+        m.className = 'st-ed-msg' + (kind ? ' ' + kind : '');
+        m.textContent = text || '';
+    }
+    ED.open = function (id) {
+        var r = reg[id];
+        if (!r) { alert('Record not found. Please refresh the page and try again.'); return; }
+        var def = TYPES[r.type];
+        ensureModal(); document.getElementById('stEdSave').style.display = '';
+        cur = { id: id, type: r.type, row: r.row, orig: {}, match: def.match.map(function (n) { return { keys: F[n].k, value: String(val(r.row, F[n])).trim() }; }) };
+        document.getElementById('stEdTitle').textContent = '✏️ ' + def.title;
+        document.getElementById('stEdSub').textContent = 'Fix what was wrongly submitted, then press Save. Changes are written to the Google Sheet and your KPI / progress is recomputed.';
+        var h = '<div class="st-ed-msg" id="stEdMsg"></div>';
+        def.fields.forEach(function (n) {
+            var f = F[n], v = val(r.row, f);
+            cur.orig[n] = v;
+            h += '<div class="' + (f.full ? 'full' : '') + '" data-f="' + n + '"><label>' + esc(f.l) + (f.req ? ' *' : '') + '</label>' +
+                (f.sel ? selectHtml(n, f.sel, v) : f.area ? '<textarea rows="2" name="' + n + '">' + esc(v) + '</textarea>' : '<input type="text" name="' + n + '" value="' + esc(v) + '"' + (f.num ? ' inputmode="decimal"' : '') + '>') +
+                (f.hint ? '<div style="font-size:10px;color:var(--text-muted);margin-top:3px;">' + esc(f.hint) + '</div>' : '') + '</div>';
+        });
+        var body = document.getElementById('stEdBody');
+        body.innerHTML = h;
+        body.onchange = body.oninput = function (e) {
+            var w = e.target.closest && e.target.closest('[data-f]');
+            if (w) w.classList.toggle('chg', e.target.value.trim() !== String(cur.orig[w.getAttribute('data-f')]).trim());
+        };
+        if (r.type === 'actual' && String(val(r.row, F.cat)).toUpperCase().indexOf('CONTENT') !== -1)
+            msg('warn', 'Heads up: for CONTENT, the approval is matched by file name. If you change the Title, it may need to be re-approved.');
+        ov.classList.add('on');
+        var first = body.querySelector('input,textarea,select'); if (first) first.focus();
+    };
+    ED.close = function () { cbClose(); if (ov) ov.classList.remove('on'); cur = null; };
+
+    function toast(t) {
+        var d = document.createElement('div'); d.className = 'st-ed-toast'; d.textContent = t;
+        document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2600);
+    }
+
+    ED.save = async function () {
+        if (!cur) return;
+        var def = TYPES[cur.type], changes = [], uiChanges = {};
+        var form = document.getElementById('stEdBody');
+        for (var i = 0; i < def.fields.length; i++) {
+            var n = def.fields[i], f = F[n];
+            var v = String(form.querySelector('[name="' + n + '"]').value).trim();
+            if (f.req && !v) { msg('err', f.l + ' is required.'); return; }
+            if (f.num && v !== '' && isNaN(Number(String(v).replace(/,/g, '')))) { msg('err', f.l + ' must be a number.'); return; }
+            if (v !== String(cur.orig[n]).trim()) { changes.push({ keys: f.k, value: v }); uiChanges[n] = v; }
+        }
+        if (!changes.length) { msg('warn', 'No changes to save.'); return; }
+        var btn = document.getElementById('stEdSave');
+        btn.disabled = true; btn.textContent = 'Saving…'; msg('', '');
+        var res;
+        try {
+            var resp = await fetch(WEB_APP_URL, {
+                method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: def.action, user: window.loggedInUser, match: cur.match, changes: changes })
+            });
+            res = await resp.json();
+            if (!res || !res.success) throw new Error((res && res.message) || 'The server did not accept the change.');
+        } catch (err) {
+            btn.disabled = false; btn.textContent = '💾 Save changes';
+            msg('err', 'Could not save: ' + (err && err.message ? err.message : err));
+            return;
+        }
+        // success → update the row on screen right away
+        var row = cur.row, type = cur.type, sig = sigOf(type, row);
+        Object.keys(uiChanges).forEach(function (n) { setLocal(row, F[n], uiChanges[n]); });
+        if (type !== 'monthly') overrides.push({ type: type, sig: sig, changes: uiChanges, at: Date.now() });
+        btn.disabled = false; btn.textContent = '💾 Save changes';
+        ED.close();
+        refresh(type);
+        toast('✔ Saved — ' + def.title.replace('Edit ', '') + ' updated');
+    };
+
+    function refresh(type) {
+        function t(fn) { try { if (typeof window[fn] === 'function') window[fn](); } catch (e) { console.error(fn, e); } }
+        try { if (window._dataCache) { _dataCache.planAt = 0; _dataCache.actualAt = 0; _dataCache.monthlyAt = 0; } } catch (e) {}
+        if (type !== 'monthly') { try { renderViewTables(); } catch (e) { console.error(e); } }
+        t('renderStDailyProgress'); t('renderStMonthlyProgress'); t('updateDailyTaskSummaryAndChart'); t('renderKpiLanding');
+        if (type === 'monthly') { try { loadMonthlyPlanData(true); } catch (e) {} }   // monthly plan is read live from the server
+    }
+
+    /* The published CSV can lag a few minutes behind the sheet — keep showing the saved values until it catches up */
+    ED.applyOverrides = function () {
+        var now = Date.now();
+        overrides = overrides.filter(function (o) { return now - o.at < OVERRIDE_MS; });
+        if (!overrides.length) return;
+        ['plan', 'actual'].forEach(function (type) {
+            (allLoadedTasks[type] || []).forEach(function (row) {
+                var s = null;
+                overrides.forEach(function (o) {
+                    if (o.type !== type) return;
+                    if (s === null) s = sigOf(type, row);
+                    if (s === o.sig) Object.keys(o.changes).forEach(function (n) { setLocal(row, F[n], o.changes[n]); });
+                });
+            });
+        });
+    };
+
+    /* ---------- Monthly Plan records table (editable) ---------- */
+    function planKeyOf(r) {
+        try { var p = stNormalizeCatPair(r); return p.cat + '||' + (stNormCat2(p.cat2) || String(p.cat2 || '').toLowerCase()); } catch (e) { return ''; }
+    }
+    ED.renderMonthly = function () {   // no raw-records panel anymore; remove an old one if present
+        var w = document.getElementById('mpEditWrap'); if (w) w.remove();
+    };
+    ED.catBtn = function (key, label) {
+        return '<button type="button" class="st-ed-btn" data-k="' + esc(key) + '" data-l="' + esc(label) + '" onclick="StEdit.editCat(this.getAttribute(\'data-k\'),this.getAttribute(\'data-l\'))" title="Edit the Monthly Plan of this category">✏️ Edit</button>';
+    };
+    ED.editCat = function (key, label) {
+        var sel = document.getElementById('selectedMonthFilter'), monthKey = sel && sel.value ? sel.value : '';
+        var rows = (allLoadedTasks.monthlyPlan || []).filter(function (r) {
+            return matchesUser(r) && kpiMonthMatches(stField(r, ['MONTH']) || getRowVal(r, ['MONTH']), monthKey) && planKeyOf(r) === key;
+        });
+        if (!rows.length) { alert('No Monthly Plan row found for this category.'); return; }
+        if (rows.length === 1) { ED.open(ED.ref('monthly', rows[0])); return; }
+        ensureModal();
+        var h = rows.map(function (r) {
+            return '<div class="full" style="display:flex;align-items:center;gap:10px;justify-content:space-between;border:1px solid rgba(148,163,184,.25);border-radius:10px;padding:8px 12px;">' +
+                '<div style="min-width:0;font-size:13px;"><strong>' + esc(getRowVal(r, ['TITLE', 'PLAN [Title]'])) + '</strong><div style="font-size:11px;color:var(--text-muted);">' +
+                esc(getRowVal(r, ['MONTH'])) + ' · ' + esc(getRowVal(r, ['DURATION PER MIN', 'DURATION'])) + ' mins × ' + esc(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']) || 1) + '</div></div>' +
+                ED.btn(ED.ref('monthly', r)) + '</div>';
+        }).join('');
+        cur = null; document.getElementById('stEdSave').style.display = 'none';
+        document.getElementById('stEdTitle').textContent = '✏️ Monthly Plan — ' + (label || 'category');
+        document.getElementById('stEdSub').textContent = 'Pick the plan item you want to edit.';
+        document.getElementById('stEdBody').innerHTML = h;
+        document.getElementById('stEdBody').onchange = document.getElementById('stEdBody').oninput = null;
+        ov.classList.add('on');
+    };
+})();
+
+</script>
 </head>
 <body class="bg-gray-50 font-sans antialiased">
 
@@ -3332,12 +3746,12 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                 <div class="header-left">
                     <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open menu" onclick="toggleSidebarMobile()">&#9776;</button>
                     <div>
-                        <h3 id="dashTitle" style="margin:0; font-size: 16px;">Welcome, User</h3>
-                        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Role: <span id="dashRole" style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; color:var(--text-main);">Trainer</span></p>
+                        <h3 id="dashTitle" style="margin:0; font-size: 16px; font-weight:700; color:#fff;">Welcome, User</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Role: <span id="dashRole" style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; color:#cbd5e1;">Trainer</span></p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="header-right flex items-center gap-3">
                     <!-- THEME TOGGLE -->
                     <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" title="Switch between light and dark mode"><span class="theme-ico">&#9728;&#65039;</span><span class="theme-label">Light mode</span></button>
 
@@ -3363,8 +3777,8 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                         </div>
                     </div>
 
-                    <!-- Log Out Button -->
-                    <button class="logout-btn" onclick="handleLogout()">Log out</button>
+                    <!-- Logout Button -->
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
                 </div>
             </header>
 
@@ -3553,65 +3967,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                         </div>
                         <div id="stDailyProgressContainer" style="margin-bottom:16px;"><div class="cat-empty">Loading Plan vs Actual…</div></div>
 
-                        <div class="raw-data-stack">
-                            <div class="raw-data-label">Raw sheet records</div>
-                            <details class="raw-data-panel computation-notes-box">
-                                <summary>View raw Daily Plan data</summary>
-                                <div class="raw-data-body">
-                                    <div class="task-table-container">
-                                        <table class="task-table" id="viewPlanTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Date Submitted</th>
-                                                    <th>Time Submitted</th>
-                                                    <th>START TIME</th>
-                                                    <th>TIME ENDED</th>
-                                                    <th>DURATION PER MIN</th>
-                                                    <th>LOCATION</th>
-                                                    <th>PLAN [Title]</th>
-                                                    <th>CATEGORY</th>
-                                                    <th>CATEGORY 2</th>
-                                                    <th>REMARKS</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="viewPlanTableBody">
-                                                <tr><td colspan="10" style="text-align:center; padding: 20px; color:var(--text-muted);">No plans found for this user and month.</td></tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </details>
-                            <details class="raw-data-panel computation-notes-box">
-                                <summary>View raw Daily Actual data</summary>
-                                <div class="raw-data-body">
-                                    <div class="task-table-container">
-                                        <table class="task-table" id="viewActualTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Date Submitted</th>
-                                                    <th>Time Submitted</th>
-                                                    <th>START TIME</th>
-                                                    <th>TIME ENDED</th>
-                                                    <th>DURATION PER MIN</th>
-                                                    <th>LOCATION</th>
-                                                    <th>CATEGORY</th>
-                                                    <th>CATEGORY 2</th>
-                                                    <th>ACTUAL [Title]</th>
-                                                    <th>FORMAT</th>
-                                                    <th>Is this the start date?</th>
-                                                    <th>TARGET DATE</th>
-                                                    <th>APPROVAL DATE</th>
-                                                    <th>REMARKS FOR ACTUAL</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="viewActualTableBody">
-                                                <tr><td colspan="14" style="text-align:center; padding: 20px; color:var(--text-muted);">No actuals found for this user and month.</td></tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </details>
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -5593,6 +5949,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
         }
 
         function renderViewTables(tasks) {
+            if (!document.getElementById('viewPlanTableBody') || !document.getElementById('viewActualTableBody')) return;
             let selectedMonth = document.getElementById('selectedMonthFilter').value;
             let planRows = (allLoadedTasks.plan || []).filter(t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === selectedMonth);
             let actualRows = (allLoadedTasks.actual || []).filter(t => matchesUser(t) && getRowMonthKey(getRowVal(t, ["Date Submitted", "Submitted D", "Submitted Date"]) || t["Date Submitted"]) === selectedMonth);
@@ -5610,8 +5967,9 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                     <td>${getRowVal(row, ["CATEGORY", "Category"]) || ''}</td>
                     <td>${getRowVal(row, ["CATEGORY 2", "Category 2"])}</td>
                     <td>${getRowVal(row, ["REMARKS", "Remarks"]) || ''}</td>
+                    <td>${window.StEdit ? StEdit.btn(StEdit.ref('plan', row)) : ''}</td>
                 </tr>
-            `).join('') : `<tr><td colspan="10" style="text-align:center; padding: 20px; color:var(--text-muted);">No plans found.</td></tr>`;
+            `).join('') : `<tr><td colspan="11" style="text-align:center; padding: 20px; color:var(--text-muted);">No plans found.</td></tr>`;
 
             let actualTbody = document.getElementById('viewActualTableBody');
             actualTbody.innerHTML = actualRows.length > 0 ? actualRows.map(row => `
@@ -5630,8 +5988,9 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                     <td>${row["TARGET DATE"] || ''}</td>
                     <td>${row["APPROVAL DATE"] || ''}</td>
                     <td>${row["REMARKS FOR ACTUAL"] || ''}</td>
+                    <td>${window.StEdit ? StEdit.btn(StEdit.ref('actual', row)) : ''}</td>
                 </tr>
-            `).join('') : `<tr><td colspan="14" style="text-align:center; padding: 20px; color:var(--text-muted);">No actuals found.</td></tr>`;
+            `).join('') : `<tr><td colspan="15" style="text-align:center; padding: 20px; color:var(--text-muted);">No actuals found.</td></tr>`;
         }
 
         // ---- Fast data layer: parallel fetch + short TTL cache ----
@@ -5699,6 +6058,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                     var actualTasks = parseSheetToObjects(actualCsvText);
                     allLoadedTasks.plan = planTasks;
                     allLoadedTasks.actual = actualTasks;
+                    try { if (window.StEdit) StEdit.applyOverrides(); } catch (e) {}
                     refreshMonthOptions();
                     renderViewTables([].concat(planTasks, actualTasks));
                     try { updateDailyTaskSummaryAndChart(); } catch (e) { console.error('summary error', e); }
@@ -7557,6 +7917,7 @@ function stApprovedFiles() {
 }
 
 function renderStMonthlyProgress() {
+    try { if (window.StEdit) StEdit.renderMonthly(); } catch (e) { console.error(e); }
     var el = document.getElementById('stMonthlyProgressContainer');
     if (!el) return;
     var monthKey = '';
@@ -7814,7 +8175,7 @@ var lines = [];
 
     var body = '';
     if (!visible.length) {
-        body = '<tr><td colspan="5" class="cat-muted" style="text-align:center;padding:16px;">Nothing matches this filter.</td></tr>';
+        body = '<tr><td colspan="8" class="cat-muted" style="text-align:center;padding:16px;">Nothing matches this filter.</td></tr>';
     } else {
         visible.forEach(function (l) {
             var pct = l.target > 0 ? (l.actual / l.target) * 100 : null;
@@ -7826,14 +8187,18 @@ var lines = [];
                 '<td class="cat-name" style="text-align:left;"><span style="color:' + bc + ';">●</span> ' + escHtml(catLabel) + '</td>' +
                 '<td class="num">' + l.target + '</td>' +
                 '<td class="num">' + l.actual + '</td>' +
+                '<td class="num" style="font-weight:700;color:' + (pct == null ? '#64748b' : (pct >= 100 ? '#34d399' : (pct >= 80 ? '#fbbf24' : '#f87171'))) + ';">' + (pct == null ? '—' : (Math.round(pct * 10) / 10) + '%') + '</td>' +
+                '<td class="num" title="' + Math.round(l.planMins) + ' plan mins ÷ 480">' + (l.planMins > 0 ? (Math.round(l.planMins / 480 * 100) / 100) : '—') + '</td>' +
+                '<td class="num">' + (l.planMins > 0 && l.target > 0 ? (Math.round(l.planMins / 480 / l.target * 100) / 100) : '—') + '</td>' +
                 '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + barW + '%"></div></div></td>' +
                 '<td class="cat-remark-cell">' + statusHtml(l) + '</td>' +
+                '<td style="white-space:nowrap;">' + (window.StEdit ? StEdit.catBtn(l.key, catLabel) : '') + '</td>' +
                 '</tr>';
         });
     }
 
     if (extraCount > 0 && (statusFilter === 'all')) {
-        body += '<tr><td class="cat-name" style="text-align:left;"><span style="color:#34d399;">➕</span> Approved content not in plan</td><td class="num">—</td><td class="num">' + extraCount + '</td><td class="cat-bar-cell"></td><td class="cat-remark-cell"><span class="cat-remark plus">Plus points +' + extraCount + '</span></td></tr>';
+        body += '<tr><td class="cat-name" style="text-align:left;"><span style="color:#34d399;">➕</span> Approved content not in plan</td><td class="num">—</td><td class="num">' + extraCount + '</td><td class="cat-bar-cell"></td><td class="cat-remark-cell"><span class="cat-remark plus">Plus points +' + extraCount + '</span></td><td></td></tr>';
     }
     var leaveNote = '';
     try {   // approved Leave / Absent -> what was taken off the Targets, and what is still unassigned
@@ -7850,7 +8215,7 @@ var lines = [];
         '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + escHtml(monthLabel) + '</h5></div>' +
         '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category from your Monthly Plan. <strong>Actual</strong> counts unique <em>title + date</em> under that category: same title on the same day = 1; different titles on the same day = each counts; same title on different days = each day counts. CONTENT only when <strong>Approved</strong>. 0 actual = <span class="cat-remark miss">Not done</span>.</div>' + leaveNote +
         '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
-        '<th>Category</th><th class="num">Target</th><th class="num">Actual</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
+        '<th>Category</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Ach %</th><th class="num" title="Plan mins (less leave/absent) ÷ 480">Days Allowed</th><th class="num" title="Days Allowed ÷ Target">Days / Item</th><th>Progress</th><th class="cat-remark-h">Status</th><th>Action</th>' +
         '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
 }
 
@@ -7897,7 +8262,8 @@ function renderStDailyProgress() {
         var dur = stParseMins(r);
         ensureDay(date).plans.push({
             title: title, nt: stNormTitle(title), bucket: pair.cat, cat2: pair.cat2,
-            nc: stNormCat2(pair.cat2), dur: dur, match: null
+            nc: stNormCat2(pair.cat2), dur: dur, match: null,
+            ref: (window.StEdit ? StEdit.ref('plan', r) : '')
         });
     });
 
@@ -7915,7 +8281,8 @@ function renderStDailyProgress() {
         var approved = !isContent || stIsContentApproved(title, stField(r, ['APPROVAL DATE', 'Approval Date']), approvedFiles);
         ensureDay(date).actuals.push({
             title: title, nt: stNormTitle(title), bucket: pair.cat, cat2: pair.cat2,
-            nc: stNormCat2(pair.cat2), dur: dur, approved: approved, used: false
+            nc: stNormCat2(pair.cat2), dur: dur, approved: approved, used: false,
+            ref: (window.StEdit ? StEdit.ref('actual', r) : '')
         });
     });
 
@@ -7995,6 +8362,7 @@ function renderStDailyProgress() {
                 '<td class="num">' + (aMins ? Math.round(aMins).toLocaleString() : (s === 'notdone' ? '0' : '—')) + '</td>' +
                 '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + pct + '%"></div></div></td>' +
                 '<td class="cat-remark-cell">' + statusHtml + '</td>' +
+                '<td style="white-space:nowrap;">' + (window.StEdit ? StEdit.btns(p.ref, p.match && p.match.ref) : '') + '</td>' +
                 '</tr>';
         });
 
@@ -8011,6 +8379,7 @@ function renderStDailyProgress() {
                     '<td class="num">' + Math.round(showMins).toLocaleString() + '</td>' +
                     '<td class="cat-bar-cell"></td>' +
                     '<td class="cat-remark-cell"><span class="cat-remark enhance">○ Unplanned actual' + ((a.bucket === 'CONTENT' && !a.approved) ? ' · awaiting approval' : '') + '</span></td>' +
+                    '<td style="white-space:nowrap;">' + (window.StEdit ? StEdit.btns('', a.ref) : '') + '</td>' +
                     '</tr>';
             }
         });
@@ -8022,7 +8391,7 @@ function renderStDailyProgress() {
         try {
             dLabel = new Date(dk + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
         } catch (e) {}
-        body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="7" style="text-align:left;padding:10px 14px;font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">📅 ' + escHtml(dLabel) +
+        body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="8" style="text-align:left;padding:10px 14px;font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">📅 ' + escHtml(dLabel) +
             '<span style="font-weight:500;color:var(--text-muted);margin-left:10px;">' + dDone + '/' + dPlans + ' planned done · ' + Math.round(dPM).toLocaleString() + ' plan mins / ' + Math.round(dAM).toLocaleString() + ' actual mins</span> ' +
             (dPct == null ? '' : '<span class="cat-pct ' + (dPct >= 100 ? 'good' : (dPct >= 80 ? 'warn' : 'bad')) + '">' + (Math.round(dPct * 10) / 10) + '%</span>') +
             '</td></tr>' + rows;
@@ -8036,7 +8405,7 @@ function renderStDailyProgress() {
         '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Daily Plan vs Actual · ' + escHtml(dayFilter || monthLabel) + '</h5></div>' +
         '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is something in your Daily Plan, matched to your Daily Actual of the same day (exact title → similar title → same Category 2). Planned items with no actual are <span class="cat-remark miss">Not done</span>. Rows marked ○ are actuals not in that day\'s plan. CONTENT only counts once Approved.</div>' +
         '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
-        '<th>Category</th><th>Plan [Title]</th><th class="num">Plan mins</th><th>Actual [Title]</th><th class="num">Actual mins</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
+        '<th>Category</th><th>Plan [Title]</th><th class="num">Plan mins</th><th>Actual [Title]</th><th class="num">Actual mins</th><th>Progress</th><th class="cat-remark-h">Status</th><th>Action</th>' +
         '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
 }
 
@@ -8665,7 +9034,7 @@ function renderKpiLanding() {
 
     // missing inputs banner
     var msgs = [];
-    if (k.target === 0) msgs.push('walang <strong>CONTENT</strong> na naka-plan sa Monthly Plan para sa ' + escHtml(monthLabel) + ' (check ang MONTH column)');
+    if (k.target === 0) msgs.push('no <strong>CONTENT</strong> planned in the Monthly Plan for ' + escHtml(monthLabel) + ' (check ang MONTH column)');
     if (k.missing.length) msgs.push('walang laman sa <strong>“KPI Inputs”</strong> sheet para sa: ' + k.missing.map(function (m) { return escHtml(m.label) + ' <em>(' + escHtml(m.need.join(' / ')) + ')</em>'; }).join(', '));
     banner.style.display = 'none';   // missing-data notice removed on request
 
@@ -9096,9 +9465,9 @@ function submitSnsTikTokLink() {
 
 <!-- ===================== TRAINING PORTAL CHAT BOT (hybrid: topic-based + Gemini via Apps Script) ===================== -->
 <style>
-#kpiBotFab{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:26px;box-shadow:0 8px 24px rgba(37,99,235,.45);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+#kpiBotFab{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:2147483000;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:26px;box-shadow:0 8px 24px rgba(37,99,235,.45);display:flex;align-items:center;justify-content:center;transition:transform .15s}
 #kpiBotFab:hover{transform:scale(1.07)}
-#kpiBotPanel{--kb-bg:#0f172a;--kb-card:#1e293b;--kb-text:#e2e8f0;--kb-muted:#94a3b8;--kb-line:rgba(148,163,184,.25);--kb-user:#2563eb;position:fixed;right:20px;bottom:88px;z-index:2147483000;width:410px;max-width:calc(100vw - 24px);height:620px;max-height:calc(100vh - 110px);display:none;flex-direction:column;background:var(--kb-bg);color:var(--kb-text);border:1px solid var(--kb-line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;font:13px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#kpiBotPanel{--kb-bg:#0f172a;--kb-card:#1e293b;--kb-text:#e2e8f0;--kb-muted:#94a3b8;--kb-line:rgba(148,163,184,.25);--kb-user:#2563eb;position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:2147483000;width:410px;max-width:calc(100vw - 24px);height:620px;max-height:calc(100vh - 110px - env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 110px - env(safe-area-inset-bottom,0px));display:none;flex-direction:column;background:var(--kb-bg);color:var(--kb-text);border:1px solid var(--kb-line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;font:13px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 html[data-theme="light"] #kpiBotPanel{--kb-bg:#fff;--kb-card:#f1f5f9;--kb-text:#1e293b;--kb-muted:#64748b;--kb-line:#e2e8f0}
 #kpiBotPanel.open{display:flex}
 #kpiBotHead{padding:12px 14px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;display:flex;align-items:center;gap:8px}
@@ -9126,7 +9495,7 @@ html[data-theme="light"] #kpiBotPanel{--kb-bg:#fff;--kb-card:#f1f5f9;--kb-text:#
 #kpiBotInput:focus{border-color:#2563eb}
 #kpiBotSend{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:0 14px;cursor:pointer;font-weight:600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 #kpiBotSend:disabled{opacity:.5;cursor:default}
-@media(max-width:520px){#kpiBotPanel{right:8px;left:8px;width:auto;bottom:84px}}
+@media(max-width:520px){#kpiBotPanel{right:calc(8px + env(safe-area-inset-right,0px));left:calc(8px + env(safe-area-inset-left,0px));width:auto;bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
 </style>
 
 <button id="kpiBotFab" type="button" aria-label="Buksan ang Training Portal chat bot" title="Training Portal chat bot">💬</button>
@@ -9168,7 +9537,7 @@ var KB = [
   a:'**Target Count / Own Content / Ach %**\n'+
     '- **Target** = total ng *FREQUENCY PER MONTH* ng lahat ng Monthly Plan rows na CONTENT ang bucket (blank = 1).\n'+
     '- Bucket: *CATEGORY 2* muna ang tinitingnan kung CONTENT/TASK/OTHERS/TRAINING; kung hindi, *CATEGORY*. Ang "CONTENT - One-Pager Templated" ay detalye lang, hindi bucket.\n'+
-    '- **Actual (approved)**: bawat Approved na file sa Approval Requests ay itinutugma sa Monthly Plan slot — **(1)** file name vs plan TITLE, **(2)** kung wala, approval category vs plan CATEGORY. Walang match sa plan (o lampas na sa Target) = **PLUS points**: bibilangin pa rin sa Own Content, Ach %, Efficiency at Productivity (basta approved na CONTENT).\n'+
+    '- **Actual (approved)**: each Approved file in Approval Requests is matched to a Monthly Plan slot — **(1)** file name vs plan TITLE, **(2)** if none, approval category vs plan CATEGORY. No match in plan (or already over Target) = **PLUS points**: still counted in Own Content, Ach %, Efficiency and Productivity (as long as it is approved CONTENT).\n'+
     '- Ang file na may "proofread" sa pangalan/category ay bilang **Proof**, hindi **Own**. Total = Own + Proof.\n'+
     '- **Ach %** = Own Content ÷ Target × 100 (— kapag Target = 0).\n'+
     'Halimbawa: Target 10, Own 8 → Ach 80%.' },
@@ -9177,14 +9546,14 @@ var KB = [
   a:'**Accuracy** = (Target − Revisions) ÷ Target − error deduction\n'+
     '- **Revisions** = bilang ng *Rejected* Approval Requests sa buwan na tumutugma sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY). Hindi lahat ng reject ay binibilang — ang reject na **wala sa Monthly Plan** ay *not counted* bilang revision.\n'+
     '- **Error deduction** (galing sa *KPI Inputs* → CONTENT ERRORS): `ceil(errors ÷ 2) × 1%` → 1–2 errors = −1%, 3–4 = −2%, 5–6 = −3% …\n'+
-    '- Hindi bababa sa 0%. Kapag **walang Target**, "—" (walang data) ang lalabas, hindi 100%.\n'+
+    '- Never goes below 0%. When there is **no Target**, "—" (no data) is shown, not 100%.\n'+
     'Halimbawa: Target 10, Revisions 2, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
 { id:'efficiency', title:'Efficiency',
   kw:['efficiency','efficient','eff','approved content mins','plan mins','minutes','mins','efficiency %'],
   a:'**Efficiency** (KPI Landing Page) = (Content na walang revision) ÷ Target\n'+
     '- **W/o revisions** = Approved content − Revisions.\n'+
     '- **Revisions** = bilang ng Rejected files na tugma sa Monthly Plan.\n'+
-    '- Kapag **walang Target**, "—" ang lalabas.\n'+
+    '- When there is **no Target**, "—" is shown.\n'+
     'Halimbawa: Target 10, W/o revisions 7 → 7/10 = **70%**.\n'+
     '\n**Sa SEPCO Overview table**, ibang sukat ang Efficiency: *Daily Plan mins ÷ Daily Actual mins* (bawat unique Daily Plan item ay isang beses lang itinutugma).\n'+
     '- Kung ang Monthly Plan ay **mababa sa Designated Minutes** → ang plano lang ang bibilangin at **hanggang 100%** lang.\n'+
@@ -9192,7 +9561,7 @@ var KB = [
 { id:'timeliness', title:'Timeliness',
   kw:['timeliness','timely','on time','ontime','late','daily plan','daily actual','tim','daily','huli','oras','on-time'],
   a:'**Timeliness** = Daily Actual mins ÷ Daily Plan mins (parehong buwan)\n'+
-    '- Daily Plan: bawat row na may Title ay kasama; kung walang duration → 480 mins.\n'+
+    '- Daily Plan: every row with a Title is included; if no duration → 480 mins.\n'+
     '- Daily Actual: rows na may Title at may duration. CONTENT rows ay kasama **lang kapag approved na**; TASK/OTHERS ay laging kasama.\n'+
     '- Hiwalay na bilang ang **On Time / Late**: bawat unique Daily Plan item (user + petsa + title; magkakadagdag ang maraming time blocks). Actual < Plan = On Time; Actual > Plan = Late.\n'+
     'Halimbawa: Plan 9,600 mins, Actual 9,120 mins → 95%.' },
@@ -9215,7 +9584,7 @@ var KB = [
     '<tr><td>Timeliness</td><td>20%</td><td>20%</td><td>15%</td></tr>'+
     '<tr><td>Productivity</td><td>30%</td><td>30%</td><td>35%</td></tr></table>'+
     '- Ang Job Group ay galing sa *JOB GROUP* column ng user account sheet (may sariling page ang bawat group).\n'+
-    '- **Total** = Σ (min(value, 100%) × weight). Kapag walang data ang isang component, 0 ang ginagamit.' },
+    '- **Total** = Σ (min(value, 100%) × weight). When a component has no data, 0 is used.' },
 { id:'catplan', title:'Category Plan vs Actual',
   kw:['category','category plan','plan vs actual','plan days','actual days','target days','days worked','working days','category 2','progress','overall plan completion','not started','plan completion','rendered'],
   a:'**Category Plan vs Actual**\n'+
@@ -9240,7 +9609,7 @@ var KB = [
   a:'**SNS Boosting**\n'+
     '- **Target TTL** = Heart + Share + Views (inilagay mo). **Actual TTL** = diggs + shares + plays. **ACH%** = Actual ÷ Target × 100.\n'+
     '- Isang TikTok video ay isang beses lang puwedeng i-submit kada buwan. Boost period: araw ng submit → katapusan ng buwan.\n'+
-    '- Kailangan mag-upload ng **screenshot bilang proof** ng target engagement (Heart / Share / Views) sa pag-submit.\n\n'+
+    '- You must upload a **screenshot as proof** of the target engagement (Heart / Share / Views) on submit.\n\n'+
     '**Boosting only** (ACH% → SCORE%):\n'+
     '<table><tr><th>ACH%</th><th>SCORE%</th></tr><tr><td>≥2001</td><td>180</td></tr><tr><td>501–2000</td><td>150</td></tr><tr><td>101–500</td><td>100</td></tr><tr><td>85–100</td><td>95</td></tr><tr><td>75–84</td><td>90</td></tr><tr><td>50–74</td><td>80</td></tr><tr><td>31–49</td><td>70</td></tr><tr><td>21–30</td><td>60</td></tr><tr><td>11–20</td><td>50</td></tr><tr><td>1–10</td><td>25</td></tr></table>'+
     '- Special: Actual TTL ≥ 100,000 (o lamang ng ≥100,000 sa target) = **200**.\n\n'+
@@ -9260,16 +9629,16 @@ var KB = [
   kw:['approval','approval date','not counted','hindi nabilang','missing','hindi counted','counted','duplicate','unique','nabilang'],
   a:'**Bakit hindi nabilang ang isang content/task?**\n'+
     '- **CONTENT** ay binibilang (count at minutes) **lang kapag Approved** — may *APPROVAL DATE* sa Daily Actual row, o may Approved na file sa Approvals na tugma ang pangalan.\n'+
-    '- Dapat nasa **Monthly Plan** ang Category 2 niyon; kung wala, hindi counted (at sa Productivity, "extra" lang).\n'+
+    '- Its Category 2 must be in the **Monthly Plan**; if not, it is not counted (and for Productivity it is only "extra").\n'+
     '- Exact duplicate rows = 1 lang. Parehong title sa parehong araw = 1 sa category progress.\n'+
-    '- Ang Monthly Plan row na walang FREQUENCY ay 1; walang DURATION ay 480 mins.' },
+    '- A Monthly Plan row with no FREQUENCY is 1; no DURATION is 480 mins.' },
 { id:'approval', title:'Approval flow (RTO → SEPCO)',
   kw:['approval flow','approval','approve','approver','pending','pending rto','pending sepco','rto','resubmit','resubmission','rejected by rto','rejected by sepco','status','stage','upload','file approval','paano ma approve','telegram'],
   a:'**Approval flow ng uploaded file**\n'+
-    '- Bagong upload → **Pending RTO** (kung may RTO approver) o diretso **Pending SEPCO** kung wala.\n'+
+    '- New upload → **Pending RTO** (if there is an RTO approver) or straight to **Pending SEPCO** if none.\n'+
     '- RTO approve → **Pending SEPCO**. SEPCO approve → **Approved** (final).\n'+
     '- Kapag nag-reject ang approver: **Rejected by RTO / Rejected by SEPCO**, at kailangan ng *remarks*.\n'+
-    '- **Resubmit**: bumabalik sa Pending RTO (o Pending SEPCO kung walang RTO) at nabubura ang lumang remarks.\n'+
+    '- **Resubmit**: returns to Pending RTO (or Pending SEPCO if no RTO) and clears the old remarks.\n'+
     '- Ang approval/reject ay puwedeng gawin sa email o Telegram — ang *kasalukuyang assigned approver* lang ang may karapatan.\n'+
     '- Ang **Rejected** na tumutugma sa CONTENT ng Monthly Plan ay bilang **Revision** sa Accuracy; ang **Approved** lang ang bilang sa Own Content.' },
 { id:'about', title:'Ano ang kaya ng bot na ito?',
@@ -9361,7 +9730,7 @@ function liveSnapshot() {
 function mineAnswer() {
     var s = liveSnapshot();
     if (!s) return 'Wala akong makuhang live na numbers sa page na ito (o hindi pa tapos mag-load ang data / hindi ito ST page). Buksan ang KPI Landing Page, piliin ang buwan, tapos subukan ulit.';
-    return '**Numbers mo para sa ' + s.month + '**\n' +
+    return '**Your numbers for ' + s.month + '**\n' +
       '- Target ' + s.target + ' · Own ' + s.ownContent + ' (+' + s.proof + ' proof) → **Ach ' + pct(s.achievement) + '**\n' +
       '- Revisions ' + s.revisions + ', content errors ' + s.contentErrors + ' (deduction ' + pct(s.accuracyDeduction) + ') → **Accuracy ' + pct(s.accuracy) + '**\n' +
       '- (W/o revisions ' + s.woRev + ') ÷ Target ' + s.target + ' → **Efficiency ' + pct(s.efficiency) + '**\n' +
@@ -9429,7 +9798,7 @@ function askAI(text) {
 
 /* ------------------------------------------------------------------ chat flow */
 function fallbackHtml() {
-    return 'Hindi ko pa sigurado ang topic na iyan. Subukan ang isa sa mga button sa ibaba (Accuracy, Productivity, Weights, Approval flow, atbp.) o i-rephrase ang tanong.';
+    return 'I\'m not sure about that topic yet. Try one of the buttons below (Accuracy, Productivity, Weights, Approval flow, etc.) or rephrase your question.';
 }
 var busy = false;
 function showTopic(entry, tag) {
