@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <script>
     /* Early auth guard: runs before the page renders, so a visitor who is not logged in never sees the dashboard. */
     (function(){try{
@@ -1053,6 +1053,9 @@ html[data-theme="light"] label { color: #64748b !important; }
 html[data-theme="light"] .logout-btn { background: #fef2f2 !important; color: #dc2626 !important; border: 1px solid #fecaca !important; }
 html[data-theme="light"] .logout-btn:hover { background: #dc2626 !important; color: #ffffff !important; }
 html[data-theme="light"] button[style*="background: #f1f5f9"] { background: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important; }
+/* Light mode fixes */
+html[data-theme="light"] button[style*="background:#334155"] { color:#ffffff !important; }
+html[data-theme="light"] span[style*="color:#8ab8ff"] { color:#1d4ed8 !important; }
 html[data-theme="light"] button[style*="background: var(--primary)"],
 html[data-theme="light"] button[style*="background-color: var(--primary)"] { box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25); }
 
@@ -1627,6 +1630,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                         <div class="main-menu-item" onclick="toggleSubMenu(event, 'approvalMenuParent', 'approvalSubMenu')">
                             <span class="sidebar-icon"><i data-lucide="file-text"></i></span>
                             <span>Approval Section</span>
+                            <span id="approvalParentBadge"></span>
                             <span class="arrow-icon">▶</span>
                         </div>
                         <ul class="sub-menu" id="approvalSubMenu" style="display: none;">
@@ -1775,7 +1779,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 </div>
                 <div id="bulkBar" class="bulk-bar" style="display:none;">
                     <strong id="bulkCount">0 selected</strong>
-                    <input type="text" id="bulkRemarks" class="remarks-input" list="quickRemarks" placeholder="Remarks para sa lahat ng napili (optional sa Approve · required sa Reject)">
+                    <input type="text" id="bulkRemarks" class="remarks-input" list="quickRemarks" placeholder="Remarks for all selected (optional on Approve · required on Reject)">
                     <button type="button" class="btn-approve" onclick="bulkDecision('Approved')">✔ Approve selected</button>
                     <button type="button" class="btn-reject" onclick="bulkDecision('Rejected')">✖ Reject selected</button>
                     <button type="button" class="btn-ghost" onclick="clearSelection()">Clear</button>
@@ -1886,6 +1890,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     <button style="background: var(--primary);" onclick="resetMonthlyPlanMonthFilter()">Current Month</button>
                     <label for="monthlyPlanTrainerFilter">Trainer:</label>
                     <select id="monthlyPlanTrainerFilter" class="filter-input" onchange="onMonthlyPlanViewChange()"><option value="all">All trainers</option></select>
+                    <label for="monthlyPlanCatFilter">Category:</label>
+                    <select id="monthlyPlanCatFilter" class="filter-input" onchange="onMonthlyPlanViewChange()"><option value="all">All Categories</option><option value="CONTENT">CONTENT</option><option value="TASK">TASK</option><option value="TRAINING">TRAINING</option><option value="OTHERS">OTHERS</option></select>
                     <label for="monthlyPlanStatusFilter">Show:</label>
                     <select id="monthlyPlanStatusFilter" class="filter-input" onchange="onMonthlyPlanViewChange()">
                         <option value="all">All categories</option>
@@ -1896,7 +1902,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     </select>
                 </div>
                 <div id="monthlyPlanCategoryProgress" style="margin-bottom:20px;"></div>
-                <details class="computation-notes-box" style="margin-top:8px;">
+                <details class="computation-notes-box" style="display:none;margin-top:8px;">
                     <summary style="cursor:pointer;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:var(--primary);">📋 View raw Monthly Plan data</summary>
                     <div style="margin-top:12px;">
                     <div class="task-table-container">
@@ -1936,6 +1942,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     <button style="background: var(--primary);" onclick="resetDailyProgressFilters()">Current Month</button>
                     <label for="dailyTrainerFilter">Trainer:</label>
                     <select id="dailyTrainerFilter" class="filter-input" onchange="renderDailyProgress()"><option value="all">All trainers</option></select>
+                    <label for="dailyCatFilter">Category:</label>
+                    <select id="dailyCatFilter" class="filter-input" onchange="renderDailyProgress()"><option value="all">All Categories</option><option value="CONTENT">CONTENT</option><option value="TASK">TASK</option><option value="TRAINING">TRAINING</option><option value="OTHERS">OTHERS</option></select>
                     <label for="dailyStatusFilter">Show:</label>
                     <select id="dailyStatusFilter" class="filter-input" onchange="renderDailyProgress()">
                         <option value="all">Everything</option>
@@ -1946,7 +1954,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     </select>
                 </div>
                 <div id="dailyProgressContainer" style="margin-bottom:20px;"><div class="cat-empty">Loading Daily Plan and Daily Actual data...</div></div>
-                <details class="computation-notes-box" style="margin-top:8px;">
+                <details class="computation-notes-box" style="display:none;margin-top:8px;">
                     <summary style="cursor:pointer;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:var(--primary);">📋 View raw Daily Plan data</summary>
                     <div style="margin-top:12px;">
                     <div class="task-table-container">
@@ -1973,7 +1981,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 </div>
                     </div>
                 </details>
-                <details class="computation-notes-box" style="margin-top:8px;">
+                <details class="computation-notes-box" style="display:none;margin-top:8px;">
                     <summary style="cursor:pointer;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:var(--primary);">📋 View raw Daily Actual data</summary>
                     <div style="margin-top:12px;">
                     <div class="task-table-container">
@@ -3079,6 +3087,26 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     trainerFilter = trainerSel.value;
                 }
             }
+            const c2Lbl = (c2, b) => (c2 && c2 !== b && c2 !== '—') ? c2 : b;
+            const catSel = document.getElementById('monthlyPlanCatFilter');
+            const catFilter = catSel ? catSel.value : 'all';
+            const cat2Sel = document.getElementById('monthlyPlanCat2Filter');
+            let cat2Filter = cat2Sel ? cat2Sel.value : 'all';
+            if (cat2Sel) {
+                const set = {};
+                allUsers.forEach(k => {
+                    users[k].lines.forEach(l => { if (catFilter === 'all' || l.bucket === catFilter) set[c2Lbl(l.cat2, l.bucket)] = 1; });
+                    Object.keys(users[k].unplanned).forEach(x => { const o = users[k].unplanned[x]; if (catFilter === 'all' || o.bucket === catFilter) set[c2Lbl(o.label, o.bucket)] = 1; });
+                });
+                const labs = Object.keys(set).sort();
+                const csig = labs.join('|');
+                if (cat2Sel.getAttribute('data-sig') !== csig) {
+                    cat2Sel.innerHTML = '<option value="all">All Category 2</option>' + labs.map(x => '<option value="' + sepcoEsc(x) + '">' + sepcoEsc(x) + '</option>').join('');
+                    cat2Sel.setAttribute('data-sig', csig);
+                    cat2Sel.value = set[cat2Filter] ? cat2Filter : 'all';
+                }
+                cat2Filter = cat2Sel.value;
+            }
             const lineStatus = l => l.actual <= 0 ? 'notdone' : (l.actual < l.target ? 'partial' : 'done');
             const statusHtml = l => {
                 if (l.actual <= 0) return '<span class="cat-remark miss">Not done — 0 of ' + l.target + '</span>';
@@ -3122,16 +3150,16 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 if (trainerFilter !== 'all' && k !== trainerFilter) return;
                 const u = users[k];
                 const lines = u.lines.slice().sort((a, b) => (a.bucket === b.bucket ? (a.cat2 < b.cat2 ? -1 : 1) : (a.bucket < b.bucket ? -1 : 1)));
-                const visible = lines.filter(l => statusFilter === 'all' ? true : (statusFilter === 'incomplete' ? lineStatus(l) !== 'done' : lineStatus(l) === statusFilter));
-                const unplanned = Object.keys(u.unplanned).map(x => u.unplanned[x]);
-                if (statusFilter !== 'all' && !visible.length) return;
+                const visible = lines.filter(l => (catFilter === 'all' || l.bucket === catFilter) && (cat2Filter === 'all' || c2Lbl(l.cat2, l.bucket) === cat2Filter) && (statusFilter === 'all' ? true : (statusFilter === 'incomplete' ? lineStatus(l) !== 'done' : lineStatus(l) === statusFilter)));
+                const unplanned = Object.keys(u.unplanned).map(x => u.unplanned[x]).filter(x => (catFilter === 'all' || x.bucket === catFilter) && (cat2Filter === 'all' || c2Lbl(x.label, x.bucket) === cat2Filter));
+                if ((statusFilter !== 'all' || cat2Filter !== 'all' || catFilter !== 'all') && !visible.length && !(statusFilter === 'all' && unplanned.length)) return;
                 shownUsers++;
                 let tT = 0, tCredit = 0, tPM = 0, tAM = 0, nDone = 0;
                 const apprInPlan = lines.filter(l => l.bucket === 'CONTENT').reduce((t, l) => t + l.approved, 0);
                 lines.forEach(l => { tT += l.target; tCredit += Math.min(l.actual, l.target); tPM += l.planMins; tAM += l.actualMins; if (l.actual >= l.target) nDone++; });
                 const hdrPct = tT > 0 ? tCredit / tT * 100 : null;
                 const badge = !lines.length ? ' <span style="font-size:10px;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:#f59e0b;background:rgba(245,158,11,.15);padding:2px 6px;border-radius:4px;margin-left:6px;">No Monthly Plan</span>' : '';
-                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="9" style="text-align:left;padding:12px 14px;font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">👤 ' + sepcoEsc(labelFor(u)) + badge +
+                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="11" style="text-align:left;padding:12px 14px;font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">👤 ' + sepcoEsc(labelFor(u)) + badge +
                     (lines.length ? ' <span style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;color:var(--text-muted);margin-left:10px;">' + nDone + '/' + lines.length + ' categories done · ' + tCredit + '/' + tT + ' items · ' + Math.round(tAM).toLocaleString() + '/' + Math.round(tPM).toLocaleString() + ' mins · </span>' + pctHtml(tCredit, tT) : '') +
                     (lines.length ? ' <span style="font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;margin-left:10px;color:#34d399;">Approved content: ' + apprInPlan + '</span>' : '') +
                     '</td></tr>';
@@ -3142,7 +3170,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                         let _m = '';
                         if (_ln.length) _m += '<div style="color:#34d399;">✅ Taken off the Target (approved Leave / Absent): ' + _ln.join(' · ') + '</div>';
                         if (_ld.untitledMins > 0.5) _m += '<div style="color:#fbbf24;">⚠️ ' + (Math.round(_ld.untitledMins / 480 * 100) / 100) + ' approved Leave / Absent day(s) (' + Math.round(_ld.untitledMins) + ' mins) have no Plan Task, so no Target was reduced. The trainer must Edit it in the Leave / Absent Log and pick the task(s).</div>';
-                        if (_m) body += '<tr><td colspan="9" style="text-align:left;padding:6px 26px;font-size:11px;line-height:1.6;">' + _m + '</td></tr>';
+                        if (_m) body += '<tr><td colspan="11" style="text-align:left;padding:6px 26px;font-size:11px;line-height:1.6;">' + _m + '</td></tr>';
                     }
                 } catch (e) {}
                 visible.forEach(l => {
@@ -3154,6 +3182,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                         '<td class="num">' + l.target + '</td>' +
                         '<td class="num"' + (l.actual === 0 ? ' style="color:#fff;"' : '') + '>' + l.actual + '</td>' +
                         '<td class="num">' + pctHtml(l.actual, l.target) + '</td>' +
+                        '<td class="num" title="' + Math.round(l.planMins) + ' plan mins ÷ 480">' + (l.planMins > 0 ? (Math.round(l.planMins / 480 * 100) / 100) : '—') + '</td>' +
+                        '<td class="num">' + (l.planMins > 0 && l.target > 0 ? (Math.round(l.planMins / 480 / l.target * 100) / 100) : '—') + '</td>' +
                         (l.bucket === 'CONTENT' ? '<td class="num cat-strong" style="color:#34d399;">' + l.approved + '</td>' : '<td class="num cat-muted">—</td>') +
                         '<td class="num">' + Math.round(l.planMins).toLocaleString() + ' / ' + Math.round(l.actualMins).toLocaleString() + '<div style="font-size:10px;" class="cat-diff ' + (diff > 0 ? 'pos' : (diff < 0 ? 'neg' : 'zero')) + '">' + (diff > 0 ? '+' : '') + Math.round(diff).toLocaleString() + '</div></td>' +
                         '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + Math.min(100, Math.round(p)) + '%;"></div></div></td>' +
@@ -3164,14 +3194,14 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     unplanned.forEach(x => {
                         body += '<tr style="opacity:.8;">' +
                             '<td class="cat-name" style="text-align:left;padding-left:26px;white-space:normal;min-width:200px;"><span style="color:' + (bucketColor[x.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc((x.label && x.label !== x.bucket && x.label !== '—') ? x.label : x.bucket) + '</td>' +
-                            '<td class="num cat-muted">—</td><td class="num">' + x.count + '</td><td class="num cat-muted">—</td>' +
+                            '<td class="num cat-muted">—</td><td class="num">' + x.count + '</td><td class="num cat-muted">—</td><td class="num cat-muted">—</td><td class="num cat-muted">—</td>' +
                             (x.bucket === 'CONTENT' ? '<td class="num cat-strong" style="color:#34d399;">' + x.count + '</td>' : '<td class="num cat-muted">—</td>') +
                             '<td class="num">— / ' + Math.round(x.mins).toLocaleString() + '</td><td></td>' +
                             '<td class="cat-remark-cell" colspan="2"><span class="cat-remark enhance">' + sepcoEsc(x.note) + '</span></td></tr>';
                     });
                 }
                 if (statusFilter === 'all' && !lines.length) {
-                    body += '<tr><td colspan="9" class="cat-muted" style="text-align:left;padding:10px 26px;">No Monthly Plan for this month — no approved or actual content is shown.</td></tr>';
+                    body += '<tr><td colspan="11" class="cat-muted" style="text-align:left;padding:10px 26px;">No Monthly Plan for this month — no approved or actual content is shown.</td></tr>';
                 }
             });
 
@@ -3183,7 +3213,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + sepcoEsc(monthLabel) + '</h5></div>' +
                 '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category from the trainer\'s Monthly Plan. <strong>Actual</strong> = unique <em>title + date</em> under that category (same title on the same day counts once; different titles count separately; same title on different days each count). CONTENT counts only when <strong>Approved</strong> and the Category 2 is in the plan. Planned items with 0 actual are shown as <span class="cat-remark miss">Not done</span>. Approved Content = Approved requests from the List of Requests that match a plan line. Trainers without a Monthly Plan show nothing. Rows marked ○ are TASK / OTHERS actuals that are <em>not</em> in the trainer\'s Monthly Plan.</div>' +
                 '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
-                '<th>Category</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Achievement %</th><th class="num">Approved Content</th><th class="num">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h" colspan="2">Status</th>' +
+                '<th>Category</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Achievement %</th><th class="num" title="Plan mins (less leave/absent) ÷ 480">Days Allowed</th><th class="num" title="Days Allowed ÷ Target">Days / Item</th><th class="num">Approved Content</th><th class="num">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h" colspan="2">Status</th>' +
                 '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
         }
 
@@ -3304,6 +3334,26 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 }
             }
 
+            const c2Lbl = (c2, b) => (c2 && c2 !== b && c2 !== '—') ? c2 : b;
+            const catSel = document.getElementById('dailyCatFilter');
+            const catFilter = catSel ? catSel.value : 'all';
+            const cat2Sel = document.getElementById('dailyCat2Filter');
+            let cat2Filter = cat2Sel ? cat2Sel.value : 'all';
+            if (cat2Sel) {
+                const set = {};
+                allKeys.forEach(k => Object.keys(users[k].days).forEach(dk => {
+                    users[k].days[dk].plans.forEach(p => { if (catFilter === 'all' || p.bucket === catFilter) set[c2Lbl(p.cat2, p.bucket)] = 1; });
+                    users[k].days[dk].actuals.forEach(a => { if (catFilter === 'all' || a.bucket === catFilter) set[c2Lbl(a.cat2, a.bucket)] = 1; });
+                }));
+                const labs = Object.keys(set).sort();
+                const csig = labs.join('|');
+                if (cat2Sel.getAttribute('data-sig') !== csig) {
+                    cat2Sel.innerHTML = '<option value="all">All Category 2</option>' + labs.map(x => '<option value="' + sepcoEsc(x) + '">' + sepcoEsc(x) + '</option>').join('');
+                    cat2Sel.setAttribute('data-sig', csig);
+                    cat2Sel.value = set[cat2Filter] ? cat2Filter : 'all';
+                }
+                cat2Filter = cat2Sel.value;
+            }
             const itemState = p => {
                 if (!p.match) return 'notdone';
                 if (p.dur > 0 && p.match.dur > p.dur) return 'late';
@@ -3352,6 +3402,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                         if (statusFilter === 'done' && s === 'notdone') return;
                         if (statusFilter === 'late' && s !== 'late') return;
                         if (statusFilter === 'unplanned') return;
+                        if (catFilter !== 'all' && p.bucket !== catFilter) return;
+                        if (cat2Filter !== 'all' && c2Lbl(p.cat2, p.bucket) !== cat2Filter) return;
                         const pct = p.dur > 0 && p.match ? Math.min(100, Math.round(p.match.dur / p.dur * 100)) : (p.match ? 100 : 0);
                         rows += '<tr>' +
                             '<td class="cat-name" style="text-align:left;padding-left:26px;"><span style="color:' + (bucketColor[p.bucket] || '#94a3b8') + ';">●</span> ' + sepcoEsc(p.bucket) + '</td>' +
@@ -3365,6 +3417,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     unplanned.forEach(a => {
                         if (a.bucket !== 'CONTENT' || a.approved) dAM += a.dur;
                         if (statusFilter !== 'all' && statusFilter !== 'unplanned') return;
+                        if (catFilter !== 'all' && a.bucket !== catFilter) return;
+                        if (cat2Filter !== 'all' && c2Lbl(a.cat2, a.bucket) !== cat2Filter) return;
                         rows += '<tr style="opacity:.8;">' +
                             '<td class="cat-name" style="text-align:left;padding-left:26px;"><span style="color:' + (bucketColor[a.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc(a.bucket) + '</td>' +
                             '<td class="cat-muted" style="text-align:left;">Not in Daily Plan</td><td class="num cat-muted">—</td>' +
@@ -5255,7 +5309,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 return;
             }
             if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="' + colSpan + '" style="color: var(--text-muted); padding: 20px;">Walang tumutugma sa filters. <a href="#" onclick="clearAllFilters(\'' + tableBodyId + '\'); return false;" style="color:var(--primary); font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">Clear filters</a></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="' + colSpan + '" style="color: var(--text-muted); padding: 20px;">No matches for the current filters. <a href="#" onclick="clearAllFilters(\'' + tableBodyId + '\'); return false;" style="color:var(--primary); font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">Clear filters</a></td></tr>';
                 refreshBulkBar();
                 return;
             }
@@ -5328,7 +5382,9 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
 
         function updateForApprovalBadge(n) {
             var li = document.getElementById('subForApproval');
-            if (li) li.innerHTML = 'For Approval' + (n > 0 ? ' <span class="nav-badge">' + n + '</span>' : '');
+            if (li) li.innerHTML = 'For Approval' + (n > 0 ? '<span class="nav-badge" title="' + n + ' for approval">' + n + '</span>' : '');
+            var pb = document.getElementById('approvalParentBadge');
+            if (pb) pb.innerHTML = (n > 0 ? '<span class="nav-badge" style="margin-left:0;" title="' + n + ' total for approval">' + n + '</span>' : '');
             document.title = (n > 0 ? '(' + n + ') ' : '') + BASE_TITLE;
         }
 
@@ -5358,7 +5414,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
         }
         function bulkDecision(status) {
             var rows = Array.from(selRows);
-            if (!rows.length) { apprToast('Wala pang napili.', 'err'); return; }
+            if (!rows.length) { apprToast('Nothing selected yet.', 'err'); return; }
             var bulk = (document.getElementById('bulkRemarks') || {}).value || '';
             runDecisions(rows, status, bulk.trim());
         }
@@ -5405,7 +5461,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                             failed.push('Row ' + x.row + ': ' + ((d && d.message) || 'Failed'));
                         }
                     }).catch(function (err) {
-                        failed.push('Row ' + x.row + ': ' + (err && err.message === 'timeout' ? 'walang response (i-check ang status)' : 'connection error'));
+                        failed.push('Row ' + x.row + ': ' + (err && err.message === 'timeout' ? 'no response (check the status)' : 'connection error'));
                     });
                 });
             });
@@ -5561,9 +5617,9 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
     </script>
 <!-- ===================== TRAINING PORTAL CHAT BOT (hybrid: topic-based + Gemini via Apps Script) ===================== -->
 <style>
-#kpiBotFab{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:26px;box-shadow:0 8px 24px rgba(37,99,235,.45);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+#kpiBotFab{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:2147483000;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:26px;box-shadow:0 8px 24px rgba(37,99,235,.45);display:flex;align-items:center;justify-content:center;transition:transform .15s}
 #kpiBotFab:hover{transform:scale(1.07)}
-#kpiBotPanel{--kb-bg:#0f172a;--kb-card:#1e293b;--kb-text:#e2e8f0;--kb-muted:#94a3b8;--kb-line:rgba(148,163,184,.25);--kb-user:#2563eb;position:fixed;right:20px;bottom:88px;z-index:2147483000;width:410px;max-width:calc(100vw - 24px);height:620px;max-height:calc(100vh - 110px);display:none;flex-direction:column;background:var(--kb-bg);color:var(--kb-text);border:1px solid var(--kb-line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;font:13px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#kpiBotPanel{--kb-bg:#0f172a;--kb-card:#1e293b;--kb-text:#e2e8f0;--kb-muted:#94a3b8;--kb-line:rgba(148,163,184,.25);--kb-user:#2563eb;position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:2147483000;width:410px;max-width:calc(100vw - 24px);height:620px;max-height:calc(100vh - 110px - env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 110px - env(safe-area-inset-bottom,0px));display:none;flex-direction:column;background:var(--kb-bg);color:var(--kb-text);border:1px solid var(--kb-line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;font:13px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 html[data-theme="light"] #kpiBotPanel{--kb-bg:#fff;--kb-card:#f1f5f9;--kb-text:#1e293b;--kb-muted:#64748b;--kb-line:#e2e8f0}
 #kpiBotPanel.open{display:flex}
 #kpiBotHead{padding:12px 14px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;display:flex;align-items:center;gap:8px}
@@ -5591,7 +5647,7 @@ html[data-theme="light"] #kpiBotPanel{--kb-bg:#fff;--kb-card:#f1f5f9;--kb-text:#
 #kpiBotInput:focus{border-color:#2563eb}
 #kpiBotSend{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:0 14px;cursor:pointer;font-weight:600;font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
 #kpiBotSend:disabled{opacity:.5;cursor:default}
-@media(max-width:520px){#kpiBotPanel{right:8px;left:8px;width:auto;bottom:84px}}
+@media(max-width:520px){#kpiBotPanel{right:calc(8px + env(safe-area-inset-right,0px));left:calc(8px + env(safe-area-inset-left,0px));width:auto;bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
 </style>
 
 <button id="kpiBotFab" type="button" aria-label="Buksan ang Training Portal chat bot" title="Training Portal chat bot">💬</button>
@@ -5633,7 +5689,7 @@ var KB = [
   a:'**Target Count / Own Content / Ach %**\n'+
     '- **Target** = total ng *FREQUENCY PER MONTH* ng lahat ng Monthly Plan rows na CONTENT ang bucket (blank = 1).\n'+
     '- Bucket: *CATEGORY 2* muna ang tinitingnan kung CONTENT/TASK/OTHERS/TRAINING; kung hindi, *CATEGORY*. Ang "CONTENT - One-Pager Templated" ay detalye lang, hindi bucket.\n'+
-    '- **Actual (approved)**: bawat Approved na file sa Approval Requests ay itinutugma sa Monthly Plan slot — **(1)** file name vs plan TITLE, **(2)** kung wala, approval category vs plan CATEGORY. Walang match sa plan (o lampas na sa Target) = **PLUS points**: bibilangin pa rin sa Own Content, Ach %, Efficiency at Productivity (basta approved na CONTENT).\n'+
+    '- **Actual (approved)**: each Approved file in Approval Requests is matched to a Monthly Plan slot — **(1)** file name vs plan TITLE, **(2)** if none, approval category vs plan CATEGORY. No match in plan (or already over Target) = **PLUS points**: still counted in Own Content, Ach %, Efficiency and Productivity (as long as it is approved CONTENT).\n'+
     '- Ang file na may "proofread" sa pangalan/category ay bilang **Proof**, hindi **Own**. Total = Own + Proof.\n'+
     '- **Ach %** = Own Content ÷ Target × 100 (— kapag Target = 0).\n'+
     'Halimbawa: Target 10, Own 8 → Ach 80%.' },
@@ -5642,14 +5698,14 @@ var KB = [
   a:'**Accuracy** = (Target − Revisions) ÷ Target − error deduction\n'+
     '- **Revisions** = bilang ng *Rejected* Approval Requests sa buwan na tumutugma sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY). Hindi lahat ng reject ay binibilang — ang reject na **wala sa Monthly Plan** ay *not counted* bilang revision.\n'+
     '- **Error deduction** (galing sa *KPI Inputs* → CONTENT ERRORS): `ceil(errors ÷ 2) × 1%` → 1–2 errors = −1%, 3–4 = −2%, 5–6 = −3% …\n'+
-    '- Hindi bababa sa 0%. Kapag **walang Target**, "—" (walang data) ang lalabas, hindi 100%.\n'+
+    '- Never goes below 0%. When there is **no Target**, "—" (no data) is shown, not 100%.\n'+
     'Halimbawa: Target 10, Revisions 2, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
 { id:'efficiency', title:'Efficiency',
   kw:['efficiency','efficient','eff','approved content mins','plan mins','minutes','mins','efficiency %'],
   a:'**Efficiency** (KPI Landing Page) = (Content na walang revision) ÷ Target\n'+
     '- **W/o revisions** = Approved content − Revisions.\n'+
     '- **Revisions** = bilang ng Rejected files na tugma sa Monthly Plan.\n'+
-    '- Kapag **walang Target**, "—" ang lalabas.\n'+
+    '- When there is **no Target**, "—" is shown.\n'+
     'Halimbawa: Target 10, W/o revisions 7 → 7/10 = **70%**.\n'+
     '\n**Sa SEPCO Overview table**, ibang sukat ang Efficiency: *Daily Plan mins ÷ Daily Actual mins* (bawat unique Daily Plan item ay isang beses lang itinutugma).\n'+
     '- Kung ang Monthly Plan ay **mababa sa Designated Minutes** → ang plano lang ang bibilangin at **hanggang 100%** lang.\n'+
@@ -5657,7 +5713,7 @@ var KB = [
 { id:'timeliness', title:'Timeliness',
   kw:['timeliness','timely','on time','ontime','late','daily plan','daily actual','tim','daily','huli','oras','on-time'],
   a:'**Timeliness** = Daily Actual mins ÷ Daily Plan mins (parehong buwan)\n'+
-    '- Daily Plan: bawat row na may Title ay kasama; kung walang duration → 480 mins.\n'+
+    '- Daily Plan: every row with a Title is included; if no duration → 480 mins.\n'+
     '- Daily Actual: rows na may Title at may duration. CONTENT rows ay kasama **lang kapag approved na**; TASK/OTHERS ay laging kasama.\n'+
     '- Hiwalay na bilang ang **On Time / Late**: bawat unique Daily Plan item (user + petsa + title; magkakadagdag ang maraming time blocks). Actual < Plan = On Time; Actual > Plan = Late.\n'+
     'Halimbawa: Plan 9,600 mins, Actual 9,120 mins → 95%.' },
@@ -5680,7 +5736,7 @@ var KB = [
     '<tr><td>Timeliness</td><td>20%</td><td>20%</td><td>15%</td></tr>'+
     '<tr><td>Productivity</td><td>30%</td><td>30%</td><td>35%</td></tr></table>'+
     '- Ang Job Group ay galing sa *JOB GROUP* column ng user account sheet (may sariling page ang bawat group).\n'+
-    '- **Total** = Σ (min(value, 100%) × weight). Kapag walang data ang isang component, 0 ang ginagamit.' },
+    '- **Total** = Σ (min(value, 100%) × weight). When a component has no data, 0 is used.' },
 { id:'catplan', title:'Category Plan vs Actual',
   kw:['category','category plan','plan vs actual','plan days','actual days','target days','days worked','working days','category 2','progress','overall plan completion','not started','plan completion','rendered'],
   a:'**Category Plan vs Actual**\n'+
@@ -5705,7 +5761,7 @@ var KB = [
   a:'**SNS Boosting**\n'+
     '- **Target TTL** = Heart + Share + Views (inilagay mo). **Actual TTL** = diggs + shares + plays. **ACH%** = Actual ÷ Target × 100.\n'+
     '- Isang TikTok video ay isang beses lang puwedeng i-submit kada buwan. Boost period: araw ng submit → katapusan ng buwan.\n'+
-    '- Kailangan mag-upload ng **screenshot bilang proof** ng target engagement (Heart / Share / Views) sa pag-submit.\n\n'+
+    '- You must upload a **screenshot as proof** of the target engagement (Heart / Share / Views) on submit.\n\n'+
     '**Boosting only** (ACH% → SCORE%):\n'+
     '<table><tr><th>ACH%</th><th>SCORE%</th></tr><tr><td>≥2001</td><td>180</td></tr><tr><td>501–2000</td><td>150</td></tr><tr><td>101–500</td><td>100</td></tr><tr><td>85–100</td><td>95</td></tr><tr><td>75–84</td><td>90</td></tr><tr><td>50–74</td><td>80</td></tr><tr><td>31–49</td><td>70</td></tr><tr><td>21–30</td><td>60</td></tr><tr><td>11–20</td><td>50</td></tr><tr><td>1–10</td><td>25</td></tr></table>'+
     '- Special: Actual TTL ≥ 100,000 (o lamang ng ≥100,000 sa target) = **200**.\n\n'+
@@ -5725,16 +5781,16 @@ var KB = [
   kw:['approval','approval date','not counted','hindi nabilang','missing','hindi counted','counted','duplicate','unique','nabilang'],
   a:'**Bakit hindi nabilang ang isang content/task?**\n'+
     '- **CONTENT** ay binibilang (count at minutes) **lang kapag Approved** — may *APPROVAL DATE* sa Daily Actual row, o may Approved na file sa Approvals na tugma ang pangalan.\n'+
-    '- Dapat nasa **Monthly Plan** ang Category 2 niyon; kung wala, hindi counted (at sa Productivity, "extra" lang).\n'+
+    '- Its Category 2 must be in the **Monthly Plan**; if not, it is not counted (and for Productivity it is only "extra").\n'+
     '- Exact duplicate rows = 1 lang. Parehong title sa parehong araw = 1 sa category progress.\n'+
-    '- Ang Monthly Plan row na walang FREQUENCY ay 1; walang DURATION ay 480 mins.' },
+    '- A Monthly Plan row with no FREQUENCY is 1; no DURATION is 480 mins.' },
 { id:'approval', title:'Approval flow (RTO → SEPCO)',
   kw:['approval flow','approval','approve','approver','pending','pending rto','pending sepco','rto','resubmit','resubmission','rejected by rto','rejected by sepco','status','stage','upload','file approval','paano ma approve','telegram'],
   a:'**Approval flow ng uploaded file**\n'+
-    '- Bagong upload → **Pending RTO** (kung may RTO approver) o diretso **Pending SEPCO** kung wala.\n'+
+    '- New upload → **Pending RTO** (if there is an RTO approver) or straight to **Pending SEPCO** if none.\n'+
     '- RTO approve → **Pending SEPCO**. SEPCO approve → **Approved** (final).\n'+
     '- Kapag nag-reject ang approver: **Rejected by RTO / Rejected by SEPCO**, at kailangan ng *remarks*.\n'+
-    '- **Resubmit**: bumabalik sa Pending RTO (o Pending SEPCO kung walang RTO) at nabubura ang lumang remarks.\n'+
+    '- **Resubmit**: returns to Pending RTO (or Pending SEPCO if no RTO) and clears the old remarks.\n'+
     '- Ang approval/reject ay puwedeng gawin sa email o Telegram — ang *kasalukuyang assigned approver* lang ang may karapatan.\n'+
     '- Ang **Rejected** na tumutugma sa CONTENT ng Monthly Plan ay bilang **Revision** sa Accuracy; ang **Approved** lang ang bilang sa Own Content.' },
 { id:'about', title:'Ano ang kaya ng bot na ito?',
@@ -5826,7 +5882,7 @@ function liveSnapshot() {
 function mineAnswer() {
     var s = liveSnapshot();
     if (!s) return 'Wala akong makuhang live na numbers sa page na ito (o hindi pa tapos mag-load ang data / hindi ito ST page). Buksan ang KPI Landing Page, piliin ang buwan, tapos subukan ulit.';
-    return '**Numbers mo para sa ' + s.month + '**\n' +
+    return '**Your numbers for ' + s.month + '**\n' +
       '- Target ' + s.target + ' · Own ' + s.ownContent + ' (+' + s.proof + ' proof) → **Ach ' + pct(s.achievement) + '**\n' +
       '- Revisions ' + s.revisions + ', content errors ' + s.contentErrors + ' (deduction ' + pct(s.accuracyDeduction) + ') → **Accuracy ' + pct(s.accuracy) + '**\n' +
       '- (W/o revisions ' + s.woRev + ') ÷ Target ' + s.target + ' → **Efficiency ' + pct(s.efficiency) + '**\n' +
@@ -5894,7 +5950,7 @@ function askAI(text) {
 
 /* ------------------------------------------------------------------ chat flow */
 function fallbackHtml() {
-    return 'Hindi ko pa sigurado ang topic na iyan. Subukan ang isa sa mga button sa ibaba (Accuracy, Productivity, Weights, Approval flow, atbp.) o i-rephrase ang tanong.';
+    return 'I\'m not sure about that topic yet. Try one of the buttons below (Accuracy, Productivity, Weights, Approval flow, etc.) or rephrase your question.';
 }
 var busy = false;
 function showTopic(entry, tag) {
