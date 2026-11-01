@@ -758,6 +758,27 @@ html[data-theme="light"] .filter-container input {
 .mp-total-bar { height:8px; border-radius:8px; background:rgba(148,163,184,.2); overflow:hidden; margin-top:10px; }
 .mp-total-bar i { display:block; height:100%; border-radius:8px; background:var(--c); }
 @media (max-width:640px) { .mp-total { padding:16px; } .mp-total-side { max-width:none; } }
+
+/* Content Deadline — title dropdown (Monthly Plan + Daily Plan) */
+.cd-combo { position: relative; }
+.cd-combo > input { width: 100%; box-sizing: border-box; padding-right: 30px !important; text-overflow: ellipsis; }
+#cdTitleInput::placeholder, #cdCategoryInput::placeholder, #cdReasonInput::placeholder { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+#cdCategoryInput, #cdReasonInput { text-overflow: ellipsis; }
+.cd-combo-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--aura-muted, var(--text-muted)); font-size: 14px; user-select: none; }
+.cd-combo-panel { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 60; max-height: 260px; overflow-y: auto; background: var(--aura-card, var(--card-bg)); border: 1px solid var(--aura-line-strong, var(--border-color)); border-radius: 10px; box-shadow: 0 12px 30px rgba(0,0,0,.35); padding: 4px; }
+.cd-opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--aura-text, var(--text-main)); }
+.cd-opt:hover, .cd-opt.active { background: rgba(59,130,246,.16); }
+.cd-opt-t { flex: 1; min-width: 0; white-space: normal; line-height: 1.3; }
+.cd-opt-src { flex: none; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: rgba(59,130,246,.16); color: var(--aura-blue-soft, #3b82f6); }
+.cd-opt-src.daily { background: rgba(249,115,22,.16); color: #fb923c; }
+.cd-grp { padding: 6px 10px 2px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; color: var(--aura-muted, var(--text-muted)); }
+.cd-empty { padding: 10px; font-size: 12px; color: var(--aura-muted, var(--text-muted)); }
+
+/* Content Deadline request form: all 5 inputs on ONE line, submit button below */
+.leave-form.cd-form { grid-template-columns: minmax(180px, 1.5fr) minmax(120px, 1fr) minmax(140px, 0.9fr) minmax(150px, 1.1fr) minmax(170px, 1.2fr); }
+.leave-form.cd-form select, .leave-form.cd-form input { text-overflow: ellipsis; }
+@media (max-width: 1100px) { .leave-form.cd-form { grid-template-columns: 1fr 1fr 1fr; } }
+@media (max-width: 700px) { .leave-form.cd-form { grid-template-columns: 1fr; } }
 </style>
 <style id="aura-theme">
 /* ==========================================================
@@ -3707,6 +3728,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                             <li id="subPlanActual" onclick="switchSubTab(event, 'planActualSection')">Plan vs Actual</li>
                             <li id="subMonthlyPlan" onclick="switchSubTab(event, 'monthlyPlanSection')">Monthly Plan</li>
                             <li id="subLeaveAbsent" onclick="switchSubTab(event, 'leaveAbsentSection')">Leave / Absent Log</li>
+                            <li id="subContentDeadline" onclick="switchSubTab(event, 'deadlineApprovalSection')">Content Deadline Approval</li>
                         </ul>
                     </li>
                     <li class="has-sub-menu" id="socmedMenuParent">
@@ -4049,6 +4071,63 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                                 </thead>
                                 <tbody id="leaveAbsentTableBody">
                                     <tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">No recorded leaves or absences.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTENT DEADLINE APPROVAL SECTION -->
+                <div id="deadlineApprovalSection" class="sub-content-section" style="display: none;">
+                    <div class="section-container">
+                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 10px; color: var(--text-main);">🗓 Request Content Deadline Approval</h4>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Submit the deadline of your content. The SEPCO approver approves or rejects it on Telegram. Only an <strong>approved</strong> deadline is used for Timeliness in the Daily Task Time summary (Timeliness is <strong>-1</strong> when the task is worked on after the approved deadline).</p>
+
+                        <div class="leave-form cd-form" style="background: #f8fafc; border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px;">
+                            <div>
+                                <label>Content Title *</label>
+                                <div class="cd-combo" id="cdCombo">
+                                    <input type="text" id="cdTitleInput" autocomplete="off" placeholder="Pick or type the title..." onfocus="cdOpenTitles()" oninput="cdOpenTitles(); cdSyncCategory()" onkeydown="if(event.key==='Escape')cdCloseTitles()">
+                                    <span class="cd-combo-arrow" onclick="cdToggleTitles()">▾</span>
+                                    <div class="cd-combo-panel" id="cdTitlePanel" style="display:none;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Category</label>
+                                <input type="text" id="cdCategoryInput" placeholder="Auto-filled" readonly>
+                            </div>
+                            <div>
+                                <label>Proposed Deadline *</label>
+                                <input type="date" id="cdDeadlineInput">
+                            </div>
+                            <div>
+                                <label>Reason / Remarks</label>
+                                <input type="text" id="cdReasonInput" placeholder="Why this deadline? (optional)">
+                            </div>
+                            <div>
+                                <label>Approver (SEPCO) *</label>
+                                <select id="cdApproverSelect"><option value="">Loading approvers...</option></select>
+                            </div>
+                            <div class="leave-actions">
+                                <button class="leave-save-btn" id="cdSaveBtn" onclick="cdSubmit()" style="background-color: var(--primary); color: white; border-radius: var(--radius-sm); border: none; font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif; cursor: pointer;">Submit for Approval</button>
+                            </div>
+                        </div>
+
+                        <h4 style="font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📋 My Content Deadline Requests</h4>
+                        <div class="task-table-container">
+                            <table class="task-table" id="cdTable">
+                                <thead>
+                                    <tr>
+                                        <th>Content</th>
+                                        <th>Category</th>
+                                        <th>Deadline</th>
+                                        <th>Reason</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cdTableBody">
+                                    <tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">No deadline requests yet.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -5236,6 +5315,145 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             });
         }
 
+        // ---- Content Deadline Approval (request -> SEPCO approves on Telegram) ----
+        var cdRecords = [], cdSaving = false, cdApproversLoaded = false;
+        function cdPlanContentRows() {
+            let monthKey = getRowMonthKey(new Date().toISOString().slice(0, 10));
+            return (allLoadedTasks.monthlyPlan || []).filter(r => matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), monthKey) && kpiRowBucket(r) === 'CONTENT');
+        }
+        // Titles for the dropdown: Monthly Plan CONTENT titles; once the Monthly Plan has hit the Designated Minutes,
+        // new content that only exists in the Daily Plan is added too (so its deadline can be requested).
+        var cdOptMap = {};
+        function cdTitleOptions() {
+            let monthKey = getRowMonthKey(new Date().toISOString().slice(0, 10));
+            let out = [], seen = {};
+            cdPlanContentRows().forEach(r => {
+                let t = String(getRowVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']) || '').trim();
+                let k = kpiNormTitle(t); if (!t || seen[k]) return; seen[k] = 1;
+                out.push({ title: t, cat: String(getRowVal(r, ['CATEGORY', 'Category', 'Catergory']) || '').trim(), src: 'Monthly Plan' });
+            });
+            let hit = false;
+            try { hit = !!kpiProdEff(monthKey).planHit; } catch (e) {}
+            if (hit) {
+                (allLoadedTasks.plan || []).forEach(t => {
+                    if (!matchesUser(t) || kpiRowBucket(t) !== 'CONTENT') return;
+                    let d = kpiDate(getRowVal(t, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || t['Date Submitted']);
+                    if (!d || getRowMonthKey(d) !== monthKey) return;
+                    let ti = kpiTitle(t), k = kpiNormTitle(ti); if (!ti || seen[k]) return; seen[k] = 1;
+                    out.push({ title: ti, cat: String(getRowVal(t, ['CATEGORY', 'Category', 'Catergory']) || '').trim(), src: 'Daily Plan' });
+                });
+            }
+            return out;
+        }
+        function cdFillTitles() {
+            let panel = document.getElementById('cdTitlePanel'); if (!panel) return;
+            let inp = document.getElementById('cdTitleInput');
+            let q = kpiNormTitle(inp ? inp.value : '');
+            let opts = cdTitleOptions();
+            cdOptMap = {}; opts.forEach(o => { cdOptMap[kpiNormTitle(o.title)] = o; });
+            let shown = opts.filter(o => !q || kpiNormTitle(o.title).indexOf(q) !== -1);
+            let html = '', last = '';
+            shown.forEach(o => {
+                if (o.src !== last) { html += '<div class="cd-grp">' + escHtml(o.src === 'Monthly Plan' ? 'From Monthly Plan' : 'New content in Daily Plan') + '</div>'; last = o.src; }
+                html += '<div class="cd-opt" data-k="' + escHtml(kpiNormTitle(o.title)) + '"><span class="cd-opt-t">' + escHtml(o.title) + '</span><span class="cd-opt-src' + (o.src === 'Daily Plan' ? ' daily' : '') + '">' + escHtml(o.src) + '</span></div>';
+            });
+            panel.innerHTML = html || '<div class="cd-empty">' + (opts.length ? 'No match — you can still type the title.' : 'No content found in your Monthly Plan / Daily Plan yet — type the title.') + '</div>';
+        }
+        function cdOpenTitles() { cdFillTitles(); let p = document.getElementById('cdTitlePanel'); if (p) p.style.display = 'block'; }
+        function cdCloseTitles() { let p = document.getElementById('cdTitlePanel'); if (p) p.style.display = 'none'; }
+        function cdToggleTitles() { let p = document.getElementById('cdTitlePanel'); if (p && p.style.display === 'block') cdCloseTitles(); else cdOpenTitles(); }
+        document.addEventListener('mousedown', function (e) {
+            let panel = document.getElementById('cdTitlePanel'); if (!panel || panel.style.display === 'none') return;
+            let opt = e.target.closest ? e.target.closest('.cd-opt') : null;
+            if (opt && panel.contains(opt)) {
+                let o = cdOptMap[opt.getAttribute('data-k')];
+                if (o) { document.getElementById('cdTitleInput').value = o.title; cdSyncCategory(); }
+                cdCloseTitles(); e.preventDefault(); return;
+            }
+            if (!e.target.closest || !e.target.closest('#cdCombo')) cdCloseTitles();
+        });
+        function cdSyncCategory() {
+            let t = (document.getElementById('cdTitleInput') || {}).value || '', out = document.getElementById('cdCategoryInput');
+            if (!out) return;
+            let o = cdOptMap[kpiNormTitle(t)];
+            if (!o) { cdOptions = cdTitleOptions(); o = cdOptions.filter(x => kpiNormTitle(x.title) === kpiNormTitle(t))[0]; }
+            out.value = o ? o.cat : '';
+        }
+        var cdOptions = [];
+        async function cdLoadApprovers() {
+            let sel = document.getElementById('cdApproverSelect'); if (!sel) return;
+            try {
+                let resp = await fetch(WEB_APP_URL + "?action=getSepcoApprovers");
+                let data = await resp.json();
+                let list = (data && data.success && Array.isArray(data.approvers)) ? data.approvers : [];
+                if (!list.length) { sel.innerHTML = '<option value="">No SEPCO approver found</option>'; return; }
+                sel.innerHTML = '<option value="">Select approver...</option>' + list.map(a => '<option value="' + escHtml(a.email) + '">' + escHtml(a.name) + '</option>').join('');
+                if (list.length === 1) sel.value = list[0].email;
+                else { let last = ''; try { last = localStorage.getItem('portal_cd_approver_' + loggedInUser) || ''; } catch (e) {} if (last) sel.value = last; }
+                cdApproversLoaded = true;
+            } catch (e) { sel.innerHTML = '<option value="">Failed to load approvers</option>'; }
+        }
+        async function cdLoad() {
+            try {
+                let resp = await fetch(WEB_APP_URL + "?action=getContentDeadlines&user=" + encodeURIComponent(loggedInUser));
+                let data = await resp.json();
+                if (data && data.success && Array.isArray(data.items)) cdRecords = data.items;
+            } catch (e) { console.error("Error loading content deadlines:", e); }
+            cdRender();
+        }
+        function cdInit() { cdFillTitles(); if (!cdApproversLoaded) cdLoadApprovers(); cdLoad(); }
+        async function cdSubmit() {
+            if (cdSaving) return;
+            let title = (document.getElementById('cdTitleInput').value || '').trim();
+            let cat = (document.getElementById('cdCategoryInput').value || '').trim();
+            let dl = document.getElementById('cdDeadlineInput').value;
+            let reason = (document.getElementById('cdReasonInput').value || '').trim();
+            let ap = (document.getElementById('cdApproverSelect').value || '').trim();
+            let btn = document.getElementById('cdSaveBtn');
+            if (!title) { alert('Please enter the content title.'); return; }
+            if (!dl) { alert('Please pick the proposed deadline.'); return; }
+            if (!ap) { alert('Please select an approver.'); return; }
+            if (cdRecords.some(r => kpiNormTitle(r.title) === kpiNormTitle(title) && String(r.status || '').toLowerCase() !== 'rejected')) { alert('This content already has a deadline request.'); return; }
+            cdSaving = true; if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+            try {
+                let resp = await fetch(WEB_APP_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: "saveContentDeadline", user: loggedInUser, title: title, category: cat, deadline: dl, reason: reason, approverEmail: ap }) });
+                let result = await resp.json();
+                if (!result || !result.success) throw new Error((result && result.message) || 'Save failed');
+                try { localStorage.setItem('portal_cd_approver_' + loggedInUser, ap); } catch (e) {}
+                document.getElementById('cdTitleInput').value = ''; document.getElementById('cdCategoryInput').value = '';
+                document.getElementById('cdDeadlineInput').value = ''; document.getElementById('cdReasonInput').value = '';
+                await cdLoad();
+                alert(result.message || 'Submitted for approval.');
+            } catch (err) {
+                alert((err && err.message && err.message !== 'Save failed') ? err.message : 'Could not submit the request. Please try again.');
+            }
+            cdSaving = false; if (btn) { btn.disabled = false; btn.textContent = 'Submit for Approval'; }
+        }
+        async function cdDelete(i) {
+            let rec = cdRecords[i]; if (!rec) return;
+            let pending = String(rec.status || '').toLowerCase() === 'pending';
+            if (!confirm((pending ? 'Cancel this pending ' : 'Delete this ') + 'deadline request for "' + rec.title + '"?')) return;
+            try {
+                let resp = await fetch(WEB_APP_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: "deleteContentDeadline", user: loggedInUser, id: rec.id }) });
+                let result = await resp.json();
+                if (!result || !result.success) throw new Error((result && result.message) || 'Delete failed');
+                cdRecords.splice(i, 1); cdRender();
+            } catch (err) { alert((err && err.message && err.message !== 'Delete failed') ? err.message : 'Could not delete. Please try again.'); }
+        }
+        function cdRender() {
+            let tb = document.getElementById('cdTableBody'); if (!tb) return;
+            if (!cdRecords.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">No deadline requests yet.</td></tr>'; return; }
+            tb.innerHTML = cdRecords.map((r, i) => {
+                let low = String(r.status || '').toLowerCase();
+                let act = low === 'approved' ? '<span style="color:var(--text-muted);">—</span>' : '<button onclick="cdDelete(' + i + ')" class="text-red-600 hover:text-red-800 font-semibold text-xs">' + (low === 'pending' ? 'Cancel' : 'Delete') + '</button>';
+                return '<tr><td>' + escHtml(r.title) + '</td><td>' + (escHtml(r.category) || '-') + '</td><td>' + escHtml(r.deadline) + '</td>' +
+                    '<td>' + (escHtml(r.reason) || '-') + ((low === 'rejected' && r.approverRemarks) ? '<div style="font-size:11px;color:#f87171;margin-top:2px;">Approver: ' + escHtml(r.approverRemarks) + '</div>' : '') + '</td>' +
+                    '<td>' + leaveStatusBadge(r.status, r.approverRemarks) + '</td><td style="white-space:nowrap;">' + act + '</td></tr>';
+            }).join('');
+        }
+
         function switchSubTab(evt, sectionId) {
             evt.stopPropagation();
             let subSections = document.querySelectorAll('#dailyTaskTab .sub-content-section');
@@ -5257,6 +5475,9 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             }
             if (sectionId === 'planActualSection') {
                 try { renderStDailyProgress(); } catch (e) { console.error(e); }
+            }
+            if (sectionId === 'deadlineApprovalSection') {
+                try { cdInit(); } catch (e) { console.error(e); }
             }
             try { if (window.lucide) lucide.createIcons(); } catch (e) {}
         }
