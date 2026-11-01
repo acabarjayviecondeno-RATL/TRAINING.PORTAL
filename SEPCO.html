@@ -1615,6 +1615,12 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                             <li id="subPlanActual" onclick="switchSubTab(event, 'planActualSection', 'reportsMenuParent')">Plan vs Actual</li>
                         </ul>
                     </li>
+                    <li class="has-sub-menu" id="contentDeadlineMenuParent">
+                        <div class="main-menu-item" onclick="switchSubTab(event, 'contentDeadlineSection', 'contentDeadlineMenuParent'); cdlRender();">
+                            <span class="sidebar-icon"><i data-lucide="calendar-clock"></i></span>
+                            <span>Content Deadlines</span>
+                        </div>
+                    </li>
                     <li class="has-sub-menu" id="snsBoostingMenuParent">
                         <div class="main-menu-item" onclick="switchSubTab(event, 'snsBoostingSection', 'snsBoostingMenuParent'); loadSnsBoostingSepco();">
                             <span class="sidebar-icon"><i data-lucide="rocket"></i></span>
@@ -1637,6 +1643,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                             <li id="subSummary" onclick="switchSubTab(event, 'summarySection', 'approvalMenuParent')">Summary</li>
                             <li id="subForApproval" onclick="switchSubTab(event, 'forApprovalSection', 'approvalMenuParent')">For Approval</li>
                             <li id="subRequests" onclick="switchSubTab(event, 'requestsSection', 'approvalMenuParent')">List of Requests</li>
+                            <li id="subDeadlineApproval" onclick="switchSubTab(event, 'deadlineApprovalSection', 'approvalMenuParent'); dlaRender(); dlaLoad(true, true);">Content Deadline For Approval</li>
                         </ul>
                     </li>
                 </ul>
@@ -2016,6 +2023,77 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             </div>
 
                                                 <!-- SNS BOOSTING SECTION -->
+            <!-- CONTENT DEADLINE — FOR APPROVAL SECTION -->
+            <div id="deadlineApprovalSection" class="content-section">
+                <h3 style="margin-top:0; font-size: 15px;">🗓 Content Deadline — For Approval</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
+                    Pending <strong>Content Deadline</strong> requests assigned <strong>to you</strong>. Same request as in the Telegram topic — when you approve/reject on one, the buttons on the other side disappear too. Only <strong>approved</strong> deadlines count for Timeliness. Pending requests assigned to another approver also appear here (greyed, view only). Auto-updating.
+                </p>
+                <div class="appr-toolbar">
+                    <button type="button" class="btn-ghost" onclick="dlaLoad(true)">⟳ Refresh</button>
+                    <span id="dlaStatus" class="tbl-status"></span>
+                </div>
+                <div id="dlaSummaryCards" class="summary-grid" style="margin-bottom:16px;"></div>
+                <div class="task-table-container">
+                    <table class="task-table" id="dlaTable">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Trainer</th>
+                                <th style="text-align:left;">Content</th>
+                                <th style="text-align:left;">Category</th>
+                                <th>Deadline</th>
+                                <th style="text-align:left;">Reason</th>
+                                <th style="text-align:left;">Remarks</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dlaTableBody">
+                            <tr><td colspan="7" style="color: var(--text-muted); padding: 20px;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="contentDeadlineSection" class="content-section">
+                <h3 style="margin-top:0; font-size: 15px;">🗓 Content Deadline Approval</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Content deadlines requested by trainers (all trainers). They are approved or rejected by the SEPCO approver on Telegram; only <strong>approved</strong> deadlines are used for Timeliness in the Daily Task Time summary.</p>
+                <div class="filter-container" style="flex-wrap:wrap;">
+                    <label for="cdlMonthFilter">Deadline month:</label>
+                    <input type="month" id="cdlMonthFilter" class="filter-input" onchange="cdlRender()">
+                    <button style="background: var(--primary);" onclick="cdlResetMonth()">Current Month</button>
+                    <label for="cdlStatusFilter">Status:</label>
+                    <select id="cdlStatusFilter" class="filter-input" onchange="cdlRender()">
+                        <option value="all">All</option>
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <label for="cdlSearch">Search:</label>
+                    <input type="text" id="cdlSearch" class="filter-input" placeholder="Name, email or content..." oninput="cdlRender()" style="min-width:160px;">
+                    <button type="button" onclick="cdlLoad(true)" style="background:#334155;">↻ Refresh</button>
+                </div>
+                <div id="cdlSummaryCards" class="summary-grid" style="margin-bottom:16px;"></div>
+                <div class="task-table-container">
+                    <table class="task-table" id="cdlTable">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Trainer</th>
+                                <th style="text-align:left;">Content</th>
+                                <th style="text-align:left;">Category</th>
+                                <th>Deadline</th>
+                                <th style="text-align:left;">Reason</th>
+                                <th>Status</th>
+                                <th style="text-align:left;">Approver</th>
+                                <th>Requested</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cdlTableBody">
+                            <tr><td colspan="8" style="color: var(--text-muted); padding: 20px;">Select Content Deadlines from the menu to load data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div id="snsBoostingSection" class="content-section">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
                     <div>
@@ -2169,6 +2247,255 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 parentLi.classList.add('open');
             }
         }
+
+        // ---- Content Deadline Approval list (read-only; approvals happen on Telegram topic) ----
+        var cdlData = null, cdlLoading = false;
+        function cdlEsc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function cdlResetMonth() { var el = document.getElementById('cdlMonthFilter'); if (el) el.value = ''; cdlRender(); }
+        function cdlLoad(force) {
+            if (cdlLoading) return;
+            if (cdlData && !force) { cdlRender(); return; }
+            cdlLoading = true;
+            var tbody = document.getElementById('cdlTableBody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="color:var(--text-muted);padding:20px;text-align:center;">Loading deadline requests…</td></tr>';
+            var cb = 'jsonp_cdl_' + Math.round(Math.random() * 1e6);
+            var tag = document.createElement('script');
+            window[cb] = function (data) {
+                delete window[cb];
+                try { document.body.removeChild(tag); } catch (e) {}
+                cdlLoading = false;
+                cdlData = (data && Array.isArray(data.items)) ? data.items : [];
+                cdlRender();
+            };
+            tag.onerror = function () {
+                delete window[cb];
+                cdlLoading = false;
+                if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="color:#ef4444;padding:20px;text-align:center;">Failed to load deadline requests.</td></tr>';
+            };
+            tag.src = GA_WEB_APP_URL + '?action=getContentDeadlines&callback=' + cb + '&t=' + Date.now();
+            document.body.appendChild(tag);
+        }
+        function cdlRender() {
+            var tbody = document.getElementById('cdlTableBody');
+            if (!tbody) return;
+            if (cdlData === null) { cdlLoad(false); return; }
+            var monthEl = document.getElementById('cdlMonthFilter');
+            var monthKey = (monthEl && monthEl.value) ? monthEl.value : '';
+            if (!monthKey) {
+                var n = new Date();
+                monthKey = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+                if (monthEl) monthEl.value = monthKey;
+            }
+            var statusFilter = String((document.getElementById('cdlStatusFilter') || {}).value || 'all').toLowerCase();
+            var q = String((document.getElementById('cdlSearch') || {}).value || '').toLowerCase().trim();
+            var nameByEmail = {};
+            (typeof specializedTrainersGlobal !== 'undefined' && Array.isArray(specializedTrainersGlobal) ? specializedTrainersGlobal : []).forEach(function (t) {
+                var e = String(t.email || '').toLowerCase().trim();
+                if (e) nameByEmail[e] = String(t.name || '').trim();
+            });
+            var tot = { all: 0, approved: 0, pending: 0, rejected: 0, people: {} };
+            var rows = [];
+            cdlData.slice().sort(function (a, b) { return String(b.requestedAt || '').localeCompare(String(a.requestedAt || '')); }).forEach(function (r) {
+                var uid = String(r.user || '').toLowerCase().trim();
+                if (!uid) return;
+                if (typeof rtoInScope === 'function' && !rtoInScope(uid)) return;      // RTO only sees trainers in scope
+                if (String(r.deadline || '').slice(0, 7) !== monthKey) return;
+                var st = String(r.status || 'Pending').toLowerCase().trim() || 'pending';
+                if (statusFilter !== 'all' && st.indexOf(statusFilter) === -1) return;
+                var name = nameByEmail[uid] || uid;
+                if (q && (name + ' ' + uid + ' ' + (r.title || '')).toLowerCase().indexOf(q) === -1) return;
+                tot.all++; tot.people[uid] = true;
+                var badge;
+                if (st.indexOf('reject') !== -1) { tot.rejected++; badge = '<span class="badge-rejected">Rejected</span>'; }
+                else if (st.indexOf('approv') !== -1) { tot.approved++; badge = '<span class="badge-approved">Approved</span>'; }
+                else { tot.pending++; badge = '<span class="badge-pending">Pending</span>'; }
+                rows.push('<tr>' +
+                    '<td style="text-align:left;font-weight:600;">' + cdlEsc(name) + (name !== uid ? '<div style="font-size:11px;color:var(--text-muted);font-weight:500;">' + cdlEsc(uid) + '</div>' : '') + '</td>' +
+                    '<td style="text-align:left;max-width:240px;white-space:normal;">' + cdlEsc(r.title || '—') + '</td>' +
+                    '<td style="text-align:left;font-size:11px;">' + cdlEsc(r.category || '—') + '</td>' +
+                    '<td>' + cdlEsc(r.deadline || '—') + '</td>' +
+                    '<td style="text-align:left;max-width:220px;white-space:normal;">' + cdlEsc(r.reason || '—') +
+                        (st.indexOf('reject') !== -1 && r.approverRemarks ? '<div style="font-size:11px;color:#f87171;margin-top:2px;">Approver: ' + cdlEsc(r.approverRemarks) + '</div>' : '') + '</td>' +
+                    '<td>' + badge + '</td>' +
+                    '<td style="text-align:left;font-size:11px;">' + cdlEsc(r.approver || '—') + '</td>' +
+                    '<td style="font-size:11px;">' + cdlEsc(String(r.requestedAt || '').slice(0, 10) || '—') + '</td></tr>');
+            });
+            var cards = document.getElementById('cdlSummaryCards');
+            if (cards) cards.innerHTML =
+                '<div class="summary-card"><h4>Requests</h4><p class="val">' + tot.all + '</p></div>' +
+                '<div class="summary-card"><h4>Trainers</h4><p class="val">' + Object.keys(tot.people).length + '</p></div>' +
+                '<div class="summary-card"><h4>Approved</h4><p class="val" style="color:var(--success);">' + tot.approved + '</p></div>' +
+                '<div class="summary-card"><h4>Pending</h4><p class="val" style="color:#d97706;">' + tot.pending + '</p></div>' +
+                '<div class="summary-card"><h4>Rejected</h4><p class="val" style="color:var(--danger);">' + tot.rejected + '</p></div>';
+            tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="8" style="color:var(--text-muted);padding:20px;text-align:center;">No content deadline requests for ' + cdlEsc(monthKey) + '.</td></tr>';
+        }
+
+        // ===== CONTENT DEADLINE — FOR APPROVAL (web) =====
+        var dlaData = null, dlaLoading = false, dlaBusy = false, dlaLastSig = '';
+        var dlaDraft = {};
+        window.__deadlinePendingMine = 0;
+
+        function dlaMe() { return String(localStorage.getItem('portal_user') || '').toLowerCase().trim(); }
+        function dlaMyIds() {
+            var ids = {}, me = dlaMe();
+            if (me) ids[me] = true;
+            try {
+                ((window.RTO_IDS && window.RTO_IDS.emails) || []).forEach(function (e) {
+                    e = String(e || '').toLowerCase().trim();
+                    if (e) ids[e] = true;
+                });
+            } catch (e) {}
+            return ids;
+        }
+        // Pending deadlines: the ones assigned to me (mine) + other pending ones in my scope (view only)
+        function dlaPendingRows() {
+            var ids = dlaMyIds(), out = [];
+            (Array.isArray(dlaData) ? dlaData : []).forEach(function (d) {
+                if (String(d.status || 'Pending').toLowerCase().indexOf('pend') === -1) return;
+                var appr = String(d.approver || '').toLowerCase().trim();
+                var mine = !!ids[appr];
+                var uid = String(d.user || '').toLowerCase().trim();
+                if (!mine && typeof rtoInScope === 'function' && !rtoInScope(uid)) return;
+                out.push({ d: d, mine: mine });
+            });
+            out.sort(function (a, b) {
+                if (a.mine !== b.mine) return a.mine ? -1 : 1;
+                return String(a.d.deadline || '').localeCompare(String(b.d.deadline || ''));
+            });
+            return out;
+        }
+        function dlaUpdateBadge() {
+            var n = dlaPendingRows().filter(function (r) { return r.mine; }).length;
+            window.__deadlinePendingMine = n;
+            var li = document.getElementById('subDeadlineApproval');
+            if (li) li.innerHTML = 'Content Deadline For Approval' + (n > 0 ? '<span class="nav-badge" title="' + n + ' content deadline for approval">' + n + '</span>' : '');
+            updateForApprovalBadge(window.__fileApprCount || 0);
+        }
+        function dlaRender() {
+            var tbody = document.getElementById('dlaTableBody');
+            var cardsEl = document.getElementById('dlaSummaryCards');
+            if (!tbody) return;
+            if (dlaData === null) { dlaLoad(false); return; }
+            var nameByEmail = {};
+            (typeof specializedTrainersGlobal !== 'undefined' && Array.isArray(specializedTrainersGlobal) ? specializedTrainersGlobal : []).forEach(function (t) {
+                var e = String(t.email || '').toLowerCase().trim();
+                if (e) nameByEmail[e] = String(t.name || '').trim();
+            });
+            var rows = dlaPendingRows();
+            var mineCount = rows.filter(function (r) { return r.mine; }).length;
+            dlaUpdateBadge();
+            if (cardsEl) {
+                cardsEl.innerHTML =
+                    '<div class="summary-card"><h4>For my approval</h4><p class="val" style="color:#d97706;">' + mineCount + '</p></div>' +
+                    '<div class="summary-card"><h4>Assigned to others</h4><p class="val">' + (rows.length - mineCount) + '</p></div>';
+            }
+            var stEl = document.getElementById('dlaStatus');
+            if (stEl) stEl.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-muted);padding:20px;text-align:center;">No pending Content Deadline. 🎉</td></tr>';
+                return;
+            }
+            tbody.innerHTML = rows.map(function (r) {
+                var d = r.d, uid = String(d.user || '').toLowerCase().trim();
+                var name = nameByEmail[uid] || uid;
+                var id = cdlEsc(d.id || '');
+                var remarksCell, actionCell;
+                if (r.mine && d.id) {
+                    remarksCell = '<input type="text" class="remarks-input dla-remark" id="dla_remark_' + id + '" data-id="' + id + '" list="quickRemarks" placeholder="Remarks (optional sa Approve · required sa Reject)" value="' + cdlEsc(dlaDraft[d.id] || '') + '">';
+                    actionCell = '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">' +
+                        '<button type="button" class="btn-approve dla-act" data-id="' + id + '" data-act="Approved">✔ Approve</button>' +
+                        '<button type="button" class="btn-reject dla-act" data-id="' + id + '" data-act="Rejected">✖ Reject</button></div>';
+                } else {
+                    remarksCell = '<span style="font-size:11px;color:var(--text-muted);">—</span>';
+                    actionCell = '<span style="font-size:11px;color:var(--text-muted);">Assigned to<br>' + cdlEsc(d.approver || '—') + '</span>';
+                }
+                return '<tr' + (r.mine ? '' : ' style="opacity:.6;"') + '>' +
+                    '<td style="text-align:left;font-weight:600;">' + cdlEsc(name) +
+                        (name !== uid ? '<div style="font-size:11px;color:var(--text-muted);font-weight:500;">' + cdlEsc(uid) + '</div>' : '') + '</td>' +
+                    '<td style="text-align:left;max-width:240px;white-space:normal;">' + cdlEsc(d.title || '—') + '</td>' +
+                    '<td style="text-align:left;font-size:11px;">' + cdlEsc(d.category || '—') + '</td>' +
+                    '<td>' + cdlEsc(d.deadline || '—') + '</td>' +
+                    '<td style="text-align:left;max-width:220px;white-space:normal;">' + cdlEsc(d.reason || '—') + '</td>' +
+                    '<td style="text-align:left;min-width:200px;">' + remarksCell + '</td>' +
+                    '<td>' + actionCell + '</td></tr>';
+            }).join('');
+        }
+        function dlaLoad(force, silent) {
+            if (dlaLoading) return;
+            dlaLoading = true;
+            var tbody = document.getElementById('dlaTableBody');
+            if (!silent && dlaData === null && tbody) tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-muted);padding:20px;text-align:center;">Loading content deadline requests…</td></tr>';
+            jsonpCall(GA_WEB_APP_URL + '?action=getContentDeadlines&t=' + Date.now(), 30000).then(function (data) {
+                dlaLoading = false;
+                dlaData = (data && Array.isArray(data.items)) ? data.items : [];
+                cdlData = dlaData;   // keep the Content Deadlines list in sync
+                var sig = dlaData.map(function (d) { return [d.id, d.status, d.approver, d.approverRemarks, d.deadline].join('|'); }).join('\n');
+                var changed = sig !== dlaLastSig;
+                dlaLastSig = sig;
+                if (typeof isTypingRemark === 'function' && isTypingRemark()) { dlaUpdateBadge(); return; }   // don't wipe what they're typing
+                if (changed || !silent) dlaRender(); else dlaUpdateBadge();
+                try { if (changed && document.getElementById('contentDeadlineSection').classList.contains('active')) cdlRender(); } catch (e) {}
+            }).catch(function () {
+                dlaLoading = false;
+                if (!silent) {
+                    if (dlaData === null && tbody) tbody.innerHTML = '<tr><td colspan="7" style="color:#ef4444;padding:20px;text-align:center;">Failed to load content deadline requests.</td></tr>';
+                    apprToast('Hindi ma-load ang content deadline requests.', 'err');
+                }
+            });
+        }
+        function dlaDecide(id, status) {
+            if (dlaBusy) { apprToast('May tinatapos pang approval, sandali lang...', 'info'); return; }
+            var rec = (dlaData || []).filter(function (x) { return x.id === id; })[0];
+            if (!rec) return;
+            var inp = document.getElementById('dla_remark_' + id);
+            var remark = String((inp && inp.value) || dlaDraft[id] || '').trim();
+            var isRej = status === 'Rejected';
+            if (isRej && !remark) {
+                apprToast('Maglagay ng reason sa remarks bago mag-Reject.', 'err');
+                if (inp) inp.focus();
+                return;
+            }
+            dlaBusy = true;
+            document.querySelectorAll('#deadlineApprovalSection button').forEach(function (b) { b.disabled = true; });
+            apprToast((isRej ? 'Rejecting' : 'Approving') + '...', 'info', true);
+            var url = GA_WEB_APP_URL + '?action=decideDeadline&id=' + encodeURIComponent(id) +
+                '&user=' + encodeURIComponent(dlaMe()) + '&status=' + encodeURIComponent(status) +
+                '&remarks=' + encodeURIComponent(remark);
+            jsonpCall(url, 60000).then(function (d) {
+                if (d && d.success) {
+                    rec.status = status;
+                    rec.approverRemarks = remark || (isRej ? '' : 'Approved via Web');
+                    delete dlaDraft[id];
+                    apprToast('✔ Content Deadline ' + (isRej ? 'rejected' : 'approved') + '!', 'ok');
+                } else {
+                    apprToast((d && d.message) || 'Hindi na-save. Subukan ulit.', 'err');
+                    if (d && (d.code === 'done' || d.code === 'invalid')) dlaLastSig = '';   // stale -> refresh from server
+                }
+            }).catch(function (err) {
+                apprToast(err && err.message === 'timeout' ? 'No response — check the status (Refresh).' : 'Connection error.', 'err');
+            }).then(function () {
+                dlaBusy = false;
+                document.querySelectorAll('#deadlineApprovalSection button').forEach(function (b) { b.disabled = false; });
+                dlaRender();
+                dlaLoad(true, true);
+            });
+        }
+        (function () {
+            var body = document.getElementById('dlaTableBody');
+            if (body) {
+                body.addEventListener('input', function (e) {
+                    var t = e.target;
+                    if (t && t.classList && t.classList.contains('dla-remark')) dlaDraft[t.dataset.id] = t.value;
+                });
+                body.addEventListener('click', function (e) {
+                    var b = e.target && e.target.closest ? e.target.closest('.dla-act') : null;
+                    if (b) dlaDecide(b.dataset.id, b.dataset.act);
+                });
+            }
+            // first load (for the sidebar badge) + live refresh
+            setTimeout(function () { if (dlaMe()) dlaLoad(true, true); }, 3800);
+            setInterval(function () { if (!document.hidden && !dlaBusy && dlaMe()) dlaLoad(true, true); }, 45000);
+        })();
 
         function switchSubTab(evt, sectionId, parentMenuId) {
             evt.stopPropagation();
@@ -5381,11 +5708,13 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
         }
 
         function updateForApprovalBadge(n) {
+            window.__fileApprCount = n;
+            var total = n + (window.__deadlinePendingMine || 0);
             var li = document.getElementById('subForApproval');
             if (li) li.innerHTML = 'For Approval' + (n > 0 ? '<span class="nav-badge" title="' + n + ' for approval">' + n + '</span>' : '');
             var pb = document.getElementById('approvalParentBadge');
-            if (pb) pb.innerHTML = (n > 0 ? '<span class="nav-badge" style="margin-left:0;" title="' + n + ' total for approval">' + n + '</span>' : '');
-            document.title = (n > 0 ? '(' + n + ') ' : '') + BASE_TITLE;
+            if (pb) pb.innerHTML = (total > 0 ? '<span class="nav-badge" style="margin-left:0;" title="' + total + ' total for approval (files + content deadline)">' + total + '</span>' : '');
+            document.title = (total > 0 ? '(' + total + ') ' : '') + BASE_TITLE;
         }
 
         // ---------- selection + bulk ----------
