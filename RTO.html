@@ -3557,9 +3557,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             Object.keys(eff).forEach(k => {
                 const e = eff[k];
                 if (!(e.plan > 0) || !(e.act > 0)) return;
-                if (e.act < e.plan) onTime++; else if (e.act > e.plan) late++;
-                pAll += e.plan; aAll += e.act;
-                if (planHit || e.inPlan) { pUse += e.plan; aUse += e.act; }
+                                pAll += e.plan; aAll += e.act;
+                if (planHit || e.inPlan) { pUse += e.plan; aUse += e.act; if (e.act <= e.plan) onTime++; else late++; }   // On Time / Late: Monthly-Plan items only (same gate as Efficiency); equal = on time
             });
             let efficiency = aUse > 0 ? pUse / aUse : null;
             if (efficiency != null && !planHit) efficiency = Math.min(1, efficiency);
@@ -5418,6 +5417,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const planContentIdx = sepcoBuildPlanContentIndex(monthKey);
             // Track CONTENT titles already counted per user
             const countedContentTitles = {}; // userKey -> Set of norm titles
+            const ovEff = {};   // userKey|day|title -> { s, plan, act }
 
             (actualRows.slice(headerIndex + 1) || []).forEach(row => {
                 if (!row || !row.some(c => String(c || '').trim())) return;
@@ -5486,11 +5486,18 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 })();
                 const planDur = dailyPlanMap[userKey + '|' + dayKey + '|' + nt];
                 if (planDur != null && planDur > 0) {
-                    s.planMinsMatched += planDur;
-                    s.matchedActualMins += dur;
-                    if (dur < planDur) s.onTime++;
-                    else if (dur > planDur) s.late++;
+                    // ONE On Time / Late result per unique Daily Plan item (user + date + title); several actual rows of it add up
+                    const _ek = userKey + '|' + dayKey + '|' + nt;
+                    const _e = ovEff[_ek] || (ovEff[_ek] = { s: s, plan: planDur, act: 0 });
+                    _e.act += dur;
                 }
+            });
+            Object.keys(ovEff).forEach(k => {
+                const e = ovEff[k];
+                if (!(e.act > 0)) return;
+                e.s.planMinsMatched += e.plan;
+                e.s.matchedActualMins += e.act;
+                if (e.act <= e.plan) e.s.onTime++; else e.s.late++;   // equal = on time
             });
 
             // ---- Also count Approved CONTENT from Approvals sheet (even without Daily Actual row) ----
