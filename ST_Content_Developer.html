@@ -7756,7 +7756,7 @@ function kpiProdEff(monthKey, onlyBucket) {   // onlyBucket (optional): CONTENT 
     Object.keys(eff).forEach(function (k) {
         var e = eff[k];
         if (!(e.plan > 0) || !(e.act > 0)) return;
-        if (e.act < e.plan) onTime++; else if (e.act > e.plan) late++;
+        if (e.act <= e.plan) onTime++; else late++;   // equal = on time
         pAll += e.plan; aAll += e.act;
         if (planHit || e.inPlan) { pUse += e.plan; aUse += e.act; }
     });
