@@ -549,7 +549,6 @@ body.bg-gray-50 {
         radial-gradient(1100px 560px at 85% -10%, rgba(59, 130, 246, 0.14), transparent 60%),
         radial-gradient(900px 520px at -10% 105%, rgba(139, 92, 246, 0.12), transparent 60%),
         var(--aura-bg) !important;
-    background-attachment: fixed !important;
     color: var(--aura-text) !important;
 }
 
@@ -1264,6 +1263,86 @@ html[data-theme="light"] .kpi-card span[style*="rgba(148,163,184,.25)"] { backgr
 
 </script>
 
+<style id="compliance-summary-css">
+        /* Report Compliance: fit all 9 KPI cards in one row when possible */
+        #complianceSummaryCards.summary-grid {
+            grid-template-columns: repeat(9, minmax(0, 1fr));
+            gap: 8px;
+        }
+        @media (max-width: 1100px) {
+            #complianceSummaryCards.summary-grid {
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 700px) {
+            #complianceSummaryCards.summary-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        #complianceSummaryCards .summary-card {
+            padding: 12px 6px;
+            min-width: 0;
+        }
+        #complianceSummaryCards .summary-card h4 {
+            font-size: 9px !important;
+            letter-spacing: 0.02em;
+            margin-bottom: 4px;
+            line-height: 1.25;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #complianceSummaryCards .summary-card .val {
+            font-size: 20px !important;
+        }
+</style>
+            <style id="compliance-cal-css">
+                .rc-cal { width:100%; border-collapse:separate; border-spacing:6px; min-width:560px; }
+                .rc-cal th { font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; text-align:center; padding:4px; }
+                .rc-cal td { vertical-align:top; }
+                .rc-day {
+                    border-radius:10px; border:1px solid var(--border-color); background:rgba(148,163,184,.06);
+                    min-height:72px; padding:6px 7px; position:relative;
+                }
+                .rc-day.sun, .rc-day.holiday { background:rgba(148,163,184,.04); opacity:.55; }
+                .rc-day.future { background:rgba(148,163,184,.03); opacity:.5; }
+                .rc-day.today {
+                    background: linear-gradient(160deg, rgba(59,130,246,.28), rgba(99,102,241,.16));
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 2px rgba(59,130,246,.5), 0 8px 22px rgba(37,99,235,.25);
+                }
+                .rc-day.today .rc-day-num { color: #93c5fd; }
+                .rc-day.today .rc-day-num::after {
+                    content: ' · Today';
+                    font-size: 9px;
+                    font-weight: 700;
+                    color: #60a5fa;
+                    letter-spacing: 0.02em;
+                }
+                .rc-day.today .rc-day-count { color: #93c5fd; }
+                .rc-day-num { font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px; }
+                .rc-day.sun .rc-day-num, .rc-day.holiday .rc-day-num { color:var(--text-muted); }
+                .rc-day-bars { display:flex; flex-direction:column; gap:3px; }
+                .rc-bar { height:6px; border-radius:999px; background:rgba(148,163,184,.18); overflow:hidden; }
+                .rc-bar > i { display:block; height:100%; border-radius:999px; }
+                .rc-bar.plan > i { background:linear-gradient(90deg,#3b82f6,#60a5fa); }
+                .rc-bar.actual > i { background:linear-gradient(90deg,#10b981,#34d399); }
+                .rc-day-meta { font-size:10px; color:var(--text-muted); margin-top:4px; line-height:1.3; }
+                .rc-day.empty { background:transparent; border:none; min-height:0; }
+                .rc-leg-dot { width:10px; height:10px; border-radius:3px; display:inline-block; }
+                .rc-day { min-height:96px; }
+                .rc-day-count { font-size:10px; font-weight:600; color:var(--text-muted); margin-left:4px; }
+                .rc-day-people { display:flex; flex-wrap:wrap; gap:3px; margin-top:5px; max-height:72px; overflow:hidden; }
+                .rc-name {
+                    display:inline-block; font-size:9px; font-weight:700; line-height:1.2;
+                    padding:2px 5px; border-radius:4px; white-space:nowrap; max-width:100%;
+                    overflow:hidden; text-overflow:ellipsis;
+                }
+                .rc-name.ok { background:rgba(16,185,129,.18); color:#34d399; }
+                .rc-name.miss { background:rgba(239,68,68,.16); color:#f87171; }
+                .rc-name.leave { background:rgba(245,158,11,.16); color:#fbbf24; }
+            </style>
+
 <style id="mobile-responsive">
 /* ==========================================================
    MOBILE / TABLET RESPONSIVE LAYER
@@ -1579,6 +1658,23 @@ html[data-theme="light"] .sidebar-menu li.active .sidebar-icon,html[data-theme="
 html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="light"] .main-menu-item:hover .sidebar-icon{color:#0f172a !important}
 </style>
 <script src="https://unpkg.com/lucide@latest"></script>
+<style id="perf-fix">
+.rc-mp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:2px 0}
+.rc-mp-row{display:flex;align-items:center;justify-content:center;gap:6px;line-height:1.4}
+.rc-mp .badge-approved,.rc-mp .badge-rejected{display:inline-block;line-height:1.4;white-space:nowrap;margin:0}
+.rc-mp-n{color:var(--text-muted);font-size:11px}
+.rc-mp-date{font-size:10px;color:var(--text-muted);line-height:1.3;white-space:nowrap}
+/* scroll performance */
+.header-bar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.main-content{will-change:scroll-position;overscroll-behavior:contain}
+.task-table tbody tr,.rc-day{content-visibility:auto;contain-intrinsic-size:auto 60px}
+.task-table tbody tr,.task-table td{transition:none!important;animation:none!important}
+.rc-day,.rc-name{transition:none!important;animation:none!important}
+.rc-grp{text-align:center!important;border-bottom:1px solid var(--border,rgba(148,163,184,.25))}
+.rc-subhead th{font-size:11px;text-align:center}
+td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-align:center}
+.rc-ns{display:inline-block;white-space:nowrap;line-height:1.4;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;color:var(--text-muted);background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.3)}
+</style>
 </head>
 <body>
 
@@ -1703,12 +1799,86 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                     <button type="button" role="tab" class="ov-sum-tab" data-b="TASK" onclick="switchOvSummaryTab('TASK')">Task</button>
                     <button type="button" role="tab" class="ov-sum-tab" data-b="OTHERS" onclick="switchOvSummaryTab('OTHERS')">Others</button>
                     <button type="button" role="tab" class="ov-sum-tab" data-b="OVERALL" onclick="switchOvSummaryTab('OVERALL')">Overall Monthly Score</button>
+                    <button type="button" role="tab" class="ov-sum-tab" data-b="COMPLIANCE" onclick="switchOvSummaryTab('COMPLIANCE')">Report Compliance</button>
                 </div>
 
                 <!-- All Trainers KPI Cards -->
                 <div id="allTrainersKpiContainer">
                     <div style="text-align:center; padding:40px; color:var(--text-muted);">Loading KPI data for all Specialized Trainers...</div>
                 </div>
+
+                <!-- REPORT COMPLIANCE (tab) -->
+            <div id="reportComplianceSection" style="display:none;">
+                <h3 style="margin-top:0; font-size: 15px;">📋 Report Compliance</h3>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Who submitted <strong>Monthly Plan</strong>, <strong>Task Plan</strong>, and <strong>Task Actual</strong> for the selected month. Only <strong>working days</strong> are counted — Sundays, PH holidays, and leave days are excluded.</p>
+                <div class="filter-container" style="flex-wrap:wrap;">
+                    <label for="complianceMonthFilter">Month:</label>
+                    <input type="month" id="complianceMonthFilter" class="filter-input" onchange="renderReportCompliance()">
+                    <button style="background: var(--primary);" onclick="resetComplianceMonthFilter()">Current Month</button>
+                    <label for="complianceStatusFilter">Show:</label>
+                    <select id="complianceStatusFilter" class="filter-input" onchange="renderReportCompliance()">
+                        <option value="all">All trainers</option>
+                        <option value="full">Fully compliant (≥80%)</option>
+                        <option value="ontrack">On track (50–79%)</option>
+                        <option value="low">Needs attention (&lt;50%)</option>
+                        <option value="partial">Below compliant (&lt;80%)</option>
+                        <option value="missing">No submissions</option>
+                        <option value="no-plan">No Monthly Plan</option>
+                        <option value="mp-late">Late Monthly Plan</option>
+                        <option value="no-actual">No Task Actual</option>
+                        <option value="no-taskplan">No Task Plan</option>
+                    </select>
+                    <label for="complianceSearch">Search:</label>
+                    <input type="text" id="complianceSearch" class="filter-input" placeholder="Name or email..." oninput="renderReportCompliance()" style="min-width:160px;">
+                </div>
+                <div id="complianceSummaryCards" class="summary-grid" style="margin-bottom:16px;"></div>
+
+                <!-- Calendar summary: daily Plan / Actual coverage across the team -->
+                <div id="complianceCalendarWrap" class="cat-progress-wrap" style="margin-top:4px;margin-bottom:18px;">
+                    <div class="cat-progress-head">
+                        <h5>Daily Submission Calendar</h5>
+                        <div id="complianceCalLegend" style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--text-muted);align-items:center;"></div>
+                    </div>
+                    <div id="complianceCalendar" style="overflow-x:auto;"></div>
+                </div>
+
+                <div class="task-table-container">
+                    <table class="task-table" id="complianceTable">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="text-align:left;">Trainer</th>
+                                <th colspan="2" class="rc-grp">Monthly Plan</th>
+                                <th rowspan="2" class="num">Plan Days</th>
+                                <th rowspan="2" class="num">Actual Days</th>
+                                <th rowspan="2" class="num">Working Days</th>
+                                <th rowspan="2" class="num">Leave / Absent</th>
+                                <th rowspan="2">SNS Boosting</th>
+                                <th rowspan="2" class="num">SNS Score</th>
+                                <th rowspan="2" class="num">Overall Score</th>
+                                <th rowspan="2">Status</th>
+                            </tr>
+                            <tr class="rc-subhead">
+                                <th>Status</th>
+                                <th>Submitted Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complianceTableBody">
+                            <tr>
+                                <td colspan="11" style="color: var(--text-muted); padding: 20px;">Loading…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="ov-cat-note" style="margin-top:12px;">
+                    <strong>Monthly Plan deadline</strong> = last day of the previous month — submitted in the present month = <strong>Late</strong> ·
+                    <strong>Plan Days / Actual Days</strong> = unique submission dates on working days only (Sunday &amp; PH holidays excluded) ·
+                    <strong>Working Days</strong> = Mon–Sat excluding PH holidays · <strong>Leave / Absent</strong> = approved leave days (excluded from % base) ·
+                    <strong>SNS Boosting</strong> = TikTok links in the selected month · <strong>SNS Score</strong> = best SCORE% ·
+                    <strong>Overall Score</strong> = average of 4 equal parts (25% each): Monthly Plan (100/0) · Plan days% · Actual days% · SNS Score (0 if none) ·
+                    Plan/Actual % = days ÷ (Working Days − Leave/Absent), capped at 100%. ·
+                    <strong>Status</strong>: Fully compliant ≥80% · On track 50–79% · Needs attention &lt;50% · No submissions = 0%.
+                </p>
+            </div>
             </div>
 
             <!-- SUMMARY SECTION -->
@@ -3159,6 +3329,56 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const x = skLeavePlanDeduct(userKey, monthKey).red.get(r);
             return x ? Math.max(0, f - x) : f;
         }
+
+// ======== TIMELINESS v2 — helpers (same in every portal file) ========
+//  CONTENT                    : On time when the content's APPROVAL DATE <= its APPROVED Content Deadline (Content Deadline Approval). No approved deadline / no approval date = not counted.
+//  TASK / TRAINING / OTHERS   : no deadline. Target = Duration (Task Actual col C); Actual = Start Time -> End Time. Actual <= Target = On time (equal = on time).
+function tlParseDT(s) {
+    var t = String(s == null ? '' : s).trim(); if (!t) return null;
+    var m = /(?:(\d{4})-(\d{1,2})-(\d{1,2})[ T]+)?(\d{1,2}):(\d{2})(?::\d{2})?(?:\.\d+)?\s*(AM|PM)?/i.exec(t);
+    if (!m) return null;
+    var h = parseInt(m[4], 10), mi = parseInt(m[5], 10);
+    if (m[6]) { var ap = m[6].toUpperCase(); if (ap === 'PM' && h < 12) h += 12; if (ap === 'AM' && h === 12) h = 0; }
+    if (h > 23 || mi > 59) return null;
+    return { day: m[1] ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 60000 : null, tod: h * 60 + mi };
+}
+// minutes between Start Time and End Time (handles "2026-10-30 18:00", "6:30 PM", and past-midnight); NaN if unreadable
+function tlActualMins(st, en) {
+    var a = tlParseDT(st), b = tlParseDT(en); if (!a || !b) return NaN;
+    var diff;
+    if (a.day != null && b.day != null) diff = (b.day + b.tod) - (a.day + a.tod);
+    else { diff = b.tod - a.tod; if (diff < 0) diff += 1440; }
+    return diff >= 0 ? diff : NaN;
+}
+
+        // approved Content Deadline for a trainer's content title (all trainers; list comes from getContentDeadlines)
+        window.TL_DEADLINES = window.TL_DEADLINES || null;
+        function tlApprovedDeadline(userKey, nameKey, title) {
+            const lists = [window.TL_DEADLINES, (typeof cdlData !== 'undefined' ? cdlData : null), (typeof dlaData !== 'undefined' ? dlaData : null)];
+            const list = lists.filter(l => Array.isArray(l) && l.length)[0] || [];
+            const nt = skNormTitle(title); let best = '', exact = '';
+            list.forEach(d => {
+                if (!/^approved/i.test(String(d.status || ''))) return;
+                const du = skNorm(d.user);
+                const own = du === userKey || (nameKey && du === nameKey) || (du.length > 2 && userKey.length > 2 && (du.indexOf(userKey) !== -1 || userKey.indexOf(du) !== -1));
+                if (!own) return;
+                const dl = skDate(d.deadline); if (!dl) return;
+                if (skNormTitle(d.title) === nt) exact = dl; else if (skTitlesMatch(title, d.title)) best = dl;
+            });
+            return exact || best;
+        }
+        // load approved deadlines for every trainer (needed for Timeliness) + keep them fresh
+        function tlLoadDeadlines() {
+            return jsonpCall(GA_WEB_APP_URL + '?action=getContentDeadlines&t=' + Date.now(), 30000).then(function (d) {
+                const items = (d && Array.isArray(d.items)) ? d.items : [];
+                const sig = items.map(x => [x.id, x.status, x.deadline, x.title].join('|')).join('\n');
+                const changed = sig !== window.TL_SIG; window.TL_SIG = sig; window.TL_DEADLINES = items;
+                if (changed) { try { renderAllTrainersKpi(); } catch (e) {} try { checkAndComputeOverview(); } catch (e) {} }
+            }).catch(function () {});
+        }
+        setTimeout(tlLoadDeadlines, 2500);
+        setInterval(function () { if (!document.hidden) tlLoadDeadlines(); }, 60000);
+
         function skProdEff(userKey, monthKey, displayName, onlyBucket) {   // onlyBucket (optional): CONTENT / TASK / OTHERS / TRAINING -> category-only productivity & efficiency (same as ST kpiProdEff)
             const X = SK_EXTRA[userKey] || { loaded: false, name: '', leaves: [] };
             const D = skDailyObjects();
@@ -3215,7 +3435,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const approvalsAll = (globalApprovalsData || []).filter(a => skApprovalIsUser(a, userKey, nameKey));
             const apprRows = skApprovedContentRows(monthKey, actRows, approvalsAll);
             const ordered = actRows.map((r, i) => ({ r, i, d: skDate(dateOf(r)) || '' })).sort((a, b) => a.d < b.d ? -1 : (a.d > b.d ? 1 : a.i - b.i));
-            const seenRow = {}, eff = {};
+            const seenRow = {}, eff = {}, tlTask = {}, tlContent = {};
             let inMins = 0, extraMins = 0, bonusMins = 0;
             ordered.forEach(o => {
                 const r = o.r;
@@ -3243,6 +3463,18 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 const k = o.d + '|' + skNormTitle(title);
                 const e = eff[k] || (eff[k] = { plan: planByKey[k] || 0, act: 0, inPlan: inPlan });
                 e.act += d;
+                // ---- Timeliness v2 collection ----
+                if (bucket === 'CONTENT') {
+                    const cn = skNormTitle(title), ce = tlContent[cn] || (tlContent[cn] = { title, apr: '', inPlan: false });
+                    const ad = skDate(skRowVal(r, ['APPROVAL DATE', 'Approval Date']));
+                    if (ad && ad > ce.apr) ce.apr = ad;
+                    if (inPlan) ce.inPlan = true;
+                } else {
+                    const te = tlTask[k] || (tlTask[k] = { tgt: 0, act: 0, inPlan });
+                    const am = tlActualMins(st, en);
+                    te.tgt += d; te.act += isNaN(am) ? d : am;     // target = Duration, actual = Start -> End (falls back to Duration if times are unreadable)
+                    if (inPlan) te.inPlan = true;
+                }
             });
 
             // ---- Efficiency + On Time / Late: one result per unique Daily Plan item ----
@@ -3251,10 +3483,23 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 const e = eff[k];
                 if (!(e.plan > 0) || !(e.act > 0)) return;
                                 pAll += e.plan; aAll += e.act;
-                if (planHit || e.inPlan) { pUse += e.plan; aUse += e.act; if (e.act <= e.plan) onTime++; else late++; }   // On Time / Late: Monthly-Plan items only (same gate as Efficiency); equal = on time
+                if (planHit || e.inPlan) { pUse += e.plan; aUse += e.act; }
             });
             let efficiency = aUse > 0 ? pUse / aUse : null;
             if (efficiency != null && !planHit) efficiency = Math.min(1, efficiency);
+
+            // ---- Timeliness v2: On Time / Late ----
+            Object.keys(tlTask).forEach(k => {
+                const t = tlTask[k];
+                if (!(t.tgt > 0) || !(t.act > 0) || !(planHit || t.inPlan)) return;
+                if (t.act <= t.tgt + 0.001) onTime++; else late++;                 // equal = on time
+            });
+            Object.keys(tlContent).forEach(k => {
+                const c = tlContent[k];
+                if (!c.apr || !(planHit || c.inPlan)) return;
+                const dl = tlApprovedDeadline(userKey, nameKey, c.title); if (!dl) return;   // only APPROVED deadlines count
+                if (c.apr <= dl) onTime++; else late++;                            // approved on/before the deadline = on time
+            });
 
             // ---- Productivity ----
             const usedMins = planHit ? (inMins + extraMins) : (Math.min(inMins, adjPlan) + bonusMins);   // approved content outside the plan is always plus points
@@ -3616,7 +3861,9 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
                 const isContent = pair.cat === 'CONTENT';
                 const approved = !isContent || sepcoIsContentApproved(title, skRowVal(r, ['APPROVAL DATE']), approvedFiles);
                 ensureDay(ensureU(r._u, skRowVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL'])), date).actuals.push({
-                    title, nt: ovNormTitle(title), bucket: pair.cat, cat2: pair.cat2, nc: sepcoNormCat2(pair.cat2), dur: isNaN(d) ? 0 : d, approved, used: false
+                    title, nt: ovNormTitle(title), bucket: pair.cat, cat2: pair.cat2, nc: sepcoNormCat2(pair.cat2), dur: isNaN(d) ? 0 : d, approved, used: false, u: r._u,
+                    act: (function () { const m = tlActualMins(skRowVal(r, ['START TIME', 'Start Time']), skRowVal(r, ['TIME ENDED', 'End Time'])); return isNaN(m) ? (isNaN(d) ? 0 : d) : m; })(),
+                    apr: skDate(skRowVal(r, ['APPROVAL DATE', 'Approval Date']))
                 });
             });
 
@@ -3682,16 +3929,21 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             }
             const itemState = p => {
                 if (!p.match) return 'notdone';
-                if (p.dur > 0 && p.match.dur > p.dur) return 'late';
-                return 'done';
+                return pvaLate(p.match) ? 'late' : 'done';   // Timeliness v2
+            };
+            // Content: approved after its approved deadline · Task/Training/Others: Start→End longer than Duration
+            const pvaLate = a => {
+                if (a.bucket === 'CONTENT') { const dl = tlApprovedDeadline(a.u, '', a.title); return !!(dl && a.apr && a.apr > dl); }
+                return a.dur > 0 && a.act > a.dur + 0.001;
             };
             const bucketColor = { CONTENT: '#4f8f46', TASK: '#d8ad24', OTHERS: '#397d89', TRAINING: '#7c3aed' };
             const stHtml = (p) => {
                 const s = itemState(p);
                 if (s === 'notdone') return '<span class="cat-remark miss">Not done</span>';
                 const wait = (p.match.bucket === 'CONTENT' && !p.match.approved) ? ' <span class="cat-remark partial">· awaiting approval</span>' : '';
-                if (s === 'late') return '<span class="cat-remark partial">Done · late +' + Math.round(p.match.dur - p.dur) + ' min</span>' + wait;
-                return '<span class="cat-remark plus">Done' + (p.dur > 0 ? ' · on time' : '') + '</span>' + wait;
+                if (s === 'late') return '<span class="cat-remark partial">Done · late' + (p.match.bucket === 'CONTENT' ? '' : ' +' + Math.round(p.match.act - p.match.dur) + ' min') + '</span>' + wait;
+                const known = p.match.bucket === 'CONTENT' ? !!(p.match.apr && tlApprovedDeadline(p.match.u, '', p.match.title)) : p.match.dur > 0;
+                return '<span class="cat-remark plus">Done' + (known ? ' · on time' : '') + '</span>' + wait;
             };
 
             // totals (all trainers, current month / day, unfiltered by status)
@@ -3705,7 +3957,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const cards = '<div class="summary-grid" style="margin-bottom:16px;">' +
                 '<div class="summary-card"><h4>Daily Plan Completion</h4><p class="val">' + (tPct == null ? '—' : (Math.round(tPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">' + tDone + ' of ' + tPlans + ' planned items done</p></div>' +
                 '<div class="summary-card"><h4>Not Done</h4><p class="val">' + tNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but no actual</p></div>' +
-                '<div class="summary-card"><h4>Done Late</h4><p class="val">' + tLate + '</p><p style="font-size:10px;margin:4px 0 0 0;">Actual longer than plan</p></div>' +
+                '<div class="summary-card"><h4>Done Late</h4><p class="val">' + tLate + '</p><p style="font-size:10px;margin:4px 0 0 0;">Content: approved after deadline · Others: Start–End longer than Duration</p></div>' +
                 '<div class="summary-card"><h4>Plan / Actual Mins</h4><p class="val" style="font-size:20px;">' + Math.round(tPM).toLocaleString() + ' / ' + Math.round(tAM).toLocaleString() + '</p><p style="font-size:10px;margin:4px 0 0 0;">CONTENT counts once approved</p></div>' +
                 '</div>';
 
@@ -4628,6 +4880,527 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             clearTimeout(SK_RENDER_TIMER);
             SK_RENDER_TIMER = setTimeout(renderAllTrainersKpi, 200);
         }
+        function resetComplianceMonthFilter() {
+            var n = new Date();
+            var el = document.getElementById('complianceMonthFilter');
+            if (el) {
+                el.value = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+                renderReportCompliance();
+            }
+        }
+
+        function rcNormKey(s) {
+            return String(s || '').toLowerCase().trim();
+        }
+
+        function escHtmlRc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        /** True if yyyy-MM-dd is a working day (not Sunday, not PH holiday). */
+        function rcIsWorkingDay(dateStr) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ''))) return false;
+            var parts = dateStr.split('-');
+            var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1, d = parseInt(parts[2], 10);
+            var dt = new Date(y, m, d);
+            if (dt.getDay() === 0) return false; // Sunday
+            var key = String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+            if (typeof SK_PH_HOLIDAYS !== 'undefined' && SK_PH_HOLIDAYS.indexOf(key) !== -1) return false;
+            return true;
+        }
+
+        /** Unique submission dates per user for a month (working days only — no Sunday / PH holiday). */
+        function rcDaysByUser(rawRows, monthKey) {
+            var map = {};
+            if (!rawRows || !rawRows.length || !monthKey) return map;
+            try {
+                var objs = skRowsToObjects(rawRows);
+                objs.forEach(function (r) {
+                    var uid = rcNormKey(skRowVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL', 'User', 'USER ID']) || r['NS+ USER ID'] || '');
+                    if (!uid) return;
+                    var d = skDate(skRowVal(r, ['Date Submitted', 'DATE SUBMITTED', 'Submitted D', 'Submitted Date', 'DATE']) || r['Date Submitted']);
+                    if (!d || skMonthKey(d) !== monthKey) return;
+                    if (!rcIsWorkingDay(d)) return; // exclude Sunday & PH holidays
+                    if (!map[uid]) map[uid] = {};
+                    map[uid][d] = true;
+                });
+            } catch (e) { console.warn('rcDaysByUser', e); }
+            return map;
+        }
+
+        /** Users who have at least one Monthly Plan row for the month. */
+        function rcMonthlyPlanUsers(monthKey) {
+            var set = {};
+            (Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : []).forEach(function (r) {
+                var uid = rcNormKey(sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL', 'USER ID']) || '');
+                if (!uid) return;
+                var mRaw = sepcoGetVal(r, ['MONTH', 'Month', 'MONTH YEAR']) || r['MONTH'] || r['Month'] || '';
+                if (typeof skMonthMatches === 'function') {
+                    if (!skMonthMatches(mRaw, monthKey)) return;
+                } else if (typeof ovMonthMatches === 'function') {
+                    if (!ovMonthMatches(mRaw, monthKey)) return;
+                } else if (mRaw) {
+                    var mk = skMonthKey(mRaw);
+                    if (mk && mk !== monthKey) return;
+                }
+                set[uid] = (set[uid] || 0) + 1;
+            });
+            return set;
+        }
+
+        /** Monthly Plan deadline = last day of the PREVIOUS month. Returns yyyy-MM-dd. */
+        function rcMpDeadline(monthKey) {
+            var p = String(monthKey || '').split('-');
+            var y = parseInt(p[0], 10), m = parseInt(p[1], 10);
+            if (isNaN(y) || isNaN(m)) return '';
+            var d = new Date(y, m - 1, 0); // day 0 of this month = last day of previous month
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        /** Earliest submission date per user for the month's Monthly Plan rows (needs a Timestamp / Date Submitted column). */
+        function rcMonthlyPlanSubmitDates(monthKey) {
+            var out = { found: false, byUser: {} };
+            (Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : []).forEach(function (r) {
+                var uid = rcNormKey(sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL', 'USER ID']) || '');
+                if (!uid) return;
+                var mRaw = sepcoGetVal(r, ['MONTH', 'Month', 'MONTH YEAR']) || r['MONTH'] || r['Month'] || '';
+                if (typeof skMonthMatches === 'function') { if (!skMonthMatches(mRaw, monthKey)) return; }
+                var raw = '';
+                Object.keys(r).forEach(function (k) {
+                    if (raw) return;
+                    if (/month/i.test(k)) return;
+                    if (/time\s*stamp|submitted|date\s*created|created|date\s*filed|date\s*submit/i.test(k) && String(r[k] == null ? '' : r[k]).trim() !== '') raw = r[k];
+                });
+                if (!raw) return;
+                var tok = String(raw).trim().split(/[T\s]/)[0]; // drop time part
+                var d = skDate(tok);
+                if (!d) return;
+                out.found = true;
+                if (!out.byUser[uid] || d < out.byUser[uid]) out.byUser[uid] = d;
+            });
+            return out;
+        }
+
+        function renderReportCompliance() {
+            var tbody = document.getElementById('complianceTableBody');
+            var cardsEl = document.getElementById('complianceSummaryCards');
+            if (!tbody) return;
+
+            // Ensure SNS data is available (async once, then re-render)
+            if (snsBoostingDataGlobal === null && typeof loadSnsBoostingSepco === 'function') {
+                tbody.innerHTML = '<tr><td colspan="10" style="color:var(--text-muted);padding:20px;text-align:center;">Loading SNS Boosting data…</td></tr>';
+                loadSnsBoostingSepco(function () {
+                    try { renderReportCompliance(); } catch (e) { console.error(e); }
+                });
+                // continue with empty SNS for first paint of other columns after load callback
+            }
+
+            var monthEl = document.getElementById('complianceMonthFilter');
+            var monthKey = (monthEl && monthEl.value) ? monthEl.value : '';
+            if (!monthKey) {
+                var n = new Date();
+                monthKey = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+                if (monthEl) monthEl.value = monthKey;
+            }
+
+            var statusFilter = (document.getElementById('complianceStatusFilter') || {}).value || 'all';
+            var searchQ = rcNormKey((document.getElementById('complianceSearch') || {}).value || '');
+
+            var trainers = Array.isArray(specializedTrainersGlobal) ? specializedTrainersGlobal.slice() : [];
+            if (!trainers.length) {
+                tbody.innerHTML = '<tr><td colspan="10" style="color:var(--text-muted);padding:20px;text-align:center;">No Specialized Trainers in your scope yet. Data may still be loading…</td></tr>';
+                if (cardsEl) cardsEl.innerHTML = '';
+                return;
+            }
+
+            var planDaysMap = rcDaysByUser(planDataGlobal, monthKey);
+            var actualDaysMap = rcDaysByUser(actualDataGlobal, monthKey);
+            var mpUsers = rcMonthlyPlanUsers(monthKey);
+            var mpSub = rcMonthlyPlanSubmitDates(monthKey);
+            var mpDeadline = rcMpDeadline(monthKey);
+            var workDays = (typeof skWorkingDays === 'function') ? skWorkingDays(monthKey) : 0;
+
+            // SNS Boosting for selected month (match boostStart or timestamp month)
+            var snsByUser = {}; // email -> { count, bestScore, bestAch }
+            (Array.isArray(snsBoostingDataGlobal) ? snsBoostingDataGlobal : []).forEach(function (r) {
+                var uid = rcNormKey(r.stUser);
+                if (!uid) return;
+                var mk = '';
+                if (r.boostStart) mk = skMonthKey(r.boostStart);
+                if (!mk && r.timestamp) mk = skMonthKey(r.timestamp);
+                if (!mk && r.boostEnd) mk = skMonthKey(r.boostEnd);
+                if (mk && mk !== monthKey) return;
+                if (!mk) return; // no date → skip
+                if (!snsByUser[uid]) snsByUser[uid] = { count: 0, bestScore: null, bestAch: null };
+                snsByUser[uid].count++;
+                var sc = parseFloat(r.scorePct);
+                if (!isNaN(sc) && (snsByUser[uid].bestScore === null || sc > snsByUser[uid].bestScore)) snsByUser[uid].bestScore = sc;
+                var ac = parseFloat(r.achPct);
+                if (!isNaN(ac) && (snsByUser[uid].bestAch === null || ac > snsByUser[uid].bestAch)) snsByUser[uid].bestAch = ac;
+            });
+
+            var known = {};
+            trainers.forEach(function (t) {
+                [t.email, t.employeeId].forEach(function (k) {
+                    k = rcNormKey(k);
+                    if (k) known[k] = true;
+                });
+            });
+            function maybeAdd(uid) {
+                uid = rcNormKey(uid);
+                if (!uid || known[uid]) return;
+                if (typeof rtoInScope === 'function' && !rtoInScope(uid)) return;
+                known[uid] = true;
+                trainers.push({ email: uid, name: uid, employeeId: '' });
+            }
+            Object.keys(planDaysMap).forEach(maybeAdd);
+            Object.keys(actualDaysMap).forEach(maybeAdd);
+            Object.keys(mpUsers).forEach(maybeAdd);
+            Object.keys(snsByUser).forEach(maybeAdd);
+
+            trainers.sort(function (a, b) {
+                var na = String(a.name || a.email || '').toLowerCase();
+                var nb = String(b.name || b.email || '').toLowerCase();
+                return na < nb ? -1 : na > nb ? 1 : 0;
+            });
+
+            var rows = [];
+            var tot = { all: 0, full: 0, partial: 0, missing: 0, hasMp: 0, hasPlan: 0, hasActual: 0, onLeave: 0, hasSns: 0 };
+            // day -> { plan: [names], actual: [names], leave: [names] }
+            var dayAgg = {};
+            var allCalNames = []; // every trainer short name (for missing list)
+
+            trainers.forEach(function (t) {
+                var email = rcNormKey(t.email);
+                var emp = rcNormKey(t.employeeId);
+                var keys = [email, emp].filter(Boolean);
+
+                var hasMp = false, mpLines = 0, mpDate = '';
+                keys.forEach(function (k) {
+                    if (mpUsers[k]) { hasMp = true; mpLines = Math.max(mpLines, mpUsers[k]); }
+                    if (mpSub.byUser[k] && (!mpDate || mpSub.byUser[k] < mpDate)) mpDate = mpSub.byUser[k];
+                });
+                // Deadline = last day of previous month; submitting in the present month = LATE
+                var mpLate = !!(hasMp && mpDate && mpDeadline && mpDate > mpDeadline);
+
+                var pDays = {};
+                var aDays = {};
+                keys.forEach(function (k) {
+                    Object.keys(planDaysMap[k] || {}).forEach(function (d) { pDays[d] = true; });
+                    Object.keys(actualDaysMap[k] || {}).forEach(function (d) { aDays[d] = true; });
+                });
+
+                // Approved leave days this month
+                var leaveDates = {};
+                keys.forEach(function (k) {
+                    var X = (typeof SK_EXTRA !== 'undefined' && SK_EXTRA[k]) || null;
+                    if (X && Array.isArray(X.leaves)) {
+                        X.leaves.forEach(function (l) {
+                            if (String((l && l.status) || 'Approved').toLowerCase() !== 'approved') return;
+                            var ld = skDate(l.date);
+                            if (ld && skMonthKey(ld) === monthKey) leaveDates[ld] = true;
+                        });
+                    }
+                });
+                var leaveN = Object.keys(leaveDates).length;
+                var shortName = String(t.name || t.email || emp || '—').trim();
+                // Prefer first name / short label for calendar cells
+                var calName = shortName.split(/\s+/)[0];
+                if (shortName.indexOf(' ') > 0) {
+                    var partsN = shortName.replace(/,/g, ' ').trim().split(/\s+/).filter(Boolean);
+                    calName = partsN.length >= 2 ? (partsN[0] + ' ' + partsN[partsN.length - 1].charAt(0) + '.') : partsN[0];
+                }
+                if (allCalNames.indexOf(calName) === -1) allCalNames.push(calName);
+
+                // Calendar agg: names who submitted plan / actual / on leave
+                function rcPushDay(map, d, field, label) {
+                    if (!map[d]) map[d] = { plan: [], actual: [], leave: [] };
+                    if (map[d][field].indexOf(label) === -1) map[d][field].push(label);
+                }
+                Object.keys(leaveDates).forEach(function (d) { rcPushDay(dayAgg, d, 'leave', calName); });
+                Object.keys(pDays).forEach(function (d) {
+                    if (leaveDates[d]) return;
+                    rcPushDay(dayAgg, d, 'plan', calName);
+                });
+                Object.keys(aDays).forEach(function (d) {
+                    if (leaveDates[d]) return;
+                    rcPushDay(dayAgg, d, 'actual', calName);
+                });
+
+                // Plan/Actual day counts exclude leave days
+                Object.keys(leaveDates).forEach(function (d) {
+                    delete pDays[d];
+                    delete aDays[d];
+                });
+
+                var planN = Object.keys(pDays).length;
+                var actN = Object.keys(aDays).length;
+
+                // Plan/Actual rate = days submitted ÷ (Working Days − Leave/Absent), capped at 100
+                var denom = Math.max(0, workDays - leaveN);
+                var planPct = denom > 0 ? Math.min(100, Math.round((planN / denom) * 1000) / 10) : (planN > 0 ? 100 : 0);
+                var actPct = denom > 0 ? Math.min(100, Math.round((actN / denom) * 1000) / 10) : (actN > 0 ? 100 : 0);
+
+                // SNS for this trainer
+                var snsInfo = null;
+                keys.forEach(function (k) {
+                    if (snsByUser[k]) {
+                        if (!snsInfo) snsInfo = { count: 0, bestScore: null, bestAch: null };
+                        snsInfo.count += snsByUser[k].count;
+                        if (snsByUser[k].bestScore != null && (snsInfo.bestScore === null || snsByUser[k].bestScore > snsInfo.bestScore))
+                            snsInfo.bestScore = snsByUser[k].bestScore;
+                        if (snsByUser[k].bestAch != null && (snsInfo.bestAch === null || snsByUser[k].bestAch > snsInfo.bestAch))
+                            snsInfo.bestAch = snsByUser[k].bestAch;
+                    }
+                });
+                var hasSns = !!(snsInfo && snsInfo.count > 0);
+
+                // Overall Score = equal average of 4 components (25% each):
+                // 1) Monthly Plan  2) Plan days%  3) Actual days%  4) SNS Score
+                var mpScore = hasMp ? 100 : 0;
+                var snsScoreVal = 0;
+                if (hasSns) {
+                    snsScoreVal = (snsInfo.bestScore != null && !isNaN(snsInfo.bestScore))
+                        ? Math.min(100, Number(snsInfo.bestScore))
+                        : 100; // submitted but no score yet → full credit for having submitted
+                }
+                var overallScore = Math.round(((mpScore + planPct + actPct + snsScoreVal) / 4) * 10) / 10;
+
+                // Status from Overall Score (not just "has any submission")
+                var isFull = overallScore >= 80;
+                var isOnTrack = overallScore >= 50 && overallScore < 80;
+                var isLow = overallScore > 0 && overallScore < 50;
+                var isMissing = overallScore <= 0 && !hasMp && planN === 0 && actN === 0 && !hasSns;
+                if (overallScore <= 0 && !isMissing) isLow = true; // has something but score still 0
+                var isPartial = isOnTrack || isLow;
+
+                tot.all++;
+                if (isFull) tot.full++;
+                else if (isMissing) tot.missing++;
+                else tot.partial++;
+
+                if (hasMp) tot.hasMp++;
+                if (planN > 0) tot.hasPlan++;
+                if (actN > 0) tot.hasActual++;
+                if (leaveN > 0) tot.onLeave++;
+                if (hasSns) tot.hasSns++;
+
+                var statusBadge;
+                if (isFull) {
+                    statusBadge = '<span class="badge-approved">Fully compliant</span>';
+                } else if (isOnTrack) {
+                    statusBadge = '<span class="badge-pending">On track</span>';
+                } else if (isMissing) {
+                    statusBadge = '<span class="badge-rejected">No submissions</span>';
+                } else {
+                    statusBadge = '<span class="badge-rejected">Needs attention</span>';
+                }
+
+                if (statusFilter === 'full' && !isFull) return;
+                if (statusFilter === 'partial' && !isPartial) return;
+                if (statusFilter === 'ontrack' && !isOnTrack) return;
+                if (statusFilter === 'low' && !isLow) return;
+                if (statusFilter === 'missing' && !isMissing) return;
+                if (statusFilter === 'no-plan' && hasMp) return;
+                if (statusFilter === 'mp-late' && !mpLate) return;
+                if (statusFilter === 'no-actual' && actN > 0) return;
+                if (statusFilter === 'no-taskplan' && planN > 0) return;
+
+                var name = String(t.name || t.email || emp || '—').trim();
+                var displayEmail = String(t.email || emp || '').trim();
+                if (searchQ) {
+                    var hay = (name + ' ' + displayEmail + ' ' + emp).toLowerCase();
+                    if (hay.indexOf(searchQ) === -1) return;
+                }
+
+                var pctClass = function (p) {
+                    if (p >= 80) return 'cat-pct good';
+                    if (p >= 50) return 'cat-pct warn';
+                    return 'cat-pct bad';
+                };
+
+                var snsCell = hasSns
+                    ? '<span class="badge-approved">Yes</span> <span style="color:var(--text-muted);font-size:11px;">(' + snsInfo.count + ')</span>'
+                    : '<span class="badge-rejected">No</span>';
+                var snsScoreCell = (hasSns && snsInfo.bestScore != null)
+                    ? '<span class="' + pctClass(snsInfo.bestScore) + '">' + snsInfo.bestScore + '%</span>'
+                    : (hasSns ? '—' : '—');
+
+                rows.push(
+                    '<tr>' +
+                    '<td style="text-align:left;font-weight:600;">' + escHtmlRc(name) +
+                        (displayEmail ? '<div style="font-size:11px;color:var(--text-muted);font-weight:500;">' + escHtmlRc(displayEmail) + '</div>' : '') +
+                    '</td>' +
+                    '<td><div class="rc-mp">' + (hasMp
+                        ? (mpLate
+                              ? '<span class="badge-rejected" title="Deadline: ' + escHtmlRc(mpDeadline) + '">Late</span>'
+                              : '<span class="badge-approved" title="Deadline: ' + escHtmlRc(mpDeadline) + '">On time</span>')
+                        : '<span class="badge-pending rc-ns">Not yet submitted</span>') +
+                    '</div></td>' +
+                    '<td class="rc-mp-date">' + (hasMp && mpDate ? escHtmlRc(mpDate) : '—') + '</td>' +
+                    '<td class="num">' + planN + '</td>' +
+                    '<td class="num">' + actN + '</td>' +
+                    '<td class="num">' + workDays + '</td>' +
+                    '<td class="num">' + (leaveN > 0 ? leaveN : '—') + '</td>' +
+                    '<td>' + snsCell + '</td>' +
+                    '<td class="num">' + snsScoreCell + '</td>' +
+                    '<td class="num"><span class="' + pctClass(overallScore) + '">' + overallScore + '%</span></td>' +
+                    '<td>' + statusBadge + '</td>' +
+                    '</tr>'
+                );
+            });
+
+            if (cardsEl) {
+                cardsEl.innerHTML =
+                    '<div class="summary-card"><h4>Trainers</h4><p class="val">' + tot.all + '</p></div>' +
+                    '<div class="summary-card"><h4>Compliant</h4><p class="val" style="color:var(--success);">' + tot.full + '</p></div>' +
+                    '<div class="summary-card"><h4>Partial</h4><p class="val" style="color:#d97706;">' + tot.partial + '</p></div>' +
+                    '<div class="summary-card"><h4>No Submit</h4><p class="val" style="color:var(--danger);">' + tot.missing + '</p></div>' +
+                    '<div class="summary-card"><h4>Monthly Plan</h4><p class="val">' + tot.hasMp + '</p></div>' +
+                    '<div class="summary-card"><h4>Task Plan</h4><p class="val">' + tot.hasPlan + '</p></div>' +
+                    '<div class="summary-card"><h4>Task Actual</h4><p class="val">' + tot.hasActual + '</p></div>' +
+                    '<div class="summary-card"><h4>SNS</h4><p class="val">' + tot.hasSns + '</p></div>' +
+                    '<div class="summary-card"><h4>Leave</h4><p class="val">' + tot.onLeave + '</p></div>';
+            }
+
+            // ---- Calendar summary ----
+            try { renderComplianceCalendar(monthKey, dayAgg, allCalNames); } catch (e) { console.warn(e); }
+
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="11" style="color:var(--text-muted);padding:20px;text-align:center;">No trainers match the current filters for ' + escHtmlRc(monthKey) + '.</td></tr>';
+            } else {
+                tbody.innerHTML = rows.join('');
+            }
+        }
+
+        function renderComplianceCalendar(monthKey, dayAgg, allNames) {
+            var calEl = document.getElementById('complianceCalendar');
+            var legEl = document.getElementById('complianceCalLegend');
+            if (!calEl) return;
+            allNames = Array.isArray(allNames) ? allNames.slice() : [];
+            var trainerCount = Math.max(1, allNames.length || 1);
+
+            var parts = String(monthKey || '').split('-');
+            var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1;
+            if (isNaN(y) || isNaN(m)) { calEl.innerHTML = ''; return; }
+
+            var dim = new Date(y, m + 1, 0).getDate();
+            var firstDow = new Date(y, m, 1).getDay();
+            var startOffset = (firstDow + 6) % 7;
+
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+            if (legEl) {
+                legEl.innerHTML =
+                    '<span style="color:#60a5fa;">● Submitted (Plan/Actual)</span>' +
+                    '<span style="color:#f87171;">● Missing</span>' +
+                    '<span style="color:#fbbf24;">● Leave</span>' +
+                    '<span style="color:var(--text-muted);">Hover a day for full list</span>';
+            }
+
+            function nameList(arr, cls) {
+                if (!arr || !arr.length) return '';
+                return arr.map(function (n) {
+                    return '<span class="rc-name ' + cls + '">' + escHtmlRc(n) + '</span>';
+                }).join('');
+            }
+
+            var html = '<table class="rc-cal"><thead><tr>' +
+                ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function (d) { return '<th>' + d + '</th>'; }).join('') +
+                '</tr></thead><tbody>';
+
+            var totalCells = Math.ceil((startOffset + dim) / 7) * 7;
+            html += '<tr>';
+            for (var i = 0; i < totalCells; i++) {
+                if (i > 0 && i % 7 === 0) html += '</tr><tr>';
+                var dayNum = i - startOffset + 1;
+                if (dayNum < 1 || dayNum > dim) {
+                    html += '<td><div class="rc-day empty"></div></td>';
+                    continue;
+                }
+                var ds = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
+                var isSun = (i % 7 === 6);
+                var mmdd = String(m + 1).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
+                var isHol = (typeof SK_PH_HOLIDAYS !== 'undefined' && SK_PH_HOLIDAYS.indexOf(mmdd) !== -1);
+                var agg = dayAgg[ds] || { plan: [], actual: [], leave: [] };
+                var planArr = Array.isArray(agg.plan) ? agg.plan : [];
+                var actArr = Array.isArray(agg.actual) ? agg.actual : [];
+                var leaveArr = Array.isArray(agg.leave) ? agg.leave : [];
+
+                // Submitted = has Plan or Actual that day
+                var submittedSet = {};
+                planArr.concat(actArr).forEach(function (n) { submittedSet[n] = true; });
+                var leaveSet = {};
+                leaveArr.forEach(function (n) { leaveSet[n] = true; });
+
+                var isFuture = ds > todayStr; // not yet reached — don't mark anyone missing
+
+                var submitted = [];
+                var onLeave = [];
+                var missing = [];
+                if (!isFuture) {
+                    allNames.forEach(function (n) {
+                        if (leaveSet[n]) onLeave.push(n);
+                        else if (submittedSet[n]) submitted.push(n);
+                        else missing.push(n);
+                    });
+                }
+
+                var pPct = Math.min(100, Math.round((planArr.length / trainerCount) * 100));
+                var aPct = Math.min(100, Math.round((actArr.length / trainerCount) * 100));
+                var cls = 'rc-day';
+                if (isSun) cls += ' sun';
+                if (isHol) cls += ' holiday';
+                if (isFuture) cls += ' future';
+                if (ds === todayStr) cls += ' today';
+
+                // Tooltip full detail
+                var tip = 'Day ' + dayNum;
+                if (isSun) tip += ' (Sunday)';
+                if (isHol) tip += ' (Holiday)';
+                if (isFuture) tip += ' (Upcoming — not due yet)';
+                if (!isFuture) {
+                    if (submitted.length) tip += '\nSubmitted: ' + submitted.join(', ');
+                    if (onLeave.length) tip += '\nLeave: ' + onLeave.join(', ');
+                    if (missing.length && !isSun && !isHol) tip += '\nMissing: ' + missing.join(', ');
+                    if (planArr.length) tip += '\nPlan: ' + planArr.join(', ');
+                    if (actArr.length) tip += '\nActual: ' + actArr.join(', ');
+                }
+
+                var bodyHtml = '';
+                if (isFuture) {
+                    bodyHtml += '<div class="rc-day-meta">Upcoming</div>';
+                } else if (!isSun && !isHol) {
+                    bodyHtml +=
+                        '<div class="rc-day-bars">' +
+                            '<div class="rc-bar plan" title="Plan: ' + planArr.length + '/' + trainerCount + '"><i style="width:' + pPct + '%;"></i></div>' +
+                            '<div class="rc-bar actual" title="Actual: ' + actArr.length + '/' + trainerCount + '"><i style="width:' + aPct + '%;"></i></div>' +
+                        '</div>' +
+                        '<div class="rc-day-people">' +
+                            nameList(submitted, 'ok') +
+                            nameList(onLeave, 'leave') +
+                            nameList(missing, 'miss') +
+                        '</div>';
+                } else {
+                    bodyHtml += '<div class="rc-day-meta">' + (isHol ? 'Holiday' : 'Sun') + '</div>';
+                }
+
+                html += '<td><div class="' + cls + '" title="' + escHtmlRc(tip) + '">' +
+                    '<div class="rc-day-num">' + dayNum +
+                        (!isSun && !isHol && !isFuture
+                            ? ' <span class="rc-day-count">' + submitted.length + '/' + trainerCount + '</span>'
+                            : '') +
+                    '</div>' +
+                    bodyHtml +
+                    '</div></td>';
+            }
+            html += '</tr></tbody></table>';
+            calEl.innerHTML = html;
+        }
+
+
         function skLoadExtras(users) {
             users.forEach(u => {
                 if (SK_EXTRA[u]) return;
@@ -4845,9 +5618,26 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             const u = skNorm(email); const mk = monthKey || (document.getElementById('kpiMonth') || {}).value || '';
             const k = skComputeKpi(u, mk, ''); console.table({ target:k.target, own:k.own, totalMins:k.totalMins, planContentMins:k.planContentMins, planMins:k.planMins, leaveDays:k.leaveDays, adjPlan:k.adjPlan, actMins:k.actMins, dailyPlanMins:k.dailyPlanMins, dailyActMins:k.dailyActMins, eff:k.vals[2], prod:k.vals[4], capped:k.capped, uncapped:k.uncapped }); return k;
         };
+        function rcApplyTabVisibility() {
+            const on = (window._ovSumBucket === 'COMPLIANCE');
+            const c = document.getElementById('allTrainersKpiContainer');
+            const p = document.getElementById('reportComplianceSection');
+            if (c) c.style.display = on ? 'none' : '';
+            if (p) p.style.display = on ? '' : 'none';
+            return on;
+        }
+        function rcShowTab() {
+            // make sure every trainer's approved leave days are loaded (used for Working Days - Leave)
+            try {
+                const us = (specializedTrainersGlobal || []).map(t => skNorm(t.email)).filter(Boolean);
+                if (us.length && typeof skLoadExtras === 'function') skLoadExtras(us);
+            } catch (e) { console.error(e); }
+            try { renderReportCompliance(); } catch (e) { console.error(e); }
+        }
         function renderAllTrainersKpi() {
             const container = document.getElementById('allTrainersKpiContainer');
             if (!container) return;
+            if (rcApplyTabVisibility()) { rcShowTab(); return; }
 
             const stats = window._kpiStats || {};
             // Always include every Specialized Trainer from user account (with name)
@@ -5330,7 +6120,7 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
         }
         var C_FILE   = { label: 'File Name',           get: function (i) { return i.fileName; } };
         var C_CAT    = { label: 'Category',            get: function (i) { return i.category; } };
-        var C_USER   = { label: 'Request User',        get: function (i) { return i.uploadedBy; } };
+        var C_USER   = { label: 'ST Name',              get: function (i) { return i.uploadedByName || i.uploadedBy; } };
         var C_RTO    = { label: 'RTO',                 get: function (i) { return i.rtoEmail; } };
         var C_SEPCO  = { label: 'SEPCO',               get: function (i) { return i.sepcoEmail || i.approverEmail || i.approver; } };
         var C_DATE   = { label: 'Request Date',        get: function (i) { return dayLabel(i.uploadDate); }, isDate: true };
@@ -5854,24 +6644,43 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
             var bg = s === 'Updated' ? 'rgba(16,185,129,0.2);color:#34d399' : (String(s).indexOf('Error') === 0 ? 'rgba(239,68,68,0.2);color:#f87171' : 'rgba(245,158,11,0.2);color:#fbbf24');
             return '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;background:' + bg + ';">' + escapeSns(s) + '</span>';
         }
-        function loadSnsBoostingSepco() {
+        var snsBoostingDataGlobal = null; // cached rows for compliance + SNS section
+        var snsBoostingLoading = false;
+
+        function loadSnsBoostingSepco(optCb) {
             var tbody = document.getElementById('snsBoostingTableBody');
             if (tbody) tbody.innerHTML = '<tr><td colspan="15" style="padding:20px;color:var(--text-muted);text-align:center;">Loading...</td></tr>';
+            if (snsBoostingLoading) {
+                if (typeof optCb === 'function') {
+                    var wait = setInterval(function () {
+                        if (!snsBoostingLoading) { clearInterval(wait); optCb(snsBoostingDataGlobal || []); }
+                    }, 200);
+                }
+                return;
+            }
+            snsBoostingLoading = true;
             var cb = 'jsonp_sns_' + Math.round(Math.random() * 1e6);
             var done = false;
             window[cb] = function (data) {
                 if (done) return; done = true;
                 delete window[cb];
+                snsBoostingLoading = false;
                 try { document.body.removeChild(tag); } catch (e) {}
-                renderSnsBoostingSepco((data && data.rows) ? data.rows : []);
+                var rows = ((data && data.rows) ? data.rows : []);
+                snsBoostingDataGlobal = rows;
+                renderSnsBoostingSepco(rows);
+                if (typeof optCb === 'function') optCb(rows);
             };
             var tag = document.createElement('script');
             tag.src = GA_WEB_APP_URL + '?action=getTikTokLinks&callback=' + cb + '&t=' + Date.now();
             tag.onerror = function () {
                 if (done) return; done = true;
                 delete window[cb];
+                snsBoostingLoading = false;
                 try { document.body.removeChild(tag); } catch (e) {}
+                if (snsBoostingDataGlobal === null) snsBoostingDataGlobal = []; // avoid reload loop
                 if (tbody) tbody.innerHTML = '<tr><td colspan="15" style="padding:20px;color:#ef4444;text-align:center;">Failed to load.</td></tr>';
+                if (typeof optCb === 'function') optCb(snsBoostingDataGlobal || []);
             };
             document.body.appendChild(tag);
         }
@@ -6369,7 +7178,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 <script>
 /* ===== Auto month rollover: filters that sit on the current month follow the calendar (1 Nov -> November). Past months stay selectable. ===== */
 (function () {
-    var IDS = ['monthYearFilter', 'requestMonthYearFilter', 'overviewMonthFilter', 'monthlyPlanMonthFilter', 'dailyMonthFilter', 'dashKpiMonth'];
+    var IDS = ['monthYearFilter', 'requestMonthYearFilter', 'overviewMonthFilter', 'monthlyPlanMonthFilter', 'dailyMonthFilter', 'dashKpiMonth', 'complianceMonthFilter'];
     function curKey() { var n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0'); }
     var lastKey = curKey();
     function check() {
@@ -6429,7 +7238,7 @@ body{animation:fxFade .3s ease backwards}
 .summary-card:hover,.kpi-card:hover,.stat:hover{transform:translateY(-4px)!important}
 
 /* no hover work while the page is scrolling */
-html.fx-scrolling body{pointer-events:none}
+
 
 /* progress bars */
 .cat-bar-fill,.kpi-bar>i{transform-origin:left center;animation:fxBar .6s var(--fx-ease) backwards}
