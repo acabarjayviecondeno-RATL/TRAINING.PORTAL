@@ -2746,7 +2746,6 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                                 <label>Category</label>
                                 <select id="planCategory" onchange="onSftCategoryChange('plan')">
                                     <option value="">Select category</option>
-                                    <option value="ACTIVITY PLAN">ACTIVITY PLAN</option>
                                     <option value="STORE PLAN">STORE PLAN</option>
                                     <option value="FSM HC">FSM HC</option>
                                     <option value="PROMOTER HC">PROMOTER HC</option>
@@ -2780,7 +2779,6 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                                         <th>DATE</th>
                                         <th>TYPE OF ACTIVITY</th>
                                         <th>CATEGORY</th>
-                                        <th>ACTIVITY PLAN</th>
                                         <th>STORE PLAN</th>
                                         <th>FSM HC</th>
                                         <th>PROMOTER HC</th>
@@ -2789,7 +2787,7 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                                     </tr>
                                 </thead>
                                 <tbody id="viewPlanTableBody">
-                                    <tr><td colspan="12" style="text-align:center; padding: 20px; color:var(--text-muted);">No weekly plans for this month.</td></tr>
+                                    <tr><td colspan="11" style="text-align:center; padding: 20px; color:var(--text-muted);">No weekly plans for this month.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -2885,7 +2883,6 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                                 <label>Category</label>
                                 <select id="actualCategory" onchange="onSftCategoryChange('actual')">
                                     <option value="">Select category</option>
-                                    <option value="ACTIVITY PLAN">ACTIVITY PLAN</option>
                                     <option value="STORE PLAN">STORE PLAN</option>
                                     <option value="FSM HC">FSM HC</option>
                                     <option value="PROMOTER HC">PROMOTER HC</option>
@@ -2919,7 +2916,6 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                                         <th>DATE</th>
                                         <th>TYPE OF ACTIVITY</th>
                                         <th>CATEGORY</th>
-                                        <th>ACTIVITY PLAN</th>
                                         <th>STORE PLAN</th>
                                         <th>FSM HC</th>
                                         <th>PROMOTER HC</th>
@@ -2928,7 +2924,7 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                                     </tr>
                                 </thead>
                                 <tbody id="viewActualTableBody">
-                                    <tr><td colspan="12" style="text-align:center; padding: 20px; color:var(--text-muted);">No actual plans for this month.</td></tr>
+                                    <tr><td colspan="11" style="text-align:center; padding: 20px; color:var(--text-muted);">No actual plans for this month.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -3566,7 +3562,7 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                 });
                 tb.innerHTML = "";
                 if (!filtered.length) {
-                    tb.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:var(--text-muted);">No entries for this month.</td></tr>';
+                    tb.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:var(--text-muted);">No entries for this month.</td></tr>';
                     return;
                 }
                 filtered.forEach(function (r) {
@@ -3578,7 +3574,6 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                         "<td>" + (r.date || "") + "</td>" +
                         "<td>" + (r.typeOfActivity || "") + "</td>" +
                         "<td>" + (r.category || "") + "</td>" +
-                        "<td>" + (r.activityPlan || (r.category === "ACTIVITY PLAN" ? r.details : "") || "") + "</td>" +
                         "<td>" + (r.storePlan || (r.category === "STORE PLAN" ? r.details : "") || "") + "</td>" +
                         "<td>" + (r.fsmHc || (r.category === "FSM HC" ? r.details : "") || "") + "</td>" +
                         "<td>" + (r.promoterHc || (r.category === "PROMOTER HC" ? r.details : "") || "") + "</td>" +
@@ -3718,9 +3713,6 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
             } else if (cat === "FSM HC" || cat === "PROMOTER HC") {
                 wrap.innerHTML =
                     '<input type="number" id="' + prefix + 'Details" min="0" step="1" placeholder="Enter count (number)" inputmode="numeric">';
-            } else if (cat === "ACTIVITY PLAN") {
-                wrap.innerHTML =
-                    '<input type="text" id="' + prefix + 'Details" placeholder="Optional activity details">';
             } else {
                 wrap.innerHTML =
                     '<input type="text" id="' + prefix + 'Details" placeholder="Select category first" disabled>';
@@ -4403,7 +4395,6 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
                     DATE: r.date || "",
                     "TYPE OF ACTIVITY": r.typeOfActivity || "",
                     CATEGORY: r.category || "",
-                    "ACTIVITY PLAN": r.activityPlan || "",
                     "STORE PLAN": r.storePlan || "",
                     "FSM HC": r.fsmHc || "",
                     "PROMOTER HC": r.promoterHc || "",
