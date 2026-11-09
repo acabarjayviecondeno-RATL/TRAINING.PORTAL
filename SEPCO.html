@@ -1712,10 +1712,15 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
                         </ul>
                     </li>
                     <li class="has-sub-menu" id="contentDeadlineMenuParent">
-                        <div class="main-menu-item" onclick="switchSubTab(event, 'contentDeadlineSection', 'contentDeadlineMenuParent'); cdlRender();">
+                        <div class="main-menu-item" onclick="toggleSubMenu(event, 'contentDeadlineMenuParent', 'contentDeadlineSubMenu')">
                             <span class="sidebar-icon"><i data-lucide="calendar-clock"></i></span>
                             <span>Content Deadlines</span>
+                            <span class="arrow-icon">▶</span>
                         </div>
+                        <ul class="sub-menu" id="contentDeadlineSubMenu" style="display: none;">
+                            <li id="subCdlRequests" onclick="switchSubTab(event, 'contentDeadlineSection', 'contentDeadlineMenuParent'); cdlRender();">Deadline Requests</li>
+                            <li id="subCdlTim" onclick="switchSubTab(event, 'contentDeadlineTimSection', 'contentDeadlineMenuParent'); cdlRenderTim();">Time in Motion</li>
+                        </ul>
                     </li>
                     <li class="has-sub-menu" id="snsBoostingMenuParent">
                         <div class="main-menu-item" onclick="switchSubTab(event, 'snsBoostingSection', 'snsBoostingMenuParent'); loadSnsBoostingSepco();">
@@ -2264,6 +2269,45 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
                 </div>
             </div>
 
+            <div id="contentDeadlineTimSection" class="content-section">
+                <h3 style="margin-top:0; font-size: 15px;">📅 Content Deadlines (Time in Motion)</h3>
+                <p id="cdlTimNote" style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;"></p>
+                <div class="filter-container" style="flex-wrap:wrap;">
+                    <label for="cdlTimMonthFilter">Month:</label>
+                    <input type="month" id="cdlTimMonthFilter" class="filter-input" onchange="cdlRenderTim()">
+                    <button style="background: var(--primary);" onclick="cdlTimResetMonth()">Current Month</button>
+                    <label for="cdlTimName">Name:</label>
+                    <select id="cdlTimName" class="filter-input" onchange="cdlRenderTim()" style="min-width:180px;">
+                        <option value="">All trainers</option>
+                    </select>
+                    <label for="cdlTimSearch">Search:</label>
+                    <input type="text" id="cdlTimSearch" class="filter-input" placeholder="Name, email or content..." oninput="cdlRenderTim()" style="min-width:160px;">
+                    <button type="button" onclick="cdlLoad(true); cdlRenderTim();" style="background:#334155;">↻ Refresh</button>
+                </div>
+                <div class="task-table-container">
+                    <table class="task-table" id="cdlTimTable">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Trainer</th>
+                                <th style="text-align:left;">Content</th>
+                                <th style="text-align:left;">Category</th>
+                                <th>Start</th>
+                                <th>TIM</th>
+                                <th>Deadline</th>
+                                <th>Submitted</th>
+                                <th style="text-align:left;">Change Schedule Approved By</th>
+                                <th>Change Approved On</th>
+                                <th>Delay</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cdlTimBody">
+                            <tr><td colspan="11" style="color: var(--text-muted); padding: 20px; text-align:center;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div id="snsBoostingSection" class="content-section">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
                     <div>
@@ -2498,6 +2542,69 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
                 '<div class="summary-card"><h4>Pending</h4><p class="val" style="color:#d97706;">' + tot.pending + '</p></div>' +
                 '<div class="summary-card"><h4>Rejected</h4><p class="val" style="color:var(--danger);">' + tot.rejected + '</p></div>';
             tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="8" style="color:var(--text-muted);padding:20px;text-align:center;">No content deadline requests for ' + cdlEsc(monthKey) + '.</td></tr>';
+            cdlRenderTimIfActive();   // TIM page (separate) refreshes when it is open
+        }
+
+        // ---- Content Deadlines (Time in Motion) for every trainer — same rows / numbers as ST "My Content Deadlines" and the KPI Timeliness ----
+        function cdlTimResetMonth() { var el = document.getElementById('cdlTimMonthFilter'); if (el) el.value = ''; cdlRenderTim(); }
+        function cdlRenderTimIfActive() { try { var s = document.getElementById('contentDeadlineTimSection'); if (s && s.classList.contains('active')) cdlRenderTim(); } catch (e) {} }
+        function cdlRenderTim() {
+            var tb = document.getElementById('cdlTimBody'); if (!tb) return;
+            if (typeof skProdEff !== 'function') return;
+            var monthEl = document.getElementById('cdlTimMonthFilter');
+            var monthKey = (monthEl && monthEl.value) ? monthEl.value : '';
+            if (!monthKey) { var n = new Date(); monthKey = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0'); if (monthEl) monthEl.value = monthKey; }
+            if (cdlData === null) { try { cdlLoad(false); } catch (e) {} }   // approved changed deadlines come from the request list
+            var q = String((document.getElementById('cdlTimSearch') || {}).value || '').toLowerCase().trim();
+            var today = new Date(Date.now() + 8 * 3600000).toISOString().substring(0, 10);
+            var trainers = (typeof specializedTrainersGlobal !== 'undefined' && Array.isArray(specializedTrainersGlobal) ? specializedTrainersGlobal : []).map(function (t) {
+                return { email: String(t.email || '').trim(), key: skNorm(t.email), name: String(t.name || '').trim() };
+            }).filter(function (t) { return t.key && (typeof rtoInScope !== 'function' || rtoInScope(t.email)); });
+            trainers.sort(function (a, b) { return (a.name || a.email).localeCompare(b.name || b.email); });
+            try { skLoadExtras(trainers.map(function (t) { return t.key; })); } catch (e) {}
+            // Name filter: dropdown of every trainer (keeps the current pick when the list refreshes)
+            var nameSel = document.getElementById('cdlTimName');
+            if (nameSel) {
+                var curPick = nameSel.value;
+                var optHtml = '<option value="">All trainers</option>' + trainers.map(function (t) { return '<option value="' + cdlEsc(t.key) + '">' + cdlEsc(t.name || t.email) + '</option>'; }).join('');
+                if (nameSel.getAttribute('data-sig') !== optHtml) { nameSel.innerHTML = optHtml; nameSel.setAttribute('data-sig', optHtml); nameSel.value = curPick; }
+            }
+            var pickKey = nameSel ? nameSel.value : '';
+            var html = [], on = 0, lt = 0, hitCount = 0;
+            trainers.forEach(function (t) {
+                var disp = t.name || t.email;
+                if (pickKey && t.key !== pickKey) return;
+                if (q && (disp + ' ' + t.email).toLowerCase().indexOf(q) === -1) return;
+                var res; try { res = skProdEff(t.key, monthKey, t.name); } catch (e) { return; }
+                if (res.planHit) hitCount++;
+                (res.tlRows || []).forEach(function (x) {
+                    var v = x.v, info = x.info, cat = (info.cats[0] || x.cat || '-');
+                    var tag = '<div style="font-size:10px; margin-top:2px; color:' + (x.plan ? 'var(--text-muted)' : '#fbbf24') + ';">' + (x.plan ? 'Monthly Plan' : 'Additional') + '</div>';
+                    var who = '<td style="text-align:left;font-weight:600;">' + cdlEsc(disp) + '</td>';
+                    var head = who + '<td style="text-align:left;max-width:240px;white-space:normal;">' + cdlEsc(x.title) + tag + '</td><td style="text-align:left;font-size:11px;">' + cdlEsc(cat) + '</td><td>' + cdlEsc(info.start || '-') + '</td>';
+                    if (!v) {
+                        html.push('<tr>' + head + '<td>' + (x.days > 0 ? x.days + 'd' : '-') + '</td><td colspan="6" style="color:var(--text-muted);text-align:left;">' + ((x.plan && !info.start)
+                            ? 'Not started — no Daily Actual yet in this plan month (start date not set). Deadline = start date + TIM days' + (x.days > 0 ? ' (' + x.days + 'd)' : '') + '. Not counted in Timeliness yet.'
+                            : 'No Time in Motion in RCODE for this category (or no start date) — not counted.') + '</td></tr>');
+                        return;
+                    }
+                    var s = tlStatusSk(x, today);
+                    if (x.apr) { if (s.cls === 'ok') on++; else if (s.cls === 'late') lt++; }   // approved content only (= KPI Timeliness)
+                    var chg = (v.src === 'CHANGE') ? tlApprovedRecordExact(t.key, skNorm(t.name), x.title) : null;
+                    var cls = s.cls === 'late' ? 'badge-rejected' : (s.cls === 'ok' ? 'badge-approved' : 'badge-pending');
+                    html.push('<tr>' + head +
+                        '<td>' + (v.src === 'CHANGE' ? '<span class="badge-pending" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.4);">Changed</span>' : (v.special ? 'Weekly' : (x.days + 'd'))) + '</td>' +
+                        '<td>' + cdlEsc(v.submitDeadline) + '</td><td>' + cdlEsc(info.sub || '-') + '</td>' +
+                        '<td style="text-align:left;font-size:11px;">' + cdlEsc(chg ? (chg.approverName || chg.approver || '-') : '-') + '</td>' +
+                        '<td style="font-size:11px;">' + cdlEsc(chg ? (String(chg.decidedAt || '').substring(0, 10) || '-') : '-') + '</td>' +
+                        '<td title="Submission +' + v.subDelay + 'd · Resubmission +' + v.resubDays + 'd · Approval +' + v.aprDelay + 'd (content approval due ' + v.approvalDeadline + (x.apr ? ', approved ' + x.apr : '') + ')">' + (s.delay > 0 ? '+' + s.delay + 'd' : '0') + '</td>' +
+                        '<td><span class="' + cls + '">' + s.status + '</span></td></tr>');
+                });
+            });
+            var note = document.getElementById('cdlTimNote');
+            if (note) note.textContent = 'Monthly Plan content is always listed; Additional (Daily Plan) content only for trainers whose Monthly Plan target is hit (' + hitCount + ' of ' + trainers.length + ' this month). Deadline = start date + TIM days, or the approved changed deadline. ' +
+                'Timeliness (approved content only, same as KPI): On time ' + on + ' · Late ' + lt + ' → ' + ((on + lt) > 0 ? Math.round(on / (on + lt) * 1000) / 10 + '%' : '—') + '.';
+            tb.innerHTML = html.length ? html.join('') : '<tr><td colspan="11" style="color:var(--text-muted);padding:20px;text-align:center;">No content in the Monthly Plan for ' + cdlEsc(monthKey) + '.</td></tr>';
         }
 
         // ===== CONTENT DEADLINE — FOR APPROVAL (web) =====
@@ -2604,7 +2711,7 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
                 dlaLastSig = sig;
                 if (typeof isTypingRemark === 'function' && isTypingRemark()) { dlaUpdateBadge(); return; }   // don't wipe what they're typing
                 if (changed || !silent) dlaRender(); else dlaUpdateBadge();
-                try { if (changed && document.getElementById('contentDeadlineSection').classList.contains('active')) cdlRender(); } catch (e) {}
+                try { if (changed && document.getElementById('contentDeadlineSection').classList.contains('active')) cdlRender(); } catch (e) {} try { if (changed) cdlRenderTimIfActive(); } catch (e) {}
             }).catch(function () {
                 dlaLoading = false;
                 if (!silent) {
@@ -3260,6 +3367,31 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
         //      Monthly Plan mins < Designated  →  actuals NOT in the plan are excluded and Productivity / Efficiency are capped at 100% (no "over").
         //      Monthly Plan mins ≥ Designated  →  actuals NOT in the plan are added on top (plus to productivity) so over-achievement is possible.
         const SK_PH_HOLIDAYS = ["01-01", "04-09", "05-01", "06-12", "08-21", "08-26", "11-01", "11-02", "11-30", "12-08", "12-24", "12-25", "12-30", "12-31"];
+
+/* ===== ADDITIONAL HOLIDAYS (set in Admin page) — each date is a non-working day: it is taken off the working days / target / designated minutes ===== */
+var _xhT0 = Date.now();
+var EXTRA_HOLIDAYS = {};   // { 'yyyy-MM-dd': 'name' }
+try { var _xh = JSON.parse(localStorage.getItem('extra_holidays_v1') || 'null'); if (_xh && typeof _xh === 'object') EXTRA_HOLIDAYS = _xh; } catch (e) {}
+function isExtraHolidayYmd(ds) { return !!(EXTRA_HOLIDAYS && EXTRA_HOLIDAYS[ds]); }
+function isExtraHoliday(y, m1, d) { return isExtraHolidayYmd(y + '-' + String(m1).padStart(2, '0') + '-' + String(d).padStart(2, '0')); }
+function loadExtraHolidays() {
+    try {
+        fetch(GA_WEB_APP_URL + '?action=getExtraHolidays&t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+            if (!j || !j.success) return;
+            var m = {}; (j.items || []).forEach(function (i) { if (i && i.date) m[i.date] = i.name || 'Holiday'; });
+            var changed = JSON.stringify(m) !== JSON.stringify(EXTRA_HOLIDAYS);
+            EXTRA_HOLIDAYS = m;
+            try { localStorage.setItem('extra_holidays_v1', JSON.stringify(m)); } catch (e) {}
+            if (changed) {
+                try { window.dispatchEvent(new Event('extraHolidaysChanged')); } catch (e) {}
+                // just opened the page with an out-of-date holiday list: reload ONCE so every number is computed with the new holidays
+                try { if (Date.now() - _xhT0 < 20000 && !sessionStorage.getItem('xh_reloaded')) { sessionStorage.setItem('xh_reloaded', '1'); location.reload(); } } catch (e) {}
+            }
+        }).catch(function () {});
+    } catch (e) {}
+}
+loadExtraHolidays();
+setInterval(function () { if (!document.hidden) loadExtraHolidays(); }, 300000);
         function skWorkingDays(monthKey) {
             const now = new Date();
             const mk = /^\d{4}-\d{2}$/.test(String(monthKey || '')) ? monthKey : (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
@@ -3269,7 +3401,7 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
             for (let d = 1; d <= dim; d++) {
                 const dow = new Date(y, m, d).getDay();
                 const key = String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-                if (dow !== 0 && SK_PH_HOLIDAYS.indexOf(key) === -1) n++;
+                if (dow !== 0 && SK_PH_HOLIDAYS.indexOf(key) === -1 && !isExtraHoliday(y, m + 1, d)) n++;
             }
             return n;
         }
@@ -3379,6 +3511,115 @@ function tlActualMins(st, en) {
         setTimeout(tlLoadDeadlines, 2500);
         setInterval(function () { if (!document.hidden) tlLoadDeadlines(); }, 60000);
 
+        // ===== Content Time in Motion (TIM) timeliness — aligned with ST (My Content Deadlines table + KPI Timeliness) =====
+        //  Monthly Plan content  : TIM days = ceil( DURATION PER MIN x FREQUENCY / 480 )  (min 1)
+        //  Additional content    : (only when the Monthly Plan target is hit) unique Daily Plan titles -> CATEGORY -> RCODE "TOTAL DURATION (MIN.)" (col I) / 480
+        //  Deadline = start date + TIM days (or the approved changed deadline).  Only APPROVED content is counted.  Matching is by EXACT title.
+        window.TL_RCODE = window.TL_RCODE || null;
+        function tlLoadRcode() {
+            return jsonpCall(GA_WEB_APP_URL + '?action=getRcodeCategories&t=' + Date.now(), 30000).then(function (d) {
+                if (d && d.success && d.lookup) {
+                    const first = !window.TL_RCODE; window.TL_RCODE = d.lookup;
+                    if (first) { try { renderAllTrainersKpi(); } catch (e) {} try { checkAndComputeOverview(); } catch (e) {} try { cdlRenderTimIfActive(); } catch (e) {} }
+                }
+            }).catch(function () {});
+        }
+        setTimeout(tlLoadRcode, 3000);
+        setInterval(function () { if (!document.hidden && !window.TL_RCODE) tlLoadRcode(); }, 60000);
+        function tlYmdMs(s) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || '')); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN; }
+        function tlAddDays(ymd, n) {
+            const t = tlYmdMs(ymd); if (isNaN(t)) return '';
+            const d = new Date(t + n * 86400000);
+            return d.getUTCFullYear() + '-' + ('0' + (d.getUTCMonth() + 1)).slice(-2) + '-' + ('0' + d.getUTCDate()).slice(-2);
+        }
+        function tlDayDiff(a, b) { const x = tlYmdMs(a), y = tlYmdMs(b); return (isNaN(x) || isNaN(y)) ? 0 : Math.round((y - x) / 86400000); }
+        function tlCatKey(s) { return String(s || '').replace(/&gt;/g, '>').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+        function tlRcodeRec(c) {
+            const lk = window.TL_RCODE || {}; c = String(c || '').trim(); if (!c) return null;
+            let rec = lk[c] || lk[c.toLowerCase()];
+            if (!rec) { const nk = tlCatKey(c); Object.keys(lk).some(function (k) { if (tlCatKey(k) === nk) { rec = lk[k]; return true; } return false; }); }
+            return rec || null;
+        }
+        function tlRcodeDurDays(cands) {   // RCODE column I (TOTAL DURATION) first, then the TIM column
+            for (let i = 0; i < (cands || []).length; i++) {
+                const rec = tlRcodeRec(cands[i]); if (!rec) continue;
+                const m = parseFloat(rec.duration); if (m > 0) return Math.max(1, Math.ceil(m / 480));
+                const d = parseFloat(rec.timDays); if (d > 0) return d;
+            }
+            return 0;
+        }
+        function tlIsWeeklyCat(cats) { return (cats || []).some(function (c) { return tlCatKey(c).indexOf('samsunglivespaceinvitevideo') !== -1; }); }
+        function tlNextMonday(ymd) { const t = tlYmdMs(ymd); if (isNaN(t)) return ''; return tlAddDays(ymd, ((8 - new Date(t).getUTCDay()) % 7) || 7); }
+        // approved CHANGED deadline record: EXACT title only (a fuzzy match applied one content's deadline to another title)
+        function tlApprovedRecordExact(userKey, nameKey, title) {
+            const lists = [window.TL_DEADLINES, (typeof cdlData !== 'undefined' ? cdlData : null), (typeof dlaData !== 'undefined' ? dlaData : null)];
+            const list = lists.filter(l => Array.isArray(l) && l.length)[0] || [];
+            const nt = skNormTitle(title); let exact = null;
+            list.forEach(d => {
+                if (!/^approved/i.test(String(d.status || ''))) return;
+                const du = skNorm(d.user);
+                const own = du === userKey || (nameKey && du === nameKey) || (du.length > 2 && userKey.length > 2 && (du.indexOf(userKey) !== -1 || userKey.indexOf(du) !== -1));
+                if (!own) return;
+                if (!skDate(d.deadline)) return;
+                if (skNormTitle(d.title) === nt) exact = d;
+            });
+            return exact;
+        }
+        function tlApprovedDeadlineExact(userKey, nameKey, title) { const r = tlApprovedRecordExact(userKey, nameKey, title); return r ? skDate(r.deadline) : ''; }
+        // start / upload / category / first submission / resubmission days of ONE content title (exact title)
+        function tlContentInfoSk(title, actAll, approvals, planCat, monthKey) {   // monthKey = Monthly Plan month: only that month's Daily Actual rows are read
+            const nt = skNormTitle(title); let start = '', first = '', upload = ''; const cats = [];
+            actAll.forEach(r => {
+                if (!skIsContent(r)) return;
+                const t = skTitle(r); if (!t || skNormTitle(t) !== nt) return;
+                const d = skDate(skRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date']) || r['Date Submitted']); if (!d) return;
+                if (monthKey && d.substring(0, 7) !== monthKey) return;   // Monthly Plan = Nov -> NOVEMBER Daily Actual only
+                if (!first || d < first) first = d;                       // START DATE = earliest Submitted Date of the title in that month
+                const tg = skDate(skRowVal(r, ['TARGET DATE'])); if (tg) upload = tg;
+                [skRowVal(r, ['CATEGORY']), skRowVal(r, ['CATEGORY 2'])].forEach(c => { c = String(c || '').trim(); if (c && cats.indexOf(c) === -1) cats.push(c); });
+            });
+            if (!cats.length && planCat) cats.push(planCat);
+            let sub = '', resub = 0;
+            approvals.forEach(a => {
+                const fn = a.fileName || a.title || '';
+                if (skNormTitle(fn) !== nt) return;
+                const sd = skDate(String(a.firstSubmitted || a.uploadDate || '').substring(0, 10));
+                if (sd && (!sub || sd < sub)) sub = sd;
+                resub += Number(a.resubmitDays) || 0;
+            });
+            return { start: first, upload, cats, sub, resub };
+        }
+        // Time-in-Motion verdict (same rule as ST tlContentVerdict): null when no deadline can be computed
+        function tlVerdictSk(info, days, changed, apr) {
+            const LEAD = 5, TAT = 2;
+            if (tlIsWeeklyCat(info.cats)) {
+                const wad = changed || (info.start ? tlNextMonday(info.start) : (info.upload ? tlAddDays(info.upload, -LEAD) : ''));
+                if (!wad) return null;
+                const wApr = apr ? Math.max(0, tlDayDiff(wad, apr)) : 0, wTot = info.resub + wApr;
+                return { submitDeadline: wad, approvalDeadline: wad, subDelay: 0, resubDays: info.resub, aprDelay: wApr, total: wTot, late: wTot > 0, src: changed ? 'CHANGE' : 'WEEKLY', special: true };
+            }
+            const sd = changed || ((info.start && days > 0) ? tlAddDays(info.start, Math.ceil(days)) : '');
+            if (!sd) return null;
+            const ad = info.upload ? tlAddDays(info.upload, -LEAD) : tlAddDays(sd, TAT);
+            const subDelay = info.sub ? Math.max(0, tlDayDiff(sd, info.sub)) : 0;
+            const aprDelay = apr ? Math.max(0, tlDayDiff(ad, apr)) : 0;
+            const total = subDelay + info.resub + aprDelay;
+            return { submitDeadline: sd, approvalDeadline: ad, subDelay, resubDays: info.resub, aprDelay, total, late: total > 0, src: changed ? 'CHANGE' : 'TIM' };
+        }
+        // status of one row (same as ST tlTimStatus): cls 'ok' | 'late' | 'wait'
+        function tlStatusSk(x, today) {
+            const v = x.v, info = x.info; if (!v) return null;
+            let delay = v.total, status, color;
+            if (x.apr) { status = v.late ? 'Late' : 'On time'; color = v.late ? '#f87171' : '#34d399'; }
+            else {
+                const runSub = info.sub ? v.subDelay : Math.max(0, tlDayDiff(v.submitDeadline, today));
+                const runApr = info.sub ? Math.max(0, tlDayDiff(v.approvalDeadline, today)) : 0;
+                delay = runSub + v.resubDays + runApr;
+                status = v.special ? (delay > 0 ? 'Late' : (info.sub ? 'On time' : 'Not submitted')) : (info.sub ? (delay > 0 ? 'Late' : 'On time') : 'Not submitted');
+                color = delay > 0 ? '#f87171' : (info.sub ? '#34d399' : '#fbbf24');
+            }
+            return { delay, status, color, cls: (color === '#f87171' ? 'late' : (color === '#34d399' ? 'ok' : 'wait')) };
+        }
         function skProdEff(userKey, monthKey, displayName, onlyBucket) {   // onlyBucket (optional): CONTENT / TASK / OTHERS / TRAINING -> category-only productivity & efficiency (same as ST kpiProdEff)
             const X = SK_EXTRA[userKey] || { loaded: false, name: '', leaves: [] };
             const D = skDailyObjects();
@@ -3494,18 +3735,46 @@ function tlActualMins(st, en) {
                 if (!(t.tgt > 0) || !(t.act > 0) || !(planHit || t.inPlan)) return;
                 if (t.act <= t.tgt + 0.001) onTime++; else late++;                 // equal = on time
             });
-            Object.keys(tlContent).forEach(k => {
-                const c = tlContent[k];
-                if (!c.apr || !(planHit || c.inPlan)) return;
-                const dl = tlApprovedDeadline(userKey, nameKey, c.title); if (!dl) return;   // only APPROVED deadlines count
-                if (c.apr <= dl) onTime++; else late++;                            // approved on/before the deadline = on time
-            });
+            // Content timeliness = Time in Motion, same rows / rule as the ST "My Content Deadlines" table:
+            //   Monthly Plan content (always) + Additional Daily Plan content (only when the plan target is hit) — only APPROVED content is COUNTED.
+            const tlRows = [];
+            {
+                const allAct = D.actualObjs.filter(r => r._u === userKey);
+                const seenT = {}, tItems = [];
+                plan.forEach(r => {
+                    if (sepcoNormalizeCatPair(r).cat !== 'CONTENT') return;
+                    const rawF = String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, '');
+                    const f = rawF === '' ? 1 : (parseFloat(rawF) || 0); if (f <= 0) return;
+                    let d = parseFloat(String(sepcoGetVal(r, ['DURATION PER MIN', 'Duration per Min', 'DURATION']) || '').replace(/,/g, '')); if (isNaN(d) || d <= 0) d = 480;
+                    const t = skTitle(r), k = skNormTitle(t); if (!k) return;
+                    if (!seenT[k]) { seenT[k] = { title: t, plan: true, mins: 0, cat: String(sepcoGetVal(r, ['CATEGORY', 'Category']) || '').trim() }; tItems.push(seenT[k]); }
+                    seenT[k].mins += d * f;
+                });
+                if (planHit) D.planObjs.filter(r => r._u === userKey && inMonth(r) && skIsContent(r) && skTitle(r)).forEach(r => {
+                    const t = skTitle(r), k = skNormTitle(t); if (seenT[k]) return;
+                    seenT[k] = { title: t, plan: false, mins: 0, cat: String(sepcoGetVal(r, ['CATEGORY', 'Category']) || '').trim() }; tItems.push(seenT[k]);
+                });
+                tItems.forEach(it => {
+                    const nt = skNormTitle(it.title); let apr = '';
+                    allAct.forEach(r => {
+                        if (!skIsContent(r) || skNormTitle(skTitle(r)) !== nt) return;
+                        if (monthKey && skMonthKey(skRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || r['Date Submitted']) !== monthKey) return;   // plan month's Daily Actual only
+                        const a = skDate(skRowVal(r, ['APPROVAL DATE', 'Approval Date'])); if (a && a > apr) apr = a;
+                    });
+                    const info = tlContentInfoSk(it.title, allAct, approvalsAll, it.cat, monthKey);
+                    const changed = tlApprovedDeadlineExact(userKey, nameKey, it.title);
+                    const days = it.plan && it.mins > 0 ? Math.max(1, Math.ceil(it.mins / 480)) : tlRcodeDurDays(info.cats);
+                    const v = tlVerdictSk(info, days, changed, apr);   // null = no TIM / no start date / no approved change
+                    tlRows.push({ title: it.title, plan: it.plan, cat: it.cat, apr, info, days, changed, v });
+                    if ((!onlyBucket || onlyBucket === 'CONTENT') && apr && v) { if (v.late) late++; else onTime++; }   // APPROVED content only
+                });
+            }
 
             // ---- Productivity ----
             const usedMins = planHit ? (inMins + extraMins) : (Math.min(inMins, adjPlan) + bonusMins);   // approved content outside the plan is always plus points
             const productivity = adjPlan > 0 ? usedMins / adjPlan : (usedMins > 0 ? 1 : null);
             return { planMins, adjPlan, leaveDays, designated, planHit, inMins, extraMins, bonusMins, loggedMins: inMins + extraMins,
-                     usedMins, productivity, efficiency, onTime, late, planMinsMatched: pAll, matchedActualMins: aAll };
+                     usedMins, productivity, efficiency, onTime, late, planMinsMatched: pAll, matchedActualMins: aAll, tlRows };
         }
         function onMonthlyPlanMonthChange() {
             const mf = document.getElementById('monthlyPlanMonthFilter');
@@ -4907,6 +5176,7 @@ function tlActualMins(st, en) {
             if (dt.getDay() === 0) return false; // Sunday
             var key = String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
             if (typeof SK_PH_HOLIDAYS !== 'undefined' && SK_PH_HOLIDAYS.indexOf(key) !== -1) return false;
+            if (isExtraHoliday(y, m + 1, d)) return false;   // additional holiday set in Admin
             return true;
         }
 
@@ -5323,7 +5593,7 @@ function tlActualMins(st, en) {
                 var ds = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
                 var isSun = (i % 7 === 6);
                 var mmdd = String(m + 1).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
-                var isHol = (typeof SK_PH_HOLIDAYS !== 'undefined' && SK_PH_HOLIDAYS.indexOf(mmdd) !== -1);
+                var isHol = (typeof SK_PH_HOLIDAYS !== 'undefined' && SK_PH_HOLIDAYS.indexOf(mmdd) !== -1) || isExtraHolidayYmd(ds);
                 var agg = dayAgg[ds] || { plan: [], actual: [], leave: [] };
                 var planArr = Array.isArray(agg.plan) ? agg.plan : [];
                 var actArr = Array.isArray(agg.actual) ? agg.actual : [];
@@ -5419,6 +5689,7 @@ function tlActualMins(st, en) {
                     // leave days change Designated Minutes -> refresh the Overview table too
                     clearTimeout(window._ovLeaveTimer);
                     window._ovLeaveTimer = setTimeout(() => { try { checkAndComputeOverview(); } catch (e) {} }, 400);
+                    try { cdlRenderTimIfActive(); } catch (e) {}
                 });
             });
         }
@@ -5583,7 +5854,10 @@ function tlActualMins(st, en) {
                 if (!skTitle(t)) return;
                 const d = skDur(t); if (!isNaN(d)) dailyActMins += d;
             });
-            const timeliness = dailyPlanMins > 0 ? dailyActMins / dailyPlanMins : (dailyActMins > 0 ? 1 : null);
+            // Timeliness = On time ÷ (On time + Late) — Content by Time in Motion (approved content only) + Task duration rule. Same as ST. No data = not scored.
+            const _peT = skProdEff(userKey, monthKey, displayName), _totT = (_peT.onTime || 0) + (_peT.late || 0);
+            const hasContentPlan = plan.some(r => skIsContent(r));   // no CONTENT line in the Monthly Plan -> Timeliness / Productivity are not scored (shown as "—")
+            const timeliness = (hasContentPlan && _totT > 0) ? _peT.onTime / _totT : null;
 
             // KPI Inputs: content errors deduction (1-2 = 1%, 3-4 = 2% ...)
             const inp = (X.inputs || []).filter(r => skMonthMatches(r.month, monthKey));
@@ -5598,7 +5872,7 @@ function tlActualMins(st, en) {
             // Same rule as the Overview table and as kpiProdEff in every ST file.
             const pe = skProdEff(userKey, monthKey, displayName);
             const planMins = pe.planMins, leaveDays = pe.leaveDays, adjPlan = pe.adjPlan, actMins = pe.usedMins;
-            const productivity = pe.productivity;
+            const productivity = hasContentPlan ? pe.productivity : null;
 
             const vals = [ach, quality, eff, timeliness, productivity];
             // Same as ST computeKpi: a KPI with no target / no data is NOT scored as 0 - it is left out and the remaining weights are re-scaled to 100%.

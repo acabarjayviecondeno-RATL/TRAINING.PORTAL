@@ -206,6 +206,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
     <div class="cat">Management</div>
     <div class="item active" id="nav-dash" onclick="showDash()">📊 <span>Dashboard</span></div>
     <div class="item" id="nav-ann" onclick="showAnn()">📣 <span>Announcements</span></div>
+    <div class="item" id="nav-hol" onclick="showHol()">🗓 <span>Additional Holidays</span></div>
     <div class="cat">All Sheets (Database)</div>
     <div style="padding:2px 4px 8px"><input id="navQ" type="search" placeholder="Find sheet…" oninput="filterNav()" style="width:100%;padding:7px 10px"></div>
     <div id="sheetNav"><div class="msg" style="padding:6px 12px">Locked…</div></div>
@@ -288,6 +289,23 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
       <input id="annTitle" placeholder="Title" style="width:100%;margin-bottom:8px">
       <textarea id="annMsg" rows="5" placeholder="Message" style="width:100%"></textarea>
       <div style="margin-top:10px"><button onclick="postAnn()">Publish Announcement</button></div>
+    </div>
+  </div>
+
+  <div class="sec" id="secHol">
+    <h3 class="t">Additional Holidays</h3>
+    <p class="sub">Sundays and the regular PH holidays are already excluded. A date you add here becomes a <b>non-working day for every portal</b> (ST, SEPCO, RTO, SFT, this Admin page): it is taken off the <b>Target Days</b> and the <b>Designated minutes</b> (working days × 480), so everyone's target goes down. Portals pick it up when opened (and within ~5 minutes if already open).</p>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px">
+      <input type="date" id="holDate" style="width:auto">
+      <input id="holName" placeholder="Holiday name (e.g. Company Day Off)" maxlength="80" style="min-width:260px">
+      <button onclick="addHoliday()">＋ Add holiday</button>
+      <button class="ghost" onclick="loadHolidays(true)">⟳ Reload</button>
+    </div>
+    <div style="overflow:auto;max-width:760px">
+      <table>
+        <thead><tr><th>Date</th><th>Day</th><th>Name</th><th></th></tr></thead>
+        <tbody id="holBody"><tr><td colspan="4" class="msg">Loading…</td></tr></tbody>
+      </table>
     </div>
   </div>
 
@@ -515,6 +533,7 @@ async function unlock(auto){
     $("who").textContent="Welcome, "+(localStorage.getItem("portal_name")||user);
     await loadSheets();
     loadLeaveEditSetting();
+    loadHolidays();
   }catch(e){
     creds=null; if(auto){ $("lkPass").value=""; try{sessionStorage.removeItem("portal_admin_pass")}catch(x){} }
     $("lkErr").textContent = e.message==="Failed to fetch" ? "Can't reach the server. Did you deploy the latest script version?" : "Not authorized. Check your email/password (must be an ADMIN account).";
@@ -592,6 +611,32 @@ function setActive(sel){document.querySelectorAll(".item").forEach(x=>x.classLis
 function showSec(id){document.querySelectorAll(".sec").forEach(x=>x.classList.remove("active"));$(id).classList.add("active")}
 function showDash(){setActive($("nav-dash"));showSec("secDash"); if(creds) loadTrendSummary();}
 function showAnn(){setActive($("nav-ann"));showSec("secAnn")}
+/* ===== Additional holidays (saved on the server; every portal reads them) ===== */
+let EXTRA_HOLIDAYS={};
+function paintHolidays(items){
+  EXTRA_HOLIDAYS={}; (items||[]).forEach(i=>{ EXTRA_HOLIDAYS[i.date]=i.name||"Holiday"; });
+  const tb=$("holBody"); if(!tb) return;
+  const DN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  tb.innerHTML=(items&&items.length)?items.map(i=>{ const p=i.date.split("-"), dow=DN[new Date(+p[0],+p[1]-1,+p[2]).getDay()];
+    return `<tr><td>${esc(i.date)}</td><td>${dow}</td><td>${esc(i.name)}</td><td><button class="bad sm" onclick="delHoliday('${esc(i.date)}')">Delete</button></td></tr>`; }).join("")
+    :`<tr><td colspan="4" class="msg">No additional holidays yet.</td></tr>`;
+}
+async function loadHolidays(show){
+  try{ const j=await api("adminGetHolidays"); paintHolidays(j.items); if(show) toast("Reloaded"); }
+  catch(e){ const tb=$("holBody"); if(tb) tb.innerHTML=`<tr><td colspan="4" class="msg">Could not load (deploy the latest Apps Script).</td></tr>`; }
+}
+async function addHoliday(){
+  const date=$("holDate").value, name=$("holName").value.trim();
+  if(!date){ toast("Pick a date"); return; }
+  try{ const j=await api("adminAddHoliday",{date,name}); paintHolidays(j.items); $("holName").value=""; toast("Holiday added: "+date); }
+  catch(e){ toast(e.message||"Failed"); }
+}
+async function delHoliday(date){
+  if(!confirm("Remove the holiday on "+date+"? That day counts as a working day again.")) return;
+  try{ const j=await api("adminDeleteHoliday",{date}); paintHolidays(j.items); toast("Holiday removed"); }
+  catch(e){ toast(e.message||"Failed"); }
+}
+function showHol(){setActive($("nav-hol"));showSec("secHol"); if(creds) loadHolidays();}
 function refreshAll(){ if(!creds) return; loadSheets({trends:true}); if($("secData").classList.contains("active")) loadSheet(curSheet); }
 
 function openSheet(i){
@@ -712,7 +757,7 @@ const AD_PH_HOLIDAYS=["01-01","04-09","05-01","06-12","08-21","08-26","11-01","1
 const AD_BUCKETS=["CONTENT","TASK","OTHERS","TRAINING"];
 function adWorkingDays(key){
   const y=parseInt(key.slice(0,4),10), m=parseInt(key.slice(5,7),10)-1, dim=new Date(y,m+1,0).getDate(); let n=0;
-  for(let d=1;d<=dim;d++){ const dow=new Date(y,m,d).getDay(), k=String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"); if(dow!==0&&AD_PH_HOLIDAYS.indexOf(k)===-1) n++; }
+  for(let d=1;d<=dim;d++){ const dow=new Date(y,m,d).getDay(), k=String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"); if(dow!==0&&AD_PH_HOLIDAYS.indexOf(k)===-1&&!EXTRA_HOLIDAYS[String(y)+"-"+k]) n++; }
   return n;
 }
 function adBucket(cat,cat2){

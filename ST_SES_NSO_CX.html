@@ -5414,7 +5414,7 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                             <li id="subPlanActual" onclick="switchSubTab(event, 'planActualSection')">Plan vs Actual</li>
                             <li id="subMonthlyPlan" onclick="switchSubTab(event, 'monthlyPlanSection')">Monthly Plan</li>
                             <li id="subLeaveAbsent" onclick="switchSubTab(event, 'leaveAbsentSection')">Leave / Absent Log</li>
-                            <li id="subContentDeadline" onclick="switchSubTab(event, 'deadlineApprovalSection')">Content Deadline Approval</li>
+                            <li id="subContentDeadline" onclick="switchSubTab(event, 'deadlineApprovalSection')">Content Deadline Change</li>
                         </ul>
                     </li>
                     <li class="has-sub-menu" id="socmedMenuParent">
@@ -5548,7 +5548,7 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                                     <li><strong>Target Count (Content) %</strong> = Own Content ÷ Target. Target = Monthly Plan rows (category CONTENT) for the selected MONTH × FREQUENCY PER MONTH.</li>
                                     <li><strong>Accuracy (Quality) %</strong> = (Target − Revision count) ÷ Target. Revisions = Rejected files in Approval Requests that match Monthly Plan by <em>file name</em> (vs plan TITLE) or by <em>category</em> (vs plan CATEGORY). Unrelated rejects are ignored. Less the Content Errors deduction (1–2 errors = 1%, 3–4 = 2% …).</li>
                                     <li><strong>Efficiency %</strong> = Content approved <em>without revisions</em> (W/o revisions) ÷ Target. Each revision (matched reject) is excluded from the count. No Target = no data.</li>
-                                    <li><strong>Timeliness (On-time) %</strong> = On-time ÷ (On-time + Late). <em>Content</em>: on time when the date it was <strong>approved</strong> is on or before its <strong>approved Content Deadline</strong> (no approved deadline = not counted). <em>Task / Training / Others</em>: no deadline — Target = <code>Duration</code> (Task Actual col C), Actual = <code>Start Time → End Time</code>; on time when Actual ≤ Target.</li>
+                                    <li><strong>Timeliness (On-time) %</strong> = On-time ÷ (On-time + Late). <em>Content</em> (Time in Motion): <strong>submit deadline</strong> = start date (the earliest Submitted Date of that content in the Daily Actual of its Monthly Plan month) + the category's TIM days in RCODE; <strong>approval deadline</strong> = upload date (TARGET DATE) − 5 days (no upload date = submit deadline + 2 days). Delay = days late to submit + resubmission days + days late to approve; on time only when the delay is 0. No TIM / no start date = not counted. A deadline that moved needs a SEPCO-approved <em>Deadline Change</em>. <em>Task / Training / Others</em>: no deadline — Target = <code>Duration</code> (Task Actual col C), Actual = <code>Start Time → End Time</code>; on time when Actual ≤ Target.</li>
                                 </ul>
                             </div>
                             <div class="kpi-notes-card">
@@ -5766,9 +5766,28 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                 <!-- CONTENT DEADLINE APPROVAL SECTION -->
                 <div id="deadlineApprovalSection" class="sub-content-section" style="display: none;">
                     <div class="section-container">
-                        <h4 style="margin-top:0; font-size: 13px; margin-bottom: 10px; color: var(--text-main);">🗓 Request Content Deadline Approval</h4>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Submit the deadline of your content. The SEPCO approver approves or rejects it on Telegram. Only an <strong>approved</strong> deadline is used for Timeliness in the Daily Task Time summary (Timeliness is <strong>-1</strong> when the task is worked on after the approved deadline).</p>
-
+                        <div class="cd-toolbar">
+                            <div><div class="cd-toolbar-title">Content Deadlines</div><div class="cd-toolbar-sub">Deadlines and change requests for the selected month (clear the month to see all)</div></div>
+                            <div class="cd-month"><label for="cdMonthFilter">Month</label><input type="month" id="cdMonthFilter" onchange="cdRender()" title="Filter all tables below by month"></div>
+                        </div>
+                        <style>
+#cdFormWrap { backdrop-filter: blur(3px); }
+#cdFormWrap .cd-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; width: min(720px, 100%); max-height: 92vh; overflow-y: auto; padding: 24px 26px 26px; position: relative; box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+#cdFormWrap .cd-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); font-size: 16px; line-height: 1; cursor: pointer; }
+#cdFormWrap .cd-close:hover { background: rgba(148,163,184,.15); color: var(--text-main); }
+#cdFormWrap .cd-title { margin: 0 40px 6px 0; font-size: 17px; font-weight: 700; color: var(--text-main); }
+#cdFormWrap .cd-note { font-size: 12px; line-height: 1.55; color: var(--text-muted); margin: 0 0 18px; }
+#cdFormWrap .leave-form.cd-form { grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 !important; background: transparent !important; border: 0 !important; margin-bottom: 0 !important; }
+#cdFormWrap .leave-form.cd-form > div:nth-child(4) { grid-column: 1 / -1; }
+#cdFormWrap .leave-form.cd-form input, #cdFormWrap .leave-form.cd-form select { text-overflow: clip; }
+#cdFormWrap .leave-form.cd-form .leave-actions { margin-top: 4px; }
+@media (max-width: 600px) { #cdFormWrap .leave-form.cd-form { grid-template-columns: 1fr; } #cdFormWrap .cd-card { padding: 20px 16px; } }
+</style>
+<div id="cdFormWrap" onclick="if(event.target===this)cdHideForm()" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.6); align-items:center; justify-content:center; padding:16px;">
+                        <div class="cd-card">
+                        <button type="button" class="cd-close" onclick="cdHideForm()" aria-label="Close">✕</button>
+                        <h4 class="cd-title">🗓 Request Content Deadline Change</h4>
+                        <p class="cd-note">Your content's deadline is <strong>automatic (Time in Motion)</strong>: start date in your Daily Task + the category's days in RCODE — no approval needed. Use this form <strong>only when the deadline moved</strong>. The SEPCO approver approves or rejects it on Telegram, and the <strong>approved</strong> date replaces the automatic submit deadline (Timeliness is <strong>-1</strong> when the content is submitted / resubmitted / approved late).</p>
                         <div class="leave-form cd-form" style="background: #f8fafc; border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px;">
                             <div>
                                 <label>Content Title *</label>
@@ -5783,7 +5802,7 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                                 <input type="text" id="cdCategoryInput" placeholder="Auto-filled" readonly>
                             </div>
                             <div>
-                                <label>Proposed Deadline *</label>
+                                <label>New Submit Deadline *</label>
                                 <input type="date" id="cdDeadlineInput">
                             </div>
                             <div>
@@ -5799,7 +5818,62 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                             </div>
                         </div>
 
-                        <h4 style="font-size: 13px; margin-bottom: 10px; color: var(--text-main);">📋 My Content Deadline Requests</h4>
+                        </div>
+                        </div>
+
+<style>
+.task-table-container:has(#cdTimTable) { overflow-x: hidden; }
+#cdTimTable { width: 100%; min-width: 0; table-layout: fixed; }
+#cdTimTable th, #cdTimTable td { padding: 10px 6px; font-size: 12px; line-height: 1.35; white-space: normal !important; overflow-wrap: anywhere; vertical-align: middle; }
+#cdTimTable th { font-size: 10.5px; }
+#cdTimTable th:nth-child(1) { width: 16%; } #cdTimTable th:nth-child(2) { width: 15%; } #cdTimTable th:nth-child(3) { width: 7%; }
+#cdTimTable th:nth-child(4) { width: 6%; } #cdTimTable th:nth-child(5) { width: 7%; } #cdTimTable th:nth-child(6) { width: 7%; }
+#cdTimTable th:nth-child(7) { width: 9%; } #cdTimTable th:nth-child(8) { width: 8%; } #cdTimTable th:nth-child(9) { width: 5%; }
+#cdTimTable th:nth-child(10) { width: 8%; } #cdTimTable th:nth-child(11) { width: 12%; }
+.cd-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:14px 16px; margin-bottom:20px; border:1px solid var(--border-color); border-radius:12px; background:rgba(148,163,184,.07); }
+.cd-toolbar-title { font-size:15px; font-weight:700; color:var(--text-main); }
+.cd-toolbar-sub { font-size:12px; color:var(--text-muted); margin-top:2px; }
+.cd-month { display:flex; align-items:center; gap:10px; }
+.cd-month label { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin:0; }
+.cd-month input { height:38px; min-width:170px; padding:0 12px; border-radius:10px; font-weight:600; font-size:13px; }
+.cd-pill { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; }
+.cd-pill.ok { background:rgba(52,211,153,.15); color:#34d399; }
+.cd-pill.late { background:rgba(248,113,113,.15); color:#f87171; }
+.cd-pill.wait { background:rgba(251,191,36,.15); color:#fbbf24; }
+.cd-tag { display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; background:rgba(96,165,250,.15); color:#60a5fa; white-space:nowrap; }
+#cdTable { width:100%; table-layout:fixed; }
+#cdTable th, #cdTable td { padding:10px 8px; font-size:12px; line-height:1.35; white-space:normal !important; overflow-wrap:anywhere; vertical-align:middle; }
+#cdTable th:nth-child(1) { width:26%; } #cdTable th:nth-child(2) { width:22%; } #cdTable th:nth-child(3) { width:12%; }
+#cdTable th:nth-child(4) { width:20%; } #cdTable th:nth-child(5) { width:10%; } #cdTable th:nth-child(6) { width:10%; }
+.task-table-container:has(#cdTable) { overflow-x: hidden; }
+#cdTimTable td button { white-space: normal; padding: 5px 8px !important; line-height: 1.2; }
+</style>
+                        <h4 style="font-size: 13px; margin-bottom: 4px; color: var(--text-main);">📅 My Content Deadlines (Time in Motion)</h4>
+                        <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 10px 0;">Every content in your Daily Actual. <strong>Start</strong> = earliest Submitted Date of the content in the Daily Actual of the selected month · <strong>Deadline</strong> = start date + RCODE days, or the approved changed deadline when one exists · <strong>Change Schedule Approved By / Change Approved On</strong> = who approved the deadline change and when (blank when the automatic Time in Motion deadline applies). Delay = submission + resubmission + approval days. <strong>Samsung Live Space Invite Video</strong> is weekly (not Time in Motion): Deadline = the Monday after the week of its start date; approved by then = On time, otherwise Late (Tuesday onwards).</p>
+                        <div class="task-table-container" style="margin-bottom: 22px;">
+                            <table class="task-table" id="cdTimTable">
+                                <thead>
+                                    <tr>
+                                        <th>Content</th>
+                                        <th>Category</th>
+                                        <th>Start</th>
+                                        <th>TIM</th>
+                                        <th>Deadline</th>
+                                        <th>Submitted</th>
+                                        <th>Change Schedule Approved By</th>
+                                        <th>Change Approved On</th>
+                                        <th>Delay</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cdTimBody">
+                                    <tr><td colspan="11" style="text-align:center; padding: 20px; color:var(--text-muted);">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 style="font-size: 13px; margin: 26px 0 10px; color: var(--text-main);">📋 My Content Deadline Change Requests</h4>
                         <div class="task-table-container">
                             <table class="task-table" id="cdTable">
                                 <thead>
@@ -6322,6 +6396,31 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
         const PH_HOLIDAYS = [
             "01-01", "04-09", "05-01", "06-12", "08-21", "08-26", "11-01", "11-02", "11-30", "12-08", "12-24", "12-25", "12-30", "12-31"
         ];
+
+/* ===== ADDITIONAL HOLIDAYS (set in Admin page) — each date is a non-working day: it is taken off the working days / target / designated minutes ===== */
+var _xhT0 = Date.now();
+var EXTRA_HOLIDAYS = {};   // { 'yyyy-MM-dd': 'name' }
+try { var _xh = JSON.parse(localStorage.getItem('extra_holidays_v1') || 'null'); if (_xh && typeof _xh === 'object') EXTRA_HOLIDAYS = _xh; } catch (e) {}
+function isExtraHolidayYmd(ds) { return !!(EXTRA_HOLIDAYS && EXTRA_HOLIDAYS[ds]); }
+function isExtraHoliday(y, m1, d) { return isExtraHolidayYmd(y + '-' + String(m1).padStart(2, '0') + '-' + String(d).padStart(2, '0')); }
+function loadExtraHolidays() {
+    try {
+        fetch(WEB_APP_URL + '?action=getExtraHolidays&t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+            if (!j || !j.success) return;
+            var m = {}; (j.items || []).forEach(function (i) { if (i && i.date) m[i.date] = i.name || 'Holiday'; });
+            var changed = JSON.stringify(m) !== JSON.stringify(EXTRA_HOLIDAYS);
+            EXTRA_HOLIDAYS = m;
+            try { localStorage.setItem('extra_holidays_v1', JSON.stringify(m)); } catch (e) {}
+            if (changed) {
+                try { window.dispatchEvent(new Event('extraHolidaysChanged')); } catch (e) {}
+                // just opened the page with an out-of-date holiday list: reload ONCE so every number is computed with the new holidays
+                try { if (Date.now() - _xhT0 < 20000 && !sessionStorage.getItem('xh_reloaded')) { sessionStorage.setItem('xh_reloaded', '1'); location.reload(); } } catch (e) {}
+            }
+        }).catch(function () {});
+    } catch (e) {}
+}
+loadExtraHolidays();
+setInterval(function () { if (!document.hidden) loadExtraHolidays(); }, 300000);
 
         const FB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT7oZoS9WzZkscUKl3O1oyLiffbUXRqWBA5G3AEPcB-5DYrMyWoW1cPyrJSM0zRZh08xhJb5R3_MCD1/pub?gid=0&single=true&output=csv";
         const IG_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT7oZoS9WzZkscUKl3O1oyLiffbUXRqWBA5G3AEPcB-5DYrMyWoW1cPyrJSM0zRZh08xhJb5R3_MCD1/pub?gid=980908131&single=true&output=csv";
@@ -7093,12 +7192,16 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
             }
             if (!e.target.closest || !e.target.closest('#cdCombo')) cdCloseTitles();
         });
+        // category of a content title: from the Daily Actual rows (CATEGORY) when the Monthly/Daily Plan has none
+        function cdCatFor(t) {
+            try { var c = (tlContentInfo(t).cats || [])[0]; return c ? String(c).trim() : ''; } catch (e) { return ''; }
+        }
         function cdSyncCategory() {
             let t = (document.getElementById('cdTitleInput') || {}).value || '', out = document.getElementById('cdCategoryInput');
             if (!out) return;
             let o = cdOptMap[kpiNormTitle(t)];
             if (!o) { cdOptions = cdTitleOptions(); o = cdOptions.filter(x => kpiNormTitle(x.title) === kpiNormTitle(t))[0]; }
-            out.value = o ? o.cat : '';
+            out.value = (o && o.cat) ? o.cat : cdCatFor(t);
         }
         var cdOptions = [];
         async function cdLoadApprovers() {
@@ -7130,7 +7233,7 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
         async function cdSubmit() {
             if (cdSaving) return;
             let title = (document.getElementById('cdTitleInput').value || '').trim();
-            let cat = (document.getElementById('cdCategoryInput').value || '').trim();
+            let cat = (document.getElementById('cdCategoryInput').value || '').trim() || cdCatFor(title);
             let dl = document.getElementById('cdDeadlineInput').value;
             let reason = (document.getElementById('cdReasonInput').value || '').trim();
             let ap = (document.getElementById('cdApproverSelect').value || '').trim();
@@ -7148,7 +7251,7 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                 try { localStorage.setItem('portal_cd_approver_' + loggedInUser, ap); } catch (e) {}
                 document.getElementById('cdTitleInput').value = ''; document.getElementById('cdCategoryInput').value = '';
                 document.getElementById('cdDeadlineInput').value = ''; document.getElementById('cdReasonInput').value = '';
-                await cdLoad();
+                await cdLoad(); cdHideForm();
                 alert(result.message || 'Submitted for approval.');
             } catch (err) {
                 alert((err && err.message && err.message !== 'Save failed') ? err.message : 'Could not submit the request. Please try again.');
@@ -7167,13 +7270,164 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                 cdRecords.splice(i, 1); cdRender();
             } catch (err) { alert((err && err.message && err.message !== 'Delete failed') ? err.message : 'Could not delete. Please try again.'); }
         }
+        // Monthly Plan state for the month: CONTENT lines of the plan + whether the plan minutes reached the Designated minutes (same rule as kpiProdEff)
+function cdPlanState(monthKey) {
+    var durOf = function (t) { var d = parseFloat(String(getRowVal(t, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, '')); return (!isNaN(d) && d > 0) ? d : NaN; };
+    var plan = (allLoadedTasks.monthlyPlan || []).filter(function (r) { return matchesUser(r) && kpiMonthMatches(getRowVal(r, ['MONTH']), monthKey); });
+    var mins = 0, items = [];
+    plan.forEach(function (r) {
+        var rawF = String(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, '');
+        var f = rawF === '' ? 1 : (parseFloat(rawF) || 0);
+        if (f <= 0) return;
+        var d = durOf(r); if (isNaN(d)) d = 480;
+        mins += d * f;
+        var pair = kpiPairOf(r);
+        if (pair.cat !== 'CONTENT') return;
+        var title = kpiTitle(r); if (!title) return;
+        items.push({ title: title, cat: String(getRowVal(r, ['CATEGORY', 'Category']) || '').trim() });
+    });
+    var mk = String(monthKey || '').split('-');
+    var yr = parseInt(mk[0], 10) || new Date().getFullYear(), mi = (parseInt(mk[1], 10) || (new Date().getMonth() + 1)) - 1;
+    var leaveDays = (localLeaveRecords || []).filter(function (l) { return getRowMonthKey(l.date) === monthKey; }).length;
+    var wd = (typeof calculateTargetDays === 'function') ? calculateTargetDays(yr, mi, 0) : 22;
+    var designated = Math.max(0, wd - leaveDays) * 480;
+    return { items: items, mins: mins, designated: designated, hit: mins > 0 && mins >= designated - 0.5 };
+}
+// ===== ONE SOURCE OF TRUTH for content deadlines: the Content Deadlines table AND the KPI Timeliness both use tlTimList + tlTimStatus =====
+//  • Monthly Plan CONTENT lines are ALWAYS listed (matched to the Daily Actual by EXACT title).
+//  • Content that is NOT in the Monthly Plan (Daily Plan titles, unique) is listed as "Additional" ONLY when the Monthly Plan minutes reached the Designated minutes.
+function tlTodayPH() { var d = new Date(Date.now() + 8 * 3600000); return d.toISOString().substring(0, 10); }
+function tlTimList(selM) {
+    var today = tlTodayPH();
+    var mk = selM || today.substring(0, 7);       // month of the Monthly Plan -> start date comes from THAT month's Daily Actual (Submitted Date)
+    var st = cdPlanState(mk);
+    var seen = {}, list = [];
+    var aprOf = function (r) { return kpiDate(getRowVal(r, ['APPROVAL DATE', 'Approval Date'])); };
+    // 1) Monthly Plan content
+    st.items.forEach(function (it) {
+        var k = kpiNormTitle(it.title); if (!k || seen[k]) return;
+        seen[k] = { title: it.title, apr: '', plan: true, planCat: it.cat };
+        list.push(seen[k]);
+    });
+    // 2) Daily Actual only fills the approval date of the listed titles
+    (allLoadedTasks.actual || []).forEach(function (r) {
+        if (!matchesUser(r) || !kpiIsContentRow(r)) return;
+        var t = kpiTitle(r); if (!t) return;
+        var k = kpiNormTitle(t), a = aprOf(r);
+        if (getRowMonthKey(getRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || r['Date Submitted']) !== mk) return;   // plan month's Daily Actual only
+        if (seen[k]) { if (a && a > (seen[k].apr || '')) seen[k].apr = a; }
+    });
+    // 3) Daily Plan content that is not in the Monthly Plan (additional, only if the plan target is hit)
+    if (st.hit) (allLoadedTasks.plan || []).forEach(function (r) {
+        if (!matchesUser(r) || !kpiIsContentRow(r)) return;
+        var t = kpiTitle(r); if (!t) return;
+        if (selM && getRowMonthKey(getRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date', 'DATE']) || r['Date Submitted']) !== selM) return;
+        var k = kpiNormTitle(t); if (seen[k]) return;
+        seen[k] = { title: t, apr: '', plan: false, fromDailyPlan: true, planCat: String(getRowVal(r, ['CATEGORY', 'Category']) || '').trim() };
+        list.push(seen[k]);
+    });
+    var rows = list.map(function (c) {
+        var info = tlContentInfo(c.title, true, mk), v = tlContentVerdict(c.title, c.apr, true, mk);
+        var days = tlTimDays(c.title, info.cats, info.start);
+        return { c: c, info: info, v: v, days: days };
+    }).sort(function (a, b) {
+        if (a.c.plan !== b.c.plan) return a.c.plan ? -1 : 1;           // Monthly Plan first, then additional
+        return (b.info.start || '') < (a.info.start || '') ? -1 : 1;
+    });
+    if (selM) rows = rows.filter(function (x) {   // plan content always shows; additional content only when its start / deadline / submitted date is in the chosen month
+        if (x.c.plan) return true;
+        return [x.info.start, x.v ? x.v.submitDeadline : '', x.info.sub].some(function (d) { return String(d || '').substring(0, 7) === selM; }) || !!x.c.fromDailyPlan;
+    });
+    return { st: st, rows: rows, today: today };
+}
+// status of one row: cls 'ok' (on time) | 'late' | 'wait' (not submitted yet and still inside its deadline = not counted). null when no deadline can be computed.
+function tlTimStatus(x, today) {
+    var v = x.v, info = x.info; if (!v) return null;
+    var delay = v.total, status, color;
+    if (x.c.apr) { status = v.late ? 'Late' : 'On time'; color = v.late ? '#f87171' : '#34d399'; }
+    else {
+        // not approved yet: delay keeps running until today
+        var runSub = info.sub ? v.subDelay : Math.max(0, tlDayDiff(v.submitDeadline, today));
+        var runApr = info.sub ? Math.max(0, tlDayDiff(v.approvalDeadline, today)) : 0;
+        delay = runSub + v.resubDays + runApr;
+        status = v.special ? (delay > 0 ? 'Late' : (info.sub ? 'On time' : 'Not submitted')) : (info.sub ? (delay > 0 ? 'Late' : 'On time') : 'Not submitted');
+        color = delay > 0 ? '#f87171' : (info.sub ? '#34d399' : '#fbbf24');
+    }
+    return { delay: delay, status: status, color: color, cls: (color === '#f87171' ? 'late' : (color === '#34d399' ? 'ok' : 'wait')) };
+}
+function cdRenderTim() {
+    var tb = document.getElementById('cdTimBody'); if (!tb) return;
+    var selM = cdMonthSel();
+    var L = tlTimList(selM), st = L.st, rows = L.rows, today = L.today;
+    // plan status note above the table
+    try {
+        var wrap = tb.closest('.task-table-container'), note = document.getElementById('cdTimPlanNote');
+        if (!note && wrap && wrap.parentNode) { note = document.createElement('p'); note.id = 'cdTimPlanNote'; note.style.cssText = 'font-size:11px; margin:0 0 8px 0;'; wrap.parentNode.insertBefore(note, wrap); }
+        if (note) {
+            var on = 0, lt = 0; rows.forEach(function (x) { if (!x.c.apr) return; var s = tlTimStatus(x, today); if (!s) return; if (s.cls === 'ok') on++; else if (s.cls === 'late') lt++; });
+            note.style.color = st.hit ? '#34d399' : 'var(--text-muted)';
+            note.textContent = 'Monthly Plan: ' + Math.round(st.mins) + ' / ' + Math.round(st.designated) + ' designated mins — ' + (st.hit ? 'target hit, additional content from the Daily Plan is shown.' : 'target not yet hit, only Monthly Plan content is shown.') +
+                '  ·  Timeliness (approved content only, same as KPI): On time ' + on + ' · Late ' + lt + ' → ' + ((on + lt) > 0 ? Math.round(on / (on + lt) * 1000) / 10 + '%' : '—');
+        }
+    } catch (e) {}
+    if (!rows.length) { tb.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 20px; color:var(--text-muted);">' + (selM ? 'No content for this month.' : 'No content in your Monthly Plan yet.') + '</td></tr>'; return; }
+    window.cdTimTitles = [];
+    tb.innerHTML = rows.slice(0, 150).map(function (x, ri) {
+        var v = x.v, info = x.info, cat = (info.cats[0] || x.c.planCat || '-');
+        window.cdTimTitles[ri] = x.c.title;
+        var tag = '<div style="font-size:10px; margin-top:2px; color:' + (x.c.plan ? 'var(--text-muted)' : '#fbbf24') + ';">' + (x.c.plan ? 'Monthly Plan' : 'Additional') + '</div>';
+        var hasReq = cdRecords.some(function (r) { return kpiNormTitle(r.title) === kpiNormTitle(x.c.title) && String(r.status || '').toLowerCase() !== 'rejected'; });
+        var actCell = x.c.apr ? '<span style="color:var(--text-muted);">—</span>'
+            : (hasReq ? '<span style="color:var(--text-muted); font-size:11px;">Requested</span>'
+            : '<button onclick="cdRequestChange(' + ri + ')" style="background:var(--primary); color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">Change deadline</button>');
+        if (!v) {
+            var msg = (x.c.plan && !info.start)
+                ? 'Not started — no Daily Actual yet in this plan month (start date not set). Deadline = start date + TIM days' + (x.days > 0 ? ' (' + x.days + 'd)' : '') + '. Not counted in Timeliness yet.'
+                : 'No Time in Motion in RCODE for this category (or no start date) — not counted. Request a Deadline Change if needed.';
+            return '<tr><td>' + escHtml(x.c.title) + tag + '</td><td>' + escHtml(cat) + '</td><td>' + escHtml(info.start || '-') + '</td><td>' + (x.days > 0 ? x.days + 'd' : '-') + '</td><td colspan="6" style="color:var(--text-muted);">' + msg + '</td><td style="white-space:nowrap;">' + actCell + '</td></tr>';
+        }
+        var s = tlTimStatus(x, today), delay = s.delay, status = s.status;
+        var chg = (v.src === 'CHANGE') ? tlApprovedRecord(x.c.title) : null;
+        return '<tr><td>' + escHtml(x.c.title) + tag + '</td><td>' + escHtml(cat) + '</td><td>' + escHtml(info.start || '-') + '</td>' +
+            '<td>' + (v.src === 'CHANGE' ? '<span class="cd-tag">Changed</span>' : (v.special ? '<span class="cd-tag">Weekly</span>' : (x.days + 'd'))) + '</td><td>' + escHtml(v.submitDeadline) + '</td><td>' + escHtml(v.submitDate || '-') + '</td>' +
+            '<td>' + escHtml(chg ? (chg.approverName || chg.approver || '-') : '-') + '</td><td>' + escHtml(chg ? (String(chg.decidedAt || '').substring(0, 10) || '-') : '-') + '</td>' +
+            '<td title="Submission +' + v.subDelay + 'd · Resubmission +' + v.resubDays + 'd · Approval +' + v.aprDelay + 'd (content approval due ' + v.approvalDeadline + (x.c.apr ? ', approved ' + x.c.apr : '') + ')">' + (delay > 0 ? '+' + delay + 'd' : '0') + '</td>' +
+            '<td><span class="cd-pill ' + s.cls + '">' + status + '</span></td>' +
+            '<td style="white-space:nowrap;">' + actCell + '</td></tr>';
+    }).join('');
+}
+// "Change deadline" button on a row: prefill the request form above with that content and jump to it
+        function cdHideForm() { var w = document.getElementById('cdFormWrap'); if (w) w.style.display = 'none'; }
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cdHideForm(); });
+        function cdRequestChange(i) {
+            var t = (window.cdTimTitles || [])[i]; if (!t) return;
+            var inp = document.getElementById('cdTitleInput'); if (!inp) return;
+            inp.value = t; cdSyncCategory(); cdCloseTitles();
+            var wrap = document.getElementById('cdFormWrap'); if (wrap) { if (wrap.parentNode !== document.body) document.body.appendChild(wrap); wrap.style.display = 'flex'; }
+            var d = document.getElementById('cdDeadlineInput'); if (d) setTimeout(function () { d.focus(); }, 100);
+        }
+        // one month filter at the top drives every table in this tab; empty = all months
+        function cdMonthSel() {
+            var mf = document.getElementById('cdMonthFilter'); if (!mf) return '';
+            if (!mf.dataset.init) { mf.dataset.init = '1'; mf.value = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 7); }
+            return mf.value || '';
+        }
         function cdRender() {
+            cdMonthSel();
+            try { cdRenderTim(); } catch (e) { console.error('cdRenderTim', e); }
             let tb = document.getElementById('cdTableBody'); if (!tb) return;
-            if (!cdRecords.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">No deadline requests yet.</td></tr>'; return; }
-            tb.innerHTML = cdRecords.map((r, i) => {
+            // month filter (top of the tab; a request's month = REQUESTED AT, else its deadline)
+            let sel = cdMonthSel();
+            let recMonth = r => (String(r.requestedAt || '').match(/^\d{4}-\d{2}/) || String(r.deadline || '').match(/^\d{4}-\d{2}/) || [''])[0];
+            let shown = [];
+            cdRecords.forEach((r, i) => { if (!sel || recMonth(r) === sel) shown.push({ r: r, i: i }); });
+            if (!shown.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color:var(--text-muted);">' + (cdRecords.length ? 'No deadline requests for this month.' : 'No deadline requests yet.') + '</td></tr>'; return; }
+            tb.innerHTML = shown.map(x => {
+                let r = x.r, i = x.i;
                 let low = String(r.status || '').toLowerCase();
                 let act = low === 'approved' ? '<span style="color:var(--text-muted);">—</span>' : '<button onclick="cdDelete(' + i + ')" class="text-red-600 hover:text-red-800 font-semibold text-xs">' + (low === 'pending' ? 'Cancel' : 'Delete') + '</button>';
-                return '<tr><td>' + escHtml(r.title) + '</td><td>' + (escHtml(r.category) || '-') + '</td><td>' + escHtml(r.deadline) + '</td>' +
+                let cat = r.category || cdCatFor(r.title);
+                return '<tr><td>' + escHtml(r.title) + '</td><td>' + (escHtml(cat) || '-') + '</td><td>' + escHtml(r.deadline) + '</td>' +
                     '<td>' + (escHtml(r.reason) || '-') + ((low === 'rejected' && r.approverRemarks) ? '<div style="font-size:11px;color:#f87171;margin-top:2px;">Approver: ' + escHtml(r.approverRemarks) + '</div>' : '') + '</td>' +
                     '<td>' + leaveStatusBadge(r.status, r.approverRemarks) + '</td><td style="white-space:nowrap;">' + act + '</td></tr>';
             }).join('');
@@ -8070,7 +8324,7 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                 let dayOfWeek = d.getDay();
                 let monthStr = String(monthIndex + 1).padStart(2, '0');
                 let dayStr = String(day).padStart(2, '0');
-                if (dayOfWeek !== 0 && !PH_HOLIDAYS.includes(`${monthStr}-${dayStr}`)) totalWorkingDays++;
+                if (dayOfWeek !== 0 && !PH_HOLIDAYS.includes(`${monthStr}-${dayStr}`) && !isExtraHoliday(year, monthIndex + 1, day)) totalWorkingDays++;
             }
             return Math.max(0, totalWorkingDays - leaveAbsentCount);
         }
@@ -8986,6 +9240,8 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
             rcodeCategories = list.map(function (c) { return String(c).trim(); });
             window.rcodeCategories = rcodeCategories;
             window.rcodeLookup = lookup || {};
+            try { if (typeof renderKpiLanding === 'function') renderKpiLanding(); } catch (e) {}   // Time in Motion days come from RCODE
+            try { if (typeof cdRenderTim === 'function') cdRenderTim(); } catch (e) {}
             let inp = document.getElementById('categorySearch');
             if (inp) inp.placeholder = rcodeCategories.length ? 'Search or select category...' : 'No categories found';
             renderCategoryList('');
@@ -9599,7 +9855,7 @@ function kpiDurationCounts(row, approvedSet) {
 
 
 // ======== TIMELINESS v2 — helpers (same in every portal file) ========
-//  CONTENT                    : On time when the content's APPROVAL DATE <= its APPROVED Content Deadline (Content Deadline Approval). No approved deadline / no approval date = not counted.
+//  CONTENT                    : Time in Motion — submit deadline = start date + RCODE TIM days (an SEPCO-approved deadline change replaces it); approval deadline = upload date (TARGET DATE) − 5 days (else submit deadline + 2). Delay = submission delay + resubmission days + approval delay; Late when delay > 0. No deadline / no approval date = not counted.
 //  TASK / TRAINING / OTHERS   : no deadline. Target = Duration (Task Actual col C); Actual = Start Time -> End Time. Actual <= Target = On time (equal = on time).
 function tlParseDT(s) {
     var t = String(s == null ? '' : s).trim(); if (!t) return null;
@@ -9619,7 +9875,17 @@ function tlActualMins(st, en) {
     return diff >= 0 ? diff : NaN;
 }
 
-// approved Content Deadline for a content title (this ST's own requests, loaded into cdRecords)
+// SEPCO-APPROVED deadline CHANGE for a content title (this ST's own requests, loaded into cdRecords) — replaces the automatic Time-in-Motion submit deadline
+function tlApprovedRecord(title) {
+    var list = (typeof cdRecords !== 'undefined' && cdRecords) ? cdRecords : [];
+    var nt = kpiNormTitle(title), best = null, exact = null;
+    list.forEach(function (r) {
+        if (!/^approved/i.test(String(r.status || ''))) return;
+        if (!kpiDate(r.deadline)) return;
+        if (kpiNormTitle(r.title) === nt) exact = r;
+    });
+    return exact || best;
+}
 function tlApprovedDeadline(title) {
     var list = (typeof cdRecords !== 'undefined' && cdRecords) ? cdRecords : [];
     var nt = kpiNormTitle(title), best = '', exact = '';
@@ -9627,9 +9893,133 @@ function tlApprovedDeadline(title) {
         if (!/^approved/i.test(String(r.status || ''))) return;
         var dl = kpiDate(r.deadline); if (!dl) return;
         if (kpiNormTitle(r.title) === nt) exact = dl;
-        else if (kpiTitlesMatch(title, r.title)) best = dl;
+        // exact title only — a fuzzy match wrongly applied one content's deadline to a different title in the same category
     });
     return exact || best;
+}
+
+// ======== TIME IN MOTION (TIM) — content deadline (same rule as the Apps Script tsContentTimeline_) ========
+//  START DATE        = the earliest SUBMITTED DATE of the title in the Daily Actual of the Monthly Plan's month (Plan = November -> November Actual only). No approval needed.
+//  SUBMIT DEADLINE   = start date + TIM days (RCODE). An approved deadline CHANGE (Content Deadline tab) replaces it.
+//  APPROVAL DEADLINE = upload date (TARGET DATE) − 5 days  (window −7 … −5).  No upload date -> submit deadline + 2 days (SEPCO 48 hrs).
+//  DELAY (days)      = submission delay + resubmission days + approval delay.  Late = delay > 0.
+var TIM_APPROVAL_TAT_DAYS = 2;
+var TIM_UPLOAD_LEAD_DAYS = 5;
+function tlYmdMs(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || '')); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN; }
+function tlAddDays(ymd, n) {
+    var t = tlYmdMs(ymd); if (isNaN(t)) return '';
+    var d = new Date(t + n * 86400000);
+    return d.getUTCFullYear() + '-' + ('0' + (d.getUTCMonth() + 1)).slice(-2) + '-' + ('0' + d.getUTCDate()).slice(-2);
+}
+function tlDayDiff(a, b) { var x = tlYmdMs(a), y = tlYmdMs(b); return (isNaN(x) || isNaN(y)) ? 0 : Math.round((y - x) / 86400000); }
+function tlCatKey(s) { return String(s || '').replace(/&gt;/g, '>').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+// Time in Motion (days) of a category from RCODE: the TIM column when it exists, otherwise duration minutes ÷ 480 (rounded up, min 1)
+function tlRcodeDays(cands) {
+    var lk = window.rcodeLookup || {};
+    for (var i = 0; i < (cands || []).length; i++) {
+        var c = String(cands[i] || '').trim(); if (!c) continue;
+        var rec = lk[c] || lk[c.toLowerCase()];
+        if (!rec) { var nk = tlCatKey(c); Object.keys(lk).some(function (k) { if (tlCatKey(k) === nk) { rec = lk[k]; return true; } return false; }); }
+        if (!rec) continue;
+        var d = parseFloat(rec.timDays); if (d > 0) return d;
+        var m = parseFloat(rec.duration); if (m > 0) return Math.max(1, Math.ceil(m / 480));
+    }
+    return 0;
+}
+// everything the timeline needs for one content title: start / upload dates, category, first submission + resubmission days
+function tlContentInfo(title, exact, monthKey) {   // monthKey = month of the Monthly Plan line (yyyy-MM): ONLY that month's Daily Actual rows are read
+    var nt = kpiNormTitle(title), start = '', first = '', upload = '', cats = [];
+    (allLoadedTasks.actual || []).forEach(function (r) {
+        if (!matchesUser(r) || !kpiIsContentRow(r)) return;
+        var t = kpiTitle(r); if (!t) return;
+        if (!(kpiNormTitle(t) === nt || (!exact && kpiTitlesMatch(title, t)))) return;
+        var d = kpiDate(getRowVal(r, ['Date Submitted', 'Submitted D', 'Submitted Date']) || r['Date Submitted']); if (!d) return;
+        if (monthKey && d.substring(0, 7) !== monthKey) return;      // Monthly Plan = Nov -> read the NOVEMBER Daily Actual only (an Oct row never sets a Nov start date)
+        if (!first || d < first) first = d;                          // START DATE = earliest Submitted Date of the title in that month
+        var tg = kpiDate(getRowVal(r, ['TARGET DATE'])); if (tg) upload = tg;
+        [getRowVal(r, ['CATEGORY']), getRowVal(r, ['CATEGORY 2'])].forEach(function (c) { c = String(c || '').trim(); if (c && cats.indexOf(c) === -1) cats.push(c); });
+    });
+    if (!cats.length) (allLoadedTasks.monthlyPlan || []).forEach(function (r) {   // no Daily Actual yet: category comes from the Monthly Plan line
+        if (!matchesUser(r) || kpiNormTitle(kpiTitle(r)) !== nt) return;
+        var c = String(getRowVal(r, ['CATEGORY', 'Category']) || '').trim(); if (c && cats.indexOf(c) === -1) cats.push(c);
+    });
+    if (!cats.length) (allLoadedTasks.plan || []).forEach(function (r) {   // Daily Plan only: category comes from the Daily Plan row
+        if (!matchesUser(r) || kpiNormTitle(kpiTitle(r)) !== nt) return;
+        var c = String(getRowVal(r, ['CATEGORY', 'Category']) || '').trim(); if (c && cats.indexOf(c) === -1) cats.push(c);
+    });
+    var sub = '', resub = 0;
+    (allApprovals || []).forEach(function (a) {
+        var fn = a.fileName || a.title || '';
+        if (!(kpiNormTitle(fn) === nt || (!exact && kpiTitlesMatch(title, fn)))) return;
+        var sd = kpiDate(String(a.firstSubmitted || a.uploadDate || '').substring(0, 10));
+        if (sd && (!sub || sd < sub)) sub = sd;
+        resub += Number(a.resubmitDays) || 0;
+    });
+    return { start: first, upload: upload, cats: cats, sub: sub, resub: resub };
+}
+// ---- TIM days (Time in Motion) ----
+//  Monthly Plan content : ceil( DURATION PER MIN x FREQUENCY / 480 ) days (min 1)  — taken from the Monthly Plan line of that exact title
+//  Additional content   : Daily Plan title -> its CATEGORY -> RCODE sheet "TOTAL DURATION (MIN.)" (column I) -> ceil( mins / 480 ) days (min 1)
+function tlPlanMins(title, monthKey) {
+    var nt = kpiNormTitle(title); if (!nt) return 0;
+    var pick = function (mk) {
+        var mins = 0, found = false;
+        (allLoadedTasks.monthlyPlan || []).forEach(function (r) {
+            if (!matchesUser(r) || kpiNormTitle(kpiTitle(r)) !== nt) return;
+            if (!kpiMonthMatches(getRowVal(r, ['MONTH']), mk)) return;
+            var rawF = String(getRowVal(r, ['FREQUENCY PER MONTH', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, '');
+            var f = rawF === '' ? 1 : (parseFloat(rawF) || 0); if (f <= 0) return;
+            var d = parseFloat(String(getRowVal(r, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, '')); if (isNaN(d) || d <= 0) d = 480;
+            mins += d * f; found = true;
+        });
+        return found ? mins : 0;
+    };
+    return pick(monthKey) || (monthKey ? pick('') : 0);
+}
+function tlRcodeDurDays(cands) {   // RCODE column I (TOTAL DURATION) only, no TIM column
+    var lk = window.rcodeLookup || {};
+    for (var i = 0; i < (cands || []).length; i++) {
+        var c = String(cands[i] || '').trim(); if (!c) continue;
+        var rec = lk[c] || lk[c.toLowerCase()];
+        if (!rec) { var nk = tlCatKey(c); Object.keys(lk).some(function (k) { if (tlCatKey(k) === nk) { rec = lk[k]; return true; } return false; }); }
+        if (!rec) continue;
+        var m = parseFloat(rec.duration); if (m > 0) return Math.max(1, Math.ceil(m / 480));
+    }
+    return 0;
+}
+function tlTimDays(title, cats, startYmd) {
+    var mk = startYmd ? String(startYmd).substring(0, 7) : '';
+    if (!mk) { try { mk = (typeof cdMonthSel === 'function' && cdMonthSel()) || ''; } catch (e) {} }
+    var pm = tlPlanMins(title, mk);
+    if (pm > 0) return Math.max(1, Math.ceil(pm / 480));
+    return tlRcodeDurDays(cats) || tlRcodeDays(cats);
+}
+// Time-in-Motion verdict for a content: null when no deadline can be computed (no RCODE TIM / no start date / no approved change)
+// "CONTENT - Samsung Live Space Invite Video" is NOT Time-in-Motion based: it is per week. It keeps its START DATE; the content started
+// this week must be APPROVED by the Monday of the next week (the week it is uploaded). Approved by then = on time, otherwise late (Tuesday onwards).
+function tlIsWeeklyCat(cats) { return (cats || []).some(function (c) { return tlCatKey(c).indexOf('samsunglivespaceinvitevideo') !== -1; }); }
+function tlNextMonday(ymd) { var t = tlYmdMs(ymd); if (isNaN(t)) return ''; return tlAddDays(ymd, ((8 - new Date(t).getUTCDay()) % 7) || 7); }
+function tlContentVerdict(title, aprDate, exact, monthKey) {
+    var info = tlContentInfo(title, exact, monthKey);
+    var changed = tlApprovedDeadline(title);
+    if (tlIsWeeklyCat(info.cats)) {
+        var wad = changed || (info.start ? tlNextMonday(info.start) : (info.upload ? tlAddDays(info.upload, -TIM_UPLOAD_LEAD_DAYS) : ''));
+        if (!wad) return null;
+        var wApr = aprDate ? Math.max(0, tlDayDiff(wad, aprDate)) : 0;
+        var wTot = info.resub + wApr;
+        return { submitDeadline: wad, approvalDeadline: wad, submitDate: info.sub, approvalDate: aprDate || '', subDelay: 0, resubDays: info.resub, aprDelay: wApr, total: wTot, late: wTot > 0, src: changed ? 'CHANGE' : 'WEEKLY', special: true };
+    }
+    var days = tlTimDays(title, info.cats, info.start);
+    var sd = changed || ((info.start && days > 0) ? tlAddDays(info.start, Math.ceil(days)) : '');
+    if (!sd) return null;
+    var ad = info.upload ? tlAddDays(info.upload, -TIM_UPLOAD_LEAD_DAYS) : tlAddDays(sd, TIM_APPROVAL_TAT_DAYS);
+    var subDelay = info.sub ? Math.max(0, tlDayDiff(sd, info.sub)) : 0;
+    var aprDelay = aprDate ? Math.max(0, tlDayDiff(ad, aprDate)) : 0;
+    var total = subDelay + info.resub + aprDelay;
+    return { submitDeadline: sd, approvalDeadline: ad, submitDate: info.sub, approvalDate: aprDate || '', subDelay: subDelay, resubDays: info.resub, aprDelay: aprDelay, total: total, late: total > 0, src: changed ? 'CHANGE' : 'TIM' };
+}
+function tlVerdictNote(v) {
+    return 'Late ' + v.total + 'd = submission +' + v.subDelay + 'd (due ' + v.submitDeadline + ') + resubmission +' + v.resubDays + 'd + approval +' + v.aprDelay + 'd (due ' + v.approvalDeadline + ').';
 }
 
 // ======== PRODUCTIVITY / EFFICIENCY / ON-TIME  (UNIQUE + Monthly-Plan-only) — identical rule to SEPCO skProdEff ========
@@ -9756,13 +10146,29 @@ function kpiProdEff(monthKey, onlyBucket) {   // onlyBucket (optional): CONTENT 
         if (t.act <= t.tgt + 0.001) { onTime++; onTimeItems.push(row); }
         else { late++; row.note = 'Actual duration (' + Math.round(t.act) + ' mins) exceeded Target duration (' + Math.round(t.tgt) + ' mins).'; lateItems.push(row); }
     });
-    Object.keys(tlContent).forEach(function (k) {
+    // Content timeliness = the SAME rows / statuses as the "My Content Deadlines (Time in Motion)" table (tlTimList + tlTimStatus)
+    if (!onlyBucket || onlyBucket === 'CONTENT') {
+        var _tl = tlTimList(monthKey);
+        _tl.rows.forEach(function (x) {
+            if (!x.c.apr) return;   // Timeliness counts APPROVED content only
+            var s = tlTimStatus(x, _tl.today); if (!s || s.cls === 'wait') return;
+            var v = x.v;
+            var row = { kind: 'Content', title: x.c.title + (x.c.plan ? '' : ' (additional)'),
+                        tgt: 'Submit ≤ ' + v.submitDeadline + ' · Approve ≤ ' + v.approvalDeadline,
+                        act: (v.submitDate ? 'Submitted ' + v.submitDate : 'Not submitted') + (x.c.apr ? ' · Approved ' + x.c.apr : ''), note: '' };
+            if (s.cls === 'ok') { onTime++; onTimeItems.push(row); }
+            else { late++; row.note = (x.c.apr ? tlVerdictNote(v) : 'Deadline passed: +' + s.delay + 'd (submit due ' + v.submitDeadline + ').'); lateItems.push(row); }
+        });
+    }
+    Object.keys({}).forEach(function (k) {
         var c = tlContent[k];
         if (!c.apr || !(planHit || c.inPlan)) return;
-        var dl = tlApprovedDeadline(c.title); if (!dl) return;             // only APPROVED deadlines count
-        var row = { kind: 'Content', title: c.title || k, tgt: dl, act: c.apr, note: '' };
-        if (c.apr <= dl) { onTime++; onTimeItems.push(row); }
-        else { late++; row.note = 'Approved on ' + c.apr + ' after deadline ' + dl + '.'; lateItems.push(row); }
+        var v = tlContentVerdict(c.title, c.apr); if (!v) return;          // Time in Motion deadline (no TIM / no start date / no approved change = not counted)
+        var row = { kind: 'Content', title: c.title || k,
+                    tgt: 'Submit ≤ ' + v.submitDeadline + ' · Approve ≤ ' + v.approvalDeadline,
+                    act: (v.submitDate ? 'Submitted ' + v.submitDate + ' · ' : '') + 'Approved ' + c.apr, note: '' };
+        if (!v.late) { onTime++; onTimeItems.push(row); }
+        else { late++; row.note = tlVerdictNote(v); lateItems.push(row); }
     });
     Object.keys(eff).forEach(function (k) {
         var e = eff[k];
@@ -9982,7 +10388,10 @@ function computeKpi(monthKey) {
         var d = kpiRowDur(t);
         if (!isNaN(d)) dailyActMins += d;
     });
-    var timeliness = dailyPlanMins > 0 ? dailyActMins / dailyPlanMins : (dailyActMins > 0 ? 1 : null);
+    // Timeliness = On time ÷ (On time + Late) — same items as the Content Deadlines table (Content) + Task duration rule. No data = not scored.
+    var _peT = kpiProdEff(monthKey), _totT = (_peT.onTime || 0) + (_peT.late || 0);
+    var hasContentPlan = plan.some(function (r) { return kpiIsContentRow(r); });   // no CONTENT line in the Monthly Plan -> Timeliness / Productivity are not scored (shown as "—")
+    var timeliness = (hasContentPlan && _totT > 0) ? _peT.onTime / _totT : null;
 
     // 4) manual inputs for this month ("KPI Inputs" sheet)
     var inp = (kpiInputs || []).filter(function (r) { return kpiMonthMatches(r.month, monthKey); });
@@ -10008,7 +10417,7 @@ function computeKpi(monthKey) {
     // Monthly Plan meets Designated Minutes → unplanned actuals add on top (over-achievement allowed). Same as SEPCO skProdEff.
     var _pe = kpiProdEff(monthKey);
     var leaveDays = _pe.leaveDays, planMins = _pe.planMins, adjPlan = _pe.adjPlan, actMins = _pe.usedMins;
-    var productivity = _pe.productivity;
+    var productivity = hasContentPlan ? _pe.productivity : null;
 
     var values = { SO: so.ratio, TC: ach, ACC: quality, EFF: eff, TIM: timeliness, SOC: soc, POSTS: posts.ratio, ENG: eng.ratio,
                    TRAIN: train, ACTIVE: active.ratio, UPL: upl.ratio, INVDIS: invdis, PROD: productivity };
@@ -10380,7 +10789,7 @@ var lines = [];
                 var ds = (typeof cleanDateDisplay === 'function' ? cleanDateDisplay(l.date) : '') || String(l.date || '').substring(0, 10);
                 var dt = /^\d{4}-\d{2}-\d{2}$/.test(ds) ? new Date(parseInt(ds.substr(0, 4), 10), parseInt(ds.substr(5, 2), 10) - 1, parseInt(ds.substr(8, 2), 10)) : new Date(l.date);
                 if (isNaN(dt.getTime())) { _lvSeen[String(l.date)] = 1; return; }
-                if (dt.getDay() === 0 || PH_HOLIDAYS.indexOf(String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0')) !== -1) return;
+                if (dt.getDay() === 0 || PH_HOLIDAYS.indexOf(String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0')) !== -1 || isExtraHoliday(dt.getFullYear(), dt.getMonth() + 1, dt.getDate())) return;
                 _lvSeen[dt.getFullYear() + '-' + dt.getMonth() + '-' + dt.getDate()] = 1;
             });
             var _lv = Object.keys(_lvSeen).length;
@@ -10550,10 +10959,10 @@ function renderStDailyProgress() {
     function itemState(p) {
         if (!p.match) return 'notdone';
         if (p.match.bucket === 'CONTENT' && !p.match.approved) return 'notdone';
-        return tlPvaLate(p.match) ? 'late' : 'done';   // Timeliness v2: Content = approved after approved deadline · Task/Training/Others = Start→End longer than Duration
+        return tlPvaLate(p.match) ? 'late' : 'done';   // Timeliness v2: Content = Time in Motion delay (submit + resubmission + approval) · Task/Training/Others = Start→End longer than Duration
     }
     function tlPvaLate(a) {
-        if (a.bucket === 'CONTENT') { var dl = tlApprovedDeadline(a.title); return !!(dl && a.apr && a.apr > dl); }
+        if (a.bucket === 'CONTENT') { var v = a.apr ? tlContentVerdict(a.title, a.apr, false, monthKey) : null; return !!(v && v.late); }
         return a.dur > 0 && a.act > a.dur + 0.001;
     }
 
@@ -11302,7 +11711,7 @@ function showKpiMetricDetail(key, ev) {
         title = 'Timeliness (On-time)';
         formula = 'On-time % = On-time count ÷ (On-time + Late).<br>' +
             '<strong>Task / Training / Others:</strong> on time when Actual duration ≤ Target duration.<br>' +
-            '<strong>Content:</strong> on time when approval date is on or before the approved Content Deadline.';
+            '<strong>Content (Time in Motion):</strong> on time when submission + resubmission + approval delay = 0 days (submit by start date + RCODE TIM days; approve by upload date − 5 days).';
         var total = (pe.onTime || 0) + (pe.late || 0);
         var tl = total > 0 ? pe.onTime / total : (ck && ck.timeliness != null ? ck.timeliness : null);
         var ot = pe.onTime, lt = pe.late;
@@ -12023,7 +12432,7 @@ var KB = [
 { id:'timeliness', title:'Timeliness',
   kw:['timeliness','timely','on time','ontime','late','daily plan','daily actual','tim','daily','huli','oras','on-time'],
   a:'**Timeliness** = On Time ÷ (On Time + Late)\n'+
-    '- **Content**: On Time kung ang petsa ng **approval** ng content ay hindi lampas sa **approved Content Deadline**. Walang approved deadline = hindi binibilang.\n'+
+    '- **Content (Time in Motion)**: Deadline to submit = **start date + TIM days (RCODE)**. Approval deadline = **upload date − 5 days**. Ang delay = late sa pag-submit + araw ng resubmission + late sa approval. On Time kung 0 ang delay. Walang TIM / start date = hindi binibilang. Kailangan lang ng SEPCO approval kapag **nalipat** ang deadline.\n'+
     '- **Task / Training / Others**: walang deadline. Target = **Duration** (col C ng Task Actual); Actual = **Start Time → End Time**. Actual ≤ Target = On Time; mas mahaba = Late.\n'+
     '- Bawat unique item (petsa + title) ay isang resulta; magkakadagdag ang maraming time blocks. Monthly Plan items lang ang bilang.\n'+
     'Halimbawa: Duration 120, Start 10:00 – End 11:30 (90 mins) → On Time.' },
