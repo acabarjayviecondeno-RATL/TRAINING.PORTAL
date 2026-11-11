@@ -725,5 +725,44 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
             });
         })();
     </script>
+<!-- ============================================================================
+     UI REFRESH (presentation + accessibility only) — appended after all existing <style>/<script> blocks.
+     Nothing above was edited or removed.
+     ============================================================================ -->
+<style id="ui-refresh">
+html body { --ui-focus: #1d4ed8; }
+/* The inputs sit inside .field (outline removed by the original CSS) — give the wrapper a clear focus ring */
+html body .field:focus-within { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+html body .otp-row input:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+html body :is(button, a, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible { outline: 2px solid var(--ui-focus) !important; outline-offset: 3px !important; }
+html body .field input:focus-visible { outline: none; }
+html body button:disabled { cursor: not-allowed; }
+html body :is(button, a) { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+html body .error-msg:empty { min-height: 18px; }
+/* touch: comfortable targets on the login form */
+@media (pointer: coarse), (max-width: 900px) {
+    html body :is(#loginBtn, #verifyBtn, #changeBtn) { min-height: 48px; }
+    html body :is(.linkbtn, .eye) { min-height: 44px; min-width: 44px; }
+}
+/* reduced motion: the original only stops the decorative shapes; also calm the card entrance and the loader */
+@media (prefers-reduced-motion: reduce) {
+    html body .login-card { animation: none !important; }
+    html body #loader *, html body #loader *::before, html body #loader *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    html body *, html body *::before, html body *::after { scroll-behavior: auto !important; }
+}
+</style>
+<script id="ui-refresh-js">
+/* UI refresh — attributes only (no handlers): error text is announced to screen readers when it changes. */
+(function () {
+    try {
+        function init() {
+            var errs = document.querySelectorAll('.error-msg');
+            for (var i = 0; i < errs.length; i++) { if (!errs[i].hasAttribute('role')) errs[i].setAttribute('role', 'alert'); if (!errs[i].hasAttribute('aria-live')) errs[i].setAttribute('aria-live', 'polite'); }
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+    } catch (e) {}
+})();
+</script>
+
 </body>
 </html>

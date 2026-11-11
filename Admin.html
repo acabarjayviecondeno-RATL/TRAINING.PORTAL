@@ -1596,5 +1596,103 @@ document.addEventListener('pointerdown',function(e){
 })();
 /* ===== /FX MOTION LAYER JS ===== */
 </script>
+<!-- ============================================================================
+     UI REFRESH (presentation + accessibility only) — appended after all existing <style>/<script> blocks.
+     Nothing above was edited or removed.
+     ============================================================================ -->
+<style id="ui-refresh">
+html body { --ui-focus: #8ab8ff; --ui-target: 44px; --ui-cat: #8896b3; --ui-thumb: rgba(148,163,184,.45); }
+html[data-theme="light"] body { --ui-focus: #1d4ed8; --ui-cat: #5b6b82; --ui-thumb: rgba(100,116,139,.5); }
+
+/* focus: one visible ring for every control */
+html body :is(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible { outline: 2px solid var(--ui-focus) !important; outline-offset: 2px !important; }
+html body :is(input, select, textarea):focus-visible { outline-offset: 0 !important; }
+html body :is(.item, .stat)[data-ui-kb]:focus-visible { outline-offset: -2px !important; }
+html body .ui-skip { position: fixed; left: 12px; top: -48px; z-index: 2147483100; padding: 10px 16px; border-radius: 10px; font: 600 13px/1.2 inherit; background: #1d4ed8; color: #fff; text-decoration: none; box-shadow: 0 8px 24px rgba(0,0,0,.35); transition: top .15s ease; }
+html body .ui-skip:focus { top: 12px; }
+
+/* contrast: sidebar group titles + placeholders (were #5d6b88 ≈ 3.5:1 on the dark theme) */
+html body .cat { color: var(--ui-cat); }
+html body :is(input, textarea)::placeholder { color: var(--muted); opacity: .9; }
+html body button:disabled, html body input:disabled, html body select:disabled { cursor: not-allowed; }
+
+/* clickable non-button elements read as clickable */
+html body :is(.item, .stat)[data-ui-kb] { cursor: pointer; }
+
+/* data grids: tidy numbers, thin scrollbars, keyboard-scrollable */
+html body :is(table) :is(td, th) { font-variant-numeric: tabular-nums; }
+html body .grid { scrollbar-width: thin; scrollbar-color: var(--ui-thumb) transparent; overscroll-behavior: contain; }
+html body .grid[data-ui-scroll]:focus-visible { outline-offset: -2px !important; }
+html body .menu { scrollbar-width: thin; scrollbar-color: var(--ui-thumb) transparent; overscroll-behavior: contain; }
+
+/* touch / small screens */
+@media (pointer: coarse), (max-width: 900px) {
+    html body .item { min-height: var(--ui-target); }
+    html body .bar :is(button, .theme-toggle) { min-height: var(--ui-target); min-width: var(--ui-target); }
+    html body button:not(.sm):not(.eye) { min-height: 40px; }
+    html body button.sm { min-height: 36px; }
+}
+@media (max-width: 640px) {
+    html body .bar h3 { white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
+}
+</style>
+<script id="ui-refresh-js">
+/* UI refresh — accessibility attributes only. No click handlers of its own; one delegated key handler:
+   Enter/Space on a marked element calls el.click() once, so the existing onclick runs once (held keys ignored). */
+(function () {
+    'use strict';
+    try {
+        var KB = '.sidebar .item[onclick], .stat[onclick]';
+        var FIELD = 'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea, select';
+        function markKb(el) {
+            if (el.getAttribute('data-ui-kb') !== null) return;
+            el.setAttribute('data-ui-kb', '');
+            if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+            if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+        }
+        document.addEventListener('keydown', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+            var el = e.target;
+            if (!el || el.nodeType !== 1 || el.getAttribute('data-ui-kb') === null) return;
+            e.preventDefault(); if (e.repeat) return; el.click();
+        });
+        function sync() {
+            var k = document.querySelectorAll(KB); for (var i = 0; i < k.length; i++) markKb(k[i]);
+            var f = document.querySelectorAll(FIELD);
+            for (var j = 0; j < f.length; j++) {
+                var el = f[j];
+                if (el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby') || (el.labels && el.labels.length)) continue;
+                var t = el.getAttribute('placeholder') || el.getAttribute('title'); if (t) el.setAttribute('aria-label', t);
+            }
+            var g = document.querySelectorAll('.grid');
+            for (var m = 0; m < g.length; m++) {
+                var c = g[m], can = c.scrollWidth > c.clientWidth + 1 || c.scrollHeight > c.clientHeight + 1;
+                if (can && !c.hasAttribute('data-ui-scroll')) { c.setAttribute('data-ui-scroll', ''); c.setAttribute('tabindex', '0'); c.setAttribute('role', 'region'); if (!c.hasAttribute('aria-label')) c.setAttribute('aria-label', 'Scrollable table'); }
+                else if (!can && c.hasAttribute('data-ui-scroll')) { c.removeAttribute('data-ui-scroll'); c.removeAttribute('tabindex'); c.removeAttribute('role'); c.removeAttribute('aria-label'); }
+            }
+            var items = document.querySelectorAll('.sidebar .item'); for (var n = 0; n < items.length; n++) { if (items[n].classList.contains('active')) items[n].setAttribute('aria-current', 'page'); else items[n].removeAttribute('aria-current'); }
+            var open = document.body.classList.contains('nav-open'), mb = document.querySelector('.menu-btn'), sb = document.querySelector('.sidebar');
+            if (sb && !sb.id) sb.id = 'adminSidebar';
+            if (mb) { mb.setAttribute('aria-expanded', open ? 'true' : 'false'); if (sb) mb.setAttribute('aria-controls', sb.id); }
+            if (sb && window.matchMedia) { if (window.matchMedia('(max-width: 900px)').matches && !open) sb.setAttribute('inert', ''); else sb.removeAttribute('inert'); }
+        }
+        var q = false; function schedule() { if (q) return; q = true; (window.requestAnimationFrame || setTimeout)(function () { q = false; try { sync(); } catch (e) {} }); }
+        function init() {
+            var main = document.querySelector('.main');
+            if (main && !document.querySelector('.ui-skip')) {
+                if (!main.id) main.id = 'uiMainContent'; if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+                var a = document.createElement('a'); a.className = 'ui-skip'; a.href = '#' + main.id; a.textContent = 'Skip to main content';
+                a.addEventListener('click', function (ev) { ev.preventDefault(); main.focus(); });
+                document.body.insertBefore(a, document.body.firstChild);
+            }
+            sync(); new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+            window.addEventListener('resize', schedule);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+    } catch (err) { /* optional layer: never break the page */ }
+})();
+</script>
+
 </body>
 </html>

@@ -4411,5 +4411,254 @@ html[data-theme="light"] .header-bar::before { background: #f3f6fc; }
 
 
     </script>
+<!-- ============================================================================
+     UI REFRESH (presentation + accessibility only)
+     Appended after all existing <style>/<script> blocks. Nothing above was edited or removed.
+     Sections: 1 tokens · 2 focus · 3 sidebar · 4 header · 5 page titles · 6 controls
+               7 tables · 8 cards · 9 tabs · 10 chat-bot clearance · 11 min text size
+               12 mobile · 13 reduced motion
+     ============================================================================ -->
+<style id="ui-refresh">
+/* 1 ── Tokens (scoped to body; both themes) ─────────────────────────────────── */
+html body {
+    --ui-focus: #8ab8ff;
+    --ui-focus-offset: 2px;
+    --ui-target: 44px;            /* minimum touch target on coarse pointers / small screens */
+    --ui-font-ctl: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --ui-scroll-thumb: rgba(148, 163, 184, .45);
+    --ui-cat-title: #8896b3;      /* sidebar group titles: 6.3:1 on the dark sidebar */
+}
+html[data-theme="light"] body {
+    --ui-focus: #1d4ed8;
+    --ui-scroll-thumb: rgba(100, 116, 139, .5);
+    --ui-cat-title: #5b6b82;      /* 5.3:1 on the light sidebar (was #94a3b8, 2.6:1) */
+}
+
+/* 2 ── Keyboard focus: one consistent, always-visible ring ──────────────────── */
+html body :is(a, button, input, select, textarea, summary, [role="button"], [role="tab"], [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--ui-focus) !important;
+    outline-offset: var(--ui-focus-offset) !important;
+}
+html body :is(input, select, textarea):focus-visible { outline-offset: 0 !important; }
+html body :is(tr, td)[data-ui-kb]:focus-visible { outline-offset: -2px !important; }
+html body :is(a, button, input, select, textarea, [role="button"], [role="tab"]):focus:not(:focus-visible) { outline: none; }
+
+/* skip link (inserted by the script below; only visible on keyboard focus) */
+html body .ui-skip {
+    position: fixed; left: 12px; top: -48px; z-index: 2147483100;
+    padding: 10px 16px; border-radius: 10px; font: 600 13px/1.2 var(--ui-font-ctl);
+    background: #1d4ed8; color: #fff; text-decoration: none; box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    transition: top .15s ease;
+}
+html body .ui-skip:focus { top: 12px; }
+
+/* 3 ── Sidebar ───────────────────────────────────────────────────────────────── */
+html body .sidebar-category-title { color: var(--ui-cat-title) !important; }
+html body .sidebar-menu li, html body .sidebar .main-menu-item { cursor: pointer; }
+html body .sidebar .sub-menu li { min-height: 36px; display: flex; align-items: center; }
+html body .sidebar-menu li[data-ui-kb]:focus-visible,
+html body .sidebar .main-menu-item:focus-visible { outline-offset: -2px !important; border-radius: 10px; }
+html body .sidebar-menu-scroll { scrollbar-width: thin; scrollbar-color: var(--ui-scroll-thumb) transparent; overscroll-behavior: contain; }
+
+/* 4 ── Header ───────────────────────────────────────────────────────────────── */
+html body .header-bar .header-left { min-width: 0; }
+html body .header-bar .header-right { gap: 8px; flex-shrink: 0; }
+html body :is(button, [role="button"])[aria-disabled="true"],
+html body button:disabled { cursor: not-allowed; }
+html body .header-bar #notifBtn { position: relative; }
+
+/* 6 ── Form controls: legible placeholders, consistent control font, calm states ── */
+html body :is(input, select, textarea, button) { font-family: var(--ui-font-ctl); }
+html body :is(input, textarea)::placeholder { color: var(--text-muted); opacity: .85; }
+html body :is(input, select, textarea):disabled { cursor: not-allowed; opacity: .6; }
+html body :is(button, .kpi-btn, .ov-sum-tab, .logout-btn, .theme-toggle) { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+html body select { text-overflow: ellipsis; }
+
+/* 7 ── Tables / scroll regions ───────────────────────────────────────────────── */
+html body :is(.task-table-container, .cat-progress-scroll, .xl-wrap, .kmd-list) {
+    scrollbar-width: thin; scrollbar-color: var(--ui-scroll-thumb) transparent; overscroll-behavior-x: contain;
+}
+html body :is(.task-table, .xl-table, .cat-progress-table, .kpi-brk-table) :is(td, th) { font-variant-numeric: tabular-nums; vertical-align: middle; }
+html body :is(.task-table, .cat-progress-table) thead th { white-space: nowrap; }
+html body :is(.task-table-container, .cat-progress-scroll)[data-ui-scroll]:focus-visible { outline-offset: -2px !important; }
+html body :is(tr.kpi-clickable, td.kpi-click-cell)[data-ui-kb] { cursor: pointer; }
+
+/* 8 ── Cards / KPI tiles ─────────────────────────────────────────────────────── */
+html body .summary-grid { align-items: stretch; }
+html body .summary-card { display: flex; flex-direction: column; min-width: 0; overflow-wrap: break-word; }
+html body .summary-card .val { font-variant-numeric: tabular-nums; }
+
+/* 9 ── Summary tabs (Overview) ───────────────────────────────────────────────── */
+html body .ov-sum-tabs { max-width: 100%; }
+html body .ov-sum-tab { white-space: nowrap; min-height: 36px; }
+
+/* 10 ── Keep the chat-bot button from covering the last row of content ───────── */
+html body:has(#kpiBotFab) .main-content::after { content: ""; display: block; flex: 0 0 auto; height: calc(76px + env(safe-area-inset-bottom, 0px)); }
+
+/* 11 ── Minimum readable text: lift 9–10px helper text to 11px ──────────────── */
+html body :is(.summary-card p:not(.val):not(.pct-big), .ov-ov-chip small, .kpi-brk-table th, .cd-opt-src, .cd-grp, .kb-tag, .st-ed-body label) { font-size: 11px !important; }
+html body .summary-card p[style*="font-size:10px"] { font-size: 11px !important; }
+
+/* 12 ── Mobile / touch ───────────────────────────────────────────────────────── */
+@media (pointer: coarse), (max-width: 900px) {
+    html body .header-bar :is(.theme-toggle, .logout-btn, #notifBtn, .mobile-menu-btn) { min-height: var(--ui-target); min-width: var(--ui-target); }
+    html body .sidebar-menu li, html body .sidebar .main-menu-item { min-height: var(--ui-target); }
+    html body .sidebar .sub-menu li { min-height: 40px; }
+    html body :is(.kpi-btn, .ov-sum-tab) { min-height: 40px; }
+}
+@media (max-width: 640px) {
+    /* the welcome text may wrap to two lines instead of being cut to "Welcome, Tes…" */
+    html body .header-bar #dashTitle {
+        white-space: normal !important; font-size: 14px !important; line-height: 1.2 !important;
+        display: -webkit-box; -webkit-box-orient: vertical; line-clamp: 2; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
+    }
+    html body .header-bar .header-left { flex: 1 1 auto; gap: 8px; }
+    html body .header-bar .header-right { gap: 6px; }
+    /* page titles align with the card edge instead of floating 15px inside it */
+    html body :is(div#dailyTaskTab, div#socmedTab, div#approvalTab, div#snsBoostingTab) :is(h3.page-title, p.page-sub) { padding-left: 4px !important; }
+    /* Overview tab strip: one scrollable row, no wrapped labels */
+    html body .ov-sum-tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    html body .ov-sum-tabs::-webkit-scrollbar { display: none; }
+    html body .ov-sum-tab { flex: 0 0 auto; padding: 8px 14px; }
+    /* single-column KPI tiles stay readable */
+    html body .summary-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+}
+
+/* 13 ── Reduced motion (loaders/spinners keep their animation so progress stays visible) ── */
+@media (prefers-reduced-motion: reduce) {
+    html body *:not([class*="spin"]):not([class*="load"]):not([class*="skeleton"]),
+    html body *:not([class*="spin"]):not([class*="load"]):not([class*="skeleton"])::before,
+    html body *:not([class*="spin"]):not([class*="load"]):not([class*="skeleton"])::after {
+        animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important; scroll-behavior: auto !important;
+    }
+}
+</style>
+<script id="ui-refresh-js">
+/* UI refresh — accessibility attributes only.
+   • Adds tabindex / role / aria-* to elements that already exist. It never adds a click handler of its own.
+   • ONE delegated keydown listener: Enter / Space on a marked element calls el.click() exactly once, so the
+     element's existing onclick runs exactly once (same path as a mouse click). Held keys (e.repeat) are ignored.
+   • Native <button>/<a>/<input> are never marked, so they keep their built-in keyboard behaviour. */
+(function () {
+    'use strict';
+    try {
+        var KB_STATIC = '.sidebar-menu li[onclick], .sidebar .main-menu-item[onclick], .sub-menu li[onclick]';
+        var KB_DYNAMIC = '#notifList [onclick], #notifDropdown span[onclick], tr.kpi-clickable[onclick], td.kpi-click-cell[onclick]';
+        var SCROLL_SEL = '.task-table-container, .cat-progress-scroll';
+        var FIELD_SEL = 'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea, select';
+
+        function markKb(el) {
+            if (el.getAttribute('data-ui-kb') !== null) return;
+            el.setAttribute('data-ui-kb', '');
+            if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+            // role="button" only where it cannot break list/table semantics
+            if (!el.matches('li, tr, td') && !el.hasAttribute('role')) el.setAttribute('role', 'button');
+        }
+
+        // Single delegated key handler (Enter / Space → one click)
+        document.addEventListener('keydown', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+            var el = e.target;
+            if (!el || el.nodeType !== 1 || el.getAttribute('data-ui-kb') === null) return;
+            e.preventDefault();             // stops Space from scrolling the page
+            if (e.repeat) return;           // a held key must not fire repeatedly
+            el.click();
+        });
+
+        function syncScrollRegions() {
+            var list = document.querySelectorAll(SCROLL_SEL);
+            for (var i = 0; i < list.length; i++) {
+                var c = list[i], can = c.scrollWidth > c.clientWidth + 1 || c.scrollHeight > c.clientHeight + 1;
+                if (can && !c.hasAttribute('data-ui-scroll')) {
+                    c.setAttribute('data-ui-scroll', ''); c.setAttribute('tabindex', '0');
+                    c.setAttribute('role', 'region'); if (!c.hasAttribute('aria-label')) c.setAttribute('aria-label', 'Scrollable table');
+                } else if (!can && c.hasAttribute('data-ui-scroll')) {
+                    c.removeAttribute('data-ui-scroll'); c.removeAttribute('tabindex'); c.removeAttribute('role'); c.removeAttribute('aria-label');
+                }
+            }
+        }
+
+        function labelFields() {
+            var f = document.querySelectorAll(FIELD_SEL);
+            for (var i = 0; i < f.length; i++) {
+                var el = f[i];
+                if (el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby')) continue;
+                if (el.labels && el.labels.length) continue;
+                var t = el.getAttribute('placeholder') || el.getAttribute('title');
+                if (t) el.setAttribute('aria-label', t);
+            }
+        }
+
+        function syncState() {
+            // current page in the sidebar
+            var items = document.querySelectorAll('.sidebar [data-ui-kb]');
+            for (var i = 0; i < items.length; i++) {
+                var it = items[i];
+                var isNav = it.matches('li') || (it.matches('.main-menu-item') && !(it.parentElement && it.parentElement.querySelector(':scope > .sub-menu')));
+                if (isNav) { if (it.classList.contains('active')) it.setAttribute('aria-current', 'page'); else it.removeAttribute('aria-current'); }
+            }
+            // expandable sidebar groups
+            var parents = document.querySelectorAll('.sidebar .has-sub-menu');
+            for (var j = 0; j < parents.length; j++) {
+                var p = parents[j], tog = p.querySelector('.main-menu-item'), sub = p.querySelector('.sub-menu');
+                if (!tog || !sub) continue;
+                tog.setAttribute('aria-expanded', (sub.style.display !== 'none' && getComputedStyle(sub).display !== 'none') ? 'true' : 'false');
+                if (sub.id) tog.setAttribute('aria-controls', sub.id);
+            }
+            // mobile menu button + off-canvas sidebar
+            var sb = document.querySelector('.sidebar'); if (sb && !sb.id) sb.id = 'appSidebar';
+            var isOpen = document.body.classList.contains('sidebar-open');
+            var mb = document.getElementById('mobileMenuBtn');
+            if (mb) { mb.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); if (sb) mb.setAttribute('aria-controls', sb.id); }
+            if (sb && window.matchMedia) {
+                if (window.matchMedia('(max-width: 900px)').matches && !isOpen) sb.setAttribute('inert', ''); else sb.removeAttribute('inert');
+            }
+            // notification bell
+            var nb = document.getElementById('notifBtn'), nd = document.getElementById('notifDropdown');
+            if (nb && nd) {
+                if (!nb.hasAttribute('aria-label')) nb.setAttribute('aria-label', 'Notifications');
+                nb.setAttribute('aria-haspopup', 'true'); nb.setAttribute('aria-controls', 'notifDropdown');
+                nb.setAttribute('aria-expanded', nd.classList.contains('hidden') ? 'false' : 'true');
+            }
+        }
+
+        function scan() {
+            var a = document.querySelectorAll(KB_STATIC + ', ' + KB_DYNAMIC);
+            for (var i = 0; i < a.length; i++) markKb(a[i]);
+            labelFields(); syncScrollRegions(); syncState();
+        }
+
+        var queued = false;
+        function schedule() {
+            if (queued) return; queued = true;
+            (window.requestAnimationFrame || setTimeout)(function () { queued = false; try { scan(); } catch (e) {} });
+        }
+
+        function init() {
+            // decorative icons in the theme toggle
+            var ico = document.querySelectorAll('.theme-ico'); for (var i = 0; i < ico.length; i++) ico[i].setAttribute('aria-hidden', 'true');
+            // skip link + focus target
+            var main = document.querySelector('main.main-content, .main-content, main');
+            if (main && !document.querySelector('.ui-skip')) {
+                if (!main.id) main.id = 'uiMainContent';
+                if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+                var a = document.createElement('a'); a.className = 'ui-skip'; a.href = '#' + main.id; a.textContent = 'Skip to main content';
+                a.addEventListener('click', function (ev) { ev.preventDefault(); main.focus(); });
+                document.body.insertBefore(a, document.body.firstChild);
+            }
+            scan();
+            // attribute/DOM changes that affect the synced state (observers do not run any app code)
+            // one observer (a second observe() on the same node would replace the first one's options)
+            new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+            window.addEventListener('resize', schedule);
+        }
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+    } catch (err) { /* accessibility layer is optional: never break the page */ }
+})();
+</script>
+
 </body>
 </html>
