@@ -1,0 +1,34 @@
+/* Design tokens (Day 1). Namespaced --pt-* so they never override the page's own variables.
+   Values mirror the existing :root variables in the pages (see var(--x, fallback)), so nothing changes visually.
+   Use these for NEW components; migrate old rules gradually. */
+:root {
+  --pt-color-bg: var(--tarkie-bg, #f8fafc);
+  --pt-color-surface: var(--card-bg, #ffffff);
+  --pt-color-border: var(--border-color, #e2e8f0);
+  --pt-color-text: var(--text-main, #1e293b);
+  --pt-color-text-muted: var(--text-muted, #64748b);
+  --pt-color-primary: var(--primary, #2563eb);
+  --pt-color-primary-hover: var(--primary-hover, #1d4ed8);
+  --pt-color-success: var(--success, #059669);
+  --pt-color-warning: #d97706;
+  --pt-color-danger: #dc2626;
+
+  --pt-radius-sm: var(--radius-sm, 6px);
+  --pt-radius-md: var(--radius-md, 8px);
+  --pt-radius-lg: var(--radius-lg, 12px);
+
+  --pt-space-1: 4px;
+  --pt-space-2: 8px;
+  --pt-space-3: 12px;
+  --pt-space-4: 16px;
+  --pt-space-6: 24px;
+
+  --pt-font-sm: 12px;
+  --pt-font-md: 14px;
+  --pt-font-lg: 16px;
+
+  --pt-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
+/* Visible keyboard focus for anything that uses the tokens */
+.pt-focusable:focus-visible { outline: none; box-shadow: var(--pt-focus-ring); }

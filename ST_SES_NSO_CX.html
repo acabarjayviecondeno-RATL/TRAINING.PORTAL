@@ -5380,6 +5380,8 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
 </style>
 
 
+    <link rel="stylesheet" href="/src/styles/tokens.css">
+    <script type="module" src="/src/boot.js"></script>
 </head>
 <body class="bg-gray-50 font-sans antialiased">
 
@@ -6537,8 +6539,7 @@ setInterval(function () { if (!document.hidden) loadExtraHolidays(); }, 300000);
         // ---- Leave / Absent: saved in the "Leave / absent etc log" Google Sheet (not just this browser) ----
         async function loadLeavesFromSheet() {
             try {
-                let resp = await fetch(WEB_APP_URL + "?action=getLeaves&user=" + encodeURIComponent(loggedInUser));
-                let data = await resp.json();
+                let data = await PortalApi.leaves.list(loggedInUser);
                 if (data && data.success && Array.isArray(data.leaves)) {
                     allLeaveRecords = data.leaves.map(l => ({ id: l.id || '', date: l.date, type: l.type, reason: l.reason, status: l.status || 'Approved', approver: l.approver || '', planTitle: l.planTitle || '', approverRemarks: l.approverRemarks || '' }));
                     localLeaveRecords = allLeaveRecords.filter(isApprovedLeave);
@@ -6681,7 +6682,7 @@ setInterval(function () { if (!document.hidden) loadExtraHolidays(); }, 300000);
         var leaveEditApprovedOn = false;     // admin switch (Admin.html): STs may edit Approved records, no re-approval
         async function loadLeaveSettings() {
             try {
-                let j = await (await fetch(WEB_APP_URL + "?action=getLeaveSettings&t=" + Date.now(), { cache: 'no-store' })).json();
+                let j = await PortalApi.leaves.settings();
                 leaveEditApprovedOn = !!(j && j.success && j.allowEditApproved);
             } catch (e) {}
             try { renderLeaveAbsentTable(); } catch (e) {}
@@ -6772,12 +6773,7 @@ setInterval(function () { if (!document.hidden) loadExtraHolidays(); }, 300000);
             if (btn) { btn.disabled = true; btn.textContent = isEdit ? 'Saving...' : 'Submitting...'; }
             let result;
             try {
-                let resp = await fetch(WEB_APP_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: isEdit ? "updateLeave" : "saveLeave", id: editingLeaveId, planOnly: editingPlanOnly, user: loggedInUser, date: dateVal, type: typeVal, remarks: reasonVal, approverEmail: approverVal, planTitle: planTitleVal })
-                });
-                result = await resp.json();
+                result = await PortalApi.leaves.submit({ id: editingLeaveId, planOnly: editingPlanOnly, user: loggedInUser, date: dateVal, type: typeVal, remarks: reasonVal, approverEmail: approverVal, planTitle: planTitleVal }, isEdit);
                 if (!result || !result.success) throw new Error((result && result.message) || 'Save failed');
             } catch (err) {
                 leaveSaving = false;
@@ -6816,12 +6812,7 @@ setInterval(function () { if (!document.hidden) loadExtraHolidays(); }, 300000);
             let isPending = String(rec.status || '').toLowerCase() === 'pending';
             if (!confirm((isPending ? 'Cancel this pending ' : 'Delete this ') + rec.type + ' request (' + rec.date + ')?')) return;
             try {
-                let resp = await fetch(WEB_APP_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: "deleteLeave", user: loggedInUser, date: rec.date, type: rec.type, id: rec.id || '' })
-                });
-                let result = await resp.json();
+                let result = await PortalApi.leaves.remove({ user: loggedInUser, date: rec.date, type: rec.type, id: rec.id || '' });
                 if (!result || !result.success) throw new Error('Delete failed');
             } catch (err) {
                 alert('Could not delete from the sheet. Please try again.');
@@ -7095,6 +7086,7 @@ setInterval(function () { if (!document.hidden) loadExtraHolidays(); }, 300000);
         }
 
         function handleLogout() {
+            if (window.PortalSession) { PortalSession.logout({ keepKeys: ['portal_theme'], keepPrefixes: ['portal_dismissed_notifs_'] }); return; }
             // Keep cleared-notification memory and theme so they don't come back after logging in again
             let keep = {};
             try {

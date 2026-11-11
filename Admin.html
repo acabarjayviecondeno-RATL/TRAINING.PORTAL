@@ -197,6 +197,8 @@ html[data-theme="light"] .stat span:last-child{color:var(--muted)}
 h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.font-black{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important}
 .brand-name,.logo,.sidebar-brand-text,.ld-title,.ld-role,.summary-card .val,.summary-card h4,.kpi-score-big,.kpi-live-item strong,.stat b,.pct-big,.plan-name,.sec-title,.section-title,.cat-progress-head h5,#kpiBotHead b,summary,[class*="title"],[class*="heading"],.login-card button,.logout-btn,.btn-primary,button[type="submit"],.kb-tag{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;font-weight:700 !important}
 </style>
+    <link rel="stylesheet" href="/src/styles/tokens.css">
+    <script type="module" src="/src/boot.js"></script>
 </head>
 <body>
 
@@ -1360,7 +1362,7 @@ async function decide(row,status){
   if(status==="Rejected"){ remarks=prompt("Reason for rejection (required):")||""; if(!remarks.trim())return; }
   else remarks=prompt("Feedback (optional):")||"";
   try{
-    const qs=new URLSearchParams({action:"updateApprovalStatus",row,status,remarks}).toString();
+    const qs=new URLSearchParams(Object.assign({action:"updateApprovalStatus",row,status,remarks}, (window.PortalSession?PortalSession.authParams():{}), (window.PortalSession&&PortalSession.getToken()?{user:PortalSession.getUser()}:{}))).toString();
     const j=await (await fetch(API+"?"+qs)).json();
     if(!j.success) throw new Error(j.message||"Failed");
     // local status update — no full sheet reload
@@ -1502,7 +1504,7 @@ async function forceLogoutAll(){
   setTimeout(check,2000); setInterval(check,60000);
   document.addEventListener("visibilitychange",()=>{ if(!document.hidden) check(); });
 })();
-function handleLogout(){ creds=null; try{sessionStorage.removeItem("portal_admin_pass")}catch(e){} {const t=localStorage.getItem("portal_theme");localStorage.clear();if(t)localStorage.setItem("portal_theme",t)} window.location.href="index.html"; }
+function handleLogout(){ creds=null; try{sessionStorage.removeItem("portal_admin_pass")}catch(e){} if(window.PortalSession){PortalSession.logout({keepKeys:["portal_theme"]});return;} {const t=localStorage.getItem("portal_theme");localStorage.clear();if(t)localStorage.setItem("portal_theme",t)} window.location.href="index.html"; }
 </script>
 <script>(function(){try{if(!document.fonts||!document.fonts.load)return;var l=['600 14px "SamsungOne 600C"','700 14px "Samsung Sharp Sans Bold"','400 14px "Samsung Sharp Sans"'];try{Chart.defaults.plugins.title.font.family='Samsung Sharp Sans Bold, Samsung Sharp Sans, SamsungOne 600C, sans-serif'}catch(e){};var r=function(){try{if(window.Chart&&Chart.instances)Object.keys(Chart.instances).forEach(function(k){try{Chart.instances[k].update()}catch(e){}})}catch(e){}};Promise.all(l.map(function(x){return document.fonts.load(x)})).then(r,r);document.fonts.ready.then(r);}catch(e){}})();</script>
 <style id="fx-motion">

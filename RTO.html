@@ -1626,6 +1626,8 @@ html[data-theme="light"] .sidebar-menu li:hover .sidebar-icon,html[data-theme="l
 td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-align:center}
 .rc-ns{display:inline-block;white-space:nowrap;line-height:1.4;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;color:var(--text-muted);background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.3)}
 </style>
+    <link rel="stylesheet" href="/src/styles/tokens.css">
+    <script type="module" src="/src/boot.js"></script>
 </head>
 <body>
 
@@ -2961,6 +2963,7 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
         }
 
         function handleLogout() {
+            if (window.PortalSession) { PortalSession.logout({ keepKeys: [], clearSession: true, clearCookies: true, replace: true }); return; }
             localStorage.clear();
             sessionStorage.clear();
             document.cookie.split(";").forEach(function(c) { 
@@ -7362,7 +7365,7 @@ function tlActualMins(st, en) {
             items.forEach(function (x, idx) {
                 chain = chain.then(function () {
                     apprToast((isRej ? 'Rejecting ' : 'Approving ') + (idx + 1) + '/' + items.length + '...', 'info', true);
-                    var url = GA_WEB_APP_URL + '?action=updateApprovalStatus&row=' + x.row + '&status=' + encodeURIComponent(status) + '&remarks=' + encodeURIComponent(x.remark);
+                    var url = GA_WEB_APP_URL + '?action=updateApprovalStatus&row=' + x.row + '&status=' + encodeURIComponent(status) + '&remarks=' + encodeURIComponent(x.remark) + (window.PortalSession ? PortalSession.authQuery() : '');
                     return jsonpCall(url, 90000).then(function (d) {
                         if (d && d.success) {
                             ok++;

@@ -246,6 +246,8 @@
 h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.font-black{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important}
 .brand-name,.logo,.sidebar-brand-text,.ld-title,.ld-role,.summary-card .val,.summary-card h4,.kpi-score-big,.kpi-live-item strong,.stat b,.pct-big,.plan-name,.sec-title,.section-title,.cat-progress-head h5,#kpiBotHead b,summary,[class*="title"],[class*="heading"],.login-card button,.logout-btn,.btn-primary,button[type="submit"],.kb-tag{font-family:"Samsung Sharp Sans Bold", "Samsung Sharp Sans", "SamsungSharpSans-Bold", "Samsung Sharp Bold", "SamsungOne 600C", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;font-weight:700 !important}
 </style>
+    <link rel="stylesheet" href="/src/styles/tokens.css">
+    <script type="module" src="/src/boot.js"></script>
 </head>
 <body>
 
@@ -579,7 +581,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
                 var url = `${WEB_APP_URL}?action=verifyOtp&user=${encodeURIComponent(pendingLogin.userInput)}&code=${encodeURIComponent(code)}`;
                 var res = await (await fetch(url)).json();
                 btn.innerText = "Verify & Log In"; btn.disabled = false;
-                if (res.success) { clearInterval(resendTimer); completeLogin(); }
+                if (res.success) { clearInterval(resendTimer); try { if (res.token) localStorage.setItem('portal_token', res.token); } catch (e) {} completeLogin(); }
                 else {
                     err.innerText = res.message || "Invalid code.";
                     if (res.locked) { pendingLogin = null; setTimeout(cancelOtp, 2500); }
