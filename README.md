@@ -5,9 +5,10 @@
 npm install
 npm run dev        # vite dev server
 npm run build      # multi-page build -> dist/
-npm test           # unit (role guard, syntax) + e2e (Playwright)
+npm run test:unit  # role guard + syntax (no extra install)
 ```
-Playwright needs a browser once: `npx playwright install chromium`.
+E2E tests only: `npm i -D playwright && npx playwright install chromium`, then `npm run test:e2e`.
+Keep the project OUTSIDE OneDrive (e.g. `C:\dev\training-portal`); OneDrive sync breaks `node_modules`.
 
 | Path | Purpose |
 |---|---|
