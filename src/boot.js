@@ -3,3 +3,9 @@
 import './session.js';
 import { PortalApi } from './api/index.js';
 window.PortalApi = PortalApi;
+
+// Itago ang ".html" sa address bar (gumagana ang URL kahit i-refresh)
+if (location.pathname.endsWith('.html')) {
+  const clean = location.pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+  history.replaceState(null, '', clean + location.search + location.hash);
+}
