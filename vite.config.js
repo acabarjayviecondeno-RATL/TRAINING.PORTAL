@@ -9,8 +9,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pages = ['index', 'ST', 'FT', 'SFT', 'ST_Content_Developer', 'ST_SES_NSO_CX', 'ST_SPlus_Expert_Admin', 'RTO', 'SEPCO', 'Admin'];
 
 export default defineConfig({
-  // Dapat tugma sa pangalan ng GitHub repo (case-sensitive)
-  base: '/TRAINING.PORTAL/',
+  // Nasa root ng domain ang site (Cloudflare)
+  base: '/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
