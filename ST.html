@@ -5548,8 +5548,8 @@ html[data-theme="light"] #leavePlanBox { background:#ffffff !important; border-c
                                 <h6>⏱️ Accuracy · Efficiency · Timeliness</h6>
                                 <ul>
                                     <li><strong>Target Count (Content) %</strong> = Own Content ÷ Target. Target = Monthly Plan rows (category CONTENT) for the selected MONTH × FREQUENCY PER MONTH.</li>
-                                    <li><strong>Accuracy (Quality) %</strong> = (Target − Revision count) ÷ Target. Revisions = Rejected files in Approval Requests that match Monthly Plan by <em>file name</em> (vs plan TITLE) or by <em>category</em> (vs plan CATEGORY). Unrelated rejects are ignored. Less the Content Errors deduction (1–2 errors = 1%, 3–4 = 2% …).</li>
-                                    <li><strong>Efficiency %</strong> = Content approved <em>without revisions</em> (W/o revisions) ÷ Target. Each revision (matched reject) is excluded from the count. No Target = no data.</li>
+                                    <li><strong>Accuracy (Quality) %</strong> = (Target − Revision count) ÷ Target. Revisions = <em>SEPCO</em> rejects of files that match the Monthly Plan by <em>file name</em> (vs plan TITLE) or by <em>category</em> (vs plan CATEGORY), counted <em>per file</em>: the first 2 SEPCO rejects don't count — the 3rd reject = 1 revision, the 4th = 2 revisions. RTO rejects never count. Unrelated rejects are ignored. Less the Content Errors deduction (1–2 errors = 1%, 3–4 = 2% …).</li>
+                                    <li><strong>Efficiency %</strong> = Content approved <em>without revisions</em> (W/o revisions) ÷ Target. Each revision (SEPCO reject beyond the first 2 per file) is excluded from the count; RTO rejects are not revisions. No Target = no data.</li>
                                     <li><strong>Timeliness (On-time) %</strong> = On-time ÷ (On-time + Late). <em>Content</em> (Time in Motion): <strong>submit deadline</strong> = start date (the earliest Submitted Date of that content in the Daily Actual of its Monthly Plan month) + the category's TIM days in RCODE; <strong>approval deadline</strong> = upload date (TARGET DATE) − 5 days (no upload date = submit deadline + 2 days). Delay = days late to submit + resubmission days + days late to approve; on time only when the delay is 0. No TIM / no start date = not counted. A deadline that moved needs a SEPCO-approved <em>Deadline Change</em>. <em>Task / Training / Others</em>: no deadline — Target = <code>Duration</code> (Task Actual col C), Actual = <code>Start Time → End Time</code>; on time when Actual ≤ Target.</li>
                                 </ul>
                             </div>
@@ -9941,15 +9941,16 @@ function tlContentInfo(title, exact, monthKey) {   // monthKey = month of the Mo
         if (!matchesUser(r) || kpiNormTitle(kpiTitle(r)) !== nt) return;
         var c = String(getRowVal(r, ['CATEGORY', 'Category']) || '').trim(); if (c && cats.indexOf(c) === -1) cats.push(c);
     });
-    var sub = '', resub = 0;
+    var sub = '', resub = 0, credit = 0;
     (allApprovals || []).forEach(function (a) {
         var fn = a.fileName || a.title || '';
         if (!(kpiNormTitle(fn) === nt || (!exact && kpiTitlesMatch(title, fn)))) return;
         var sd = kpiDate(String(a.firstSubmitted || a.uploadDate || '').substring(0, 10));
         if (sd && (!sub || sd < sub)) sub = sd;
         resub += Number(a.resubmitDays) || 0;
+        credit += Number(a.sepcoOverdueDays) || 0;   // days SEPCO took beyond its 48-hour review window -> approval deadline is extended
     });
-    return { start: first, upload: upload, cats: cats, sub: sub, resub: resub };
+    return { start: first, upload: upload, cats: cats, sub: sub, resub: resub, credit: credit };
 }
 // ---- TIM days (Time in Motion) ----
 //  Monthly Plan content : ceil( DURATION PER MIN x FREQUENCY / 480 ) days (min 1)  — taken from the Monthly Plan line of that exact title
@@ -9999,21 +10000,23 @@ function tlContentVerdict(title, aprDate, exact, monthKey) {
     if (tlIsWeeklyCat(info.cats)) {
         var wad = changed || (info.start ? tlNextMonday(info.start) : (info.upload ? tlAddDays(info.upload, -TIM_UPLOAD_LEAD_DAYS) : ''));
         if (!wad) return null;
-        var wApr = aprDate ? Math.max(0, tlDayDiff(wad, aprDate)) : 0;
+        var wadC = info.credit > 0 ? tlAddDays(wad, info.credit) : wad;   // + SEPCO review time beyond 48 hrs
+        var wApr = aprDate ? Math.max(0, tlDayDiff(wadC, aprDate)) : 0;
         var wTot = info.resub + wApr;
-        return { submitDeadline: wad, approvalDeadline: wad, submitDate: info.sub, approvalDate: aprDate || '', subDelay: 0, resubDays: info.resub, aprDelay: wApr, total: wTot, late: wTot > 0, src: changed ? 'CHANGE' : 'WEEKLY', special: true };
+        return { submitDeadline: wad, approvalDeadline: wadC, submitDate: info.sub, approvalDate: aprDate || '', subDelay: 0, resubDays: info.resub, aprDelay: wApr, total: wTot, late: wTot > 0, src: changed ? 'CHANGE' : 'WEEKLY', special: true, sepcoCredit: info.credit || 0 };
     }
     var days = tlTimDays(title, info.cats, info.start);
     var sd = changed || ((info.start && days > 0) ? tlAddDays(info.start, Math.ceil(days)) : '');
     if (!sd) return null;
     var ad = info.upload ? tlAddDays(info.upload, -TIM_UPLOAD_LEAD_DAYS) : tlAddDays(sd, TIM_APPROVAL_TAT_DAYS);
+    if (info.credit > 0) ad = tlAddDays(ad, info.credit);   // SEPCO took longer than 48 hrs to review -> the approval deadline moves later (not the ST's fault)
     var subDelay = info.sub ? Math.max(0, tlDayDiff(sd, info.sub)) : 0;
     var aprDelay = aprDate ? Math.max(0, tlDayDiff(ad, aprDate)) : 0;
     var total = subDelay + info.resub + aprDelay;
-    return { submitDeadline: sd, approvalDeadline: ad, submitDate: info.sub, approvalDate: aprDate || '', subDelay: subDelay, resubDays: info.resub, aprDelay: aprDelay, total: total, late: total > 0, src: changed ? 'CHANGE' : 'TIM' };
+    return { submitDeadline: sd, approvalDeadline: ad, submitDate: info.sub, approvalDate: aprDate || '', subDelay: subDelay, resubDays: info.resub, aprDelay: aprDelay, total: total, late: total > 0, src: changed ? 'CHANGE' : 'TIM', sepcoCredit: info.credit || 0 };
 }
 function tlVerdictNote(v) {
-    return 'Late ' + v.total + 'd = submission +' + v.subDelay + 'd (due ' + v.submitDeadline + ') + resubmission +' + v.resubDays + 'd + approval +' + v.aprDelay + 'd (due ' + v.approvalDeadline + ').';
+    return 'Late ' + v.total + 'd = submission +' + v.subDelay + 'd (due ' + v.submitDeadline + ') + resubmission +' + v.resubDays + 'd + approval +' + v.aprDelay + 'd (due ' + v.approvalDeadline + (v.sepcoCredit ? ', extended +' + v.sepcoCredit + 'd: SEPCO review beyond 48 hrs' : '') + ').';
 }
 
 // ======== PRODUCTIVITY / EFFICIENCY / ON-TIME  (UNIQUE + Monthly-Plan-only) — identical rule to SEPCO skProdEff ========
@@ -10319,10 +10322,15 @@ function computeKpi(monthKey) {
     }
     // A rejected file is a revision ONLY when it matches a Monthly Plan content item.
     // A reject that is not in the Monthly Plan is NOT counted (even if the same content was later approved as a plus).
-    function rejectInKpi(a) { return matchesPlanContent(a); }
-    var rejectedList = appr.filter(function (a) { return /reject/i.test(String(a.status || '')); });
-    var detailRevisions = rejectedList.filter(rejectInKpi).map(function (a) {
-        return { title: a.fileName || '', category: a.category || '', status: a.status || 'Rejected', note: 'Rejected file matched to Monthly Plan — counted as a revision.' };
+    // Revision rule: RTO rejects never count. SEPCO: the first 2 rejects of a file don't count; 3rd reject = 1 revision, 4th = 2 ... (see apprRevCount)
+    function rejectInKpi(a) { return apprRevCount(a) > 0 && matchesPlanContent(a); }
+    var rejectedList = appr.filter(function (a) { return apprRevCount(a) > 0; });
+    var detailRevisions = [];
+    rejectedList.filter(rejectInKpi).forEach(function (a) {
+        var n = apprRevCount(a), sep = Number(a.sepcoRejects) || 0;
+        for (var ri = 1; ri <= n; ri++) {
+            detailRevisions.push({ title: a.fileName || '', category: a.category || '', status: a.status || 'Rejected', note: 'SEPCO reject #' + (ri + 2) + ' of ' + sep + ' on this file — Revision ' + ri + ' (first 2 SEPCO rejects and all RTO rejects are not counted).' });
+        }
     });
     var revisions = detailRevisions.length;
     var pendingFiles = appr.filter(function (a) { return /pending/i.test(String(a.status || 'pending')); }).length;
@@ -10353,7 +10361,7 @@ function computeKpi(monthKey) {
         if (!rejectInKpi(a)) return;
         var fn = normTitle(a.fileName);
         var m = approvedUnits.filter(function (u) { var tn = normTitle(u.title); return tn !== '' && fn.indexOf(tn) !== -1; })[0];
-        revMins += m ? m.mins : avgMins;
+        revMins += (m ? m.mins : avgMins) * apprRevCount(a);
     });
     var woRevMins = Math.max(0, totalMins - revMins);
     var useMins = totalMins > 0 || planContentMins > 0;
@@ -10451,6 +10459,9 @@ function computeKpi(monthKey) {
 }
 
 // ---------- rendering ----------
+// Revision rule: RTO rejects NEVER count. Per request, the first 2 SEPCO rejects don't count;
+// the 3rd SEPCO reject = 1 revision, the 4th = 2 revisions, and so on. (sepcoRejects comes from the permanent counter in the Apps Script)
+function apprRevCount(a) { return Math.max(0, (Number(a && a.sepcoRejects) || 0) - 2); }
 function xlCls(v) { if (v == null || isNaN(v)) return 'xl-na'; return v >= 1 ? 'xl-good' : (v >= 0.8 ? 'xl-warn' : 'xl-bad'); }
 function xlPct(v) { return (v == null || isNaN(v)) ? '<td class="xl-na">—</td>' : '<td class="' + xlCls(v) + '">' + pct(v) + '</td>'; }
 function xlNum(v, show) { return show ? '<td>' + v + '</td>' : '<td class="xl-na">—</td>'; }
@@ -11651,12 +11662,12 @@ function showKpiMetricDetail(key, ev) {
         title = 'Accuracy (Quality)';
         if (ck) {
             formula = 'Accuracy % = (Target − Revisions − content errors) ÷ Target.<br>' +
-                '<strong>Revisions</strong> = Rejected approval files that match a CONTENT item in your Monthly Plan (by file name or category).<br>' +
-                'Rejects that are not in the plan do not reduce Accuracy.';
+                '<strong>Revisions</strong> = SEPCO rejects of files that match a CONTENT item in your Monthly Plan (by file name or category), per file: the first 2 SEPCO rejects do not count — the 3rd reject = 1 revision, the 4th = 2 revisions.<br>' +
+                'RTO rejects never count, and rejects that are not in the plan do not reduce Accuracy.';
             note = 'Target <strong>' + n(ck.target) + '</strong> − Revisions <strong>' + n(ck.revisions) + '</strong>' +
                 ((ck.errCount || 0) > 0 ? ' − Errors <strong>' + n(ck.errCount) + '</strong>' : '') +
                 ' → <strong>' + pctFmt(ck.quality) + '</strong>.';
-            if ((ck.revisions || 0) > 0) note += ' Each matched reject pulls Accuracy down — re-upload a clean file and get it approved.';
+            if ((ck.revisions || 0) > 0) note += ' Each revision pulls Accuracy down — re-upload a clean file and get it approved.';
             else note += ' No matched revisions this month.';
             badge = ck.quality == null ? '' : (ck.quality >= 1 ? 'ok' : (ck.quality >= 0.8 ? 'warn' : 'low'));
             var revs = ck.detailRevisions || [];
@@ -11665,7 +11676,7 @@ function showKpiMetricDetail(key, ev) {
                     revs.map(function (r) {
                         return '<tr><td><span class="kmd-badge low">Revision</span></td><td>' + esc(r.title) + '</td><td>' + esc(r.category) + '</td><td>' + esc(r.note || '') + '</td></tr>';
                     }).join('') + '</tbody></table></div>';
-            } else listHtml = '<div class="kmd-empty">No revisions (matched rejects) this month — Accuracy is at maximum for the current Target.</div>';
+            } else listHtml = '<div class="kmd-empty">No revisions this month (a file needs 3 or more SEPCO rejects to count; RTO rejects never count) — Accuracy is at maximum for the current Target.</div>';
         } else {
             formula = 'Accuracy is a Content KPI (Main KPI tab). Switch to Content (Main KPI) to see revision-level detail.';
             note = 'This category tab does not use Accuracy the same way.';
@@ -11677,7 +11688,7 @@ function showKpiMetricDetail(key, ev) {
         title = 'Efficiency';
         if (ck && B === 'CONTENT') {
             formula = 'Efficiency % = (Content without revisions) ÷ Target.<br>' +
-                'W/o revisions = Own + Proof − matched Revisions. Capped at 100%.';
+                'W/o revisions = Own + Proof − Revisions (SEPCO rejects beyond the first 2 per file; RTO rejects excluded). Capped at 100%.';
             note = 'W/o revisions <strong>' + n(ck.woRev) + '</strong> ÷ Target <strong>' + n(ck.target) + '</strong> → <strong>' + pctFmt(ck.eff) + '</strong>.';
             if (ck.eff != null && ck.eff < 1) note += ' Low because Own Content is below Target and/or revisions reduced the count.';
             badge = ck.eff == null ? '' : (ck.eff >= 1 ? 'ok' : (ck.eff >= 0.8 ? 'warn' : 'low'));
@@ -11974,7 +11985,7 @@ function renderKpiLanding() {
 
             li('Productivity', k.productivity != null ? pct(k.productivity) : '—') + li('Awaiting approval', k.pendingApproval + ' content') + '</div>' +
 
-            '<p class="kpi-live-status">Accuracy = (Target − Revisions) ÷ Target (Revisions = Rejected files matched to Monthly Plan by file name or category). Efficiency = Approved content mins ÷ Monthly Plan content mins. Timeliness = Daily Actual mins ÷ Daily Plan mins. Productivity = counted Actual (unique, Monthly-Plan-only) ÷ (Monthly Plan − leave×480). Weights by Job Group — Content Developer: TC 20% · ACC 20% · EFF 10% · TIM 20% · PROD 30%. SES/NSO/CX: TC 20% · ACC 15% · EFF 15% · TIM 20% · PROD 30%. S+ Expert and Admin: TC 20% · ACC 15% · EFF 15% · TIM 15% · PROD 35%.</p>';
+            '<p class="kpi-live-status">Accuracy = (Target − Revisions) ÷ Target (Revisions = SEPCO rejects of Monthly-Plan files beyond the first 2 per file; RTO rejects not counted). Efficiency = Approved content mins ÷ Monthly Plan content mins. Timeliness = Daily Actual mins ÷ Daily Plan mins. Productivity = counted Actual (unique, Monthly-Plan-only) ÷ (Monthly Plan − leave×480). Weights by Job Group — Content Developer: TC 20% · ACC 20% · EFF 10% · TIM 20% · PROD 30%. SES/NSO/CX: TC 20% · ACC 15% · EFF 15% · TIM 20% · PROD 30%. S+ Expert and Admin: TC 20% · ACC 15% · EFF 15% · TIM 15% · PROD 35%.</p>';
 
     }
 
@@ -12416,15 +12427,15 @@ var KB = [
 { id:'accuracy', title:'Accuracy',
   kw:['accuracy','accurate','quality','revision','revisions','rejected','reject','error','errors','deduction','content errors','mali','ayos'],
   a:'**Accuracy** = (Target − Revisions) ÷ Target − error deduction\n'+
-    '- **Revisions** = bilang ng *Rejected* Approval Requests sa buwan na tumutugma sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY). Hindi lahat ng reject ay binibilang — ang reject na **wala sa Monthly Plan** ay *not counted* bilang revision.\n'+
+    '- **Revisions** = bilang ng *SEPCO rejects* sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY), **bawat file**: ang unang **2 SEPCO rejects ay hindi binibilang** — ang **3rd reject = 1 revision**, ang **4th = 2 revisions**, at iba pa. Ang **RTO reject ay hindi kailanman binibilang** na revision. Ang reject na **wala sa Monthly Plan** ay *not counted* din.\n'+
     '- **Error deduction** (galing sa *KPI Inputs* → CONTENT ERRORS): `ceil(errors ÷ 2) × 1%` → 1–2 errors = −1%, 3–4 = −2%, 5–6 = −3% …\n'+
     '- Never goes below 0%. When there is **no Target**, "—" (no data) is shown, not 100%.\n'+
-    'Halimbawa: Target 10, Revisions 2, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
+    'Halimbawa: Target 10, isang file na na-reject ng SEPCO 4× = 2 revisions, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
 { id:'efficiency', title:'Efficiency',
   kw:['efficiency','efficient','eff','approved content mins','plan mins','minutes','mins','efficiency %'],
   a:'**Efficiency** (KPI Landing Page) = (Content na walang revision) ÷ Target\n'+
     '- **W/o revisions** = Approved content − Revisions.\n'+
-    '- **Revisions** = bilang ng Rejected files na tugma sa Monthly Plan.\n'+
+    '- **Revisions** = SEPCO rejects na lampas sa unang 2 bawat file (3rd reject = 1 revision, 4th = 2). Hindi binibilang ang RTO rejects.\n'+
     '- When there is **no Target**, "—" is shown.\n'+
     'Halimbawa: Target 10, W/o revisions 7 → 7/10 = **70%**.\n'+
     '\n**Sa SEPCO Overview table**, ibang sukat ang Efficiency: *Daily Plan mins ÷ Daily Actual mins* (bawat unique Daily Plan item ay isang beses lang itinutugma).\n'+
@@ -12471,7 +12482,7 @@ var KB = [
   kw:['sepco','summary','net approved','netapproved','net','approved','rejected','revised','pending sepco','pending rto','user summary','specialized trainer','approval summary'],
   a:'**SEPCO User Summary**\n'+
     '- **Approved / Rejected** = bilang ng requests ng user na may status na approve / reject sa napiling buwan.\n'+
-    '- **Revised** = Approved na file na may naunang *Rejected* na parehong file name (petsa ≤ approved) — ibig sabihin dumaan sa revision.\n'+
+    '- **Revised** = kabuuang revisions ng user: bawat file, **SEPCO rejects na lampas sa unang 2** (3rd reject = 1 revision, 4th = 2). Ang **RTO rejects ay hindi binibilang**.\n'+
     '- **netApproved** = max(0, Approved − Revised).\n'+
     '- **Target** = Σ FREQUENCY ng CONTENT rows sa Monthly Plan ng user (buwan na napili).\n'+
     '- **Achievement %** = netApproved ÷ Target × 100 (— kapag Target = 0). Berde kapag ≥ 100%.\n'+
@@ -12511,8 +12522,9 @@ var KB = [
     '- RTO approve → **Pending SEPCO**. SEPCO approve → **Approved** (final).\n'+
     '- Kapag nag-reject ang approver: **Rejected by RTO / Rejected by SEPCO**, at kailangan ng *remarks*.\n'+
     '- **Resubmit**: returns to Pending RTO (or Pending SEPCO if no RTO) and clears the old remarks.\n'+
+    '- **SEPCO 48 hours**: kapag lampas 48 oras na naka-Pending SEPCO (**hindi kasama ang Sabado, Linggo at holidays** sa bilang), may notice sa TG bot at **mawawala ang Approve / Reject buttons**. Ang sobrang tagal ng SEPCO ay **idinadagdag sa approval deadline** ng ST (Time in Motion) — hindi ito mabibilang na late.\n'+
     '- Ang approval/reject ay puwedeng gawin sa email o Telegram — ang *kasalukuyang assigned approver* lang ang may karapatan.\n'+
-    '- Ang **Rejected** na tumutugma sa CONTENT ng Monthly Plan ay bilang **Revision** sa Accuracy; ang **Approved** lang ang bilang sa Own Content.' },
+    '- **Revision rule**: ang **RTO reject ay hindi binibilang** na revision. Sa **SEPCO reject**, bawat file ay kailangang ma-reject ng **2×** muna bago magsimula ang bilang — **3 rejects = 1 revision, 4 = 2 revisions**. Ang **Approved** lang ang bilang sa Own Content.' },
 { id:'about', title:'Ano ang kaya ng bot na ito?',
   kw:['help','tulong','ano kaya mo','ano ang kaya mo','sino ka','who are you','what can you do','commands','menu','hello','hi','kumusta','gamit'],
   a:'**Ako ang Training Portal chat bot.** Kaya kong:\n'+

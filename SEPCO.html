@@ -1891,7 +1891,7 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
             <!-- SUMMARY SECTION -->
             <div id="summarySection" class="content-section">
                 <h3 style="margin-top:0; font-size: 15px;">📊 Approval Summary & Statistics</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Two-stage pipeline: Pending RTO → Pending SEPCO → Approved / Rejected. Revised = approved after a prior rejection of the same file name.</p>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Two-stage pipeline: Pending RTO → Pending SEPCO → Approved / Rejected. Revised = SEPCO rejects beyond the first 2 per file (3rd reject = 1 revision, 4th = 2). RTO rejects are not counted.</p>
 
                 <div class="filter-container">
                     <label for="monthYearFilter">Select Month and Year:</label>
@@ -2067,7 +2067,7 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
             <!-- MONTHLY PLAN SECTION -->
             <div id="monthlyPlanSection" class="content-section">
                 <h3 style="margin-top:0; font-size: 15px;">🗓️ Monthly Plan Data</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Progress of each Specialized Trainer's Monthly Plan vs their Daily Actual, per Category &mdash; including planned items they have not done yet.</p>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Summary per Specialized Trainer who submitted a Monthly Plan &mdash; Plan Days (Duration &times; Frequency &divide; 480) vs Actual Days (Start Time &rarr; End Time &divide; 480).</p>
                 <div class="filter-container" style="flex-wrap:wrap;">
                     <label for="monthlyPlanMonthFilter">Month:</label>
                     <input type="month" id="monthlyPlanMonthFilter" class="filter-input" onchange="onMonthlyPlanMonthChange()">
@@ -2075,10 +2075,10 @@ td.rc-mp-date{font-size:12px;color:var(--text-muted);white-space:nowrap;text-ali
                     <label for="monthlyPlanTrainerFilter">Trainer:</label>
                     <select id="monthlyPlanTrainerFilter" class="filter-input" onchange="onMonthlyPlanViewChange()"><option value="all">All trainers</option></select>
                     <label for="monthlyPlanCatFilter">Category:</label>
-                    <select id="monthlyPlanCatFilter" class="filter-input" onchange="onMonthlyPlanViewChange()"><option value="all">All Categories</option><option value="CONTENT">CONTENT</option><option value="TASK">TASK</option><option value="TRAINING">TRAINING</option><option value="OTHERS">OTHERS</option></select>
+                    <select id="monthlyPlanCatFilter" class="filter-input" onchange="onMonthlyPlanViewChange()"><option value="all">All Categories</option><option value="CONTENT">CONTENT</option><option value="TASK">TASK</option><option value="TRAINING">TRAINING</option></select>
                     <label for="monthlyPlanStatusFilter">Show:</label>
                     <select id="monthlyPlanStatusFilter" class="filter-input" onchange="onMonthlyPlanViewChange()">
-                        <option value="all">All categories</option>
+                        <option value="all">All plan lines</option>
                         <option value="incomplete">Not finished (not done + in progress)</option>
                         <option value="notdone">Not done only (0 actual)</option>
                         <option value="partial">In progress only</option>
@@ -3585,15 +3585,16 @@ function tlActualMins(st, en) {
                 [skRowVal(r, ['CATEGORY']), skRowVal(r, ['CATEGORY 2'])].forEach(c => { c = String(c || '').trim(); if (c && cats.indexOf(c) === -1) cats.push(c); });
             });
             if (!cats.length && planCat) cats.push(planCat);
-            let sub = '', resub = 0;
+            let sub = '', resub = 0, credit = 0;
             approvals.forEach(a => {
                 const fn = a.fileName || a.title || '';
                 if (skNormTitle(fn) !== nt) return;
                 const sd = skDate(String(a.firstSubmitted || a.uploadDate || '').substring(0, 10));
                 if (sd && (!sub || sd < sub)) sub = sd;
                 resub += Number(a.resubmitDays) || 0;
+                credit += Number(a.sepcoOverdueDays) || 0;   // days SEPCO took beyond its 48-hour review window -> approval deadline is extended
             });
-            return { start: first, upload, cats, sub, resub };
+            return { start: first, upload, cats, sub, resub, credit };
         }
         // Time-in-Motion verdict (same rule as ST tlContentVerdict): null when no deadline can be computed
         function tlVerdictSk(info, days, changed, apr) {
@@ -3601,16 +3602,18 @@ function tlActualMins(st, en) {
             if (tlIsWeeklyCat(info.cats)) {
                 const wad = changed || (info.start ? tlNextMonday(info.start) : (info.upload ? tlAddDays(info.upload, -LEAD) : ''));
                 if (!wad) return null;
-                const wApr = apr ? Math.max(0, tlDayDiff(wad, apr)) : 0, wTot = info.resub + wApr;
-                return { submitDeadline: wad, approvalDeadline: wad, subDelay: 0, resubDays: info.resub, aprDelay: wApr, total: wTot, late: wTot > 0, src: changed ? 'CHANGE' : 'WEEKLY', special: true };
+                const wadC = info.credit > 0 ? tlAddDays(wad, info.credit) : wad;   // + SEPCO review time beyond 48 hrs
+                const wApr = apr ? Math.max(0, tlDayDiff(wadC, apr)) : 0, wTot = info.resub + wApr;
+                return { submitDeadline: wad, approvalDeadline: wadC, subDelay: 0, resubDays: info.resub, aprDelay: wApr, total: wTot, late: wTot > 0, src: changed ? 'CHANGE' : 'WEEKLY', special: true, sepcoCredit: info.credit || 0 };
             }
             const sd = changed || ((info.start && days > 0) ? tlAddDays(info.start, Math.ceil(days)) : '');
             if (!sd) return null;
-            const ad = info.upload ? tlAddDays(info.upload, -LEAD) : tlAddDays(sd, TAT);
+            let ad = info.upload ? tlAddDays(info.upload, -LEAD) : tlAddDays(sd, TAT);
+            if (info.credit > 0) ad = tlAddDays(ad, info.credit);   // SEPCO took longer than 48 hrs to review -> the approval deadline moves later (not the ST's fault)
             const subDelay = info.sub ? Math.max(0, tlDayDiff(sd, info.sub)) : 0;
             const aprDelay = apr ? Math.max(0, tlDayDiff(ad, apr)) : 0;
             const total = subDelay + info.resub + aprDelay;
-            return { submitDeadline: sd, approvalDeadline: ad, subDelay, resubDays: info.resub, aprDelay, total, late: total > 0, src: changed ? 'CHANGE' : 'TIM' };
+            return { submitDeadline: sd, approvalDeadline: ad, subDelay, resubDays: info.resub, aprDelay, total, late: total > 0, src: changed ? 'CHANGE' : 'TIM', sepcoCredit: info.credit || 0 };
         }
         // status of one row (same as ST tlTimStatus): cls 'ok' | 'late' | 'wait'
         function tlStatusSk(x, today) {
@@ -3792,6 +3795,10 @@ function tlActualMins(st, en) {
         function onMonthlyPlanViewChange() { try { renderSepcoCategoryProgress(); } catch (e) { console.error(e); } }
 
         function renderSepcoCategoryProgress(monthKey) {
+            // ===== Monthly Plan SUMMARY per Specialized Trainer =====
+            //  Plan Days   = SUM( DURATION PER MIN x FREQUENCY ) / 480      (what the ST plotted in the Monthly Plan)
+            //  Actual Days = SUM( End Time - Start Time of the Daily Actual rows that belong to that plan line ) / 480
+            //  Only STs who submitted a Monthly Plan for the selected month are listed.
             const mpEl = document.getElementById('monthlyPlanCategoryProgress');
             if (!mpEl) return;
             monthKey = monthKey || (typeof ovGetOverviewMonth === 'function' ? ovGetOverviewMonth() : '');
@@ -3802,130 +3809,102 @@ function tlActualMins(st, en) {
             const mf = document.getElementById('monthlyPlanMonthFilter');
             if (mf && monthKey && mf.value !== monthKey) mf.value = monthKey;
 
+            const DAY = 480;
+            const r2 = n => Math.round(n * 100) / 100;
+            const fd = n => { const v = r2(n); return (v % 1 === 0) ? String(v) : v.toFixed(2); };
             const norm = v => String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
-            const users = {}; // key -> { key, email, lines: [], unplanned: {} }
-            const ensureU = (raw) => {
-                const k = norm(raw);
-                if (!k) return null;
-                if (!users[k]) users[k] = { key: k, email: String(raw).trim(), lines: [], unplanned: {} };
-                return users[k];
-            };
+            const users = {};   // only STs WITH a Monthly Plan this month
+            const planUsers = {};
             const labelFor = (u) => {
                 const tr = (specializedTrainersGlobal || []).find(t => norm(t.email) === u.key);
                 if (tr) { const nm = String(tr.name || '').trim(); return nm ? (nm + ' · ' + tr.email) : String(tr.email); }
                 return u.email || u.key;
             };
 
-            // 1) All Specialized Trainers (so trainers with no Monthly Plan are visible too)
-            (specializedTrainersGlobal || []).forEach(t => ensureU(t.email));
-
-            // 2) Monthly Plan lines (target)
+            // 1) Monthly Plan lines -> plan days (duration x frequency)
             (Array.isArray(monthlyPlanDataGlobal) ? monthlyPlanDataGlobal : []).forEach(r => {
                 const mk = r['MONTH'] || r['Month'] || r['month'] || sepcoGetVal(r, ['MONTH', 'Month']);
                 if (!ovMonthMatches(mk, monthKey)) return;
                 const userRaw = sepcoGetVal(r, ['NS+ USER ID', 'NS+ USER ID / Email', 'USER ID', 'EMAIL', 'User']);
-                const u = ensureU(userRaw);
-                if (!u) return;
-                const f0 = parseInt(String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '0').replace(/[^0-9\-]/g, ''), 10);
-                if (!(f0 > 0)) return;
-                const fe = skEffFreq(r, f0, skPlanUserKey(r), monthKey);   // less leave / absent (480 mins each)
-                const f = Math.round(fe);
-                const pair = sepcoNormalizeCatPair(r);
-                const nc = sepcoNormCat2(pair.cat2) || String(pair.cat2 || '').toLowerCase();
+                const k = norm(userRaw); if (!k) return;
+                const rawF = String(sepcoGetVal(r, ['FREQUENCY PER MONTH', 'Frequency per Month', 'FREQUENCY']) || '').replace(/[^0-9.\-]/g, '');
+                const f = rawF === '' ? 1 : (parseFloat(rawF) || 0);
+                if (!(f > 0)) return;
                 let d = parseFloat(String(sepcoGetVal(r, ['DURATION PER MIN', 'Duration per Min', 'DURATION']) || '').replace(/[^0-9.\-]/g, ''));
-                const mins = (!isNaN(d) && d > 0) ? d * fe : 480 * fe;
+                if (isNaN(d) || d <= 0) d = DAY;
+                if (!users[k]) users[k] = { key: k, email: String(userRaw).trim(), lines: [], unplanned: {} };
+                const u = users[k];
+                if (!u.monthText) { const mt = String(mk || '').trim(); u.monthText = /^\d{4}-\d{2}/.test(mt) ? monthLabel : mt.toUpperCase(); }
+                const pair = sepcoNormalizeCatPair(r);
+                if (pair.cat === 'OTHERS') return;   // OTHERS is not part of the Monthly Plan view
+                const nc = sepcoNormCat2(pair.cat2) || String(pair.cat2 || '').toLowerCase();
                 let line = u.lines.find(l => l.bucket === pair.cat && l.norm === nc);
-                if (!line) { line = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, approved: 0, planMins: 0, actualMins: 0, titles: [], seen: {} }; u.lines.push(line); }
-                line.target += f;
-                line.planMins += mins;
-                { const _pt = ovNormTitle(String(sepcoGetVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']) || '')); if (_pt) line.titles.push(_pt); }
+                if (!line) { line = { bucket: pair.cat, cat2: pair.cat2, norm: nc, target: 0, actual: 0, planMins: 0, actualMins: 0, pendingMins: 0, noTimeRows: 0, titles: [], parts: [], seen: {} }; u.lines.push(line); }
+                line.target += Math.round(f);
+                line.planMins += d * f;
+                const rawTitle = String(sepcoGetVal(r, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']) || '').trim();
+                const pt = ovNormTitle(rawTitle); if (pt) line.titles.push(pt);
+                line.parts.push({ title: rawTitle, d: d, f: f });
             });
+            Object.keys(users).forEach(k => { if (!users[k].lines.length) delete users[k]; });   // ST with only OTHERS lines = not listed
 
-            // 3) Actuals
-            // approved files = this trainer's approvals uploaded in the selected month only (an Oct / other trainer's approval must not approve a Nov row)
+            // 2) Daily Actual -> actual minutes from START TIME -> END TIME
             const approvedByUser = {};
             (globalApprovalsData || []).forEach(a => {
                 if (!/approve/i.test(String(a.status || ''))) return;
                 if (monthKey && ovMonthKeyFromDate(a.uploadDate) !== monthKey) return;
-                const nt = ovNormTitle(a.fileName);
-                if (!nt) return;
+                const nt = ovNormTitle(a.fileName); if (!nt) return;
                 const ak = norm(a.uploadedBy || a.user || a.email || '');
                 (approvedByUser[ak] = approvedByUser[ak] || []).push(nt);
             });
-            const addUnplanned = (u, bucket, label, mins, note, ukey) => {
-                const k = bucket + '||' + sepcoNormCat2(label);
-                if (!u.unplanned[k]) u.unplanned[k] = { bucket, label, count: 0, mins: 0, note: note || '', seen: {} };
-                const rec = u.unplanned[k];
-                rec.mins += mins || 0;
-                if (ukey === undefined) { rec.count += 1; return; }          // content paths keep 1 per call
-                if (!rec.seen[ukey]) { rec.seen[ukey] = 1; rec.count += 1; } // unique unit only
-            };
-            const countedTitles = {}; // userKey -> [norm titles] of CONTENT already counted
+            const seenRow = {};
             sepcoRowsToObjects(actualDataGlobal || []).forEach(t => {
-                if (monthKey && ovMonthKeyFromDate(sepcoGetVal(t, ['Date Submitted', 'DATE SUBMITTED'])) !== monthKey) return;
+                const dRaw = sepcoGetVal(t, ['Date Submitted', 'DATE SUBMITTED']);
+                if (monthKey && ovMonthKeyFromDate(dRaw) !== monthKey) return;
                 const title = String(sepcoGetVal(t, ['ACTUAL [Title]', 'ACTUAL [TITLE]', 'TITLE', 'Actual [Title]']) || '').trim();
                 if (!title) return;
-                const u = ensureU(sepcoGetVal(t, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL', 'User']));
-                if (!u) return;
+                const uk = norm(sepcoGetVal(t, ['NS+ USER ID', 'NS+ USER ID / Email', 'EMAIL', 'User']));
+                const u = users[uk]; if (!u) return;                       // ST has no Monthly Plan -> not listed
+                const st = String(sepcoGetVal(t, ['START TIME', 'Start Time']) || '').trim();
+                const en = String(sepcoGetVal(t, ['TIME ENDED', 'End Time']) || '').trim();
+                const day = (typeof skDate === 'function' ? skDate(dRaw) : '') || String(dRaw || '').substring(0, 10);
+                const rk = uk + '|' + day + '|' + ovNormTitle(title) + '|' + st + '|' + en;
+                if (seenRow[rk]) return; seenRow[rk] = 1;                  // exact duplicate row = 1
+                let mins = tlActualMins(st, en);
+                const noTime = isNaN(mins);
+                if (noTime) mins = 0;
                 const pair = sepcoNormalizeCatPair(t);
-                let d = parseFloat(String(sepcoGetVal(t, ['DURATION PER MIN', 'DURATION']) || '').replace(/[^0-9.\-]/g, ''));
-                if (isNaN(d) || d < 0) d = 0;
+                if (pair.cat === 'OTHERS') return;   // OTHERS actuals are not shown here
                 const isContent = pair.cat === 'CONTENT';
-                if (isContent && !sepcoIsContentApproved(title, sepcoGetVal(t, ['APPROVAL DATE', 'Approval Date']), approvedByUser[u.key] || [])) return; // not approved = not counted
-                const _cands = [pair.cat2, sepcoGetVal(t, ['CATEGORY 2', 'Category 2']), sepcoGetVal(t, ['CATEGORY', 'Category'])];
+                const cands = [pair.cat2, sepcoGetVal(t, ['CATEGORY 2', 'Category 2']), sepcoGetVal(t, ['CATEGORY', 'Category'])];
+                const approved = !isContent || sepcoIsContentApproved(title, sepcoGetVal(t, ['APPROVAL DATE', 'Approval Date']), approvedByUser[uk] || []);
+                let line = null;
                 if (!isContent) {
-                    const _dRaw = sepcoGetVal(t, ['Date Submitted', 'DATE SUBMITTED']);
-                    const _day = (typeof skDate === 'function' ? skDate(_dRaw) : '') || String(_dRaw || '').substring(0, 10);
-                    const cr = sepcoClaimUnit(u.lines, pair.cat, _cands, title, _day, d);
-                    if (!cr.line) addUnplanned(u, pair.cat, pair.cat2 || title, d, 'Not in Monthly Plan', cr.key);
-                    return;
+                    const detail = (['CONTENT', 'TASK', 'OTHERS', 'TRAINING'].indexOf(String(sepcoGetVal(t, ['CATEGORY 2', 'Category 2']) || '').trim().toUpperCase()) !== -1)
+                        ? (sepcoGetVal(t, ['CATEGORY', 'Category']) || title) : (sepcoGetVal(t, ['CATEGORY 2', 'Category 2']) || sepcoGetVal(t, ['CATEGORY', 'Category']) || title);
+                    const cr = sepcoClaimUnit(u.lines, pair.cat, [detail].concat(cands), title, day, 0);   // mins added below from Start -> End
+                    line = cr.line;
+                } else {
+                    line = sepcoFindPlanLine(u.lines, 'CONTENT', cands);
                 }
-                const line = sepcoFindPlanLine(u.lines, pair.cat, _cands);
                 if (line) {
-                    const _dRawC = sepcoGetVal(t, ['Date Submitted', 'DATE SUBMITTED']);
-                    const _dayC = (typeof skDate === 'function' ? skDate(_dRawC) : '') || String(_dRawC || '').substring(0, 10);
-                    const _ntC = ovNormTitle(title);
-                    const uk = _ntC + '|' + _dayC;
-                    line.seen = line.seen || {};
-                    line.actualMins = (line.actualMins || 0) + d;
-                    // unique (title + date) — same title same day = 1; different titles count separately
-                    if (!line.seen[uk]) {
-                        line.seen[uk] = 1;
-                        line.actual += 1;
-                        (countedTitles[u.key] = countedTitles[u.key] || []).push(_ntC);
-                    }
-                } else {   // approved CONTENT not in the Monthly Plan = plus points
-                    addUnplanned(u, 'CONTENT', 'Approved content (not in plan)', d, '➕ Plus points — approved, not in Monthly Plan', ovNormTitle(title));
+                    if (noTime) line.noTimeRows++;
+                    if (isContent && !approved) line.pendingMins += mins;  // CONTENT counts only once Approved
+                    else line.actualMins += mins;
+                } else if (approved) {
+                    const label = pair.cat2 || title;
+                    const kk = pair.cat + '||' + sepcoNormCat2(label);
+                    const o = u.unplanned[kk] || (u.unplanned[kk] = { bucket: pair.cat, label: label, mins: 0 });
+                    o.mins += mins;
                 }
-            });
-            // Approved CONTENT from the Approvals sheet (no Daily Actual row needed)
-            const apprSeen = {};
-            (globalApprovalsData || []).forEach(a => {
-                if (!/approve/i.test(String(a.status || ''))) return;
-                if (monthKey && ovMonthKeyFromDate(a.uploadDate) !== monthKey) return;
-                const cat = a.category || a.Category || a.CATEGORY || '';
-                const cat2 = a.category2 || a['CATEGORY 2'] || a['Category 2'] || '';
-                if (!sepcoApprovalIsContent(cat, cat2)) return;
-                const u = ensureU(a.uploadedBy || a.user || a.email || '');
-                if (!u) return;
-                const nt = ovNormTitle(a.fileName || a.title || '');
-                if (!nt) return;
-                const line = sepcoFindPlanLine(u.lines, 'CONTENT', [cat, cat2]);
-                if (!line) { addUnplanned(u, 'CONTENT', 'Approved content (not in plan)', 0, '➕ Plus points — approved, not in Monthly Plan', nt); return; }   // not in the Monthly Plan = plus points
-                // Approved Content = Approved requests from the Approvals list (List of Requests), one per file
-                const seenA = apprSeen[u.key] || (apprSeen[u.key] = []);
-                if (!seenA.some(x => x === nt)) { seenA.push(nt); line.approved += 1; }
-                // Actual (CONTENT) also counts it when not already counted from Daily Actual
-                const already = countedTitles[u.key] || [];
-                if (already.some(x => x === nt || x.indexOf(nt) !== -1 || nt.indexOf(x) !== -1)) return;
-                already.push(nt); countedTitles[u.key] = already;
-                line.actual += 1;
             });
 
-            // 4) View filters (trainer + status)
+            // 3) Filters
             const statusSel = document.getElementById('monthlyPlanStatusFilter');
             const trainerSel = document.getElementById('monthlyPlanTrainerFilter');
+            const catSel = document.getElementById('monthlyPlanCatFilter');
             const statusFilter = statusSel ? statusSel.value : 'all';
+            const catFilter = catSel ? catSel.value : 'all';
             let trainerFilter = trainerSel ? trainerSel.value : 'all';
             const allUsers = Object.keys(users).sort((a, b) => labelFor(users[a]).toLowerCase() < labelFor(users[b]).toLowerCase() ? -1 : 1);
             if (trainerSel) {
@@ -3937,32 +3916,13 @@ function tlActualMins(st, en) {
                     trainerFilter = trainerSel.value;
                 }
             }
-            const c2Lbl = (c2, b) => (c2 && c2 !== b && c2 !== '—') ? c2 : b;
-            const catSel = document.getElementById('monthlyPlanCatFilter');
-            const catFilter = catSel ? catSel.value : 'all';
-            const cat2Sel = document.getElementById('monthlyPlanCat2Filter');
-            let cat2Filter = cat2Sel ? cat2Sel.value : 'all';
-            if (cat2Sel) {
-                const set = {};
-                allUsers.forEach(k => {
-                    users[k].lines.forEach(l => { if (catFilter === 'all' || l.bucket === catFilter) set[c2Lbl(l.cat2, l.bucket)] = 1; });
-                    Object.keys(users[k].unplanned).forEach(x => { const o = users[k].unplanned[x]; if (catFilter === 'all' || o.bucket === catFilter) set[c2Lbl(o.label, o.bucket)] = 1; });
-                });
-                const labs = Object.keys(set).sort();
-                const csig = labs.join('|');
-                if (cat2Sel.getAttribute('data-sig') !== csig) {
-                    cat2Sel.innerHTML = '<option value="all">All Category 2</option>' + labs.map(x => '<option value="' + sepcoEsc(x) + '">' + sepcoEsc(x) + '</option>').join('');
-                    cat2Sel.setAttribute('data-sig', csig);
-                    cat2Sel.value = set[cat2Filter] ? cat2Filter : 'all';
-                }
-                cat2Filter = cat2Sel.value;
-            }
-            const lineStatus = l => l.actual <= 0 ? 'notdone' : (l.actual < l.target ? 'partial' : 'done');
+            const lineStatus = l => l.actualMins <= 0 ? 'notdone' : (l.actualMins < l.planMins - 0.5 ? 'partial' : 'done');
             const statusHtml = l => {
-                if (l.actual <= 0) return '<span class="cat-remark miss">Not done — 0 of ' + l.target + '</span>';
-                if (l.actual < l.target) return '<span class="cat-remark partial">In progress — ' + (l.target - l.actual) + ' remaining</span>';
-                if (l.actual > l.target) return '<span class="cat-remark plus">Done — ' + (l.actual - l.target) + ' over target</span>';
-                return '<span class="cat-remark plus">Done</span>';
+                const pend = l.pendingMins > 0 ? ' <span class="cat-muted" style="font-size:10px;">(+' + fd(l.pendingMins / DAY) + ' day(s) waiting for approval)</span>' : '';
+                if (l.actualMins <= 0) return '<span class="cat-remark miss">Not done — 0 of ' + fd(l.planMins / DAY) + ' day(s)</span>' + pend;
+                if (l.actualMins < l.planMins - 0.5) return '<span class="cat-remark partial">In progress — ' + fd((l.planMins - l.actualMins) / DAY) + ' day(s) left</span>' + pend;
+                if (l.actualMins > l.planMins + 0.5) return '<span class="cat-remark plus">Done — ' + fd((l.actualMins - l.planMins) / DAY) + ' day(s) over plan</span>' + pend;
+                return '<span class="cat-remark plus">Done</span>' + pend;
             };
             const pctHtml = (a, t) => {
                 if (!(t > 0)) return '<span class="cat-muted">—</span>';
@@ -3971,100 +3931,133 @@ function tlActualMins(st, en) {
             };
             const bucketColor = { CONTENT: '#4f8f46', TASK: '#d8ad24', OTHERS: '#397d89', TRAINING: '#7c3aed' };
 
-            // 5) Summary cards (all trainers, unfiltered)
-            let gLines = 0, gDone = 0, gNot = 0, gTarget = 0, gCredit = 0, gPlanMins = 0, gActMins = 0, gNoPlan = 0, gAppr = 0;
+            // Leave/Absent is taken OFF the Plan Days (Net Plan Days = Plan Days - Leave/Absent). Holidays are NOT deducted: STs already take them off when they submit the plan.
+            const leaveDaysOf = u => {   // approved Leave / Absent days of the month (each = 1 day = 480 mins)
+                try { const X = SK_EXTRA[skNorm(u.email || u.key)]; return ((X && X.leaves) || []).filter(l => String((l && l.status) || 'Approved').toLowerCase() === 'approved' && skMonthKey(l.date) === monthKey).length; } catch (e) { return 0; }
+            };
+            const netMins = (u, pm, whole) => whole ? Math.max(0, pm - leaveDaysOf(u) * DAY) : pm;
+            // 4) Summary cards (all STs with a Monthly Plan)
+            let gPlan = 0, gAct = 0, gCredit = 0, gLines = 0, gNot = 0, gDone = 0, gExtra = 0;
             allUsers.forEach(k => {
                 const u = users[k];
-                if (!u.lines.length) gNoPlan++;
-                u.lines.forEach(l => { if (l.bucket === 'CONTENT') gAppr += l.approved; });
-                Object.keys(u.unplanned).forEach(x => { if (u.unplanned[x].bucket === 'CONTENT') gAppr += u.unplanned[x].count; });
+                let upm = 0, uam = 0;
                 u.lines.forEach(l => {
-                    gLines++; gTarget += l.target; gCredit += Math.min(l.actual, l.target);
-                    gPlanMins += l.planMins; gActMins += l.actualMins;
-                    if (l.actual >= l.target) gDone++;
-                    if (l.actual <= 0) gNot++;
+                    gLines++; upm += l.planMins; uam += l.actualMins;
+                    if (l.actualMins <= 0) gNot++; else if (l.actualMins >= l.planMins - 0.5) gDone++;
                 });
+                const unet = netMins(u, upm, true);
+                gPlan += unet; gAct += uam; gCredit += Math.min(uam, unet);
+                Object.keys(u.unplanned).forEach(x => { gExtra += u.unplanned[x].mins; });
             });
-            const gPct = gTarget > 0 ? gCredit / gTarget * 100 : null;
+            const gPct = gPlan > 0 ? gCredit / gPlan * 100 : null;
             const cards = '<div class="summary-grid" style="margin-bottom:16px;">' +
-                '<div class="summary-card"><h4>Overall Plan Completion</h4><p class="val">' + (gPct == null ? '—' : (Math.round(gPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">' + gCredit + ' of ' + gTarget + ' planned items done</p></div>' +
-                '<div class="summary-card"><h4>Categories Done</h4><p class="val">' + gDone + ' / ' + gLines + '</p><p style="font-size:10px;margin:4px 0 0 0;">Category 2 targets met</p></div>' +
-                '<div class="summary-card"><h4>Approved Content</h4><p class="val">' + gAppr + '</p><p style="font-size:10px;margin:4px 0 0 0;">Approved requests in Monthly Plan</p></div>' +
-                '<div class="summary-card"><h4>Not Started</h4><p class="val">' + gNot + '</p><p style="font-size:10px;margin:4px 0 0 0;">Planned but 0 actual</p></div>' +
-                '<div class="summary-card"><h4>No Monthly Plan</h4><p class="val">' + gNoPlan + '</p><p style="font-size:10px;margin:4px 0 0 0;">Trainers without a plan</p></div>' +
+                '<div class="summary-card"><h4>STs with Monthly Plan</h4><p class="val">' + allUsers.length + '</p><p style="font-size:10px;margin:4px 0 0 0;">Submitted a plan for ' + sepcoEsc(monthLabel) + '</p></div>' +
+                '<div class="summary-card"><h4>Total Net Plan Days</h4><p class="val">' + fd(gPlan / DAY) + '</p><p style="font-size:10px;margin:4px 0 0 0;">less leave/absent</p></div>' +
+                '<div class="summary-card"><h4>Total Actual Days</h4><p class="val">' + fd(gAct / DAY) + '</p><p style="font-size:10px;margin:4px 0 0 0;">Start → End Time ÷ 480 (in plan)</p></div>' +
+                '<div class="summary-card"><h4>Overall Completion</h4><p class="val">' + (gPct == null ? '—' : (Math.round(gPct * 10) / 10) + '%') + '</p><p style="font-size:10px;margin:4px 0 0 0;">Credited plan days ÷ total plan days</p></div>' +
+                '<div class="summary-card"><h4>Not in Plan</h4><p class="val">' + fd(gExtra / DAY) + '</p><p style="font-size:10px;margin:4px 0 0 0;">Actual days outside the Monthly Plan</p></div>' +
                 '</div>';
 
-            // 6) Table
-            let body = '', shownUsers = 0;
+            // 5) SUMMARY table (one row per ST) + DETAIL tabs (one tab per ST)
+            const nameOf = u => { const tr = (specializedTrainersGlobal || []).find(t => norm(t.email) === u.key); const nm = tr ? String(tr.name || '').trim() : ''; return nm || u.email || u.key; };
+            const shown = [];
             allUsers.forEach(k => {
                 if (trainerFilter !== 'all' && k !== trainerFilter) return;
                 const u = users[k];
-                const lines = u.lines.slice().sort((a, b) => (a.bucket === b.bucket ? (a.cat2 < b.cat2 ? -1 : 1) : (a.bucket < b.bucket ? -1 : 1)));
-                const visible = lines.filter(l => (catFilter === 'all' || l.bucket === catFilter) && (cat2Filter === 'all' || c2Lbl(l.cat2, l.bucket) === cat2Filter) && (statusFilter === 'all' ? true : (statusFilter === 'incomplete' ? lineStatus(l) !== 'done' : lineStatus(l) === statusFilter)));
-                const unplanned = Object.keys(u.unplanned).map(x => u.unplanned[x]).filter(x => (catFilter === 'all' || x.bucket === catFilter) && (cat2Filter === 'all' || c2Lbl(x.label, x.bucket) === cat2Filter));
-                if ((statusFilter !== 'all' || cat2Filter !== 'all' || catFilter !== 'all') && !visible.length && !(statusFilter === 'all' && unplanned.length)) return;
-                shownUsers++;
-                let tT = 0, tCredit = 0, tPM = 0, tAM = 0, nDone = 0;
-                const apprInPlan = lines.filter(l => l.bucket === 'CONTENT').reduce((t, l) => t + l.approved, 0);
-                lines.forEach(l => { tT += l.target; tCredit += Math.min(l.actual, l.target); tPM += l.planMins; tAM += l.actualMins; if (l.actual >= l.target) nDone++; });
-                const hdrPct = tT > 0 ? tCredit / tT * 100 : null;
-                const badge = !lines.length ? ' <span style="font-size:10px;font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;color:#f59e0b;background:rgba(245,158,11,.15);padding:2px 6px;border-radius:4px;margin-left:6px;">No Monthly Plan</span>' : '';
-                body += '<tr style="background:rgba(59,130,246,0.10);"><td colspan="11" style="text-align:left;padding:12px 14px;font-weight:800;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;">👤 ' + sepcoEsc(labelFor(u)) + badge +
-                    (lines.length ? ' <span style="font-weight:600;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;color:var(--text-muted);margin-left:10px;">' + nDone + '/' + lines.length + ' categories done · ' + tCredit + '/' + tT + ' items · ' + Math.round(tAM).toLocaleString() + '/' + Math.round(tPM).toLocaleString() + ' mins · </span>' + pctHtml(tCredit, tT) : '') +
-                    (lines.length ? ' <span style="font-weight:700;font-family:Samsung Sharp Sans Bold,Samsung Sharp Sans,SamsungOne 600C,sans-serif;font-size:12px;margin-left:10px;color:#34d399;">Approved content: ' + apprInPlan + '</span>' : '') +
-                    '</td></tr>';
-                try {   // approved Leave / Absent: show what was taken off this trainer's targets (same rule as the ST page)
-                    if (monthKey && lines.length) {
-                        const _ld = skLeavePlanDeduct(skNorm(u.email || u.key), monthKey), _ln = [];
-                        _ld.red.forEach((v, row) => { if (v > 0) _ln.push(sepcoEsc(String(sepcoGetVal(row, ['TITLE', 'PLAN [Title]', 'ACTUAL [Title]']) || '')) + ' −' + (Math.round(v * 100) / 100)); });
-                        let _m = '';
-                        if (_ln.length) _m += '<div style="color:#34d399;">✅ Taken off the Target (approved Leave / Absent): ' + _ln.join(' · ') + '</div>';
-                        if (_ld.untitledMins > 0.5) _m += '<div style="color:#fbbf24;">⚠️ ' + (Math.round(_ld.untitledMins / 480 * 100) / 100) + ' approved Leave / Absent day(s) (' + Math.round(_ld.untitledMins) + ' mins) have no Plan Task, so no Target was reduced. The trainer must Edit it in the Leave / Absent Log and pick the task(s).</div>';
-                        if (_m) body += '<tr><td colspan="11" style="text-align:left;padding:6px 26px;font-size:11px;line-height:1.6;">' + _m + '</td></tr>';
-                    }
-                } catch (e) {}
-                visible.forEach(l => {
-                    const p = l.target > 0 ? l.actual / l.target * 100 : 0;
-                    const barCls = p >= 100 ? 'over' : (p < 40 ? 'low' : '');
-                    const diff = l.actualMins - l.planMins;
-                    body += '<tr>' +
-                        '<td class="cat-name" style="text-align:left;padding-left:26px;white-space:normal;min-width:200px;"><span style="color:' + (bucketColor[l.bucket] || '#94a3b8') + ';">●</span> ' + sepcoEsc((l.cat2 && l.cat2 !== l.bucket && l.cat2 !== '—') ? l.cat2 : l.bucket) + '</td>' +
-                        '<td class="num">' + l.target + '</td>' +
-                        '<td class="num"' + (l.actual === 0 ? ' style="color:#fff;"' : '') + '>' + l.actual + '</td>' +
-                        '<td class="num">' + pctHtml(l.actual, l.target) + '</td>' +
-                        '<td class="num" title="' + Math.round(l.planMins) + ' plan mins ÷ 480">' + (l.planMins > 0 ? (Math.round(l.planMins / 480 * 100) / 100) : '—') + '</td>' +
-                        '<td class="num">' + (l.planMins > 0 && l.target > 0 ? (Math.round(l.planMins / 480 / l.target * 100) / 100) : '—') + '</td>' +
-                        (l.bucket === 'CONTENT' ? '<td class="num cat-strong" style="color:#34d399;">' + l.approved + '</td>' : '<td class="num cat-muted">—</td>') +
-                        '<td class="num">' + Math.round(l.planMins).toLocaleString() + ' / ' + Math.round(l.actualMins).toLocaleString() + '<div style="font-size:10px;" class="cat-diff ' + (diff > 0 ? 'pos' : (diff < 0 ? 'neg' : 'zero')) + '">' + (diff > 0 ? '+' : '') + Math.round(diff).toLocaleString() + '</div></td>' +
-                        '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + Math.min(100, Math.round(p)) + '%;"></div></div></td>' +
-                        '<td class="cat-remark-cell" colspan="2">' + statusHtml(l) + '</td>' +
-                        '</tr>';
-                });
-                if (statusFilter === 'all' && lines.length && unplanned.length) {
-                    unplanned.forEach(x => {
-                        body += '<tr style="opacity:.8;">' +
-                            '<td class="cat-name" style="text-align:left;padding-left:26px;white-space:normal;min-width:200px;"><span style="color:' + (bucketColor[x.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc((x.label && x.label !== x.bucket && x.label !== '—') ? x.label : x.bucket) + '</td>' +
-                            '<td class="num cat-muted">—</td><td class="num">' + x.count + '</td><td class="num cat-muted">—</td><td class="num cat-muted">—</td><td class="num cat-muted">—</td>' +
-                            (x.bucket === 'CONTENT' ? '<td class="num cat-strong" style="color:#34d399;">' + x.count + '</td>' : '<td class="num cat-muted">—</td>') +
-                            '<td class="num">— / ' + Math.round(x.mins).toLocaleString() + '</td><td></td>' +
-                            '<td class="cat-remark-cell" colspan="2"><span class="cat-remark enhance">' + sepcoEsc(x.note) + '</span></td></tr>';
-                    });
-                }
-                if (statusFilter === 'all' && !lines.length) {
-                    body += '<tr><td colspan="11" class="cat-muted" style="text-align:left;padding:10px 26px;">No Monthly Plan for this month — no approved or actual content is shown.</td></tr>';
-                }
+                const catLines = u.lines.filter(l => catFilter === 'all' || l.bucket === catFilter)
+                    .sort((a, b) => (a.bucket === b.bucket ? (a.cat2 < b.cat2 ? -1 : 1) : (a.bucket < b.bucket ? -1 : 1)));
+                const visible = catLines.filter(l => statusFilter === 'all' ? true : (statusFilter === 'incomplete' ? lineStatus(l) !== 'done' : lineStatus(l) === statusFilter));
+                const unplanned = Object.keys(u.unplanned).map(x => u.unplanned[x]).filter(x => catFilter === 'all' || x.bucket === catFilter);
+                if (!catLines.length && !unplanned.length) return;
+                let pm = 0, am = 0, cr = 0, done = 0, noTime = 0, extra = 0;
+                catLines.forEach(l => { pm += l.planMins; am += l.actualMins; cr += Math.min(l.actualMins, l.planMins); if (l.actualMins >= l.planMins - 0.5) done++; noTime += l.noTimeRows; });
+                unplanned.forEach(x => { extra += x.mins; });
+                const bk = { CONTENT: { p: 0, a: 0 }, TRAINING: { p: 0, a: 0 }, TASK: { p: 0, a: 0 } };   // break down per Category
+                catLines.forEach(l => { if (bk[l.bucket]) { bk[l.bucket].p += l.planMins; bk[l.bucket].a += l.actualMins; } });
+                const whole = catFilter === 'all';   // holiday / leave are taken off the whole plan only (not off a single Category)
+                const leaveN = whole ? leaveDaysOf(u) : 0;
+                const net = netMins(u, pm, whole);
+                cr = Math.min(am, net);
+                shown.push({ k, u, catLines, visible, unplanned, pm, net, am, cr, done, noTime, extra, leaveN, bk });
             });
-
-            if (!shownUsers) {
-                mpEl.innerHTML = cards + '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress · ' + sepcoEsc(monthLabel) + '</h5></div><div class="cat-empty">Nothing to show for this view.</div></div>';
+            if (!shown.length) {
+                mpEl.innerHTML = cards + '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Summary · ' + sepcoEsc(monthLabel) + '</h5></div><div class="cat-empty">No ST has a Monthly Plan for this view.</div></div>';
                 return;
             }
-            mpEl.innerHTML = cards +
-                '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Monthly Plan Progress vs Actual · ' + sepcoEsc(monthLabel) + '</h5></div>' +
-                '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Each row is a Category from the trainer\'s Monthly Plan. <strong>Actual</strong> = unique <em>title + date</em> under that category (same title on the same day counts once; different titles count separately; same title on different days each count). CONTENT counts only when <strong>Approved</strong> and the Category 2 is in the plan. Planned items with 0 actual are shown as <span class="cat-remark miss">Not done</span>. Approved Content = Approved requests from the List of Requests that match a plan line. Trainers without a Monthly Plan show nothing. Rows marked ○ are TASK / OTHERS actuals that are <em>not</em> in the trainer\'s Monthly Plan.</div>' +
+            if (!shown.some(x => x.k === window._mpOpen)) window._mpOpen = '';
+            window.sepcoMpTab = function (k) { window._mpOpen = (window._mpOpen === k) ? '' : k; try { renderSepcoCategoryProgress(); } catch (e) { console.error(e); } };   // click an ST row: open / close its details
+
+                        // ---- details of ONE ST (shown under its row when clicked) ----
+            const buildDetail = sel => {
+                        let dBody = '', lastB = '';
+            if (sel.noTime > 0) dBody += '<tr><td colspan="8" style="text-align:left;padding:4px 14px;font-size:11px;color:#fbbf24;">⚠️ ' + sel.noTime + ' Daily Actual row(s) have no readable Start / End Time, so they add 0 days.</td></tr>';
+            sel.visible.forEach(l => {
+                if (l.bucket !== lastB) {   // Category sub-header with its own Plan / Actual days
+                    lastB = l.bucket;
+                    const bs = sel.visible.filter(z => z.bucket === l.bucket), bp = bs.reduce((s, z) => s + z.planMins, 0), ba = bs.reduce((s, z) => s + z.actualMins, 0);
+                    dBody += '<tr style="background:rgba(148,163,184,.10);"><td colspan="8" style="text-align:left;padding:6px 14px;font-weight:800;font-size:12px;color:' + (bucketColor[l.bucket] || '#94a3b8') + ';">' + sepcoEsc(l.bucket) + ' <span style="font-weight:600;color:var(--text-muted);margin-left:8px;">Plan ' + fd(bp / DAY) + ' d · Actual ' + fd(ba / DAY) + ' d</span></td></tr>';
+                }
+                const p = l.planMins > 0 ? l.actualMins / l.planMins * 100 : 0;
+                const barCls = p >= 100 ? 'over' : (p < 40 ? 'low' : '');
+                const left = l.planMins - l.actualMins;
+                const formula = l.parts.map(x => sepcoEsc(x.title || '—') + ' <span style="opacity:.8;">(' + Math.round(x.d) + ' min × ' + fd(x.f) + ' = ' + fd(x.d * x.f / DAY) + ' d)</span>').join('<br>');
+                dBody += '<tr>' +
+                    '<td class="cat-name" style="text-align:left;white-space:normal;min-width:260px;"><span style="color:' + (bucketColor[l.bucket] || '#94a3b8') + ';">●</span> ' + sepcoEsc((l.cat2 && l.cat2 !== l.bucket && l.cat2 !== '—') ? l.cat2 : l.bucket) +
+                    '<div style="font-size:10px;font-weight:400;color:var(--text-muted);line-height:1.5;margin-top:2px;">' + formula + '</div></td>' +
+                    '<td class="num cat-strong">' + fd(l.planMins / DAY) + '</td>' +
+                    '<td class="num"' + (l.actualMins <= 0 ? ' style="color:#fff;"' : '') + '>' + fd(l.actualMins / DAY) + '</td>' +
+                    '<td class="num ' + (left > 0.5 ? '' : 'cat-muted') + '">' + (left > 0.5 ? fd(left / DAY) : '0') + '</td>' +
+                    '<td class="num">' + pctHtml(l.actualMins, l.planMins) + '</td>' +
+                    '<td class="num">' + Math.round(l.planMins).toLocaleString() + ' / ' + Math.round(l.actualMins).toLocaleString() + '</td>' +
+                    '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + Math.min(100, Math.round(p)) + '%;"></div></div></td>' +
+                    '<td class="cat-remark-cell">' + statusHtml(l) + '</td></tr>';
+            });
+            if (statusFilter === 'all') sel.unplanned.forEach(x => {
+                dBody += '<tr style="opacity:.8;"><td class="cat-name" style="text-align:left;white-space:normal;min-width:260px;"><span style="color:' + (bucketColor[x.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc((x.label && x.label !== x.bucket && x.label !== '—') ? x.label : x.bucket) + '</td>' +
+                    '<td class="num cat-muted">—</td><td class="num">' + fd(x.mins / DAY) + '</td><td class="num cat-muted">—</td><td class="num cat-muted">—</td><td class="num">— / ' + Math.round(x.mins).toLocaleString() + '</td><td></td>' +
+                    '<td class="cat-remark-cell"><span class="cat-remark enhance">Not in Monthly Plan</span></td></tr>';
+            });
+            if (!dBody) dBody = '<tr><td colspan="8" class="cat-muted" style="padding:14px;">No plan lines match the current filters.</td></tr>';
+            const detailHtml = '<div class="cat-progress-wrap" style="margin:6px 0 0 0;">' +
+                '<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Plan: <strong>' + fd(sel.pm / DAY) + '</strong>' + (sel.leaveN ? ' − ' + sel.leaveN + ' leave/absent' : '') + ' = Net <strong>' + fd(sel.net / DAY) + '</strong> days · Actual: <strong>' + fd(sel.am / DAY) + '</strong> days · ' + pctHtml(sel.cr, sel.net) + '</div>' +
                 '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
-                '<th>Category</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Achievement %</th><th class="num" title="Plan mins (less leave/absent) ÷ 480">Days Allowed</th><th class="num" title="Days Allowed ÷ Target">Days / Item</th><th class="num">Approved Content</th><th class="num">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h" colspan="2">Status</th>' +
-                '</tr></thead><tbody>' + body + '</tbody></table></div></div>';
+                '<th>Plan Line (Category 2 · Title)</th><th class="num">Plan Days</th><th class="num">Actual Days</th><th class="num">Days Left</th><th class="num">Achievement %</th><th class="num" title="Plan mins / Actual mins (Start→End)">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
+                '</tr></thead><tbody>' + dBody + '</tbody></table></div></div>';
+            return detailHtml;
+            };
+
+            // ---- summary table ----
+            const bkCell = o => { const p = o.p, a = o.a; if (!(p > 0) && !(a > 0)) return '<td class="num cat-muted">—</td><td class="num cat-muted">—</td><td class="num cat-muted">—</td>'; return '<td class="num">' + (p > 0 ? fd(p / DAY) : '—') + '</td><td class="num"' + (a <= 0 ? ' style="color:#fff;"' : '') + '>' + fd(a / DAY) + '</td><td class="num">' + pctHtml(a, p) + '</td>'; };
+            const tBk = { CONTENT: { p: 0, a: 0 }, TRAINING: { p: 0, a: 0 }, TASK: { p: 0, a: 0 } };
+            let sBody = '', tPM = 0, tGross = 0, tLv = 0, tAM = 0, tCR = 0, tEX = 0;
+            const wd = monthKey ? skWorkingDays(monthKey) : 0;   // working days of the selected month (Sundays + PH / extra holidays excluded)
+            shown.forEach(x => {
+                tPM += x.net; ['CONTENT', 'TRAINING', 'TASK'].forEach(b => { tBk[b].p += x.bk[b].p; tBk[b].a += x.bk[b].a; }); tGross += x.pm; tLv += x.leaveN; tAM += x.am; tCR += x.cr; tEX += x.extra;
+                const p = x.net > 0 ? x.am / x.net * 100 : 0;
+                const left = x.net - x.am;
+                sBody += '<tr style="cursor:pointer;" onclick="sepcoMpTab(\'' + sepcoEsc(x.k) + '\')" title="Click to open / close ' + sepcoEsc(nameOf(x.u)) + ' details">' +
+                    '<td class="cat-name" style="text-align:left;white-space:normal;">' + (window._mpOpen === x.k ? '▾ ' : '▸ ') + '👤 ' + sepcoEsc(nameOf(x.u)) + '<div style="font-size:10px;font-weight:400;color:var(--text-muted);">' + sepcoEsc(x.u.email) + '</div></td>' +
+                    ['CONTENT', 'TRAINING', 'TASK'].map(b => bkCell(x.bk[b])).join('') +
+                    '<td class="num">' + fd(x.pm / DAY) + '</td>' +
+                                        '<td class="num ' + (x.leaveN ? '' : 'cat-muted') + '">' + (x.leaveN ? '−' + x.leaveN : '0') + '</td>' +
+                    '<td class="num cat-strong">' + fd(x.net / DAY) + '</td>' +
+                    '<td class="num"' + (x.am <= 0 ? ' style="color:#fff;"' : '') + '>' + fd(x.am / DAY) + '</td>' +
+                    '<td class="num ' + (left > 0.5 ? '' : 'cat-muted') + '">' + (left > 0.5 ? fd(left / DAY) : '0') + '</td>' +
+                    '<td class="num">' + pctHtml(x.cr, x.net) + '</td>' +
+                    '<td class="num ' + (x.extra > 0 ? '' : 'cat-muted') + '">' + (x.extra > 0 ? fd(x.extra / DAY) : '—') + '</td>' +
+                    '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + (p >= 100 ? 'over' : (p < 40 ? 'low' : '')) + '" style="width:' + Math.min(100, Math.round(p)) + '%;"></div></div></td>' +
+                    '</tr>';
+                if (window._mpOpen === x.k) sBody += '<tr><td colspan="18" style="text-align:left;padding:4px 10px 16px 26px;">' + buildDetail(x) + '</td></tr>';
+            });
+            sBody += '<tr style="background:rgba(59,130,246,0.10);font-weight:800;"><td style="text-align:left;">TOTAL (' + shown.length + ' ST)</td>' + ['CONTENT', 'TRAINING', 'TASK'].map(b => bkCell(tBk[b])).join('') + '<td class="num">' + fd(tGross / DAY) + '</td><td class="num">' + (tLv ? '−' + tLv : '0') + '</td><td class="num">' + fd(tPM / DAY) + '</td><td class="num">' + fd(tAM / DAY) + '</td><td class="num">' + fd(Math.max(0, tPM - tAM) / DAY) + '</td><td class="num">' + pctHtml(tCR, tPM) + '</td><td class="num">' + (tEX > 0 ? fd(tEX / DAY) : '—') + '</td><td></td></tr>';
+            const summaryHtml = '<div class="cat-progress-wrap"><div class="cat-progress-head"><h5>Summary per ST · ' + sepcoEsc(monthLabel) + '</h5></div>' +
+                '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">Only STs who submitted a Monthly Plan are listed. The <strong>Content / Training / Task</strong> columns show the <em>Plan Days, Actual Days and Ach %</em> of each Category (category OTHERS is not part of the Monthly Plan view). <strong>Plan Days</strong> = Duration per Min × Frequency ÷ 480. <strong>Net Plan Days</strong> = Plan Days − approved Leave/Absent days (holidays are already taken off by the ST when submitting the plan). <strong>Actual Days</strong> = total <em>End Time − Start Time</em> of the Daily Actual rows under the plan lines ÷ 480 (duplicate rows counted once; CONTENT only when Approved). Click an ST row to open / close that ST\'s plan details.</div>' +
+                '<div class="cat-progress-scroll mp-fit-wrap"><table class="cat-progress-table mp-fit"><colgroup><col style="width:12%"><col style="width:4.6%"><col style="width:4.6%"><col style="width:4.6%"><col style="width:4.6%"><col style="width:4.6%"><col style="width:4.6%"><col style="width:4.6%"><col style="width:4.6%"><col style="width:4.6%"><col style="width:5%"><col style="width:4.5%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:5.5%"><col style="width:11.6%"></colgroup><thead><tr>' +
+                '<th rowspan="2">Specialized Trainer</th><th colspan="3" style="text-align:center;border-bottom:1px solid rgba(255,255,255,.25);">CONTENT</th><th colspan="3" style="text-align:center;border-bottom:1px solid rgba(255,255,255,.25);">TRAINING</th><th colspan="3" style="text-align:center;border-bottom:1px solid rgba(255,255,255,.25);">TASK</th><th class="num" rowspan="2" title="Duration per Min × Frequency per Month ÷ 480, only rows of this MONTH">Plan Days</th><th class="num" rowspan="2" title="Approved Leave / Absent days">Leave / Absent</th><th class="num" rowspan="2" title="Plan Days − Leave/Absent">Net Plan Days</th><th class="num" rowspan="2">Actual Days</th><th class="num" rowspan="2">Days Left</th><th class="num" rowspan="2">Achievement %</th><th class="num" rowspan="2" title="Actual days that are not in the Monthly Plan">Not in Plan (days)</th><th rowspan="2">Progress</th>' +
+                '</tr><tr><th class="num">Plan Days</th><th class="num">Actual Days</th><th class="num">Ach %</th><th class="num">Plan Days</th><th class="num">Actual Days</th><th class="num">Ach %</th><th class="num">Plan Days</th><th class="num">Actual Days</th><th class="num">Ach %</th>' +
+                '</tr></thead><tbody>' + sBody + '</tbody></table></div></div>';
+
+                        mpEl.innerHTML = cards + summaryHtml;
         }
 
 
@@ -5055,6 +5048,9 @@ function tlActualMins(st, en) {
         }
         function skIsContent(r) { return skBucket(r) === 'CONTENT'; }
         function skDur(r) { const d = parseFloat(String(skRowVal(r, ['DURATION PER MIN', 'DURATION', 'Duration']) || '').replace(/,/g, '')); return (!isNaN(d) && d > 0) ? d : NaN; }
+        // Revision rule: RTO rejects NEVER count. Per request, the first 2 SEPCO rejects don't count;
+        // the 3rd SEPCO reject = 1 revision, the 4th = 2 revisions, and so on. (sepcoRejects comes from the permanent counter in the Apps Script)
+        function apprRevCount(a) { return Math.max(0, (Number(a && a.sepcoRejects) || 0) - 2); }
         function skNormTitle(s) { return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
         function skTitlesMatch(a, b) {
             const ta = skNormTitle(a), tb = skNormTitle(b);
@@ -5829,9 +5825,9 @@ function tlActualMins(st, en) {
                 return false;
             };
             // A rejected file is a revision ONLY when it matches a Monthly Plan content item. A reject not in the Monthly Plan is NOT counted (even if the same content was approved as a plus).
-            const rejectInKpi = a => matchesPlanContent(a);
-            const rejectedList = monthApprovals.filter(a => /reject/i.test(String(a.status || '')));
-            const revisions = rejectedList.filter(rejectInKpi).length;
+            const rejectInKpi = a => apprRevCount(a) > 0 && matchesPlanContent(a);   // RTO rejects never count; SEPCO: first 2 rejects per file don't count
+            const rejectedList = monthApprovals.filter(a => apprRevCount(a) > 0);
+            const revisions = rejectedList.filter(rejectInKpi).reduce((sum, a) => sum + apprRevCount(a), 0);   // 3rd SEPCO reject = 1 revision, 4th = 2 ...
             const woRev = Math.max(0, total - revisions);
             const ach = target > 0 ? own / target : null;
 
@@ -5851,7 +5847,7 @@ function tlActualMins(st, en) {
                 if (!rejectInKpi(a)) return;
                 const fn = skNormTitle(a.fileName);
                 const m = approvedUnits.filter(u => { const tn = skNormTitle(u.title); return tn !== '' && fn.indexOf(tn) !== -1; })[0];
-                revMins += m ? m.mins : avgMins;
+                revMins += (m ? m.mins : avgMins) * apprRevCount(a);
             });
             const woRevMins = Math.max(0, totalMins - revMins);
             const eff = target > 0 ? Math.min(1, woRev / target) : null;   // Efficiency = (content w/o revisions) ÷ Target
@@ -6181,9 +6177,12 @@ function tlActualMins(st, en) {
                 if (s.includes("approve")) {
                     approvedCount++;
                     userStats[userId].approved++;
-                } else if (s.includes("reject")) {
-                    rejectedCount++;
-                    userStats[userId].rejected++;
+                }
+                // Summary "Rejected" = OFFICIAL revisions only (SEPCO rejects beyond the first 2 per file). RTO rejects and the first 2 SEPCO rejects are not shown.
+                const offRev = apprRevCount(item);
+                if (offRev > 0) {
+                    rejectedCount += offRev;
+                    userStats[userId].rejected += offRev;
                 }
             });
 
@@ -6204,18 +6203,12 @@ function tlActualMins(st, en) {
                 let s = (item.status || "").toLowerCase();
                 let userId = item.uploadedBy || 'N/A';
 
-                if (s.includes("approve") && fName && fileMap[fName]) {
-                    let history = fileMap[fName];
-                    let hasPriorReject = history.some(h => {
-                        let hStatus = (h.status || "").toLowerCase();
-                        return hStatus.includes("reject") && new Date(h.uploadDate) <= new Date(item.uploadDate);
-                    });
-
-                    if (hasPriorReject) {
-                        revisedCount++;
-                        if (userStats[userId]) {
-                            userStats[userId].revised++;
-                        }
+                // Revised = SEPCO rejects beyond the first 2 per file (3rd reject = 1 revision, 4th = 2). RTO rejects never count.
+                let revN = apprRevCount(item);
+                if (revN > 0) {
+                    revisedCount += revN;
+                    if (userStats[userId]) {
+                        userStats[userId].revised += revN;
                     }
                 }
             });
@@ -7128,15 +7121,15 @@ var KB = [
 { id:'accuracy', title:'Accuracy',
   kw:['accuracy','accurate','quality','revision','revisions','rejected','reject','error','errors','deduction','content errors','mali','ayos'],
   a:'**Accuracy** = (Target − Revisions) ÷ Target − error deduction\n'+
-    '- **Revisions** = bilang ng *Rejected* Approval Requests sa buwan na tumutugma sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY). Hindi lahat ng reject ay binibilang — ang reject na **wala sa Monthly Plan** ay *not counted* bilang revision.\n'+
+    '- **Revisions** = bilang ng *SEPCO rejects* sa CONTENT item ng Monthly Plan (file name vs TITLE, o category vs CATEGORY), **bawat file**: ang unang **2 SEPCO rejects ay hindi binibilang** — ang **3rd reject = 1 revision**, ang **4th = 2 revisions**, at iba pa. Ang **RTO reject ay hindi kailanman binibilang** na revision. Ang reject na **wala sa Monthly Plan** ay *not counted* din.\n'+
     '- **Error deduction** (galing sa *KPI Inputs* → CONTENT ERRORS): `ceil(errors ÷ 2) × 1%` → 1–2 errors = −1%, 3–4 = −2%, 5–6 = −3% …\n'+
     '- Never goes below 0%. When there is **no Target**, "—" (no data) is shown, not 100%.\n'+
-    'Halimbawa: Target 10, Revisions 2, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
+    'Halimbawa: Target 10, isang file na na-reject ng SEPCO 4× = 2 revisions, Errors 3 → (10−2)/10 = 80% − 2% = **78%**.' },
 { id:'efficiency', title:'Efficiency',
   kw:['efficiency','efficient','eff','approved content mins','plan mins','minutes','mins','efficiency %'],
   a:'**Efficiency** (KPI Landing Page) = (Content na walang revision) ÷ Target\n'+
     '- **W/o revisions** = Approved content − Revisions.\n'+
-    '- **Revisions** = bilang ng Rejected files na tugma sa Monthly Plan.\n'+
+    '- **Revisions** = SEPCO rejects na lampas sa unang 2 bawat file (3rd reject = 1 revision, 4th = 2). Hindi binibilang ang RTO rejects.\n'+
     '- When there is **no Target**, "—" is shown.\n'+
     'Halimbawa: Target 10, W/o revisions 7 → 7/10 = **70%**.\n'+
     '\n**Sa SEPCO Overview table**, ibang sukat ang Efficiency: *Daily Plan mins ÷ Daily Actual mins* (bawat unique Daily Plan item ay isang beses lang itinutugma).\n'+
@@ -7182,8 +7175,8 @@ var KB = [
 { id:'sepco', title:'SEPCO summary',
   kw:['sepco','summary','net approved','netapproved','net','approved','rejected','revised','pending sepco','pending rto','user summary','specialized trainer','approval summary'],
   a:'**SEPCO User Summary**\n'+
-    '- **Approved / Rejected** = bilang ng requests ng user na may status na approve / reject sa napiling buwan.\n'+
-    '- **Revised** = Approved na file na may naunang *Rejected* na parehong file name (petsa ≤ approved) — ibig sabihin dumaan sa revision.\n'+
+    '- **Approved** = bilang ng requests ng user na approved sa napiling buwan. **Rejected** = **official revisions** lang (SEPCO rejects na lampas sa unang 2 bawat file); hindi ipinapakita ang RTO rejects at ang unang 2 SEPCO rejects.\n'+
+    '- **Revised** = kabuuang revisions ng user: bawat file, **SEPCO rejects na lampas sa unang 2** (3rd reject = 1 revision, 4th = 2). Ang **RTO rejects ay hindi binibilang**.\n'+
     '- **netApproved** = max(0, Approved − Revised).\n'+
     '- **Target** = Σ FREQUENCY ng CONTENT rows sa Monthly Plan ng user (buwan na napili).\n'+
     '- **Achievement %** = netApproved ÷ Target × 100 (— kapag Target = 0). Berde kapag ≥ 100%.\n'+
@@ -7223,8 +7216,9 @@ var KB = [
     '- RTO approve → **Pending SEPCO**. SEPCO approve → **Approved** (final).\n'+
     '- Kapag nag-reject ang approver: **Rejected by RTO / Rejected by SEPCO**, at kailangan ng *remarks*.\n'+
     '- **Resubmit**: returns to Pending RTO (or Pending SEPCO if no RTO) and clears the old remarks.\n'+
+    '- **SEPCO 48 hours**: kapag lampas 48 oras na naka-Pending SEPCO (**hindi kasama ang Sabado, Linggo at holidays** sa bilang), may notice sa TG bot at **mawawala ang Approve / Reject buttons**. Ang sobrang tagal ng SEPCO ay **idinadagdag sa approval deadline** ng ST (Time in Motion) — hindi ito mabibilang na late.\n'+
     '- Ang approval/reject ay puwedeng gawin sa email o Telegram — ang *kasalukuyang assigned approver* lang ang may karapatan.\n'+
-    '- Ang **Rejected** na tumutugma sa CONTENT ng Monthly Plan ay bilang **Revision** sa Accuracy; ang **Approved** lang ang bilang sa Own Content.' },
+    '- **Revision rule**: ang **RTO reject ay hindi binibilang** na revision. Sa **SEPCO reject**, bawat file ay kailangang ma-reject ng **2×** muna bago magsimula ang bilang — **3 rejects = 1 revision, 4 = 2 revisions**. Ang **Approved** lang ang bilang sa Own Content.' },
 { id:'about', title:'Ano ang kaya ng bot na ito?',
   kw:['help','tulong','ano kaya mo','ano ang kaya mo','sino ka','who are you','what can you do','commands','menu','hello','hi','kumusta','gamit'],
   a:'**Ako ang Training Portal chat bot.** Kaya kong:\n'+
@@ -7675,6 +7669,15 @@ html body :is(.task-table-container, .cat-progress-scroll, .xl-wrap, .kmd-list) 
 html body :is(.task-table, .xl-table, .cat-progress-table, .kpi-brk-table) :is(td, th) { font-variant-numeric: tabular-nums; vertical-align: middle; }
 html body :is(.task-table, .cat-progress-table) thead th { white-space: nowrap; }
 html body :is(.task-table-container, .cat-progress-scroll)[data-ui-scroll]:focus-visible { outline-offset: -2px !important; }
+
+/* Monthly Plan summary: fit every column in one view (no horizontal scroll bar) */
+html body .cat-progress-scroll.mp-fit-wrap { overflow-x: hidden; }
+html body table.mp-fit { min-width: 0; width: 100%; table-layout: fixed; }
+html body table.mp-fit > thead > tr > th { padding: 8px 3px; font-size: 9px; letter-spacing: 0; white-space: normal; line-height: 1.25; text-align: center; }
+html body table.mp-fit > thead > tr > th:first-child { text-align: left; padding-left: 10px; }
+html body table.mp-fit > tbody > tr > td { padding: 9px 3px; font-size: 11.5px; }
+html body table.mp-fit > tbody > tr > td.cat-name { padding-left: 10px; font-size: 11.5px; overflow-wrap: anywhere; }
+html body table.mp-fit .cat-bar-cell { min-width: 0; padding-left: 6px; padding-right: 8px; }
 html body :is(tr.kpi-clickable, td.kpi-click-cell)[data-ui-kb] { cursor: pointer; }
 
 /* 8 ── Cards / KPI tiles ─────────────────────────────────────────────────────── */
