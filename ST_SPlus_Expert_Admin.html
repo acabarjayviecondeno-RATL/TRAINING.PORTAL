@@ -3666,6 +3666,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
     function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function val(row, f) {
         if (f === F.user) return String(row['_nsUserId'] || (window.loggedInUser || '') || '');
+        if (f === F.month && row.__mRaw !== undefined) return String(row.__mRaw);   // MONTH text as it is in the sheet (before the YEAR column was added)
         var v = typeof getRowVal === 'function' ? getRowVal(row, f.k) : '';
         return v == null ? '' : String(v);
     }
@@ -3673,6 +3674,7 @@ h1,h2,h3,h4,h5,h6,strong,b,th,legend,.font-bold,.font-semibold,.font-extrabold,.
         return JSON.stringify(TYPES[type].match.map(function (n) { return String(val(row, F[n])).trim(); }));
     }
     function setLocal(row, f, v) {
+        if (f === F.month && Object.prototype.hasOwnProperty.call(row, '__mRaw')) row.__mRaw = undefined;
         var hit = false;
         f.k.forEach(function (k) { if (Object.prototype.hasOwnProperty.call(row, k)) { row[k] = v; hit = true; } });
         if (!hit) row[f.k[0]] = v;
@@ -5977,7 +5979,7 @@ html[data-theme="light"] .sp-toast{background:#fff;color:#0f172a;border-color:rg
                                     <li><strong>Target Count (Content) %</strong> = Own Content ÷ Target. Target = Monthly Plan rows (category CONTENT) for the selected MONTH × FREQUENCY PER MONTH.</li>
                                     <li><strong>Accuracy (Quality) %</strong> = (Target − Revision count) ÷ Target. Revisions = <em>SEPCO</em> rejects of files that match the Monthly Plan by <em>file name</em> (vs plan TITLE) or by <em>category</em> (vs plan CATEGORY), counted <em>per file</em>: the first 2 SEPCO rejects don't count — the 3rd reject = 1 revision, the 4th = 2 revisions. RTO rejects never count. Unrelated rejects are ignored. Less the Content Errors deduction (1–2 errors = 1%, 3–4 = 2% …).</li>
                                     <li><strong>Efficiency %</strong> = Content approved <em>without revisions</em> (W/o revisions) ÷ Target. Each revision (SEPCO reject beyond the first 2 per file) is excluded from the count; RTO rejects are not revisions. No Target = no data.</li>
-                                    <li><strong>Timeliness (On-time) %</strong> = On-time ÷ (On-time + Late). <em>Content</em> (Time in Motion): <strong>submit deadline</strong> = start date (the earliest Submitted Date of that content in the Daily Actual of its Monthly Plan month) + the category's TIM days in RCODE; <strong>approval deadline</strong> = upload date (TARGET DATE) − 5 days (no upload date = submit deadline + 2 days). Delay = days late to submit + resubmission days + days late to approve; on time only when the delay is 0. No TIM / no start date = not counted. A deadline that moved needs a SEPCO-approved <em>Deadline Change</em>. <em>Task / Training / Others</em>: no deadline — Target = <code>Duration</code> (Task Actual col C), Actual = <code>Start Time → End Time</code>; on time when Actual ≤ Target.</li>
+                                    <li><strong>Timeliness (On-time) %</strong> = On-time ÷ (On-time + Late). <em>Content</em> (Time in Motion): <strong>submit deadline</strong> = start date (the earliest Submitted Date of that content in the Daily Actual of its Monthly Plan month) + the category's TIM days in RCODE; <strong>approval deadline</strong> = upload date (TARGET DATE) − 5 days (no upload date = submit deadline + 2 days). Delay = days late to submit + resubmission days + days late to approve; on time only when the delay is 0. No TIM / no start date = not counted. If the Monthly Plan line has a <strong>DEADLINE</strong>, that date is the submit deadline (no start date / TIM needed). A deadline that moved needs a SEPCO-approved <em>Deadline Change</em>, which replaces it. <em>Task / Training / Others</em>: no deadline — Target = <code>Duration</code> (Task Actual col C), Actual = <code>Start Time → End Time</code>; on time when Actual ≤ Target.</li>
                                 </ul>
                             </div>
                             <div class="kpi-notes-card">
@@ -7808,7 +7810,7 @@ function cdRenderTim() {
         var s = tlTimStatus(x, today), delay = s.delay, status = s.status;
         var chg = (v.src === 'CHANGE') ? tlApprovedRecord(x.c.title) : null;
         return '<tr><td>' + escHtml(x.c.title) + tag + '</td><td>' + escHtml(cat) + '</td><td>' + escHtml(info.start || '-') + '</td>' +
-            '<td>' + (v.src === 'CHANGE' ? '<span class="cd-tag">Changed</span>' : (v.special ? '<span class="cd-tag">Weekly</span>' : (x.days + 'd'))) + '</td><td>' + escHtml(v.submitDeadline) + '</td><td>' + escHtml(v.submitDate || '-') + '</td>' +
+            '<td>' + (v.src === 'CHANGE' ? '<span class="cd-tag">Changed</span>' : (v.src === 'PLAN' ? '<span class="cd-tag">Plan</span>' : (v.special ? '<span class="cd-tag">Weekly</span>' : (x.days + 'd')))) + '</td><td>' + escHtml(v.submitDeadline) + '</td><td>' + escHtml(v.submitDate || '-') + '</td>' +
             '<td>' + escHtml(chg ? (chg.approverName || chg.approver || '-') : '-') + '</td><td>' + escHtml(chg ? (String(chg.decidedAt || '').substring(0, 10) || '-') : '-') + '</td>' +
             '<td title="Submission +' + v.subDelay + 'd · Resubmission +' + v.resubDays + 'd · Approval +' + v.aprDelay + 'd (content approval due ' + v.approvalDeadline + (x.c.apr ? ', approved ' + x.c.apr : '') + ')">' + (delay > 0 ? '+' + delay + 'd' : '0') + '</td>' +
             '<td><span class="cd-pill ' + s.cls + '">' + status + '</span></td>' +
@@ -7866,7 +7868,8 @@ function cdRenderTim() {
             document.getElementById('overviewMenuLi').classList.remove('active');
             document.getElementById('dailyTaskMenuParent').classList.add('active');
             if (sectionId === 'monthlyPlanSection') {
-                var mp = (allLoadedTasks.monthlyPlan || []).filter(function (t) { return matchesUser(t); });
+                var _pmk = stSelMonthKey();   // Monthly Plan is PER MONTH: "no plan" = no rows for the selected month (default = current month)
+                var mp = (allLoadedTasks.monthlyPlan || []).filter(function (t) { return matchesUser(t) && kpiMonthMatches(getRowVal(t, ['MONTH']), _pmk); });
                 if (monthlyPlanDataLoaded && mp.length === 0) showNoMonthlyPlanPopup(true);
                 else if (mp.length > 0) { closeNoMonthlyPlanPopup(); _mpEmptyPopupShown = false; }
                 try { renderStMonthlyProgress(); } catch (e) { console.error(e); }
@@ -8698,6 +8701,23 @@ function cdRenderTim() {
             try { await run; } finally { _dataCache.inFlightTasks = null; }
         }
 
+/* Monthly Plan YEAR column (same rule as the Apps Script tgmsRowInMonth_): a MONTH text without a 4-digit year ("November") + a 4-digit YEAR cell -> "November 2026".
+           The original MONTH text is kept in row.__mRaw (needed to find the sheet row again when it is edited). */
+        function mpApplyYearCol(list) {
+            (list || []).forEach(function (r) {
+                if (!r || typeof r !== 'object') return;
+                var yk = null, mk = null;
+                Object.keys(r).forEach(function (k) { var u = String(k).trim().toUpperCase(); if (u === 'YEAR') yk = k; else if (u === 'MONTH') mk = k; });
+                if (yk === null || mk === null) return;
+                var cell = String(r[mk] == null ? '' : r[mk]).trim(), y = String(r[yk] == null ? '' : r[yk]).trim();
+                if (!cell || /\d{4}/.test(cell) || !/^\d{4}$/.test(y)) return;
+                if (!/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(cell)) return;
+                try { Object.defineProperty(r, '__mRaw', { value: cell, writable: true, enumerable: false, configurable: true }); } catch (e) {}
+                r[mk] = cell + ' ' + y;
+            });
+            return list;
+        }
+
         async function loadMonthlyPlanData(isBackground) {
             if (isBackground === undefined) isBackground = false;
             if (_dataCache.inFlightMonthly) {
@@ -8717,7 +8737,7 @@ function cdRenderTim() {
                     var response = await fetch(WEB_APP_URL + "?action=getMonthlyPlan&month=all&t=" + Date.now(), { cache: 'no-store' });
                     var result = await response.json();
                     if (result.success) {
-                        var list = Array.isArray(result.monthlyPlan) ? result.monthlyPlan : [];
+                        var list = mpApplyYearCol(Array.isArray(result.monthlyPlan) ? result.monthlyPlan : []);   // Monthly Plan is PER MONTH (+ optional YEAR column) — same as the Apps Script
                         allLoadedTasks.monthlyPlan = list;
                         _dataCache.monthly = list;
                         _dataCache.monthlyAt = Date.now();
@@ -10324,9 +10344,23 @@ function tlApprovedDeadline(title) {
     return exact || best;
 }
 
+// Monthly Plan DEADLINE column = the submit deadline of that content line (same title, same plan month). It replaces the automatic Time-in-Motion deadline;
+// a SEPCO-approved Deadline Change (the latest decision) still wins over it. '' when the line has no deadline.
+function tlPlanDeadline(title, monthKey) {
+    var nt = kpiNormTitle(title); if (!nt) return '';
+    var dl = '';
+    (allLoadedTasks.monthlyPlan || []).forEach(function (r) {
+        if (!matchesUser(r) || kpiNormTitle(kpiTitle(r)) !== nt) return;
+        if (!kpiMonthMatches(getRowVal(r, ['MONTH']), monthKey)) return;
+        var d = kpiDate(getRowVal(r, ['DEADLINE', 'DEADLINE DATE', 'SUBMIT DEADLINE', 'Deadline']));
+        if (d && d > dl) dl = d;
+    });
+    return dl;
+}
+
 // ======== TIME IN MOTION (TIM) — content deadline (same rule as the Apps Script tsContentTimeline_) ========
 //  START DATE        = the earliest SUBMITTED DATE of the title in the Daily Actual of the Monthly Plan's month (Plan = November -> November Actual only). No approval needed.
-//  SUBMIT DEADLINE   = start date + TIM days (RCODE). An approved deadline CHANGE (Content Deadline tab) replaces it.
+//  SUBMIT DEADLINE   = Monthly Plan DEADLINE column when filled, else start date + TIM days (RCODE). An approved deadline CHANGE (Content Deadline tab) replaces either.
 //  APPROVAL DEADLINE = upload date (TARGET DATE) − 5 days  (window −7 … −5).  No upload date -> submit deadline + 2 days (SEPCO 48 hrs).
 //  DELAY (days)      = submission delay + resubmission days + approval delay.  Late = delay > 0.
 var TIM_APPROVAL_TAT_DAYS = 2;
@@ -10429,23 +10463,24 @@ function tlNextMonday(ymd) { var t = tlYmdMs(ymd); if (isNaN(t)) return ''; retu
 function tlContentVerdict(title, aprDate, exact, monthKey) {
     var info = tlContentInfo(title, exact, monthKey);
     var changed = tlApprovedDeadline(title);
+    var planDl = changed ? '' : tlPlanDeadline(title, monthKey);   // Monthly Plan DEADLINE column
     if (tlIsWeeklyCat(info.cats)) {
-        var wad = changed || (info.start ? tlNextMonday(info.start) : (info.upload ? tlAddDays(info.upload, -TIM_UPLOAD_LEAD_DAYS) : ''));
+        var wad = changed || planDl || (info.start ? tlNextMonday(info.start) : (info.upload ? tlAddDays(info.upload, -TIM_UPLOAD_LEAD_DAYS) : ''));
         if (!wad) return null;
         var wadC = info.credit > 0 ? tlAddDays(wad, info.credit) : wad;   // + SEPCO review time beyond 48 hrs
         var wApr = aprDate ? Math.max(0, tlDayDiff(wadC, aprDate)) : 0;
         var wTot = info.resub + wApr;
-        return { submitDeadline: wad, approvalDeadline: wadC, submitDate: info.sub, approvalDate: aprDate || '', subDelay: 0, resubDays: info.resub, aprDelay: wApr, total: wTot, late: wTot > 0, src: changed ? 'CHANGE' : 'WEEKLY', special: true, sepcoCredit: info.credit || 0 };
+        return { submitDeadline: wad, approvalDeadline: wadC, submitDate: info.sub, approvalDate: aprDate || '', subDelay: 0, resubDays: info.resub, aprDelay: wApr, total: wTot, late: wTot > 0, src: changed ? 'CHANGE' : (planDl ? 'PLAN' : 'WEEKLY'), special: true, sepcoCredit: info.credit || 0 };
     }
     var days = tlTimDays(title, info.cats, info.start);
-    var sd = changed || ((info.start && days > 0) ? tlAddDays(info.start, Math.ceil(days)) : '');
+    var sd = changed || planDl || ((info.start && days > 0) ? tlAddDays(info.start, Math.ceil(days)) : '');
     if (!sd) return null;
     var ad = info.upload ? tlAddDays(info.upload, -TIM_UPLOAD_LEAD_DAYS) : tlAddDays(sd, TIM_APPROVAL_TAT_DAYS);
     if (info.credit > 0) ad = tlAddDays(ad, info.credit);   // SEPCO took longer than 48 hrs to review -> the approval deadline moves later (not the ST's fault)
     var subDelay = info.sub ? Math.max(0, tlDayDiff(sd, info.sub)) : 0;
     var aprDelay = aprDate ? Math.max(0, tlDayDiff(ad, aprDate)) : 0;
     var total = subDelay + info.resub + aprDelay;
-    return { submitDeadline: sd, approvalDeadline: ad, submitDate: info.sub, approvalDate: aprDate || '', subDelay: subDelay, resubDays: info.resub, aprDelay: aprDelay, total: total, late: total > 0, src: changed ? 'CHANGE' : 'TIM', sepcoCredit: info.credit || 0 };
+    return { submitDeadline: sd, approvalDeadline: ad, submitDate: info.sub, approvalDate: aprDate || '', subDelay: subDelay, resubDays: info.resub, aprDelay: aprDelay, total: total, late: total > 0, src: changed ? 'CHANGE' : (planDl ? 'PLAN' : 'TIM'), sepcoCredit: info.credit || 0 };
 }
 function tlVerdictNote(v) {
     return 'Late ' + v.total + 'd = submission +' + v.subDelay + 'd (due ' + v.submitDeadline + ') + resubmission +' + v.resubDays + 'd + approval +' + v.aprDelay + 'd (due ' + v.approvalDeadline + (v.sepcoCredit ? ', extended +' + v.sepcoCredit + 'd: SEPCO review beyond 48 hrs' : '') + ').';
