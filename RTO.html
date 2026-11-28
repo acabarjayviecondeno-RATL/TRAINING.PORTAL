@@ -4406,6 +4406,57 @@ function tlActualMins(st, en) {
         function resetMonthlyPlanMonthFilter() { resetOverviewMonthFilter(); }
         function onMonthlyPlanViewChange() { try { renderSepcoCategoryProgress(); } catch (e) { console.error(e); } }
 
+/* ===== Monthly Plan: Approval status of each CONTENT plan item (from the Approval Requests) =====
+   slots     = [{ title }]  one per planned item (title x frequency)
+   approvals = the SAME ST's requests [{ fileName, status, uploadDate }]
+   Same-title match only (exact first, then contains) - never the loose word-overlap, so a similar title cannot borrow another item's approval.
+   A file approved after the month ended still shows as Approved (with its date). */
+function mpClaimApprovals(slots, approvals) {
+    var nt = function (s) { return String(s || '').toLowerCase().replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[^a-z0-9]+/g, ' ').trim(); };
+    var rank = function (s) { s = String(s || ''); return /approve/i.test(s) ? 3 : (/reject/i.test(s) ? 1 : 2); };   // 3 = approved, 2 = pending, 1 = rejected
+    var items = (approvals || []).map(function (a) {
+        return { nt: nt(a.fileName || a.title), st: String(a.status || '').trim() || 'Pending', dt: String(a.uploadDate || '').substring(0, 10), used: false };
+    }).filter(function (x) { return x.nt; });
+    slots.forEach(function (s) { s.nt = nt(s.title); s.item = null; });
+    [true, false].forEach(function (exact) {
+        [3, 2, 1].forEach(function (rk) {
+            slots.forEach(function (s) {
+                if (s.item || !s.nt) return;
+                for (var i = 0; i < items.length; i++) {
+                    var x = items[i];
+                    if (x.used || rank(x.st) !== rk) continue;
+                    if (exact ? x.nt === s.nt : (x.nt.indexOf(s.nt) !== -1 || s.nt.indexOf(x.nt) !== -1)) { x.used = true; s.item = x; return; }
+                }
+            });
+        });
+    });
+}
+function mpApprovalCell(slots) {
+    var n = (slots || []).length;
+    if (!n) return '<span class="cat-muted">&mdash;</span>';
+    var e = function (v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+    var mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var fmtD = function (d) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ''); return m ? (mon[+m[2] - 1] + ' ' + (+m[3])) : ''; };
+    var a = 0, p = 0, r = 0, m = 0, lastD = '', pendLbl = '', tips = [];
+    slots.forEach(function (s) {
+        var x = s.item, t = s.title || '—';
+        if (!x) { m++; tips.push('Not yet submitted: ' + t); return; }
+        if (/approve/i.test(x.st)) { a++; if (x.dt > lastD) lastD = x.dt; tips.push('Approved' + (x.dt ? ' (' + x.dt + ')' : '') + ': ' + t); }
+        else if (/reject/i.test(x.st)) { r++; tips.push('Rejected: ' + t); }
+        else { p++; pendLbl = x.st; tips.push(x.st + ': ' + t); }
+    });
+    var main;
+    if (a === n) main = '<span class="cat-remark plus">&#10004; Approved' + (n > 1 ? ' ' + a + '/' + n : '') + '</span>' + (n === 1 && fmtD(lastD) ? ' <span class="cat-muted" style="font-size:11px;">&middot; ' + e(fmtD(lastD)) + '</span>' : '');
+    else if (a > 0) main = '<span class="cat-remark partial">Approved ' + a + '/' + n + '</span>';
+    else if (p > 0) main = '<span class="cat-remark partial">&#9203; ' + e(p === 1 || n === 1 ? pendLbl : 'Pending') + '</span>';
+    else if (r > 0) main = '<span class="cat-remark miss">&#10006; Rejected</span>';
+    else main = '<span class="cat-remark miss">Not yet submitted</span>';
+    var rest = [];
+    if (a > 0 && a < n) { if (p) rest.push(p + ' pending'); if (r) rest.push(r + ' rejected'); if (m) rest.push(m + ' not submitted'); }
+    else if (a === 0 && n > 1) { if (p && r) rest.push(r + ' rejected'); if (m && (p || r)) rest.push(m + ' not submitted'); }
+    return '<span title="' + e(tips.join('\n')) + '">' + main + (rest.length ? '<div class="cat-muted" style="font-size:11px;font-weight:400;">' + rest.join(' &middot; ') + '</div>' : '') + '</span>';
+}
+
         function renderSepcoCategoryProgress(monthKey) {
             // ===== Monthly Plan SUMMARY per Specialized Trainer =====
             //  Plan Days   = SUM( DURATION PER MIN x FREQUENCY ) / 480      (what the ST plotted in the Monthly Plan)
@@ -4602,12 +4653,16 @@ function tlActualMins(st, en) {
                         // ---- details of ONE ST (shown under its row when clicked) ----
             const buildDetail = sel => {
                         let dBody = '', lastB = '';
-            if (sel.noTime > 0) dBody += '<tr><td colspan="8" style="text-align:left;padding:4px 14px;font-size:12px;color:#fbbf24;">⚠️ ' + sel.noTime + ' Daily Actual row(s) have no readable Start / End Time, so they add 0 days.</td></tr>';
+            // Approval status of this ST's CONTENT plan items (Approval Requests uploaded by the same ST)
+            { const _slots = [];
+              sel.u.lines.forEach(l => { l._aprSlots = []; if (l.bucket !== 'CONTENT') return; (l.parts || []).forEach(p => { const c = Math.max(1, Math.round(p.f)); for (let i = 0; i < c; i++) { const sl = { title: p.title }; l._aprSlots.push(sl); _slots.push(sl); } }); });
+              mpClaimApprovals(_slots, (globalApprovalsData || []).filter(a => norm(a.uploadedBy || a.user || a.email || '') === sel.u.key)); }
+            if (sel.noTime > 0) dBody += '<tr><td colspan="9" style="text-align:left;padding:4px 14px;font-size:12px;color:#fbbf24;">⚠️ ' + sel.noTime + ' Daily Actual row(s) have no readable Start / End Time, so they add 0 days.</td></tr>';
             sel.visible.forEach(l => {
                 if (l.bucket !== lastB) {   // Category sub-header with its own Plan / Actual days
                     lastB = l.bucket;
                     const bs = sel.visible.filter(z => z.bucket === l.bucket), bp = bs.reduce((s, z) => s + z.planMins, 0), ba = bs.reduce((s, z) => s + z.actualMins, 0);
-                    dBody += '<tr style="background:rgba(148,163,184,.10);"><td colspan="8" style="text-align:left;padding:6px 14px;font-weight:700;font-size:12px;color:' + (bucketColor[l.bucket] || '#94a3b8') + ';">' + sepcoEsc(l.bucket) + ' <span style="font-weight:600;color:var(--text-muted);margin-left:8px;">Plan ' + fd(bp / DAY) + ' d · Actual ' + fd(ba / DAY) + ' d</span></td></tr>';
+                    dBody += '<tr style="background:rgba(148,163,184,.10);"><td colspan="9" style="text-align:left;padding:6px 14px;font-weight:700;font-size:12px;color:' + (bucketColor[l.bucket] || '#94a3b8') + ';">' + sepcoEsc(l.bucket) + ' <span style="font-weight:600;color:var(--text-muted);margin-left:8px;">Plan ' + fd(bp / DAY) + ' d · Actual ' + fd(ba / DAY) + ' d</span></td></tr>';
                 }
                 const p = l.planMins > 0 ? l.actualMins / l.planMins * 100 : 0;
                 const barCls = p >= 100 ? 'over' : (p < 40 ? 'low' : '');
@@ -4622,18 +4677,19 @@ function tlActualMins(st, en) {
                     '<td class="num">' + pctHtml(l.actualMins, l.planMins) + '</td>' +
                     '<td class="num">' + Math.round(l.planMins).toLocaleString() + ' / ' + Math.round(l.actualMins).toLocaleString() + '</td>' +
                     '<td class="cat-bar-cell"><div class="cat-bar-track"><div class="cat-bar-fill ' + barCls + '" style="width:' + Math.min(100, Math.round(p)) + '%;"></div></div></td>' +
-                    '<td class="cat-remark-cell">' + statusHtml(l) + '</td></tr>';
+                    '<td class="cat-remark-cell">' + statusHtml(l) + '</td>' +
+                    '<td class="cat-remark-cell">' + (l.bucket === 'CONTENT' ? mpApprovalCell(l._aprSlots) : '<span class="cat-muted">&mdash;</span>') + '</td></tr>';
             });
             if (statusFilter === 'all') sel.unplanned.forEach(x => {
                 dBody += '<tr style="opacity:.8;"><td class="cat-name" style="text-align:left;white-space:normal;min-width:260px;"><span style="color:' + (bucketColor[x.bucket] || '#94a3b8') + ';">○</span> ' + sepcoEsc((x.label && x.label !== x.bucket && x.label !== '—') ? x.label : x.bucket) + '</td>' +
                     '<td class="num cat-muted">—</td><td class="num">' + fd(x.mins / DAY) + '</td><td class="num cat-muted">—</td><td class="num cat-muted">—</td><td class="num">— / ' + Math.round(x.mins).toLocaleString() + '</td><td></td>' +
-                    '<td class="cat-remark-cell"><span class="cat-remark enhance">Not in Monthly Plan</span></td></tr>';
+                    '<td class="cat-remark-cell"><span class="cat-remark enhance">Not in Monthly Plan</span></td><td></td></tr>';
             });
-            if (!dBody) dBody = '<tr><td colspan="8" class="cat-muted" style="padding:14px;">No plan lines match the current filters.</td></tr>';
+            if (!dBody) dBody = '<tr><td colspan="9" class="cat-muted" style="padding:14px;">No plan lines match the current filters.</td></tr>';
             const detailHtml = '<div class="cat-progress-wrap" style="margin:6px 0 0 0;">' +
                 '<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Plan: <strong>' + fd(sel.pm / DAY) + '</strong>' + (sel.leaveN ? ' − ' + sel.leaveN + ' leave/absent' : '') + ' = Net <strong>' + fd(sel.net / DAY) + '</strong> days · Actual: <strong>' + fd(sel.am / DAY) + '</strong> days · ' + pctHtml(sel.cr, sel.net) + '</div>' +
                 '<div class="cat-progress-scroll"><table class="cat-progress-table"><thead><tr>' +
-                '<th>Plan Line (Category 2 · Title)</th><th class="num">Plan Days</th><th class="num">Actual Days</th><th class="num">Days Left</th><th class="num">Achievement %</th><th class="num" title="Plan mins / Actual mins (Start→End)">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h">Status</th>' +
+                '<th>Plan Line (Category 2 · Title)</th><th class="num">Plan Days</th><th class="num">Actual Days</th><th class="num">Days Left</th><th class="num">Achievement %</th><th class="num" title="Plan mins / Actual mins (Start→End)">Plan / Actual mins</th><th>Progress</th><th class="cat-remark-h">Status</th><th class="cat-remark-h" title="Approval Requests status of the CONTENT item (matched by title)">Approval</th>' +
                 '</tr></thead><tbody>' + dBody + '</tbody></table></div></div>';
             return detailHtml;
             };
@@ -6758,11 +6814,19 @@ function tlActualMins(st, en) {
                 const t = skDate(skRowVal(r, ['TARGET DATE'])), ap = skDate(skRowVal(r, ['APPROVAL DATE']));
                 if (t) daByTitle[k].tgt = t; if (ap) daByTitle[k].apr = ap;
             });
-            const claimByTitle = fn => {
+            const claimByTitle = (fn, strict) => {   // strict = exact / contains only (no loose token overlap)
                 if (!fn) return null;
-                for (const sl of planSlots) { if (sl.used) continue; if (sl.nt && skTitlesMatch(fn, sl.nt)) { sl.used = true; return sl; } }
+                for (const sl of planSlots) {
+                    if (sl.used || !sl.nt) continue;
+                    let hit = (fn === sl.nt || fn.indexOf(sl.nt) !== -1 || sl.nt.indexOf(fn) !== -1);
+                    if (!hit && !strict) hit = skTitlesMatch(fn, sl.nt);
+                    if (hit) { sl.used = true; return sl; }
+                }
                 return null;
             };
+            // PASS 1 - every approved file first claims the plan slot with the SAME title (exact / contains), so a similar-looking title can never take another file's slot
+            const _preSlot = new Map();
+            approvedList.forEach(a => { const s0 = claimByTitle(skNormTitle(a.fileName), true); if (s0) _preSlot.set(a, s0); });
             const claimByCategory = catRaw => {
                 const nc = skNormCat(catRaw); if (!nc) return null;
                 for (const sl of planSlots) {
@@ -6774,7 +6838,7 @@ function tlActualMins(st, en) {
             };
             approvedList.forEach(a => {
                 const fn = skNormTitle(a.fileName);
-                const slot = claimByTitle(fn) || claimByCategory(a.category);
+                const slot = _preSlot.get(a) || claimByTitle(fn) || claimByCategory(a.category);   // PASS 2 (loose title / category) only for files with no same-title slot
                 let isExtra = false;
                 if (!slot) {   // approved CONTENT that is NOT in the Monthly Plan target = PLUS points (counts in all KPIs)
                     if (!sepcoApprovalIsContent(a.category, a.category2 || '')) return;
